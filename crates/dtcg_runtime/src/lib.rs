@@ -1,6 +1,8 @@
 //! String-backed DTCG document resolution and narrow typed projection.
 
 mod catalog;
+#[cfg(feature = "rayx_diagnostics")]
+mod diagnostics;
 mod error;
 mod resolver;
 mod resource;
@@ -13,6 +15,8 @@ pub use resolver::{DocumentRequest, Resolution, ResolvedToken, ResolvedTokens, R
 pub use resource::{DocumentReference, ResourceId};
 
 pub use catalog::DocumentCatalog;
+#[cfg(feature = "rayx_diagnostics")]
+pub use diagnostics::{DtcgDiagnostic, DtcgDiagnosticCode};
 
 pub trait FromDtcgValue: Sized + 'static {
     fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError>;
@@ -53,7 +57,9 @@ pub trait DtcgTokens: Sized {
     fn project(tokens: &ResolvedTokens, registry: &TypeRegistry) -> Result<Self, DtcgError>;
 }
 
-pub trait DtcgComponentTokens: DtcgTokens {}
+pub trait DtcgComponentTokens: DtcgTokens {
+    fn component_id() -> &'static str;
+}
 
 pub struct DtcgRuntime {
     catalog: DocumentCatalog,
@@ -78,6 +84,15 @@ impl DtcgRuntime {
         }
     }
 
+    /// Creates a runtime from an already-loaded JSON string.
+    ///
+    /// ```
+    /// use dtcg_runtime::{DtcgRuntime, Resolution};
+    ///
+    /// let runtime = DtcgRuntime::from_json("tokens.json", r#"{"color":{"primary":{"$value":"blue"}}}"#)?;
+    /// assert!(matches!(runtime.resolve(&[])?, Resolution::Ready(_)));
+    /// # Ok::<(), dtcg_runtime::DtcgError>(())
+    /// ```
     pub fn from_json(
         resource_id: impl AsRef<str>,
         json: impl Into<Arc<str>>,

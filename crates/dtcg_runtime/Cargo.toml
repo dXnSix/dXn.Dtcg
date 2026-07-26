@@ -6,6 +6,9 @@ publish.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[features]
+rayx_diagnostics = []
+
 [dependencies]
 dtcg_runtime_derive = { path = "../dtcg_runtime_derive" }
 serde.workspace = true
