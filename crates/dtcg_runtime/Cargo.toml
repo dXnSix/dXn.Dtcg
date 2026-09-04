@@ -12,7 +12,7 @@ rayx_diagnostics = []
 [dependencies]
 dtcg_runtime_derive = { path = "../dtcg_runtime_derive" }
 serde.workspace = true
-serde_json.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
 sha2.workspace = true
 thiserror.workspace = true
 

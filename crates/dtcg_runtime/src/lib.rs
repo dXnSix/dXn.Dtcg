@@ -6,6 +6,7 @@ mod diagnostics;
 mod error;
 mod resolver;
 mod resource;
+mod value;
 
 use std::sync::Arc;
 
@@ -13,6 +14,7 @@ pub use dtcg_runtime_derive::{DtcgComponentTokens, DtcgTokens};
 pub use error::DtcgError;
 pub use resolver::{DocumentRequest, Resolution, ResolvedToken, ResolvedTokens, RuntimeLimits};
 pub use resource::{DocumentReference, ResourceId};
+pub use value::{ValueValidationError, validate_value};
 
 pub use catalog::DocumentCatalog;
 #[cfg(feature = "rayx_diagnostics")]
@@ -89,7 +91,10 @@ impl DtcgRuntime {
     /// ```
     /// use dtcg_runtime::{DtcgRuntime, Resolution};
     ///
-    /// let runtime = DtcgRuntime::from_json("tokens.json", r#"{"color":{"primary":{"$value":"blue"}}}"#)?;
+    /// let runtime = DtcgRuntime::from_json(
+    ///     "tokens.json",
+    ///     r#"{"spacing":{"small":{"$type":"number","$value":4}}}"#,
+    /// )?;
     /// assert!(matches!(runtime.resolve(&[])?, Resolution::Ready(_)));
     /// # Ok::<(), dtcg_runtime::DtcgError>(())
     /// ```
