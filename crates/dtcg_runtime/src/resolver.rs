@@ -7,7 +7,7 @@ use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    DocumentReference, DtcgError, ResourceId,
+    AffectedResolution, DocumentReference, DtcgError, ResourceId,
     catalog::{DocumentCatalog, parse_document},
     validate_value,
 };
@@ -138,6 +138,98 @@ pub(crate) fn resolve(
         order,
         fingerprint: format!("{:x}", hasher.finalize()).into(),
     }))
+}
+
+pub(crate) fn resolve_affected(
+    catalog: &DocumentCatalog,
+    root: Option<&ResourceId>,
+    limits: &RuntimeLimits,
+    selection: &[(&str, &str)],
+    changed_paths: &[&str],
+) -> Result<Resolution<AffectedResolution>, DtcgError> {
+    let sources = discover(catalog, required_root(root)?, limits, selection, false)?;
+    let Resolution::Ready(sources) = sources else {
+        return Ok(sources.map(|_| unreachable!()));
+    };
+    let mut raw = BTreeMap::new();
+    let mut order = Vec::new();
+    for source in sources {
+        flatten_source(catalog, &source, &mut raw, &mut order)?;
+    }
+
+    let mut affected = changed_paths
+        .iter()
+        .filter(|path| raw.contains_key(**path))
+        .map(|path| (*path).to_owned())
+        .collect::<BTreeSet<_>>();
+    let mut inspected_documents = BTreeSet::new();
+    if raw.values().any(|token| {
+        inspected_documents.insert(Arc::as_ptr(&token.document) as usize)
+            && contains_group_extension(token.document.as_ref())
+    }) {
+        affected.extend(order.iter().cloned());
+    }
+    let mut reverse_dependencies = BTreeMap::<String, BTreeSet<String>>::new();
+    for (path, token) in &raw {
+        let mut dependencies = BTreeSet::new();
+        collect_token_dependencies(
+            &token.value,
+            token.document.as_ref(),
+            &raw,
+            &mut dependencies,
+            &mut Vec::new(),
+        )?;
+        for dependency in dependencies {
+            reverse_dependencies
+                .entry(dependency)
+                .or_default()
+                .insert(path.clone());
+        }
+    }
+    let mut pending = affected.iter().cloned().collect::<Vec<_>>();
+    while let Some(path) = pending.pop() {
+        if let Some(dependents) = reverse_dependencies.get(&path) {
+            for dependent in dependents {
+                if affected.insert(dependent.clone()) {
+                    pending.push(dependent.clone());
+                }
+            }
+        }
+    }
+
+    let mut resolved = BTreeMap::new();
+    for path in order.iter().filter(|path| affected.contains(*path)) {
+        resolve_token(
+            path,
+            &raw,
+            &mut resolved,
+            &mut Vec::new(),
+            &mut Vec::new(),
+            limits,
+        )?;
+    }
+    #[cfg(feature = "rayx_diagnostics")]
+    let nodes_visited = resolved.len();
+    let tokens = order
+        .iter()
+        .filter(|path| affected.contains(*path))
+        .filter_map(|path| resolved.get(path).cloned())
+        .collect();
+    Ok(Resolution::Ready(AffectedResolution {
+        tokens,
+        #[cfg(feature = "rayx_diagnostics")]
+        nodes_visited,
+    }))
+}
+
+fn contains_group_extension(value: &Value) -> bool {
+    match value {
+        Value::Object(object) => {
+            object.contains_key("$extends") || object.values().any(contains_group_extension)
+        }
+        Value::Array(array) => array.iter().any(contains_group_extension),
+        _ => false,
+    }
 }
 
 pub(crate) fn validate_complete(
@@ -1048,6 +1140,79 @@ fn whole_token_reference(value: &Value) -> Result<Option<String>, DtcgError> {
         return Ok(None);
     }
     Ok(Some(parts[..value_index].join(".")))
+}
+
+fn collect_token_dependencies(
+    value: &Value,
+    document: &Value,
+    raw: &BTreeMap<String, RawToken>,
+    dependencies: &mut BTreeSet<String>,
+    pointer_visiting: &mut Vec<String>,
+) -> Result<(), DtcgError> {
+    if let Some(reference) = value.as_str().and_then(|text| {
+        text.strip_prefix('{')
+            .and_then(|text| text.strip_suffix('}'))
+    }) {
+        if raw.contains_key(reference) {
+            dependencies.insert(reference.to_owned());
+        }
+        return Ok(());
+    }
+    if let Some(object) = value.as_object()
+        && let Some(reference) = object.get("$ref").and_then(Value::as_str)
+    {
+        let parts = pointer_parts(reference)?;
+        if let Some((_, token_path)) = parts
+            .iter()
+            .position(|part| part == "$value" || part == "$type")
+            .filter(|index| *index > 0)
+            .map(|index| (index, parts[..index].join(".")))
+            .filter(|(_, token_path)| raw.contains_key(token_path))
+        {
+            dependencies.insert(token_path);
+        } else {
+            if pointer_visiting.iter().any(|pointer| pointer == reference) {
+                return Err(DtcgError::InvalidPointer(format!(
+                    "circular JSON Pointer reference `{reference}`"
+                )));
+            }
+            let pointer = reference
+                .strip_prefix('#')
+                .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
+            let target = if reference == "#/" {
+                document
+            } else {
+                document
+                    .pointer(pointer)
+                    .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?
+            };
+            pointer_visiting.push(reference.into());
+            let result =
+                collect_token_dependencies(target, document, raw, dependencies, pointer_visiting);
+            pointer_visiting.pop();
+            result?;
+        }
+        for (key, item) in object {
+            if key != "$ref" {
+                collect_token_dependencies(item, document, raw, dependencies, pointer_visiting)?;
+            }
+        }
+        return Ok(());
+    }
+    match value {
+        Value::Array(values) => {
+            for item in values {
+                collect_token_dependencies(item, document, raw, dependencies, pointer_visiting)?;
+            }
+        }
+        Value::Object(values) => {
+            for item in values.values() {
+                collect_token_dependencies(item, document, raw, dependencies, pointer_visiting)?;
+            }
+        }
+        _ => {}
+    }
+    Ok(())
 }
 
 fn validate_name(resource: &ResourceId, prefix: &str, name: &str) -> Result<(), DtcgError> {
