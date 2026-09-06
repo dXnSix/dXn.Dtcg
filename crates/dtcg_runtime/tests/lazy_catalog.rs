@@ -3,10 +3,11 @@ use std::sync::Arc;
 use dtcg_runtime::{DtcgRuntime, Resolution, RuntimeLimits};
 
 const ROOT: &str = r##"{
+  "version": "2025.10",
   "resolutionOrder": [{"$ref":"#/sets/base"}, {"$ref":"#/modifiers/theme"}],
-  "sets": {"base": {"sources": ["tokens/base.json"]}},
+  "sets": {"base": {"sources": [{"$ref":"tokens/base.json"}]}},
   "modifiers": {"theme": {"default":"light", "contexts": {
-    "light": ["tokens/light.json"], "dark": ["tokens/dark.json"]
+    "light": [{"$ref":"tokens/light.json"}], "dark": [{"$ref":"tokens/dark.json"}]
   }}}
 }"##;
 
@@ -34,7 +35,7 @@ fn lazy_resolution_returns_the_stable_active_missing_frontier_then_converges() {
     runtime
         .provide_requested_json(
             &requests[0],
-            Arc::<str>::from(r#"{"color":{"$value":"red"}}"#),
+            Arc::<str>::from(r#"{"color":{"$type":"fontFamily","$value":"red"}}"#),
         )
         .unwrap();
     assert!(matches!(
@@ -44,7 +45,7 @@ fn lazy_resolution_returns_the_stable_active_missing_frontier_then_converges() {
     runtime
         .provide_requested_json(
             &requests[1],
-            Arc::<str>::from(r#"{"color":{"$value":"blue"}}"#),
+            Arc::<str>::from(r#"{"color":{"$type":"fontFamily","$value":"blue"}}"#),
         )
         .unwrap();
 
@@ -116,12 +117,14 @@ fn lazy_resolution_excludes_inactive_contexts_unless_complete_validation_is_requ
 #[test]
 fn lazy_catalog_multi_level_cycles_and_limits_terminate_deterministically() {
     let root = r##"{
+      "version":"2025.10",
       "resolutionOrder":[{"$ref":"#/sets/root"}],
-      "sets":{"root":{"sources":["nested.json"]}}
+      "sets":{"root":{"sources":[{"$ref":"nested.json"}]}}
     }"##;
     let nested = r##"{
+      "version":"2025.10",
       "resolutionOrder":[{"$ref":"#/sets/leaf"}],
-      "sets":{"leaf":{"sources":["leaf.json"]}}
+      "sets":{"leaf":{"sources":[{"$ref":"leaf.json"}]}}
     }"##;
     let mut runtime = DtcgRuntime::from_json("root.json", root).unwrap();
     let first = runtime.resolve(&[]).unwrap();

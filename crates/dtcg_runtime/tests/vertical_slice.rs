@@ -6,9 +6,9 @@ struct AppTheme {
     button: String,
 }
 
-const ROOT: &str = r##"{"sets":{"base":{"sources":[{"$ref":"base.json"}]}},"modifiers":{"theme":{"default":"light","contexts":{"light":[],"dark":[{"$ref":"dark.json"}]}}},"resolutionOrder":[{"$ref":"#/sets/base"},{"$ref":"#/modifiers/theme"}]}"##;
-const BASE: &str = r#"{"spacing":{"sm":{"$type":"dimension","$value":4}},"color":{"button":{"$type":"color","$value":"blue"}},"component":{"fill":{"$value":"{color.button}"},"gap":{"$value":"{spacing.sm}"}}}"#;
-const DARK: &str = r#"{"color":{"button":{"$type":"color","$value":"black"}}}"#;
+const ROOT: &str = r##"{"version":"2025.10","sets":{"base":{"sources":[{"$ref":"base.json"}]}},"modifiers":{"theme":{"default":"light","contexts":{"light":[],"dark":[{"$ref":"dark.json"}]}}},"resolutionOrder":[{"$ref":"#/sets/base"},{"$ref":"#/modifiers/theme"}]}"##;
+const BASE: &str = r#"{"spacing":{"sm":{"$type":"number","$value":4}},"color":{"button":{"$type":"fontFamily","$value":"blue"}},"component":{"fill":{"$value":"{color.button}"},"gap":{"$value":"{spacing.sm}"}}}"#;
+const DARK: &str = r#"{"color":{"button":{"$type":"fontFamily","$value":"black"}}}"#;
 
 #[test]
 fn resolves_after_missing_documents_are_provided_and_overlays_whole_tokens() {

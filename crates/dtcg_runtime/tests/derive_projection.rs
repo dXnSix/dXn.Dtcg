@@ -22,7 +22,7 @@ struct ButtonView {
 fn projects_renamed_root_fields_and_tolerates_unprojected_tokens() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
-        r#"{"palette":{"primary":{"$value":"teal"},"spacing":{"$value":8}},"button":{"fill":{"$value":"blue"}}}"#,
+        r#"{"palette":{"primary":{"$type":"fontFamily","$value":"teal"},"spacing":{"$type":"number","$value":8}},"button":{"fill":{"$type":"fontFamily","$value":"blue"}}}"#,
     )
     .unwrap();
 
