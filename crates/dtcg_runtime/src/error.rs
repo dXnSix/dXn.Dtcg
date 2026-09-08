@@ -34,6 +34,13 @@ pub enum DtcgError {
     },
     #[error("projection `{path}`: {message}")]
     Projection { path: String, message: String },
+    /// A token without a usable DTCG type, or a value that does not match it.
+    #[error("token `{path}` in `{resource}`: {message}")]
+    TokenType {
+        resource: ResourceId,
+        path: String,
+        message: String,
+    },
 }
 
 pub(crate) fn invalid(resource: &ResourceId, message: &str) -> DtcgError {

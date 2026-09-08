@@ -85,6 +85,11 @@ impl DtcgDiagnostic {
                 resource,
                 path,
                 message,
+            }
+            | DtcgError::TokenType {
+                resource,
+                path,
+                message,
             } => (
                 DtcgDiagnosticCode::Token,
                 Some(resource.clone()),

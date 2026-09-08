@@ -603,16 +603,17 @@ fn resolve_token(
         limits,
     )?;
     visiting.pop();
-    let token_type = token
-        .token_type
-        .clone()
-        .or(alias_type)
-        .ok_or_else(|| DtcgError::Token {
-            resource: token.source.clone(),
-            path: path.into(),
-            message: "token requires a DTCG type".into(),
-        })?;
-    validate_value(&token_type, &value).map_err(|error| DtcgError::Token {
+    let token_type =
+        token
+            .token_type
+            .clone()
+            .or(alias_type)
+            .ok_or_else(|| DtcgError::TokenType {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: "token requires a DTCG type".into(),
+            })?;
+    validate_value(&token_type, &value).map_err(|error| DtcgError::TokenType {
         resource: token.source.clone(),
         path: path.into(),
         message: error.to_string(),
