@@ -430,7 +430,7 @@ fn resolved_iteration_preserves_final_authored_order_and_raw_aliases() {
         .unwrap();
 
     assert_eq!(
-        tokens.iter().map(|(path, _)| path).collect::<Vec<_>>(),
+        tokens.iter().map(|token| &*token.path).collect::<Vec<_>>(),
         ["first", "alias", "second"]
     );
     assert_eq!(tokens.get("alias").unwrap().authored_value, "{first}");

@@ -54,7 +54,7 @@ impl Default for RuntimeLimits {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ResolvedToken {
     pub path: Arc<str>,
     pub token_type: Option<Arc<str>>,
@@ -63,7 +63,7 @@ pub struct ResolvedToken {
     pub source: ResourceId,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ResolvedTokens {
     tokens: BTreeMap<String, ResolvedToken>,
     order: Vec<String>,
@@ -74,14 +74,49 @@ impl ResolvedTokens {
     pub fn get(&self, path: &str) -> Option<&ResolvedToken> {
         self.tokens.get(path)
     }
-    pub fn iter(&self) -> impl Iterator<Item = (&str, &ResolvedToken)> {
-        self.order
-            .iter()
-            .filter_map(|path| self.tokens.get(path).map(|token| (path.as_str(), token)))
+    /// Tokens in resolution order.
+    pub fn iter(&self) -> impl Iterator<Item = &ResolvedToken> {
+        self.order.iter().filter_map(|path| self.tokens.get(path))
     }
     pub fn fingerprint(&self) -> &str {
         &self.fingerprint
     }
+    pub fn len(&self) -> usize {
+        self.order.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.order.is_empty()
+    }
+    /// Merge an affected re-resolution into this projection and refresh the fingerprint.
+    pub fn apply_affected(&mut self, affected: &AffectedResolution) {
+        for token in affected.iter() {
+            let path = token.path.to_string();
+            if self.tokens.insert(path.clone(), token.clone()).is_none() {
+                self.order.push(path);
+            }
+        }
+        self.fingerprint = fingerprint(&self.order, &self.tokens);
+    }
+}
+
+fn fingerprint(order: &[String], tokens: &BTreeMap<String, ResolvedToken>) -> Arc<str> {
+    let mut hasher = Sha256::new();
+    for path in order {
+        let token = tokens
+            .get(path)
+            .expect("every ordered raw token was resolved");
+        hasher.update(token.path.as_bytes());
+        hasher.update([0]);
+        if let Some(token_type) = &token.token_type {
+            hasher.update(token_type.as_bytes());
+        }
+        hasher.update([0]);
+        hasher.update(token.value.to_string().as_bytes());
+        hasher.update([0]);
+        hasher.update(token.source.as_str().as_bytes());
+        hasher.update([0]);
+    }
+    format!("{:x}", hasher.finalize()).into()
 }
 
 pub(crate) fn resolve(
@@ -117,26 +152,11 @@ pub(crate) fn resolve_sources(
             limits,
         )?;
     }
-    let mut hasher = Sha256::new();
-    for path in &order {
-        let token = resolved
-            .get(path)
-            .expect("every ordered raw token was resolved");
-        hasher.update(token.path.as_bytes());
-        hasher.update([0]);
-        if let Some(token_type) = &token.token_type {
-            hasher.update(token_type.as_bytes());
-        }
-        hasher.update([0]);
-        hasher.update(token.value.to_string().as_bytes());
-        hasher.update([0]);
-        hasher.update(token.source.as_str().as_bytes());
-        hasher.update([0]);
-    }
+    let fingerprint = fingerprint(&order, &resolved);
     Ok(ResolvedTokens {
         tokens: resolved,
         order,
-        fingerprint: format!("{:x}", hasher.finalize()).into(),
+        fingerprint,
     })
 }
 
