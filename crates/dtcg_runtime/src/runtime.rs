@@ -2,9 +2,11 @@ use std::sync::Arc;
 
 use crate::{
     AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, Resolution,
-    ResolvedTokens, ResourceId, RuntimeLimits, TypeRegistry, resolver,
+    ResolvedTokens, ResourceId, RuntimeLimits, SourceOccurrence, TypeRegistry, resolver,
+    source_discovery::{self, required_root},
 };
 
+#[derive(Clone)]
 pub struct DtcgRuntime {
     catalog: DocumentCatalog,
     root: Option<ResourceId>,
@@ -153,6 +155,102 @@ impl DtcgRuntime {
 
     pub fn validate_complete(&self) -> Result<Resolution<()>, DtcgError> {
         resolver::validate_complete(&self.catalog, self.root.as_ref(), &self.limits)
+    }
+
+    /// Inspect all authored resolver-source references, including dormant sets,
+    /// contexts and shallow overrides. This does not resolve token values or
+    /// inspect aliases/unknown extensions. Missing documents use the normal
+    /// catalog acquisition protocol.
+    pub fn source_references(&self) -> Result<Resolution<Vec<crate::SourceReference>>, DtcgError> {
+        crate::source_references::inspect(
+            &self.catalog,
+            required_root(self.root.as_ref())?,
+            &self.limits,
+        )
+    }
+
+    /// Inspect a source in the root document's resolver context without resolving
+    /// token values. Ordered duplicates, empty groups and override origins remain
+    /// available. `None` origins belong to the supplied inline source.
+    pub fn inspect_source(
+        &self,
+        source: &serde_json::Value,
+        selection: &[(&str, &str)],
+    ) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
+        source_discovery::discover_source(
+            &self.catalog,
+            required_root(self.root.as_ref())?,
+            &self.limits,
+            source,
+            selection,
+            false,
+        )
+    }
+
+    /// Discover dependencies in every context of a supplied source. Like
+    /// `validate_complete`, this validates structure, not resolved token values.
+    pub fn validate_source(&self, source: &serde_json::Value) -> Result<Resolution<()>, DtcgError> {
+        match source_discovery::discover_source(
+            &self.catalog,
+            required_root(self.root.as_ref())?,
+            &self.limits,
+            source,
+            &[],
+            true,
+        )? {
+            Resolution::Ready(_) => Ok(Resolution::Ready(())),
+            Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
+        }
+    }
+
+    /// Resolve with the supplied source's occurrences applied last. This uses the
+    /// same discovery, ordering, alias, inheritance and limit rules as `resolve`;
+    /// it does not alter catalog documents or create a synthetic resolver.
+    pub fn preview_source(
+        &self,
+        source: &serde_json::Value,
+        selection: &[(&str, &str)],
+    ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
+        match self.inspect_source(source, selection)? {
+            Resolution::Ready(sources) => self.preview_sources(&sources, selection),
+            Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
+        }
+    }
+
+    /// Preview one terminal occurrence returned by `inspect_source`, including a
+    /// shadowed source within a referenced resolver. The occurrence is a detached
+    /// authored snapshot; the surrounding context is resolved from this runtime.
+    pub fn preview_occurrence(
+        &self,
+        source: &SourceOccurrence,
+        selection: &[(&str, &str)],
+    ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
+        self.preview_sources(std::slice::from_ref(source), selection)
+    }
+
+    fn preview_sources(
+        &self,
+        preview: &[SourceOccurrence],
+        selection: &[(&str, &str)],
+    ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
+        let mut sources = match source_discovery::discover(
+            &self.catalog,
+            required_root(self.root.as_ref())?,
+            &self.limits,
+            selection,
+            false,
+        )? {
+            Resolution::Ready(sources) => sources,
+            Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+        };
+        if sources.len().saturating_add(preview.len()) > self.limits.max_documents {
+            return Err(DtcgError::LimitExceeded {
+                kind: "documents",
+                limit: self.limits.max_documents,
+            });
+        }
+        sources.extend_from_slice(preview);
+        resolver::resolve_sources(&sources, &self.limits).map(Resolution::Ready)
     }
 
     pub fn project<T: DtcgTokens>(

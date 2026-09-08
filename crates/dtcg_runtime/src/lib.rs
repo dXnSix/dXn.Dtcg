@@ -8,9 +8,14 @@ mod dtcg_component_tokens;
 mod dtcg_tokens;
 mod error;
 mod from_dtcg_value;
+mod json_pointer;
 mod resolver;
+mod resolver_definition;
 mod resource;
 mod runtime;
+mod source_discovery;
+mod source_occurrence;
+mod source_origin;
 mod type_registry;
 mod value;
 
@@ -28,3 +33,10 @@ pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;
 pub use type_registry::TypeRegistry;
 pub use value::{ValueValidationError, validate_value};
+
+pub use resolver_definition::{modifier_contexts, set_sources};
+pub use source_occurrence::SourceOccurrence;
+pub use source_origin::SourceOrigin;
+mod source_reference;
+mod source_references;
+pub use source_reference::SourceReference;

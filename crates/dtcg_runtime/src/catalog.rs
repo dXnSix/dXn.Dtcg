@@ -7,7 +7,7 @@ use serde_json::Value;
 
 use crate::{DtcgError, ResourceId};
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct DocumentCatalog {
     documents: BTreeMap<ResourceId, Arc<str>>,
     revision: u64,

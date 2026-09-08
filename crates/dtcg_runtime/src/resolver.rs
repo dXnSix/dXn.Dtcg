@@ -7,8 +7,11 @@ use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    AffectedResolution, DocumentReference, DtcgError, ResourceId,
-    catalog::{DocumentCatalog, parse_document},
+    AffectedResolution, DtcgError, ResourceId, SourceOccurrence,
+    catalog::DocumentCatalog,
+    error::invalid,
+    json_pointer::pointer_parts,
+    source_discovery::{discover, required_root},
     validate_value,
 };
 
@@ -81,16 +84,6 @@ impl ResolvedTokens {
     }
 }
 
-#[derive(Clone)]
-struct Source {
-    id: ResourceId,
-    fragment: Option<Arc<str>>,
-    inline: Option<Value>,
-    overrides: Map<String, Value>,
-    referenced_from: ResourceId,
-    original: Arc<str>,
-}
-
 pub(crate) fn resolve(
     catalog: &DocumentCatalog,
     root: Option<&ResourceId>,
@@ -101,10 +94,17 @@ pub(crate) fn resolve(
     let Resolution::Ready(sources) = sources else {
         return Ok(sources.map(|_| unreachable!()));
     };
+    resolve_sources(&sources, limits).map(Resolution::Ready)
+}
+
+pub(crate) fn resolve_sources(
+    sources: &[SourceOccurrence],
+    limits: &RuntimeLimits,
+) -> Result<ResolvedTokens, DtcgError> {
     let mut raw = BTreeMap::new();
     let mut order = Vec::new();
     for source in sources {
-        flatten_source(catalog, &source, &mut raw, &mut order)?;
+        flatten_source(source, &mut raw, &mut order)?;
     }
     let mut resolved = BTreeMap::new();
     for path in &order {
@@ -133,11 +133,11 @@ pub(crate) fn resolve(
         hasher.update(token.source.as_str().as_bytes());
         hasher.update([0]);
     }
-    Ok(Resolution::Ready(ResolvedTokens {
+    Ok(ResolvedTokens {
         tokens: resolved,
         order,
         fingerprint: format!("{:x}", hasher.finalize()).into(),
-    }))
+    })
 }
 
 pub(crate) fn resolve_affected(
@@ -154,7 +154,7 @@ pub(crate) fn resolve_affected(
     let mut raw = BTreeMap::new();
     let mut order = Vec::new();
     for source in sources {
-        flatten_source(catalog, &source, &mut raw, &mut order)?;
+        flatten_source(&source, &mut raw, &mut order)?;
     }
 
     let mut affected = changed_paths
@@ -255,519 +255,15 @@ impl<T> ResolutionMap<T> for Resolution<T> {
     }
 }
 
-fn required_root(root: Option<&ResourceId>) -> Result<&ResourceId, DtcgError> {
-    root.ok_or_else(|| DtcgError::InvalidDocument {
-        resource: ResourceId::parse("catalog").expect("static id"),
-        message: "root document is not set".into(),
-    })
-}
-
-fn discover(
-    catalog: &DocumentCatalog,
-    root: &ResourceId,
-    limits: &RuntimeLimits,
-    selection: &[(&str, &str)],
-    include_inactive: bool,
-) -> Result<Resolution<Vec<Source>>, DtcgError> {
-    let mut selections = BTreeMap::new();
-    for (name, value) in selection {
-        if selections.insert(*name, *value).is_some() {
-            return Err(invalid(root, &format!("duplicate input `{name}`")));
-        }
-    }
-    let mut queue = vec![(
-        Source {
-            id: root.clone(),
-            fragment: None,
-            inline: None,
-            overrides: Map::new(),
-            referenced_from: root.clone(),
-            original: root.as_str().into(),
-        },
-        0usize,
-        Vec::new(),
-    )];
-    let mut terminal = Vec::new();
-    let mut missing = BTreeMap::<ResourceId, DocumentRequest>::new();
-    let mut expanded = BTreeSet::new();
-    while let Some((source, depth, ancestors)) = queue.pop() {
-        if depth > limits.max_reference_depth {
-            return Err(DtcgError::LimitExceeded {
-                kind: "reference depth",
-                limit: limits.max_reference_depth,
-            });
-        }
-        if queue.len() + terminal.len() > limits.max_documents {
-            return Err(DtcgError::LimitExceeded {
-                kind: "documents",
-                limit: limits.max_documents,
-            });
-        }
-        if source.inline.is_none() && !catalog.contains(&source.id) {
-            missing.entry(source.id.clone()).or_insert(DocumentRequest {
-                resource_id: source.id,
-                referenced_from: source.referenced_from,
-                original_reference: source.original,
-            });
-            continue;
-        }
-        let value = source_value(catalog, &source)?;
-        if !is_resolver(&value) {
-            terminal.push(source);
-            continue;
-        }
-        if ancestors.contains(&source.id) {
-            return Err(DtcgError::DocumentCycle(source.id.to_string()));
-        }
-        if !expanded.insert((source.id.clone(), source.fragment.clone())) {
-            continue;
-        }
-        let children = resolver_sources(&source.id, &value, &selections, include_inactive)?;
-        let mut child_ancestors = ancestors;
-        child_ancestors.push(source.id.clone());
-        for child in children.into_iter().rev() {
-            queue.push((child, depth + 1, child_ancestors.clone()));
-        }
-    }
-    if missing.is_empty() {
-        Ok(Resolution::Ready(terminal))
-    } else {
-        Ok(Resolution::Missing(missing.into_values().collect()))
-    }
-}
-
-fn source_value(catalog: &DocumentCatalog, source: &Source) -> Result<Value, DtcgError> {
-    let document = match &source.inline {
-        Some(value) => value.clone(),
-        None => {
-            let json = catalog
-                .get(&source.id)
-                .ok_or_else(|| DtcgError::UnknownDocument(source.id.clone()))?;
-            parse_document(&source.id, json)?
-        }
-    };
-    let mut value = source
-        .fragment
-        .as_deref()
-        .map_or(Ok(document.clone()), |fragment| {
-            document
-                .pointer(fragment)
-                .cloned()
-                .ok_or_else(|| DtcgError::InvalidPointer(fragment.into()))
-        })?;
-    if !source.overrides.is_empty() {
-        let object = value
-            .as_object_mut()
-            .ok_or_else(|| invalid(&source.id, "reference overrides require an object target"))?;
-        for (key, override_value) in &source.overrides {
-            object.insert(key.clone(), override_value.clone());
-        }
-    }
-    Ok(value)
-}
-
-fn is_resolver(value: &Value) -> bool {
-    value
-        .as_object()
-        .is_some_and(|object| object.contains_key("resolutionOrder"))
-}
-
-fn resolver_sources(
-    parent: &ResourceId,
-    value: &Value,
-    selections: &BTreeMap<&str, &str>,
-    include_inactive: bool,
-) -> Result<Vec<Source>, DtcgError> {
-    let object = value
-        .as_object()
-        .ok_or_else(|| invalid(parent, "expected resolver object"))?;
-    if object.get("version").and_then(Value::as_str) != Some("2025.10") {
-        return Err(invalid(parent, "resolver version must be `2025.10`"));
-    }
-    let sets = optional_object(parent, object, "sets")?;
-    let modifiers = optional_object(parent, object, "modifiers")?;
-    let order = object
-        .get("resolutionOrder")
-        .and_then(Value::as_array)
-        .ok_or_else(|| invalid(parent, "resolutionOrder is required"))?;
-    validate_inputs(parent, modifiers, order, selections, include_inactive)?;
-
-    let mut result = Vec::new();
-    let mut inline_names = BTreeSet::new();
-    for step in order {
-        let (kind, name, definition) = resolution_step(parent, value, step)?;
-        if step.get("$ref").is_none() && !inline_names.insert(name.clone()) {
-            return Err(invalid(
-                parent,
-                &format!("duplicate inline resolution name `{name}`"),
-            ));
-        }
-        let documents = match kind.as_str() {
-            "set" => set_documents(parent, &definition)?,
-            "modifier" => {
-                modifier_documents(parent, &definition, &name, selections, include_inactive)?
-            }
-            _ => {
-                return Err(invalid(
-                    parent,
-                    "resolution step type must be `set` or `modifier`",
-                ));
-            }
-        };
-        for document in documents {
-            append_source(parent, value, sets, &document, &mut result, &mut Vec::new())?;
-        }
-    }
-    Ok(result)
-}
-
-fn optional_object<'a>(
-    parent: &ResourceId,
-    object: &'a Map<String, Value>,
-    key: &str,
-) -> Result<Option<&'a Map<String, Value>>, DtcgError> {
-    object
-        .get(key)
-        .map(|value| {
-            value
-                .as_object()
-                .ok_or_else(|| invalid(parent, &format!("resolver {key} must be an object")))
-        })
-        .transpose()
-}
-
-fn resolution_step(
-    parent: &ResourceId,
-    document: &Value,
-    step: &Value,
-) -> Result<(String, String, Value), DtcgError> {
-    let object = step
-        .as_object()
-        .ok_or_else(|| invalid(parent, "resolution step must be an object"))?;
-    if let Some(pointer) = object.get("$ref").and_then(Value::as_str) {
-        let parts = pointer_parts(pointer)?;
-        let (kind, name) = match parts.as_slice() {
-            [kind, name] if kind == "sets" => ("set", name.clone()),
-            [kind, name] if kind == "modifiers" => ("modifier", name.clone()),
-            _ => {
-                return Err(invalid(
-                    parent,
-                    &format!("unknown resolver source `{pointer}`"),
-                ));
-            }
-        };
-        return Ok((
-            kind.into(),
-            name,
-            resolve_local_reference(parent, document, object)?,
-        ));
-    }
-    let kind = object
-        .get("type")
-        .and_then(Value::as_str)
-        .ok_or_else(|| invalid(parent, "inline resolution step requires `type`"))?;
-    let name = object
-        .get("name")
-        .and_then(Value::as_str)
-        .filter(|name| !name.is_empty())
-        .ok_or_else(|| invalid(parent, "inline resolution step requires `name`"))?;
-    Ok((kind.into(), name.into(), step.clone()))
-}
-
-fn resolve_local_reference(
-    parent: &ResourceId,
-    document: &Value,
-    reference: &Map<String, Value>,
-) -> Result<Value, DtcgError> {
-    let pointer = reference
-        .get("$ref")
-        .and_then(Value::as_str)
-        .ok_or_else(|| invalid(parent, "reference object requires a string `$ref`"))?;
-    let pointer = pointer
-        .strip_prefix('#')
-        .ok_or_else(|| invalid(parent, "resolver structure reference must be local"))?;
-    if pointer.starts_with("/resolutionOrder/") {
-        return Err(invalid(
-            parent,
-            "references into resolutionOrder are forbidden",
-        ));
-    }
-    let mut target = document
-        .pointer(pointer)
-        .cloned()
-        .ok_or_else(|| DtcgError::InvalidPointer(pointer.into()))?;
-    let target = target
-        .as_object_mut()
-        .ok_or_else(|| invalid(parent, "reference target must be an object"))?;
-    for (key, value) in reference {
-        if key != "$ref" {
-            target.insert(key.clone(), value.clone());
-        }
-    }
-    Ok(Value::Object(target.clone()))
-}
-
-fn set_documents(parent: &ResourceId, set: &Value) -> Result<Vec<Value>, DtcgError> {
-    set.get("sources")
-        .and_then(Value::as_array)
-        .cloned()
-        .ok_or_else(|| invalid(parent, "set sources are required"))
-}
-
-fn modifier_documents(
-    parent: &ResourceId,
-    modifier: &Value,
-    name: &str,
-    selections: &BTreeMap<&str, &str>,
-    include_inactive: bool,
-) -> Result<Vec<Value>, DtcgError> {
-    let modifier = modifier
-        .as_object()
-        .ok_or_else(|| invalid(parent, "modifier must be an object"))?;
-    let contexts = modifier
-        .get("contexts")
-        .and_then(Value::as_object)
-        .ok_or_else(|| invalid(parent, "modifier contexts are required"))?;
-    if contexts.is_empty() {
-        return Err(invalid(parent, "modifier contexts must not be empty"));
-    }
-    if include_inactive {
-        let mut documents = Vec::new();
-        for sources in contexts.values() {
-            let sources = sources
-                .as_array()
-                .ok_or_else(|| invalid(parent, "modifier context must be an array"))?;
-            documents.extend(sources.iter().cloned());
-        }
-        return Ok(documents);
-    }
-    let choice = selections
-        .get(name)
-        .copied()
-        .or_else(|| modifier.get("default").and_then(Value::as_str))
-        .ok_or_else(|| invalid(parent, "modifier has no selected or default context"))?;
-    contexts
-        .get(choice)
-        .and_then(Value::as_array)
-        .cloned()
-        .ok_or_else(|| DtcgError::Token {
-            resource: parent.clone(),
-            path: format!("#/modifiers/{name}"),
-            message: "selected modifier context is unknown".into(),
-        })
-}
-
-fn validate_inputs(
-    parent: &ResourceId,
-    root_modifiers: Option<&Map<String, Value>>,
-    order: &[Value],
-    selections: &BTreeMap<&str, &str>,
-    include_inactive: bool,
-) -> Result<(), DtcgError> {
-    let mut modifiers = BTreeMap::<String, Value>::new();
-    if let Some(root_modifiers) = root_modifiers {
-        modifiers.extend(
-            root_modifiers
-                .iter()
-                .map(|(name, modifier)| (name.clone(), modifier.clone())),
-        );
-    }
-    for step in order {
-        let Some(object) = step.as_object() else {
-            continue;
-        };
-        if object.get("$ref").is_none()
-            && object.get("type").and_then(Value::as_str) == Some("modifier")
-        {
-            let name = object
-                .get("name")
-                .and_then(Value::as_str)
-                .filter(|name| !name.is_empty())
-                .ok_or_else(|| invalid(parent, "inline modifier requires `name`"))?;
-            modifiers.insert(name.into(), step.clone());
-        }
-    }
-    for (name, modifier) in &modifiers {
-        let modifier = modifier
-            .as_object()
-            .ok_or_else(|| invalid(parent, &format!("modifier `{name}` must be an object")))?;
-        let contexts = modifier
-            .get("contexts")
-            .and_then(Value::as_object)
-            .filter(|contexts| !contexts.is_empty())
-            .ok_or_else(|| invalid(parent, &format!("modifier `{name}` requires contexts")))?;
-        for sources in contexts.values() {
-            if !sources.is_array() {
-                return Err(invalid(
-                    parent,
-                    &format!("modifier `{name}` context must be an array"),
-                ));
-            }
-        }
-        if let Some(default) = modifier.get("default") {
-            let default = default.as_str().ok_or_else(|| {
-                invalid(
-                    parent,
-                    &format!("modifier `{name}` default must be a string"),
-                )
-            })?;
-            if !contexts.contains_key(default) {
-                return Err(invalid(
-                    parent,
-                    &format!("modifier `{name}` default context is unknown"),
-                ));
-            }
-        }
-        if !include_inactive
-            && modifier.get("default").is_none()
-            && !selections.contains_key(name.as_str())
-        {
-            return Err(invalid(
-                parent,
-                &format!("missing input for modifier `{name}`"),
-            ));
-        }
-    }
-    if include_inactive {
-        return Ok(());
-    }
-    for (name, choice) in selections {
-        let modifier = modifiers
-            .get(*name)
-            .and_then(Value::as_object)
-            .ok_or_else(|| invalid(parent, &format!("unknown input `{name}`")))?;
-        if !modifier
-            .get("contexts")
-            .and_then(Value::as_object)
-            .is_some_and(|contexts| contexts.contains_key(*choice))
-        {
-            return Err(DtcgError::Token {
-                resource: parent.clone(),
-                path: format!("#/modifiers/{name}"),
-                message: "selected modifier context is unknown".into(),
-            });
-        }
-    }
-    Ok(())
-}
-
-fn append_source(
-    parent: &ResourceId,
-    document: &Value,
-    sets: Option<&Map<String, Value>>,
-    value: &Value,
-    result: &mut Vec<Source>,
-    references: &mut Vec<String>,
-) -> Result<(), DtcgError> {
-    let object = value
-        .as_object()
-        .ok_or_else(|| invalid(parent, "document source must be an object"))?;
-    let Some(reference) = object.get("$ref") else {
-        result.push(Source {
-            id: parent.clone(),
-            fragment: None,
-            inline: Some(value.clone()),
-            overrides: Map::new(),
-            referenced_from: parent.clone(),
-            original: "inline".into(),
-        });
-        return Ok(());
-    };
-    let reference = reference
-        .as_str()
-        .ok_or_else(|| invalid(parent, "reference object `$ref` must be a string"))?;
-    if reference.starts_with("#/resolutionOrder/") || reference.starts_with("#/modifiers/") {
-        return Err(invalid(
-            parent,
-            &format!("forbidden source reference `{reference}`"),
-        ));
-    }
-    if reference.starts_with('#') {
-        if references.iter().any(|active| active == reference) {
-            return Err(invalid(
-                parent,
-                &format!("reference cycle at `{reference}`"),
-            ));
-        }
-        references.push(reference.into());
-        let parts = pointer_parts(reference)?;
-        if let [kind, name] = parts.as_slice()
-            && kind == "sets"
-        {
-            let set = sets
-                .and_then(|sets| sets.get(name))
-                .ok_or_else(|| invalid(parent, &format!("unknown set `{name}`")))?;
-            let mut set = set.clone();
-            let set_object = set
-                .as_object_mut()
-                .ok_or_else(|| invalid(parent, "referenced set must be an object"))?;
-            for (key, value) in object {
-                if key != "$ref" {
-                    set_object.insert(key.clone(), value.clone());
-                }
-            }
-            for source in set_documents(parent, &set)? {
-                append_source(parent, document, sets, &source, result, references)?;
-            }
-        } else {
-            let resolved = resolve_local_reference(parent, document, object)?;
-            append_source(parent, document, sets, &resolved, result, references)?;
-        }
-        references.pop();
-        return Ok(());
-    }
-
-    let reference: DocumentReference = parent.resolve(reference)?;
-    let overrides = object
-        .iter()
-        .filter(|(key, _)| key.as_str() != "$ref")
-        .map(|(key, value)| (key.clone(), value.clone()))
-        .collect();
-    result.push(Source {
-        id: reference.resource_id().clone(),
-        fragment: reference.fragment().map(Arc::from),
-        inline: None,
-        overrides,
-        referenced_from: parent.clone(),
-        original: reference.original().into(),
-    });
-    Ok(())
-}
-
-fn pointer_parts(pointer: &str) -> Result<Vec<String>, DtcgError> {
-    if !pointer.starts_with("#/") {
-        return Err(DtcgError::InvalidPointer(pointer.into()));
-    }
-    pointer[2..].split('/').map(unescape).collect()
-}
-
-fn unescape(value: &str) -> Result<String, DtcgError> {
-    let mut output = String::new();
-    let mut chars = value.chars();
-    while let Some(character) = chars.next() {
-        if character == '~' {
-            match chars.next() {
-                Some('0') => output.push('~'),
-                Some('1') => output.push('/'),
-                _ => return Err(DtcgError::InvalidPointer(value.into())),
-            }
-        } else {
-            output.push(character);
-        }
-    }
-    Ok(output)
-}
-
 fn flatten_source(
-    catalog: &DocumentCatalog,
-    source: &Source,
+    source: &SourceOccurrence,
     target: &mut BTreeMap<String, RawToken>,
     order: &mut Vec<String>,
 ) -> Result<(), DtcgError> {
-    let value = Arc::new(source_value(catalog, source)?);
+    let value = Arc::new(source.value.clone());
     let mut output = FlattenedTokens { target, order };
     flatten_group(
-        &source.id,
+        &source.resource,
         "",
         value.as_ref(),
         None,
@@ -1445,11 +941,4 @@ fn traverse_value<'a>(mut value: &'a Value, parts: &[String]) -> Option<&'a Valu
         };
     }
     Some(value)
-}
-
-fn invalid(resource: &ResourceId, message: &str) -> DtcgError {
-    DtcgError::InvalidDocument {
-        resource: resource.clone(),
-        message: message.into(),
-    }
 }

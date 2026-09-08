@@ -1,6 +1,6 @@
 use crate::{DtcgError, FromDtcgValue, ResolvedToken};
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct TypeRegistry;
 
 impl TypeRegistry {
