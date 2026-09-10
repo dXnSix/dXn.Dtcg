@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     sync::Arc,
 };
 
@@ -141,6 +141,7 @@ pub(crate) fn resolve_sources(
     for source in sources {
         flatten_source(source, &mut raw, &mut order)?;
     }
+    keep_last_definitions(&mut order);
     let mut resolved = BTreeMap::new();
     for path in &order {
         resolve_token(
@@ -176,6 +177,7 @@ pub(crate) fn resolve_affected(
     for source in sources {
         flatten_source(&source, &mut raw, &mut order)?;
     }
+    keep_last_definitions(&mut order);
 
     let mut affected = changed_paths
         .iter()
@@ -480,10 +482,25 @@ fn flatten_group(
 }
 
 fn insert_raw_token(path: &str, token: RawToken, output: &mut FlattenedTokens<'_>) {
-    if output.target.insert(path.into(), token).is_some() {
-        output.order.retain(|current| current != path);
-    }
+    output.target.insert(path.into(), token);
     output.order.push(path.into());
+}
+
+/// Keep each path once, at the position of its last definition: a later source
+/// overrides an earlier one and takes its place in resolution order. One pass
+/// over the flattened order replaces a scan per override, which dominated
+/// resolution once most tokens were overridden by a later set.
+fn keep_last_definitions(order: &mut Vec<String>) {
+    let mut seen = HashSet::with_capacity(order.len());
+    let mut keep = vec![false; order.len()];
+    for (index, path) in order.iter().enumerate().rev() {
+        keep[index] = seen.insert(path.as_str());
+    }
+    let mut index = 0;
+    order.retain(|_| {
+        index += 1;
+        keep[index - 1]
+    });
 }
 
 fn effective_group_type(

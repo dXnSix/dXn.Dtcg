@@ -77,6 +77,34 @@ fn inline_sets_and_local_reference_overrides_respect_array_order() {
 }
 
 #[test]
+fn an_overriding_set_moves_the_token_to_its_last_definition_in_resolution_order() {
+    let resolver = r##"{
+      "version":"2025.10",
+      "resolutionOrder":[
+        {
+          "type":"set",
+          "name":"foundation",
+          "sources":[{"a":{"$type":"number","$value":1},"b":{"$type":"number","$value":2}}]
+        },
+        {
+          "type":"set",
+          "name":"brand",
+          "sources":[{"a":{"$type":"number","$value":3}}]
+        }
+      ]
+    }"##;
+    let runtime = DtcgRuntime::from_json("tokens.resolver.json", resolver).unwrap();
+    let resolved = runtime.resolve(&[]).unwrap().ready().unwrap();
+
+    let order = resolved
+        .iter()
+        .map(|token| (token.path.as_ref(), token.value.clone()))
+        .collect::<Vec<_>>();
+    assert_eq!(order, vec![("b", 2.into()), ("a", 3.into())]);
+    assert_eq!(resolved.len(), 2);
+}
+
+#[test]
 fn modifier_contexts_may_reference_sets() {
     let resolver = r##"{
       "version":"2025.10",
