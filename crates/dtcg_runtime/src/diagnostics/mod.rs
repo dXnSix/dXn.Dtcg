@@ -18,6 +18,9 @@ pub enum DtcgDiagnosticCode {
     DocumentCycle,
     Token,
     Projection,
+    Envelope,
+    Reference,
+    Selection,
 }
 
 /// Redacted diagnostic information derived from a [`DtcgError`].
@@ -101,6 +104,29 @@ impl DtcgDiagnostic {
                 None,
                 Some(path.clone()),
                 message.clone(),
+            ),
+            DtcgError::InvalidEnvelope { resource, message } => (
+                DtcgDiagnosticCode::Envelope,
+                Some(resource.clone()),
+                None,
+                message.clone(),
+            ),
+            DtcgError::InvalidReference {
+                resource,
+                reference,
+                message,
+            } => (
+                DtcgDiagnosticCode::Reference,
+                Some(resource.clone()),
+                Some(reference.clone()),
+                message.clone(),
+            ),
+            DtcgError::UnknownModifier { modifier, .. }
+            | DtcgError::UnknownContext { modifier, .. } => (
+                DtcgDiagnosticCode::Selection,
+                None,
+                Some(modifier.clone()),
+                error.to_string(),
             ),
         };
         Self {
