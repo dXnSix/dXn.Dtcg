@@ -32,7 +32,7 @@ pub use resolver::{DocumentRequest, Resolution, ResolvedToken, ResolvedTokens, R
 pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;
 pub use type_registry::TypeRegistry;
-pub use value::{ValueValidationError, validate_value};
+pub use value::{BLUR_TYPE, ValueValidationError, validate_value};
 
 pub use resolver_definition::{modifier_contexts, set_sources};
 pub use source_occurrence::SourceOccurrence;
