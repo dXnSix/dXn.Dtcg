@@ -25,3 +25,18 @@ impl FromDtcgValue for f64 {
         })
     }
 }
+
+impl FromDtcgValue for f32 {
+    fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError> {
+        f64::from_dtcg(token).map(|value| value as f32)
+    }
+}
+
+impl FromDtcgValue for bool {
+    fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError> {
+        token.value.as_bool().ok_or_else(|| DtcgError::Projection {
+            path: token.path.to_string(),
+            message: "expected boolean value".into(),
+        })
+    }
+}

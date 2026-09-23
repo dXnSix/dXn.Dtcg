@@ -28,7 +28,7 @@ pub use catalog::DocumentCatalog;
 pub use diagnostics::{DtcgDiagnostic, DtcgDiagnosticCode};
 pub use dtcg_component_tokens::DtcgComponentTokens;
 pub use dtcg_runtime_derive::{DtcgComponentTokens, DtcgTokens};
-pub use dtcg_tokens::DtcgTokens;
+pub use dtcg_tokens::{DtcgTokens, join_token_path};
 pub use envelope::ResolverEnvelope;
 pub use error::DtcgError;
 pub use from_dtcg_value::FromDtcgValue;

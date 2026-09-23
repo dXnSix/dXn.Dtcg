@@ -60,6 +60,8 @@ pub struct ResolvedToken {
     pub token_type: Option<Arc<str>>,
     pub authored_value: Value,
     pub value: Value,
+    /// The token's authored `$extensions` object, or `Null` when it has none.
+    pub extensions: Value,
     pub source: ResourceId,
 }
 
@@ -300,6 +302,7 @@ struct RawToken {
     token_type: Option<Arc<str>>,
     authored_value: Value,
     value: Value,
+    extensions: Value,
     source: ResourceId,
     document: Arc<Value>,
 }
@@ -374,6 +377,7 @@ fn flatten_group(
                 token_type: token_type.as_deref().map(Arc::from),
                 authored_value: token_value.clone(),
                 value: token_value.clone(),
+                extensions: object.get("$extensions").cloned().unwrap_or(Value::Null),
                 source: resource.clone(),
                 document: Arc::clone(document),
             },
@@ -404,6 +408,7 @@ fn flatten_group(
                     "$ref".into(),
                     Value::String(reference.into()),
                 )])),
+                extensions: object.get("$extensions").cloned().unwrap_or(Value::Null),
                 source: resource.clone(),
                 document: Arc::clone(document),
             },
@@ -642,6 +647,7 @@ fn resolve_token(
             token_type: Some(token_type),
             authored_value: token.authored_value.clone(),
             value,
+            extensions: token.extensions.clone(),
             source: token.source.clone(),
         },
     );
