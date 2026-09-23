@@ -41,6 +41,35 @@ pub enum DtcgError {
         path: String,
         message: String,
     },
+    /// A `.tokeneditor` envelope without an object `data` member or with a
+    /// resolver version other than `2025.10`.
+    #[error("invalid project envelope `{resource}`: {message}")]
+    InvalidEnvelope {
+        resource: ResourceId,
+        message: String,
+    },
+    /// A document reference outside the relative local policy.
+    #[error("reference `{reference}` in `{resource}`: {message}")]
+    InvalidReference {
+        resource: ResourceId,
+        reference: String,
+        message: String,
+    },
+    /// A selection names a modifier the resolver does not declare.
+    #[error("unknown modifier `{modifier}`; known modifiers: {}", known.join(", "))]
+    UnknownModifier {
+        modifier: String,
+        known: Vec<String>,
+    },
+    /// A selection names a context the modifier does not declare, selects a
+    /// modifier twice, or omits a modifier without a default.
+    #[error("modifier `{modifier}` context `{context}`: {message}; allowed contexts: {}", allowed.join(", "))]
+    UnknownContext {
+        modifier: String,
+        context: String,
+        allowed: Vec<String>,
+        message: String,
+    },
 }
 
 pub(crate) fn invalid(resource: &ResourceId, message: &str) -> DtcgError {

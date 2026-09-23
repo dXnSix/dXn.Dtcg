@@ -26,7 +26,8 @@ impl fmt::Display for ValueValidationError {
 
 impl std::error::Error for ValueValidationError {}
 
-/// Validates a resolved value against one of the 13 types in DTCG 2025.10.
+/// Validates a resolved value against one of the 13 types in DTCG 2025.10 or the RayX
+/// extension type `dev.rayx.blur`.
 pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValidationError> {
     let valid = match token_type {
         "color" => color(value),
@@ -42,6 +43,7 @@ pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValida
         "shadow" => shadow(value),
         "gradient" => gradient(value),
         "typography" => typography(value),
+        BLUR_TYPE => blur(value),
         unsupported => {
             return Err(ValueValidationError::UnsupportedType(unsupported.into()));
         }
@@ -261,6 +263,8 @@ fn gradient(value: &Value) -> bool {
     })
 }
 
+/// DTCG 2025.10 typography. `lineHeight` is the spec's unitless multiplier or, as a RayX
+/// extension, a `dimension`: design-system line heights are px tokens that text styles alias.
 fn typography(value: &Value) -> bool {
     exact_object(
         value,
@@ -278,7 +282,18 @@ fn typography(value: &Value) -> bool {
             && dimension(&object["fontSize"])
             && font_weight(&object["fontWeight"])
             && dimension(&object["letterSpacing"])
-            && object["lineHeight"].is_number()
+            && (object["lineHeight"].is_number() || dimension(&object["lineHeight"]))
+    })
+}
+
+/// RayX extension type for Figma layer/background blur effect styles.
+pub const BLUR_TYPE: &str = "dev.rayx.blur";
+
+/// `{ "kind": "layer" | "background", "radius": <dimension> }`.
+fn blur(value: &Value) -> bool {
+    exact_object(value, &["kind", "radius"], &[]).is_some_and(|object| {
+        matches!(object["kind"].as_str(), Some("layer" | "background"))
+            && dimension(&object["radius"])
     })
 }
 

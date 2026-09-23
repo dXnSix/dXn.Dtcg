@@ -57,20 +57,23 @@ fn derive(input: TokenStream, component: bool) -> TokenStream {
         let path = attributes
             .path
             .unwrap_or_else(|| attributes.rename.unwrap_or_else(|| ident.to_string()));
-        let full_path = if root.is_empty() {
-            path
-        } else if path.is_empty() {
-            root.clone()
-        } else {
-            format!("{root}.{path}")
-        };
         if attributes.nested {
             initializers.push(
-                quote! { #ident: <#ty as ::dtcg_runtime::DtcgTokens>::project(tokens, registry)? },
+                quote! { #ident: <#ty as ::dtcg_runtime::DtcgTokens>::project_at(tokens, registry, &::dtcg_runtime::join_token_path(&base, #path))? },
             );
-        } else {
-            initializers.push(quote! { #ident: { let token = tokens.get(#full_path).ok_or_else(|| ::dtcg_runtime::DtcgError::Projection { path: #full_path.into(), message: "required token is missing".into() })?; registry.convert::<#ty>(token)? } });
+            continue;
         }
+        let convert = match attributes.with {
+            Some(with) => {
+                let with: syn::Path = match syn::parse_str(&with) {
+                    Ok(with) => with,
+                    Err(error) => return error.to_compile_error().into(),
+                };
+                quote! { #with(token)? }
+            }
+            None => quote! { registry.convert::<#ty>(token)? },
+        };
+        initializers.push(quote! { #ident: { let full_path = ::dtcg_runtime::join_token_path(&base, #path); let token = tokens.get(&full_path).ok_or_else(|| ::dtcg_runtime::DtcgError::Projection { path: full_path.clone(), message: "required token is missing".into() })?; #convert } });
     }
     let mut generics = input.generics;
     for parameter in &mut generics.params {
@@ -84,7 +87,9 @@ fn derive(input: TokenStream, component: bool) -> TokenStream {
     let component_impl = component.then(|| quote! { impl #impl_generics ::dtcg_runtime::DtcgComponentTokens for #name #type_generics #where_clause { fn component_id() -> &'static str { #component_id } } });
     quote! {
         impl #impl_generics ::dtcg_runtime::DtcgTokens for #name #type_generics #where_clause {
-            fn project(tokens: &::dtcg_runtime::ResolvedTokens, registry: &::dtcg_runtime::TypeRegistry) -> Result<Self, ::dtcg_runtime::DtcgError> {
+            fn project_at(tokens: &::dtcg_runtime::ResolvedTokens, registry: &::dtcg_runtime::TypeRegistry, root: &str) -> Result<Self, ::dtcg_runtime::DtcgError> {
+                let base = ::dtcg_runtime::join_token_path(root, #root);
+                let _ = &base;
                 Ok(Self { #(#initializers),* })
             }
         }
@@ -96,6 +101,7 @@ fn derive(input: TokenStream, component: bool) -> TokenStream {
 struct FieldAttributes {
     path: Option<String>,
     rename: Option<String>,
+    with: Option<String>,
     nested: bool,
     rest: bool,
 }
@@ -121,6 +127,9 @@ fn field_attributes(attributes: &[Attribute]) -> syn::Result<FieldAttributes> {
                 Ok(())
             } else if meta.path.is_ident("rename") {
                 result.rename = Some(value);
+                Ok(())
+            } else if meta.path.is_ident("with") {
+                result.with = Some(value);
                 Ok(())
             } else {
                 Err(meta.error("unsupported dtcg field attribute"))

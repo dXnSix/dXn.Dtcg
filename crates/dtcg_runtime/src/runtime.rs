@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
 use crate::{
-    AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, Resolution,
-    ResolvedTokens, ResourceId, RuntimeLimits, SourceOccurrence, TypeRegistry, resolver,
+    AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, ModifierAxis,
+    Resolution, ResolvedTokens, ResolverEnvelope, ResourceId, RuntimeLimits, SourceOccurrence,
+    TypeRegistry,
+    catalog::parse_document,
+    resolver, selection,
     source_discovery::{self, required_root},
 };
 
@@ -50,6 +53,19 @@ impl DtcgRuntime {
         runtime.provide_json(resource_id.as_ref(), json)?;
         runtime.root = Some(ResourceId::parse(resource_id)?);
         Ok(runtime)
+    }
+
+    /// Creates a runtime whose root is the resolver inside a `.tokeneditor`
+    /// envelope (see [`ResolverEnvelope`]); referenced documents resolve
+    /// against the envelope's resource id.
+    pub fn from_envelope(
+        resource_id: impl AsRef<str>,
+        json: &str,
+    ) -> Result<(Self, ResolverEnvelope), DtcgError> {
+        let resource = ResourceId::parse(resource_id.as_ref())?;
+        let envelope = ResolverEnvelope::parse(&resource, json)?;
+        let runtime = Self::from_json(resource.as_str(), envelope.resolver_json().clone())?;
+        Ok((runtime, envelope))
     }
 
     pub fn provide_json(
@@ -144,6 +160,35 @@ impl DtcgRuntime {
 
     pub fn registry(&self) -> &TypeRegistry {
         &self.registry
+    }
+
+    /// The root resolver's modifiers with their contexts and defaults, in
+    /// resolution order. A root that is a plain token document has no axes.
+    pub fn modifiers(&self) -> Result<Resolution<Vec<ModifierAxis>>, DtcgError> {
+        let root = required_root(self.root.as_ref())?;
+        let Some(json) = self.catalog.get(root) else {
+            return Ok(Resolution::Missing(vec![DocumentRequest {
+                resource_id: root.clone(),
+                referenced_from: root.clone(),
+                original_reference: root.as_str().into(),
+            }]));
+        };
+        selection::modifier_axes(root, &parse_document(root, json)?).map(Resolution::Ready)
+    }
+
+    /// Completes a selection with the modifier defaults and validates every
+    /// named modifier and context; the result is ordered by axis, so equal
+    /// selections normalize to equal vectors.
+    pub fn normalize_selection(
+        &self,
+        selection: &[(&str, &str)],
+    ) -> Result<Resolution<Vec<(String, String)>>, DtcgError> {
+        match self.modifiers()? {
+            Resolution::Ready(axes) => {
+                selection::normalize(&axes, selection).map(Resolution::Ready)
+            }
+            Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
+        }
     }
 
     pub fn resolve(

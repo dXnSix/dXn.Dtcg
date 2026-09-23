@@ -10,7 +10,7 @@ struct Palette {
 fn derives_a_narrow_projection() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
-        r#"{"color":{"primary":{"$value":"teal"}},"internal":{"spacing":{"$value":8}}}"#,
+        r#"{"color":{"primary":{"$type":"fontFamily","$value":"teal"}},"internal":{"spacing":{"$type":"number","$value":8}}}"#,
     )
     .unwrap();
     assert_eq!(
