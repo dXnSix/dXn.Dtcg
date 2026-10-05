@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 4,
+  "epicId": "dtcg-runtime",
+  "sprint": 3,
+  "auditSha256": "3ecee2a578094e368fc0f4bdb14cd2344f8bd411b23221030e9384bb834553cc",
+  "evidenceSha256": "025c8d2d01cd75ab9d1d938b2e2576d958a7675f33dd878d2ff80bc8a63c3572",
+  "repositories": [
+    {
+      "id": "main",
+      "path": "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX",
+      "baselineHead": "c4352aefa26e2445cc462fdd2e24497c039f85c8",
+      "resultHead": "13e49daaee17029cfab48340568379bbdd8d8c65",
+      "commits": [
+        "13e49daaee17029cfab48340568379bbdd8d8c65"
+      ],
+      "statusHash": "c6db75d729086ed716852f8362c2d9fbaa2833a30a989d43ebdf87caceba31a0",
+      "sprintOwnedPaths": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\diagnostics\\mod.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\lib.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\derive_projection.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\diagnostics.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime_derive\\src\\lib.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime_derive\\tests\\derive_projection.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime_derive\\tests\\trybuild.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\xtask\\src\\source_guard.rs"
+      ],
+      "unrelatedDirtyPaths": [
+        "?? .agentx/tasks/dtcg-runtime/sprint-audits/sprint-3.json"
+      ],
+      "rollbackCommand": "git -C \"C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\" revert --no-commit c4352aefa26e2445cc462fdd2e24497c039f85c8..13e49daaee17029cfab48340568379bbdd8d8c65"
+    }
+  ],
+  "generatedAt": "2026-07-26T16:08:47Z"
+}

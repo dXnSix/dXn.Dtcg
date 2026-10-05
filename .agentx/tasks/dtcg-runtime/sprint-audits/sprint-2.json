@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 4,
+  "generatorVersion": "4.0",
+  "epicId": "dtcg-runtime",
+  "sprint": 2,
+  "status": "passed",
+  "headBeforeCommit": "9b8821d4ed4b2fbd927f683c922b0324049a3d0f",
+  "filesReviewed": [
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\benches\\resolver.rs",
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src",
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\resolver.rs",
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\dtcg_2025_10_conformance.rs",
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\lazy_catalog.rs"
+  ],
+  "conformance": [
+    {
+      "requirementId": "REQ-F-001",
+      "taskIds": [
+        "sprint-2-task-2"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-F-001-1",
+        "AC-F-001-2",
+        "AC-F-001-3"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-001-1",
+        "AC-F-001-2",
+        "AC-F-001-3",
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3",
+        "AC-NF-001-1",
+        "AC-NF-001-2",
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\benches\\resolver.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\resolver.rs"
+      ],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\dtcg_2025_10_conformance.rs"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "integration",
+        "performance",
+        "regression",
+        "unit"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    },
+    {
+      "requirementId": "REQ-F-002",
+      "taskIds": [
+        "sprint-2-task-1"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-F-002-1",
+        "AC-F-002-2",
+        "AC-F-002-3"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-002-1",
+        "AC-F-002-2",
+        "AC-F-002-3",
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3",
+        "AC-NF-001-1",
+        "AC-NF-001-2",
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src"
+      ],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\lazy_catalog.rs"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "integration",
+        "performance",
+        "regression",
+        "unit"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    },
+    {
+      "requirementId": "REQ-F-003",
+      "taskIds": [
+        "sprint-2-task-1",
+        "sprint-2-task-2"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-001-1",
+        "AC-F-001-2",
+        "AC-F-001-3",
+        "AC-F-002-1",
+        "AC-F-002-2",
+        "AC-F-002-3",
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3",
+        "AC-NF-001-1",
+        "AC-NF-001-2",
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\benches\\resolver.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\resolver.rs"
+      ],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\dtcg_2025_10_conformance.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\lazy_catalog.rs"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "integration",
+        "performance",
+        "regression",
+        "unit"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    },
+    {
+      "requirementId": "REQ-NF-001",
+      "taskIds": [
+        "sprint-2-task-1",
+        "sprint-2-task-2"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-NF-001-1",
+        "AC-NF-001-2"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-001-1",
+        "AC-F-001-2",
+        "AC-F-001-3",
+        "AC-F-002-1",
+        "AC-F-002-2",
+        "AC-F-002-3",
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3",
+        "AC-NF-001-1",
+        "AC-NF-001-2",
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\benches\\resolver.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\resolver.rs"
+      ],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\dtcg_2025_10_conformance.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\lazy_catalog.rs"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "integration",
+        "performance",
+        "regression",
+        "unit"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    },
+    {
+      "requirementId": "REQ-NF-003",
+      "taskIds": [
+        "sprint-2-task-1",
+        "sprint-2-task-2"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-001-1",
+        "AC-F-001-2",
+        "AC-F-001-3",
+        "AC-F-002-1",
+        "AC-F-002-2",
+        "AC-F-002-3",
+        "AC-F-003-1",
+        "AC-F-003-2",
+        "AC-F-003-3",
+        "AC-NF-001-1",
+        "AC-NF-001-2",
+        "AC-NF-003-1",
+        "AC-NF-003-2"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\benches\\resolver.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\src\\resolver.rs"
+      ],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\dtcg_2025_10_conformance.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\crates\\rayx\\dtcg_runtime\\tests\\lazy_catalog.rs"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "integration",
+        "performance",
+        "regression",
+        "unit"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    }
+  ],
+  "designQuality": {
+    "declaredWritePaths": [
+      "main:.agentx/tasks/dtcg-runtime/**",
+      "main:crates/rayx/dtcg_runtime/benches/**",
+      "main:crates/rayx/dtcg_runtime/src/**",
+      "main:crates/rayx/dtcg_runtime/src/alias/**",
+      "main:crates/rayx/dtcg_runtime/src/cache/**",
+      "main:crates/rayx/dtcg_runtime/src/error.rs",
+      "main:crates/rayx/dtcg_runtime/src/resolver.rs",
+      "main:crates/rayx/dtcg_runtime/src/resolver/**",
+      "main:crates/rayx/dtcg_runtime/src/semantic/**",
+      "main:crates/rayx/dtcg_runtime/tests/alias_overlay.rs",
+      "main:crates/rayx/dtcg_runtime/tests/dtcg_2025_10_*.rs",
+      "main:crates/rayx/dtcg_runtime/tests/lazy_*.rs",
+      "main:crates/rayx/dtcg_runtime/tests/resource_*.rs"
+    ],
+    "actualChangedPaths": [
+      "main:crates/rayx/dtcg_runtime/benches/resolver.rs",
+      "main:crates/rayx/dtcg_runtime/src/catalog.rs",
+      "main:crates/rayx/dtcg_runtime/src/error.rs",
+      "main:crates/rayx/dtcg_runtime/src/lib.rs",
+      "main:crates/rayx/dtcg_runtime/src/resolver.rs",
+      "main:crates/rayx/dtcg_runtime/src/resource.rs",
+      "main:crates/rayx/dtcg_runtime/tests/alias_overlay.rs",
+      "main:crates/rayx/dtcg_runtime/tests/dtcg_2025_10_conformance.rs",
+      "main:crates/rayx/dtcg_runtime/tests/lazy_catalog.rs",
+      "main:crates/rayx/dtcg_runtime/tests/resource_id_adversarial.rs"
+    ],
+    "unexpectedChangedPaths": [],
+    "responsibilityIds": [
+      "RESP-001",
+      "RESP-002",
+      "RESP-004"
+    ],
+    "newAbstractions": [
+      "DocumentCatalog",
+      "DtcgResolver"
+    ],
+    "newDependencies": [
+      "proc-macro2",
+      "quote",
+      "syn"
+    ],
+    "newPublicApi": [
+      "ResourceId, DocumentRequest, DocumentCatalog, DtcgRuntime, Resolution<T>, RuntimeLimits, DtcgError, diagnostics and semantic token views"
+    ],
+    "unapprovedDesignAdditions": [],
+    "result": "pass",
+    "reason": "Actual changed paths stay within declared task scopes; declared responsibilities and explicitly allowed design additions are recorded for semantic review."
+  },
+  "commands": [
+    {
+      "command": "cargo test -p dtcg_runtime",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "cae3268de9c77a36904d5b20b0ce49daef841da5f4b3087f01fbddad0755696b",
+      "stderrHash": "920bac22d6efc9f7c69d559d39c195a120f15be78e86d8d3cb0b7067c0780acb",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "cargo bench -p dtcg_runtime --bench resolver --no-run",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrHash": "268ab6fcdb613a5db2ad21de5d9ff39fcf4309594b5aaee94c3fb14fc480a2a0",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "cargo fmt -p dtcg_runtime --check",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "failureOutputTail": ""
+    }
+  ],
+  "defects": [],
+  "repairs": [],
+  "reauditCount": 1,
+  "residualRisks": [],
+  "generatedAt": "2026-07-26T15:25:04Z"
+}

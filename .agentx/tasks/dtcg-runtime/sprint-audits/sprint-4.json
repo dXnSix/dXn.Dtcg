@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 4,
+  "generatorVersion": "4.0",
+  "epicId": "dtcg-runtime",
+  "sprint": 4,
+  "status": "passed",
+  "headBeforeCommit": "e5cee56b4f3e2d23157be0a5bef85f7d1e58cdd1",
+  "filesReviewed": [
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\apps\\test_suite\\src\\pages\\dtcg_runtime.rs",
+    "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\tools-node\\test_suite\\rayx-dtcg-runtime.spec.ts"
+  ],
+  "conformance": [
+    {
+      "requirementId": "REQ-F-005",
+      "taskIds": [
+        "sprint-4-task-1",
+        "sprint-4-task-2"
+      ],
+      "acceptanceCriteriaIds": [
+        "AC-F-005-1",
+        "AC-F-005-2",
+        "AC-F-005-3"
+      ],
+      "evidenceAcceptanceCriteriaIds": [
+        "AC-F-005-1",
+        "AC-F-005-2",
+        "AC-F-005-3"
+      ],
+      "missingAcceptanceCriteriaIds": [],
+      "implementationLocations": [],
+      "testLocations": [
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\apps\\test_suite\\src\\pages\\dtcg_runtime.rs",
+        "C:\\Users\\dinko\\.codex\\worktrees\\c21c\\RayX\\tools-node\\test_suite\\rayx-dtcg-runtime.spec.ts"
+      ],
+      "evidenceProfiles": [
+        "contract",
+        "interaction",
+        "runtime"
+      ],
+      "missingProfiles": [],
+      "result": "pass",
+      "reason": "All mapped tasks are done with fresh profile-complete evidence."
+    }
+  ],
+  "designQuality": {
+    "declaredWritePaths": [
+      "main:.agentx/tasks/dtcg-runtime/**",
+      "main:apps/test_suite/Cargo.toml",
+      "main:apps/test_suite/README.md",
+      "main:apps/test_suite/application-input-map.json",
+      "main:apps/test_suite/src/lib.rs",
+      "main:apps/test_suite/src/pages/dtcg_runtime.rs",
+      "main:apps/test_suite/src/pages/mod.rs",
+      "main:apps/test_suite/src/routes.rs",
+      "main:crates/rayx/rayx/src/application/host/gpui.rs",
+      "main:crates/rayx/rayx/src/application/host/window_runtime.rs",
+      "main:tools-node/test_suite/rayx-dtcg-runtime.spec.ts"
+    ],
+    "actualChangedPaths": [
+      "main:apps/test_suite/Cargo.toml",
+      "main:apps/test_suite/src/pages/dtcg_runtime.rs",
+      "main:apps/test_suite/src/pages/mod.rs",
+      "main:apps/test_suite/src/routes.rs",
+      "main:crates/rayx/rayx/src/application/host/gpui.rs",
+      "main:crates/rayx/rayx/src/application/host/window_runtime.rs",
+      "main:tools-node/test_suite/rayx-dtcg-runtime.spec.ts"
+    ],
+    "unexpectedChangedPaths": [],
+    "responsibilityIds": [
+      "RESP-005"
+    ],
+    "newAbstractions": [
+      "GenericDtcgTestPage"
+    ],
+    "newDependencies": [],
+    "newPublicApi": [],
+    "unapprovedDesignAdditions": [],
+    "result": "pass",
+    "reason": "Actual changed paths stay within declared task scopes; declared responsibilities and explicitly allowed design additions are recorded for semantic review."
+  },
+  "commands": [
+    {
+      "command": "cargo test -p dtcg_runtime",
+      "effectiveCommand": "cargo test -p dtcg_runtime",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "f192f7f122c8a592383d8217ac504a6d92da5b75257091025f64a9bfc07a7281",
+      "stderrHash": "6d8b889db8b46ff52e1c67336705119007341cd035d955d222f392fe85b83624",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "cargo test -p dtcg_runtime_derive",
+      "effectiveCommand": "cargo test -p dtcg_runtime_derive",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "3b5675ad1b80c022b69bf623ae5d16a9166be6ffd32f95e4a68c2bef26635585",
+      "stderrHash": "d4a4e8fd586e2ee926649c1af2ac473ed8dbc0bc335465ed26c7e17a83e3c5ca",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "cargo run -p xtask -- app apps/test_suite build wasm --no-default-features --features rayx_diagnostics",
+      "effectiveCommand": "cargo run -p xtask -- app apps/test_suite build wasm --no-default-features --features rayx_diagnostics",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "ce68faeece902e64f756277998fe2df9efbeddca57b530f7edc0e80f82fe4325",
+      "stderrHash": "c88a61664d008c834e5c388f40d26c308cdc6c602c0ec7226ff84d8cce50c02e",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "$env:RAYX_PLAYWRIGHT_WORKERS='1'; cargo run -p xtask -- app apps/test_suite test wasm --headed --webgpu --no-default-features --features rayx_diagnostics --playwright-test test_suite/rayx-dtcg-runtime.spec.ts",
+      "effectiveCommand": "$env:RAYX_PLAYWRIGHT_WORKERS='1'; cargo run -p xtask -- app apps/test_suite test wasm --headed --webgpu --no-default-features --features rayx_diagnostics --playwright-test test_suite/rayx-dtcg-runtime.spec.ts",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "4ecea443bb4301e65fb58acb7c72cae7a43e89349d0c238708ca7af657950448",
+      "stderrHash": "ce22b3f5bebe9af7f70117cdbde318ad9a49fdeb4f5eaf9e578d378831341c20",
+      "failureOutputTail": ""
+    },
+    {
+      "command": "cargo fmt -p rayx_test_suite -p dtcg_runtime --check",
+      "effectiveCommand": "cargo fmt -p rayx_test_suite -p dtcg_runtime --check",
+      "exitCode": 0,
+      "assertion": "The sprint-wide behavior and compatibility contract MUST pass.",
+      "stdoutHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "failureOutputTail": ""
+    }
+  ],
+  "defects": [],
+  "repairs": [],
+  "reauditCount": 5,
+  "residualRisks": [],
+  "generatedAt": "2026-07-26T16:37:31Z"
+}

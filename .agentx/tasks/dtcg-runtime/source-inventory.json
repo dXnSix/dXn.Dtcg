@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 4,
+  "epicId": "dtcg-runtime",
+  "items": [
+    {
+      "id": "SRC-001",
+      "repositoryId": "main",
+      "path": "Cargo.toml",
+      "symbol": "rayx_runtime_theming_dtcg workspace member",
+      "behavior": "Registers the current combined RayX-specific DTCG crate.",
+      "disposition": "implement",
+      "notes": "Add dtcg_runtime and dtcg_runtime_derive workspace members without deleting the old crate in this epic."
+    },
+    {
+      "id": "SRC-002",
+      "repositoryId": "main",
+      "path": "crates/rayx/rayx_runtime_theming_dtcg/src/workspace.rs",
+      "symbol": "DtcgWorkspace",
+      "behavior": "Loads resolver documents and selected token sources through a RayX-specific workspace abstraction.",
+      "disposition": "implement",
+      "notes": "Replace reusable document catalog, ResourceId, Missing request, context selection, and string provision behavior in dtcg_runtime."
+    },
+    {
+      "id": "SRC-003",
+      "repositoryId": "main",
+      "path": "crates/rayx/rayx_runtime_theming_dtcg/src/{evaluator,builder,selection,selection_axis,indexed_token,resolved_token_view}.rs",
+      "symbol": "ResolverIndex and resolved token model",
+      "behavior": "Evaluates resolver sources, contexts, and token views with RayX-specific follow-on compilers.",
+      "disposition": "implement",
+      "notes": "Replace reusable DTCG semantics with generic semantic token-path overlay and provenance."
+    },
+    {
+      "id": "SRC-004",
+      "repositoryId": "main",
+      "path": "crates/rayx/rayx_runtime_theming_dtcg/src/{global_tokens_compiler,override_compiler,typed_override_compiler}.rs",
+      "symbol": "RayX compilers",
+      "behavior": "Compiles resolved tokens into RuntimeTheme/GlobalTokens/component overrides.",
+      "disposition": "non_goal",
+      "notes": "RayX-specific compilation is intentionally excluded from dtcg_runtime and belongs to rayx-dtcg-theme-service."
+    },
+    {
+      "id": "SRC-005",
+      "repositoryId": "main",
+      "path": "apps/test_suite/** and tools-node/test_suite/**",
+      "symbol": "Agent-facing runtime validation app",
+      "behavior": "Provides visual and headed WASM/WebGPU validation routes for agent-driven behavior checks.",
+      "disposition": "implement",
+      "notes": "Add a generic DTCG runtime page and Playwright spec that visualizes resolved token output."
+    },
+    {
+      "id": "SRC-006",
+      "repositoryId": "main",
+      "path": "xtask/src/source_guard.rs",
+      "symbol": "source guard",
+      "behavior": "Checks architectural constraints and existing theming ownership.",
+      "disposition": "implement",
+      "notes": "Add dependency-purity guards for dtcg_runtime; RayX theming guard inversion belongs to the dependent epic."
+    }
+  ]
+}

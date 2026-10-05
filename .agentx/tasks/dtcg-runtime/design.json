@@ -1,0 +1,889 @@
+{
+  "schemaVersion": 4,
+  "epicId": "dtcg-runtime",
+  "currentState": {
+    "summary": "RayX has rayx_runtime_theming_dtcg under crates/rayx, but that crate resolves DTCG assets into RayX RuntimeTheme, GlobalTokens, and component token overrides. The reusable pieces need to become an independent dtcg_runtime crate with a companion derive crate, while RayX-specific AssetService, gpux conversion, AppBuilder, and RuntimeTheme deletion move to the dependent rayx_dtcg epic.",
+    "codeAnchors": [
+      {
+        "repositoryId": "main",
+        "path": "Cargo.toml",
+        "reason": "The current workspace contains rayx_runtime_theming_dtcg and no dtcg_runtime crates."
+      },
+      {
+        "repositoryId": "main",
+        "path": "crates/rayx/rayx_runtime_theming_dtcg/src/workspace.rs",
+        "reason": "The legacy workspace combines document selection, resolution, caching, and RayX compilation.",
+        "symbol": "DtcgWorkspace"
+      },
+      {
+        "repositoryId": "main",
+        "path": "crates/rayx/rayx_runtime_theming_dtcg/src/evaluator.rs",
+        "reason": "The evaluator is source behavior for generic semantic resolution."
+      },
+      {
+        "repositoryId": "main",
+        "path": "apps/test_suite/src/pages/dtcg_workspace.rs",
+        "reason": "The existing route is the visual baseline that Sprint 4 replaces.",
+        "symbol": "page"
+      },
+      {
+        "repositoryId": "main",
+        "path": "xtask/src/source_guard.rs",
+        "reason": "Source guards enforce workspace architectural boundaries."
+      }
+    ],
+    "constraints": [
+      "dtcg_runtime lives under D:/Work/projects/RayX/RayX/crates/rayx.",
+      "dtcg_runtime remains I/O-free and reusable outside RayX.",
+      "RayX-specific theme behavior is specified in .agentx/tasks/rayx-dtcg-theme-service.",
+      "The old combined epic rayx-dtcg-runtime-theme-service is superseded by this epic and rayx-dtcg-theme-service."
+    ]
+  },
+  "decisions": [
+    {
+      "id": "DES-001",
+      "title": "Build a reusable I/O-free runtime crate",
+      "requirementIds": [
+        "REQ-F-001",
+        "REQ-F-002",
+        "REQ-F-003",
+        "REQ-NF-002",
+        "REQ-NF-003"
+      ],
+      "decision": "Create crates/rayx/dtcg_runtime and crates/rayx/dtcg_runtime_derive. dtcg_runtime owns ResourceId, DocumentRequest, Resolution<T>, DtcgRuntime, semantic model, cache, error types, limits, projection traits, TypeRegistry, and public derive re-exports. dtcg_runtime_derive emits only generic projection metadata and contains no RayX knowledge.",
+      "rationale": "This isolates the design-token engine from RayX application policy and allows other UI libraries to use the same resolver with their own loading and conversion layers.",
+      "affectedSurfaces": [
+        "Cargo.toml workspace",
+        "crates/rayx/dtcg_runtime/**",
+        "crates/rayx/dtcg_runtime_derive/**",
+        "xtask source guard"
+      ],
+      "controlFlow": [
+        "Caller provides root JSON string.",
+        "Runtime stores document by ResourceId.",
+        "resolve walks the active graph.",
+        "Ready returns typed output; Missing returns document requests."
+      ],
+      "dataFlow": [
+        "JSON text -> catalog snapshot -> semantic token graph -> optional projection -> caller-owned output."
+      ],
+      "interfaces": [
+        "DtcgRuntime",
+        "ResourceId",
+        "DocumentRequest",
+        "Resolution<T>",
+        "DtcgError",
+        "RuntimeLimits",
+        "TypeRegistry",
+        "DtcgTokens",
+        "DtcgComponentTokens"
+      ],
+      "failureHandling": [
+        "Malformed input and invalid resource IDs return structured errors without partial batch mutation.",
+        "Missing documents are returned as data rather than loaded internally."
+      ],
+      "concurrencyAndTransactions": [
+        "Catalog mutation increments a revision and clears caches.",
+        "Resolution reads one immutable catalog revision."
+      ],
+      "compatibilityAndMigration": [
+        "No legacy RuntimeTheme, GlobalTokens, or ComponentTokenStore names are exported.",
+        "The dependent rayx_dtcg epic consumes the stable public API after this epic checkpoints."
+      ],
+      "observability": [
+        "Errors and optional traces include catalog revision, resource ID, JSON pointer, token path, context, and provenance without logging full documents."
+      ],
+      "securityAndPrivacy": [
+        "The runtime contains no ambient I/O authority and treats identifiers as opaque logical IDs."
+      ],
+      "validation": [
+        "cargo metadata dependency guard.",
+        "Generic no-RayX fixture.",
+        "Resource/catalog/lazy tests."
+      ],
+      "responsibilityIds": [
+        "RESP-001",
+        "RESP-002",
+        "RESP-004"
+      ],
+      "provenance": {
+        "basis": "user-decision",
+        "evidence": [
+          {
+            "repositoryId": "main",
+            "path": "crates/rayx/rayx_runtime_theming_dtcg/src/builder.rs",
+            "reason": "The current builder already accepts document text and identifies the string-backed input boundary.",
+            "symbol": "DtcgWorkspaceBuilder"
+          }
+        ],
+        "userDecision": "The approved architecture separates generic DTCG semantics and typed projection from every RayX-specific loading, conversion, service, and UI concern."
+      },
+      "alternativesRejected": [
+        {
+          "alternative": "Keep all resolution and RayX theme compilation in rayx_runtime_theming_dtcg.",
+          "reason": "That is the simplest code move, but it preserves the unwanted RayX dependency and prevents use by other UI libraries."
+        }
+      ]
+    },
+    {
+      "id": "DES-002",
+      "title": "Resolve by token-path operations",
+      "requirementIds": [
+        "REQ-F-001",
+        "REQ-F-004",
+        "REQ-NF-001",
+        "REQ-NF-003"
+      ],
+      "decision": "Normalize DTCG token documents into ordered operations over TokenPath -> RawToken plus group metadata. Walk resolutionOrder and source arrays in declaration order, apply whole-token replacement at matching token paths, then resolve effective types and aliases across the complete active graph before projection.",
+      "rationale": "DTCG overlay semantics operate on token identities rather than arbitrary JSON object fields. A semantic intermediate prevents accidental deep merge and keeps aliases consistent with the final selected context.",
+      "affectedSurfaces": [
+        "dtcg_runtime semantic model",
+        "resolver evaluator",
+        "alias resolver",
+        "conformance fixtures"
+      ],
+      "controlFlow": [
+        "Parse active documents.",
+        "Expand ordered sources.",
+        "Emit token/group operations.",
+        "Apply whole-token overlay.",
+        "Resolve types and aliases.",
+        "Build resolved group tree.",
+        "Compute fingerprint."
+      ],
+      "dataFlow": [
+        "DTCG node + source provenance -> RawToken -> winning token map -> ResolvedToken -> ResolvedGroup."
+      ],
+      "interfaces": [
+        "TokenPath",
+        "RawToken",
+        "ResolvedToken",
+        "ResolvedGroup",
+        "TokenProvenance",
+        "DtcgValue"
+      ],
+      "failureHandling": [
+        "Alias and reference walkers keep visited stacks and return full cycle chains.",
+        "Composite overrides validate as complete replacement values."
+      ],
+      "concurrencyAndTransactions": [
+        "Stable vectors and ordered maps prevent iteration nondeterminism."
+      ],
+      "compatibilityAndMigration": [
+        "Legacy override compiler merge behavior is not reused."
+      ],
+      "observability": [
+        "Test-only operation traces expose ordered operations and winning-token provenance."
+      ],
+      "securityAndPrivacy": [
+        "Depth and token-count limits apply before semantic expansion."
+      ],
+      "validation": [
+        "Golden operation-order tests.",
+        "Whole-composite replacement tests.",
+        "Alias-after-overlay tests.",
+        "Deterministic fingerprint tests."
+      ],
+      "responsibilityIds": [
+        "RESP-002"
+      ],
+      "provenance": {
+        "basis": "user-decision",
+        "evidence": [
+          {
+            "repositoryId": "main",
+            "path": "crates/rayx/rayx_runtime_theming_dtcg/src/workspace.rs",
+            "reason": "The current workspace contains the resolver behavior that the generic crate replaces and generalizes.",
+            "symbol": "DtcgWorkspace"
+          }
+        ],
+        "userDecision": "The approved architecture separates generic DTCG semantics and typed projection from every RayX-specific loading, conversion, service, and UI concern."
+      },
+      "alternativesRejected": [
+        {
+          "alternative": "Deep-merge serde_json values or already-deserialized Rust structs.",
+          "reason": "DTCG overlay is token-path replacement, aliases resolve after overlay, and composite values must not receive JavaScript-style recursive merge semantics."
+        }
+      ]
+    },
+    {
+      "id": "DES-003",
+      "title": "Use explicit lazy catalog APIs",
+      "requirementIds": [
+        "REQ-F-002",
+        "REQ-F-003",
+        "REQ-NF-001",
+        "REQ-NF-003"
+      ],
+      "decision": "DtcgRuntime stores Arc<str> documents by fragment-free ResourceId. from_json and provide_json accept logical identifiers plus JSON text. Relative references canonicalize against referenced_from. resolve returns Ready or Missing. provide_requested_json validates request identity, provide_json_batch is atomic, and validate_complete is a separate traversal that can inspect inactive contexts.",
+      "rationale": "This supports AssetService, in-memory tests, library-owned loaders, HTTP clients, and preloaded string catalogs without embedding a loader.",
+      "affectedSurfaces": [
+        "dtcg_runtime resource module",
+        "catalog module",
+        "public API",
+        "lazy-loading tests"
+      ],
+      "controlFlow": [
+        "Parse root.",
+        "Resolve until missing frontier.",
+        "Return stable request batch.",
+        "Caller provides JSON.",
+        "Caller resolves again until Ready or Error."
+      ],
+      "dataFlow": [
+        "Original $ref + parent ResourceId -> canonical ResourceId + fragment.",
+        "DocumentRequest -> external loader -> JSON string -> catalog revision."
+      ],
+      "interfaces": [
+        "DtcgRuntime::from_json",
+        "provide_json",
+        "provide_requested_json",
+        "provide_json_batch",
+        "replace_json",
+        "remove_document",
+        "validate_complete"
+      ],
+      "failureHandling": [
+        "Invalid ResourceId, traversal, fragment syntax, JSON, or request mismatch leaves catalog unchanged."
+      ],
+      "concurrencyAndTransactions": [
+        "Catalog mutation increments u64 revision and invalidates caches."
+      ],
+      "compatibilityAndMigration": [
+        "Path-oriented RayX call sites move to logical IDs in the dependent RayX epic."
+      ],
+      "observability": [
+        "Requests retain original and canonical references."
+      ],
+      "securityAndPrivacy": [
+        "Canonicalization rejects traversal above the logical root and malformed pointer escaping."
+      ],
+      "validation": [
+        "Selected-only lazy graph fixtures.",
+        "Multi-hop request/resume fixtures.",
+        "Atomic batch failure tests.",
+        "Identifier adversarial tests."
+      ],
+      "responsibilityIds": [
+        "RESP-001",
+        "RESP-002"
+      ],
+      "provenance": {
+        "basis": "user-decision",
+        "evidence": [
+          {
+            "repositoryId": "main",
+            "path": "crates/rayx/rayx_runtime/src/services/assets/service.rs",
+            "reason": "RayX already owns loading; the generic runtime must return missing-document requests instead of duplicating this authority.",
+            "symbol": "AssetService::load_text"
+          }
+        ],
+        "userDecision": "The approved architecture separates generic DTCG semantics and typed projection from every RayX-specific loading, conversion, service, and UI concern."
+      },
+      "alternativesRejected": [
+        {
+          "alternative": "Accept filesystem paths and URLs directly in dtcg_runtime.",
+          "reason": "That grants ambient I/O authority, duplicates host loading policy, and cannot support callers that already own loaded strings."
+        }
+      ]
+    },
+    {
+      "id": "DES-004",
+      "title": "Generate strict projected views",
+      "requirementIds": [
+        "REQ-F-004",
+        "REQ-NF-002",
+        "REQ-NF-003"
+      ],
+      "decision": "DtcgTokens derive generates static field schema and projection code. Nested DtcgTokens fields consume groups; leaves use TypeRegistry by (target TypeId, effective DTCG type). Projection rejects missing requested fields and invalid requested aliases while tolerating additional active tokens. #[dtcg(rest)] collects registered unclaimed groups without changing the JSON hierarchy.",
+      "rationale": "Serde cannot select converters by both DTCG semantic type and target foreign Rust type. Projection metadata keeps user structs simple while preserving precise errors.",
+      "affectedSurfaces": [
+        "dtcg_runtime_derive",
+        "dtcg_runtime projection module",
+        "TypeRegistry",
+        "trybuild fixtures"
+      ],
+      "controlFlow": [
+        "Derive locates expected token/group.",
+        "Projection ignores unclaimed tokens unless rest owns them.",
+        "Registry converts requested leaves.",
+        "Projection constructs T only after every requested field succeeds."
+      ],
+      "dataFlow": [
+        "ResolvedToken + ProjectionContext -> converter -> Box<dyn Any> -> checked downcast -> field.",
+        "Unprojected token -> alias target for projected token."
+      ],
+      "interfaces": [
+        "#[derive(DtcgTokens)]",
+        "#[derive(DtcgComponentTokens)]",
+        "#[dtcg(rename = ...)]",
+        "#[dtcg(root)]",
+        "#[dtcg(rest)]",
+        "TypeRegistry::register"
+      ],
+      "failureHandling": [
+        "Every error includes Rust field path, token path, effective DTCG type, expected Rust type, and source resource.",
+        "Converter panic policy is explicit and tested."
+      ],
+      "concurrencyAndTransactions": [
+        "Registry is frozen into an immutable generation for cache keys."
+      ],
+      "compatibilityAndMigration": [
+        "RayX-specific converters are not introduced here."
+      ],
+      "observability": [
+        "Projection schema dump lists Rust field path, DTCG path, target type, and expected DTCG type."
+      ],
+      "securityAndPrivacy": [
+        "Converters receive resolved values rather than raw documents."
+      ],
+      "validation": [
+        "trybuild compile-fail suite.",
+        "Nested/rename/root/rest tests.",
+        "Narrow AppTheme over wider graph test.",
+        "Broken-used-alias golden error."
+      ],
+      "responsibilityIds": [
+        "RESP-003",
+        "RESP-004"
+      ],
+      "provenance": {
+        "basis": "user-decision",
+        "evidence": [
+          {
+            "repositoryId": "main",
+            "path": "crates/rayx/rayx_runtime_theming_dtcg/src/typed_override_compiler.rs",
+            "reason": "The current RayX-specific typed compiler demonstrates the projection responsibility that must become generic."
+          }
+        ],
+        "userDecision": "The approved architecture separates generic DTCG semantics and typed projection from every RayX-specific loading, conversion, service, and UI concern."
+      },
+      "alternativesRejected": [
+        {
+          "alternative": "Deserialize the entire active graph into one exhaustive Rust struct.",
+          "reason": "That rejects internal reference-only namespaces and prevents applications from exposing narrow typed theme views."
+        }
+      ]
+    },
+    {
+      "id": "DES-005",
+      "title": "Expose a test-suite visual diagnostics route",
+      "requirementIds": [
+        "REQ-F-005"
+      ],
+      "decision": "Add a generic DTCG runtime page under apps/test_suite and a matching tools-node/test_suite spec. The page embeds small DTCG JSON strings, calls only public dtcg_runtime APIs, displays resolved token rows, contexts, missing document requests, projection output, provenance, and structured errors, and includes a fixture where spacing is internal but still used by a projected component-like token.",
+      "rationale": "The runtime is generic, but developers need a fast visual playground to inspect resolver behavior, especially overlay and alias cases that are hard to reason about from unit test output alone.",
+      "affectedSurfaces": [
+        "apps/test_suite/src/pages/dtcg_runtime.rs",
+        "apps/test_suite/src/routes.rs",
+        "apps/test_suite/src/pages/mod.rs",
+        "tools-node/test_suite/rayx-dtcg-runtime.spec.ts"
+      ],
+      "controlFlow": [
+        "Route loads embedded fixture.",
+        "Controls select contexts or invalid scenario.",
+        "Runtime resolves from strings.",
+        "Page renders Ready, Missing, or Error state."
+      ],
+      "dataFlow": [
+        "Embedded JSON -> dtcg_runtime -> display rows -> Playwright assertions."
+      ],
+      "interfaces": [
+        "TestSuite route entry",
+        "public dtcg_runtime APIs"
+      ],
+      "failureHandling": [
+        "Invalid fixture renders a visible diagnostic panel rather than panicking."
+      ],
+      "concurrencyAndTransactions": [
+        "Route state changes synchronously from user controls; no loader thread is introduced."
+      ],
+      "compatibilityAndMigration": [
+        "The route remains a consumer of dtcg_runtime and does not create RayX DTCG policy."
+      ],
+      "observability": [
+        "The page exposes resource IDs, token paths, effective types, provenance, and fingerprints."
+      ],
+      "securityAndPrivacy": [
+        "Fixture document bodies are not dumped wholesale."
+      ],
+      "validation": [
+        "Headed WASM/WebGPU test asserts visible resolved values, Missing requests, context switch, internal alias behavior, and diagnostics."
+      ],
+      "responsibilityIds": [
+        "RESP-005"
+      ],
+      "provenance": {
+        "basis": "user-decision",
+        "evidence": [
+          {
+            "repositoryId": "main",
+            "path": "apps/test_suite/src/pages/dtcg_workspace.rs",
+            "reason": "The existing DTCG diagnostic route establishes the repository's visual exploration pattern.",
+            "symbol": "page"
+          }
+        ],
+        "userDecision": "The approved architecture separates generic DTCG semantics and typed projection from every RayX-specific loading, conversion, service, and UI concern."
+      },
+      "alternativesRejected": [
+        {
+          "alternative": "Rely exclusively on unit-test debug output.",
+          "reason": "The user explicitly requires an interactive apps/test_suite surface for inspecting and experimenting with resolved tokens."
+        }
+      ]
+    }
+  ],
+  "testingStrategy": {
+    "profiles": [
+      {
+        "profile": "unit",
+        "scope": "Resource IDs, catalog mutation, resolver semantics, aliases, limits, projection, and converters",
+        "commandOrMethod": "cargo test -p dtcg_runtime --lib",
+        "assertion": "Pure generic behaviors MUST pass without RayX dependencies."
+      },
+      {
+        "profile": "integration",
+        "scope": "String-backed multi-document Ready/Missing convergence and narrow projection",
+        "commandOrMethod": "cargo test -p dtcg_runtime --tests",
+        "assertion": "Public runtime workflows MUST converge deterministically."
+      },
+      {
+        "profile": "contract",
+        "scope": "DTCG 2025.10 fixtures, public API, derive UI tests, and dependency direction",
+        "commandOrMethod": "cargo test -p dtcg_runtime -p dtcg_runtime_derive",
+        "assertion": "The specification and public Rust contracts MUST pass."
+      },
+      {
+        "profile": "regression",
+        "scope": "All generic crate targets and source guards",
+        "commandOrMethod": "cargo test -p dtcg_runtime --all-targets",
+        "assertion": "The full generic runtime regression suite MUST pass."
+      },
+      {
+        "profile": "performance",
+        "scope": "Cold resolve, cache hit, context switch, and invalidation baselines",
+        "commandOrMethod": "cargo bench -p dtcg_runtime",
+        "assertion": "Benchmarks MUST record bounded baseline measurements without semantic regressions."
+      },
+      {
+        "profile": "runtime",
+        "scope": "apps/test_suite generic DTCG route",
+        "commandOrMethod": "cargo check -p test_suite --target wasm32-unknown-unknown",
+        "assertion": "The generic route MUST compile and start through public dtcg_runtime APIs."
+      },
+      {
+        "profile": "interaction",
+        "scope": "Context, Missing, diagnostics, and projection controls",
+        "commandOrMethod": "pnpm exec playwright test tools-node/test_suite/rayx-dtcg-runtime.spec.ts",
+        "assertion": "Headed interactions MUST expose the expected resolved and diagnostic states."
+      },
+      {
+        "profile": "security",
+        "scope": "Untrusted identifiers, limits, cycles, and redacted diagnostics",
+        "commandOrMethod": "cargo test -p dtcg_runtime untrusted_input -- --nocapture",
+        "assertion": "Untrusted inputs MUST terminate safely without ambient I/O or document disclosure."
+      },
+      {
+        "profile": "architecture",
+        "scope": "Generic crate dependency graph",
+        "commandOrMethod": "cargo metadata --format-version 1 --no-deps",
+        "assertion": "The dependency graph MUST contain no RayX-specific or loader dependency from the generic crates."
+      }
+    ]
+  },
+  "rollout": [
+    "vertical-slice: enter when No dtcg_runtime crate exists.; exit when A string-backed resolver returns Ready/Missing and projects one narrow fixture.",
+    "conformance: enter when Public API exists.; exit when DTCG 2025.10 resolver and projection suites pass.",
+    "visual-proof: enter when Runtime behavior is complete enough for consumers.; exit when apps/test_suite visually renders generic resolved token behavior and diagnostics.",
+    "handoff: enter when Generic runtime checkpoint is committed.; exit when rayx-dtcg-theme-service can consume dtcg_runtime without changing generic contracts."
+  ],
+  "alternatives": [
+    {
+      "alternative": "Keep RayX AssetService integration inside dtcg_runtime",
+      "advantages": [
+        "Provides one high-level load-and-resolve call for RayX applications."
+      ],
+      "disadvantages": [
+        "Introduces RayX I/O authority and prevents independent UI-library adoption."
+      ],
+      "reasonRejected": "It makes the reusable resolver depend on RayX I/O and prevents other UI libraries from using already-loaded strings."
+    },
+    {
+      "alternative": "Deserialize several Rust structs and merge them",
+      "advantages": [
+        "Uses familiar Serde derives and ordinary Rust values."
+      ],
+      "disadvantages": [
+        "Cannot express ordered token replacement, aliases after overlay, or reference-only namespaces correctly."
+      ],
+      "reasonRejected": "Serde does not define DTCG overlay semantics and aliases must resolve before typed structs exist."
+    },
+    {
+      "alternative": "Validate every active DTCG token during ordinary projection",
+      "advantages": [
+        "Reports every latent invalid token during each projection."
+      ],
+      "disadvantages": [
+        "Rejects valid internal tokens that the requested Rust view intentionally does not expose."
+      ],
+      "reasonRejected": "It rejects valid reference-only namespaces that are intentionally absent from the public Rust target."
+    },
+    {
+      "alternative": "Skip the visual test-suite route",
+      "advantages": [
+        "Reduces application and Playwright work."
+      ],
+      "disadvantages": [
+        "Removes the requested interactive proof and makes lazy/context behavior harder to inspect."
+      ],
+      "reasonRejected": "The user explicitly wants apps/test_suite output to inspect and play with resolved tokens."
+    }
+  ],
+  "responsibilities": [
+    {
+      "id": "RESP-001",
+      "owner": "DocumentCatalog",
+      "owns": [
+        "Logical ResourceId normalization",
+        "String-backed document storage",
+        "Catalog revisions and atomic batches",
+        "Stable missing-document requests"
+      ],
+      "doesNotOwn": [
+        "Filesystem or network loading",
+        "DTCG semantic overlay",
+        "RayX AssetService integration"
+      ],
+      "stateOwned": [
+        "Canonical JSON documents",
+        "Catalog revision"
+      ],
+      "invariants": [
+        "Fragments never participate in catalog keys.",
+        "A failed batch leaves the catalog unchanged."
+      ],
+      "dependencies": [
+        "serde_json"
+      ],
+      "dependents": [
+        "DtcgResolver"
+      ],
+      "lifecycle": "Caller-owned in-memory runtime state",
+      "evidence": [
+        {
+          "repositoryId": "main",
+          "path": "crates/rayx/rayx_runtime_theming_dtcg/src/builder.rs",
+          "reason": "The existing builder demonstrates string-backed document registration.",
+          "symbol": "DtcgWorkspaceBuilder"
+        }
+      ]
+    },
+    {
+      "id": "RESP-002",
+      "owner": "DtcgResolver",
+      "owns": [
+        "DTCG 2025.10 resolver parsing",
+        "Ordered token-path overlay",
+        "Alias and reference resolution",
+        "Deterministic provenance, limits, and semantic caching"
+      ],
+      "doesNotOwn": [
+        "External loading",
+        "Rust target construction",
+        "RayX value conversion"
+      ],
+      "stateOwned": [
+        "Semantic cache keyed by catalog and context identity"
+      ],
+      "invariants": [
+        "Later tokens replace whole tokens at the same path.",
+        "Aliases resolve against the final active graph.",
+        "All graph walks terminate at configured limits."
+      ],
+      "dependencies": [
+        "DocumentCatalog"
+      ],
+      "dependents": [
+        "DtcgProjector",
+        "DiagnosticSnapshot"
+      ],
+      "lifecycle": "Stateless resolution logic plus revision-scoped cache",
+      "evidence": [
+        {
+          "repositoryId": "main",
+          "path": "crates/rayx/rayx_runtime_theming_dtcg/src/evaluator.rs",
+          "reason": "The existing evaluator and workspace are the source behavior being generalized."
+        }
+      ]
+    },
+    {
+      "id": "RESP-003",
+      "owner": "DtcgProjector",
+      "owns": [
+        "Strict projected Rust views",
+        "Field-path validation",
+        "Converter selection by Rust TypeId and effective DTCG type"
+      ],
+      "doesNotOwn": [
+        "Whole-graph overlay",
+        "Proc-macro token generation",
+        "RayX-specific converters"
+      ],
+      "stateOwned": [
+        "TypeRegistry registrations and generation"
+      ],
+      "invariants": [
+        "Only requested fields require conversion.",
+        "Unprojected tokens remain available to satisfy aliases.",
+        "No partially initialized target escapes."
+      ],
+      "dependencies": [
+        "DtcgResolver",
+        "DtcgProjectionMetadata"
+      ],
+      "dependents": [
+        "Generic runtime callers",
+        "rayx_dtcg"
+      ],
+      "lifecycle": "Runtime registry plus per-call projection",
+      "evidence": [
+        {
+          "repositoryId": "main",
+          "path": "crates/rayx/rayx_runtime_theming_dtcg/src/typed_override_compiler.rs",
+          "reason": "The existing typed compiler identifies the projection boundary that becomes generic."
+        }
+      ]
+    },
+    {
+      "id": "RESP-004",
+      "owner": "DtcgProjectionDerive",
+      "owns": [
+        "DtcgTokens and DtcgComponentTokens metadata generation",
+        "rename, root, and rest attribute validation"
+      ],
+      "doesNotOwn": [
+        "Runtime JSON parsing",
+        "Converter execution",
+        "RayX token definitions"
+      ],
+      "stateOwned": [],
+      "invariants": [
+        "Generated metadata contains no RayX-specific type or path knowledge.",
+        "Invalid or duplicate attributes fail at compile time."
+      ],
+      "dependencies": [
+        "Rust proc-macro APIs",
+        "syn",
+        "quote",
+        "proc-macro2"
+      ],
+      "dependents": [
+        "DtcgProjector",
+        "Application token structs"
+      ],
+      "lifecycle": "Compile-time proc macro",
+      "evidence": [
+        {
+          "repositoryId": "main",
+          "path": "crates/rayx/rayx_runtime_macros/Cargo.toml",
+          "reason": "The workspace already uses companion proc-macro crates for generated Rust metadata."
+        }
+      ]
+    },
+    {
+      "id": "RESP-005",
+      "owner": "GenericDtcgTestPage",
+      "owns": [
+        "Visual display of generic resolved tokens, contexts, requests, projections, provenance, and errors",
+        "Headed interaction assertions"
+      ],
+      "doesNotOwn": [
+        "DTCG resolution logic",
+        "RayX theme publication",
+        "AssetService loading"
+      ],
+      "stateOwned": [
+        "Page-local fixture selection"
+      ],
+      "invariants": [
+        "The page consumes only public dtcg_runtime APIs.",
+        "Visible diagnostics omit full source documents."
+      ],
+      "dependencies": [
+        "dtcg_runtime",
+        "apps/test_suite routing"
+      ],
+      "dependents": [
+        "Developers validating the generic runtime"
+      ],
+      "lifecycle": "Developer-only test-suite route",
+      "evidence": [
+        {
+          "repositoryId": "main",
+          "path": "apps/test_suite/src/pages/dtcg_workspace.rs",
+          "reason": "The current route establishes the visual diagnostics convention.",
+          "symbol": "page"
+        }
+      ]
+    }
+  ],
+  "dependencyRules": [
+    {
+      "from": "dtcg_runtime",
+      "to": "serde/serde_json/thiserror and dtcg_runtime_derive",
+      "rule": "allowed",
+      "rationale": "The generic runtime requires JSON parsing, structured errors, and re-exported derive metadata."
+    },
+    {
+      "from": "dtcg_runtime_derive",
+      "to": "syn/quote/proc-macro2",
+      "rule": "allowed",
+      "rationale": "The companion proc macro requires structured parsing and token generation."
+    },
+    {
+      "from": "dtcg_runtime or dtcg_runtime_derive",
+      "to": "RayX/gpux/GPUI/AssetService/filesystem/network/async runtimes",
+      "rule": "forbidden",
+      "rationale": "The generic resolver must remain reusable and I/O-free."
+    },
+    {
+      "from": "apps/test_suite",
+      "to": "dtcg_runtime",
+      "rule": "allowed",
+      "rationale": "The developer route is a consumer that proves the public generic API."
+    }
+  ],
+  "minimalDesign": {
+    "existingMechanismsReused": [
+      "Serde and serde_json for syntax parsing.",
+      "thiserror for structured Rust errors.",
+      "RayX workspace proc-macro crate pattern.",
+      "Existing apps/test_suite route and Playwright conventions.",
+      "The current DTCG workspace fixtures as source behavior, rewritten behind generic contracts."
+    ],
+    "codeExpectedToBeDeletedOrReplaced": [
+      "Generic resolver, catalog, selection, alias, cache, and diagnostic behavior currently embedded in crates/rayx/rayx_runtime_theming_dtcg."
+    ],
+    "newAbstractions": [
+      {
+        "name": "DocumentCatalog",
+        "designIds": [
+          "DES-001",
+          "DES-003"
+        ],
+        "visibility": "public",
+        "invariantOrPolicyOwned": "Canonical logical resource identity, atomic string provision, catalog revisions, and missing-document request stability.",
+        "whyExistingCodeIsInsufficient": "The existing workspace builder is tied to RayX theme compilation and has no reusable lazy missing-document contract.",
+        "knownConsumers": [
+          "DtcgRuntime",
+          "rayx_dtcg",
+          "Other UI-library adapters"
+        ]
+      },
+      {
+        "name": "DtcgResolver",
+        "designIds": [
+          "DES-001",
+          "DES-002",
+          "DES-003"
+        ],
+        "visibility": "internal",
+        "invariantOrPolicyOwned": "DTCG 2025.10 ordering, whole-token overlay, references, aliases, limits, provenance, and deterministic caching.",
+        "whyExistingCodeIsInsufficient": "Current logic is distributed across a RayX-specific workspace and compiler modules.",
+        "knownConsumers": [
+          "DtcgRuntime",
+          "DtcgProjector"
+        ]
+      },
+      {
+        "name": "DtcgProjector",
+        "designIds": [
+          "DES-004"
+        ],
+        "visibility": "internal",
+        "invariantOrPolicyOwned": "Strict typed view construction after full active-graph alias resolution.",
+        "whyExistingCodeIsInsufficient": "Serde deserialization cannot select converters by Rust TypeId plus DTCG type or tolerate internal unprojected namespaces.",
+        "knownConsumers": [
+          "DtcgRuntime::resolve",
+          "DtcgRuntime::project"
+        ]
+      },
+      {
+        "name": "GenericDtcgTestPage",
+        "designIds": [
+          "DES-005"
+        ],
+        "visibility": "internal",
+        "invariantOrPolicyOwned": "Interactive proof of generic public APIs and structured diagnostics.",
+        "whyExistingCodeIsInsufficient": "The current page compiles RayX RuntimeTheme through the legacy crate.",
+        "knownConsumers": [
+          "apps/test_suite developers",
+          "Playwright DTCG runtime spec"
+        ]
+      }
+    ],
+    "newDependencies": [
+      {
+        "name": "syn",
+        "designIds": [
+          "DES-001",
+          "DES-004"
+        ],
+        "reason": "Parse Rust derive input and dtcg field attributes in dtcg_runtime_derive.",
+        "whyStandardOrExistingMechanismsAreInsufficient": "Stable proc-macro APIs do not provide a structured derive-input parser."
+      },
+      {
+        "name": "quote",
+        "designIds": [
+          "DES-001",
+          "DES-004"
+        ],
+        "reason": "Generate projection metadata implementations from validated derive input.",
+        "whyStandardOrExistingMechanismsAreInsufficient": "Direct TokenStream construction would duplicate fragile token assembly."
+      },
+      {
+        "name": "proc-macro2",
+        "designIds": [
+          "DES-001",
+          "DES-004"
+        ],
+        "reason": "Provide testable token and span types shared by syn and quote.",
+        "whyStandardOrExistingMechanismsAreInsufficient": "The compiler proc_macro types are restricted to proc-macro entry points."
+      }
+    ],
+    "newPublicApi": [
+      {
+        "surface": "ResourceId, DocumentRequest, DocumentCatalog, DtcgRuntime, Resolution<T>, RuntimeLimits, DtcgError, diagnostics and semantic token views",
+        "requirementIds": [
+          "REQ-F-001",
+          "REQ-F-002",
+          "REQ-F-003",
+          "REQ-NF-001",
+          "REQ-NF-003"
+        ],
+        "designIds": [
+          "DES-001",
+          "DES-002",
+          "DES-003"
+        ],
+        "compatibility": "New reusable API; names stabilize at the Sprint 1 checkpoint and the dependent rayx_dtcg epic consumes them."
+      },
+      {
+        "surface": "DtcgTokens, DtcgComponentTokens, TypeRegistry, converter context, and dtcg derive attributes",
+        "requirementIds": [
+          "REQ-F-004",
+          "REQ-NF-002",
+          "REQ-NF-003"
+        ],
+        "designIds": [
+          "DES-004"
+        ],
+        "compatibility": "New projection API; unsupported or ambiguous mappings fail explicitly rather than falling back to Serde object merge."
+      }
+    ]
+  },
+  "migration": {
+    "sourceVersion": 3,
+    "reviewRequired": false
+  }
+}
