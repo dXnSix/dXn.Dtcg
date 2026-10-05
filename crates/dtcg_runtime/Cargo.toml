@@ -1,13 +1,18 @@
 [package]
 name = "dtcg_runtime"
-version = "0.1.0"
+description = "Runtime for DTCG 2025.10 design-token documents: resolution, resolvers, aliases and typed projection."
+readme = "../../README.md"
+keywords = ["dtcg", "design-tokens", "tokens", "theme", "figma"]
+categories = ["parser-implementations", "gui"]
+version.workspace = true
 edition.workspace = true
-publish.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
 
 [features]
-rayx_diagnostics = []
+diagnostics = []
 
 [dependencies]
 dtcg_runtime_derive.workspace = true
@@ -17,5 +22,6 @@ sha2.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
-dtcg_runtime = { path = ".", features = ["rayx_diagnostics"] }
+dtcg_runtime = { path = ".", features = ["diagnostics"] }
 serde_json.workspace = true
+

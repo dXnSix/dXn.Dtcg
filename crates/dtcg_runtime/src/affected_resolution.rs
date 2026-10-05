@@ -4,7 +4,7 @@ use crate::ResolvedToken;
 #[derive(Clone, Debug, Default)]
 pub struct AffectedResolution {
     pub(crate) tokens: Vec<ResolvedToken>,
-    #[cfg(feature = "rayx_diagnostics")]
+    #[cfg(feature = "diagnostics")]
     pub(crate) nodes_visited: usize,
 }
 
@@ -13,7 +13,7 @@ impl AffectedResolution {
         self.tokens.iter()
     }
 
-    #[cfg(feature = "rayx_diagnostics")]
+    #[cfg(feature = "diagnostics")]
     pub fn nodes_visited(&self) -> usize {
         self.nodes_visited
     }

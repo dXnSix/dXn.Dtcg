@@ -2,7 +2,7 @@
 
 mod affected_resolution;
 mod catalog;
-#[cfg(feature = "rayx_diagnostics")]
+#[cfg(feature = "diagnostics")]
 mod diagnostics;
 mod dtcg_component_tokens;
 mod dtcg_tokens;
@@ -24,7 +24,7 @@ mod value;
 
 pub use affected_resolution::AffectedResolution;
 pub use catalog::DocumentCatalog;
-#[cfg(feature = "rayx_diagnostics")]
+#[cfg(feature = "diagnostics")]
 pub use diagnostics::{DtcgDiagnostic, DtcgDiagnosticCode};
 pub use dtcg_component_tokens::DtcgComponentTokens;
 pub use dtcg_runtime_derive::{DtcgComponentTokens, DtcgTokens};

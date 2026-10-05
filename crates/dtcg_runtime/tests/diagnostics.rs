@@ -1,13 +1,13 @@
-#[cfg(feature = "rayx_diagnostics")]
+#[cfg(feature = "diagnostics")]
 use dtcg_runtime::{DtcgDiagnostic, DtcgDiagnosticCode, DtcgError, ResourceId};
 
-#[cfg(not(feature = "rayx_diagnostics"))]
+#[cfg(not(feature = "diagnostics"))]
 #[test]
 fn diagnostics_are_opt_in() {
-    assert!(!cfg!(feature = "rayx_diagnostics"));
+    assert!(!cfg!(feature = "diagnostics"));
 }
 
-#[cfg(feature = "rayx_diagnostics")]
+#[cfg(feature = "diagnostics")]
 #[test]
 fn diagnostics_expose_logical_context_without_document_bodies() {
     let error = DtcgError::Token {

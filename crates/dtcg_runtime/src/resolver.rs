@@ -232,7 +232,7 @@ pub(crate) fn resolve_affected(
             limits,
         )?;
     }
-    #[cfg(feature = "rayx_diagnostics")]
+    #[cfg(feature = "diagnostics")]
     let nodes_visited = resolved.len();
     let tokens = order
         .iter()
@@ -241,7 +241,7 @@ pub(crate) fn resolve_affected(
         .collect();
     Ok(Resolution::Ready(AffectedResolution {
         tokens,
-        #[cfg(feature = "rayx_diagnostics")]
+        #[cfg(feature = "diagnostics")]
         nodes_visited,
     }))
 }
