@@ -10,7 +10,7 @@ repository.workspace = true
 rayx_diagnostics = []
 
 [dependencies]
-dtcg_runtime_derive = { path = "../dtcg_runtime_derive" }
+dtcg_runtime_derive.workspace = true
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 sha2.workspace = true

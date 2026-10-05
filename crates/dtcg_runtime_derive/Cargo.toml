@@ -15,4 +15,4 @@ quote = "1.0"
 syn = { version = "2.0", features = ["full"] }
 
 [dev-dependencies]
-dtcg_runtime = { path = "../dtcg_runtime" }
+dtcg_runtime.workspace = true
