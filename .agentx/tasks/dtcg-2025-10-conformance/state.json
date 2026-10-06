@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 57,
+  "revision": 66,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -100,13 +100,22 @@
       ]
     },
     "task-typed-values": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-derive": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-export": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-docs": {
       "status": "pending"
@@ -178,6 +187,15 @@
         }
       },
       "recordedAt": "2026-10-06T22:05:12Z"
+    },
+    "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "d31f52f3f7d3c7594139b8672bb2028f2044a6c7c136163887f6dacddd89430b"
+        }
+      },
+      "recordedAt": "2026-10-06T22:19:06Z"
     }
   },
   "checkResults": {
@@ -469,6 +487,74 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-6-final-04916cf936a4.log",
       "logSha256": "739232d90db74b776f315a854a2edf50c615d08df7263a92b5306f5081fa4cfd",
       "inputsHash": "09b3e88bfaa1beb626d8087f7c9c29560c1e6f6a1e4658f0cf9a9d5400aec5b0"
+    },
+    "sprint-7/check-typed-values/final": {
+      "checkId": "check-typed-values",
+      "boundaryId": "sprint-7",
+      "phase": "final",
+      "batchId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "definitionHash": "25ba59e2f729a1605c8ccd5108196078a84c7985f3e0c6afff11917a435cebaa",
+      "basisHash": "f1e612d83b685acf36a0bb19b2024b8dab958a860b2ecce0aeac56630847e44b",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.9071,
+      "recordedAt": "2026-10-06T22:19:04Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-7-final-9fb8ef937077.log",
+      "logSha256": "e85dfa925e73b204836ce6cab18240d23f159bdb2eb33fb3dfbd655b1ac757e0",
+      "inputsHash": "c51b2be9826ed4092a374ff12c835f407be27c322a908417789596356a773729"
+    },
+    "sprint-7/check-derive-hardening/final": {
+      "checkId": "check-derive-hardening",
+      "boundaryId": "sprint-7",
+      "phase": "final",
+      "batchId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "definitionHash": "9fa0e4ece6965c49510f7cebcd82ba418f5307e77b91fb57a9c8a7a077b89c89",
+      "basisHash": "e374e77ffa04c648b4d30ded102ba8728d1df080525ae0de0a39d5a90d438d81",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.7342,
+      "recordedAt": "2026-10-06T22:19:05Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-7-final-e150b8db1870.log",
+      "logSha256": "5bdaade7a8c8b22dbc5dfb15df5582b827c0e3ab98b0bc6591df66661062b42d",
+      "inputsHash": "5005ebab1125c380f29cdc1cb2ad09d44ac67dd66c6a307103e42e4f37280d29"
+    },
+    "sprint-7/check-derive-compile-fail/final": {
+      "checkId": "check-derive-compile-fail",
+      "boundaryId": "sprint-7",
+      "phase": "final",
+      "batchId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "definitionHash": "3162d65e62b6ba2d8655e27b6b79ed5374433dd352cf6073c888f92769ec80fa",
+      "basisHash": "95711a7579a63f8697e56070dbc363196ecb03d8c6d9fb51ba75fe48fcdd4141",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 1,
+      "durationSeconds": 0.7839,
+      "recordedAt": "2026-10-06T22:19:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-7-final-f472dd73493d.log",
+      "logSha256": "7cd61bb64b82f924eb7fd79bc149f140c9a24d2c2e32adc982e3084ae3692e5a",
+      "inputsHash": "3bfb2c4c46d8e708ea098b81c31b58985c50c65d716615eee2df59f1c51abe39"
+    },
+    "sprint-7/check-document-export/final": {
+      "checkId": "check-document-export",
+      "boundaryId": "sprint-7",
+      "phase": "final",
+      "batchId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "definitionHash": "85b86db04352dd77a7100918d8d82d6897f4d40047ea53951922d693351a7092",
+      "basisHash": "dfa7efd64b5dcfa0e1e923fb4ece85df658a1956ce1c4b9c26c1b7bd25e7bbe7",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.1924,
+      "recordedAt": "2026-10-06T22:19:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-7-final-eeac2848020d.log",
+      "logSha256": "d737bcb8d0f05373525c980cd84e62b55c16ee01c1cde95acf04e122146a7df6",
+      "inputsHash": "25a40546808e440b2fe0227d6dcc25cb22a839f69bf0aaa15e9036d72ff522e2"
     }
   },
   "reviews": {
@@ -1345,6 +1431,125 @@
         "inputs-normalize-error-contract"
       ],
       "recordedAt": "2026-10-06T22:05:44Z"
+    },
+    "sprint-7": {
+      "reviewerId": "reviewer-sprint-7-023b50a91bc9",
+      "snapshotId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "criterionIds": [
+        "values.model",
+        "values.semantics",
+        "values.conversion",
+        "derive.optional",
+        "derive.hygiene",
+        "derive.attributes",
+        "derive.generics",
+        "derive.compile-fail",
+        "export.document",
+        "export.roundtrip"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/values.rs",
+          "kind": "source",
+          "criterionIds": [
+            "values.model",
+            "values.semantics",
+            "values.conversion"
+          ],
+          "sha256": "c3fb890d2d9d8f662bb332630f9057450678f5440b8ec60b3037d58517936cb1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/from_dtcg_value.rs",
+          "kind": "source",
+          "criterionIds": [
+            "values.conversion"
+          ],
+          "sha256": "b5a7d2c6f04d9ec77d6aa6e2e081dc0089ebfbd4f53e2b6c82682cdd6c9001d4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/typed_values.rs",
+          "kind": "test",
+          "criterionIds": [
+            "values.model",
+            "values.semantics",
+            "values.conversion"
+          ],
+          "sha256": "7e96cf91d195cbdb2871b1bed22ac05bfe92e1f3b8e86ee5e798361170b05672"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "derive.optional",
+            "derive.hygiene",
+            "derive.attributes",
+            "derive.generics",
+            "derive.compile-fail"
+          ],
+          "sha256": "cf24780c26a47f5a8e37b834eecf4f87de6c23eb8ef5a07ce747e3a283d99181"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "derive.compile-fail"
+          ],
+          "sha256": "283a9a9832faabe8606d1ce825b6097e8ae45ef8e2bc6197b347115ef8e175a0"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/derive_hardening.rs",
+          "kind": "test",
+          "criterionIds": [
+            "derive.optional",
+            "derive.hygiene",
+            "derive.generics"
+          ],
+          "sha256": "6d077569cd96cf2d340302a5c890cca2821014a5c6671ccd6d2399a026626e64"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/compile_fail.rs",
+          "kind": "test",
+          "criterionIds": [
+            "derive.attributes",
+            "derive.compile-fail"
+          ],
+          "sha256": "6b1ef16855d1c86ce05e1a79c124ee25045ebbb53c22b071dc4c98ca093cf369"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "export.document",
+            "export.roundtrip"
+          ],
+          "sha256": "8a47cd7544e68db3fe1f5e33d7e9ed3c2a8528e44f0366c8693d48a3a170e283"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/document_export.rs",
+          "kind": "test",
+          "criterionIds": [
+            "export.document",
+            "export.roundtrip"
+          ],
+          "sha256": "00702eee5fbb8ee71dce77d26c3df328c94fe8589536859b12a37ef2f8d83015"
+        }
+      ],
+      "summaryMarkdown": "**Typed values.** The model is complete and consistent with `validate_value_with`: all 14 color spaces, `Component::None`, every type plus `Blur`/`LineHeight` with `FromDtcgValue`, the spec consumer rules, extension gating in `typed()` and the `f32` range error.\n\n**Derive.** Strict attribute errors are spanned at the offending key, now including `path`+`rename`, and pinned by 19 LF trybuild snapshots (enum and tuple struct included). Generated code uses fully qualified paths, `unraw()` names, `Option` detection in all three spellings, and per-field bounds. RayX's existing usage stays valid.\n\n**Export.** `to_document` matches `export-format`. The round-trip now covers every resolving scenario of `merged_resolution` and `token_metadata` plus the 93 positive corpus fixtures, compared by path. The grouped re-resolution order for interleaved sources is documented and pinned by its own test.\n\nBoth sprint-7 findings are resolved.",
+      "findingIds": [
+        "s7-export-roundtrip-fixture-coverage",
+        "s7-derive-path-rename-conflict"
+      ],
+      "recordedAt": "2026-10-06T22:19:38Z"
     }
   },
   "checkpoints": {
@@ -1395,6 +1600,14 @@
       },
       "reviewHash": "fac6dac547dfad81caa9c7a7ae78c409ceb3c05152dea493de1fcaecc8c5064f",
       "recordedAt": "2026-10-06T22:06:01Z"
+    },
+    "sprint-7": {
+      "snapshotId": "340345df3245744a964720f27a9d9a274329f2d3e69b7eed6ddbcc608b514a83",
+      "commits": {
+        "dtcg": "837e0603288bb45c373ef63dbf9c4ba813487c68"
+      },
+      "reviewHash": "8bf530a55fee5dc21c311843489e3394f788d6473581f1cd0dda03316071c345",
+      "recordedAt": "2026-10-06T22:19:57Z"
     }
   },
   "findings": [
@@ -1698,6 +1911,51 @@
         }
       ],
       "boundaryId": "sprint-6"
+    },
+    {
+      "id": "s7-export-roundtrip-fixture-coverage",
+      "boundaryId": "sprint-7",
+      "criterionIds": [
+        "export.roundtrip",
+        "export.document"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** `export.roundtrip` requires the round-trip for *every* fixture of the `merged_resolution` and `token_metadata` groups, and `export.document` requires output that follows resolution order. The `to_document` rustdoc claims that tokens appear in resolution order and that resolving the export again yields the same tokens.\n\n**Observed.** `merged_and_metadata_scenarios_round_trip` in `tests/document_export.rs` runs 7 hand-picked scenarios. It leaves out these fixtures:\n- `order_and_sources_keep_their_documented_meaning` (both cases);\n- the full `json_pointers_read_the_merged_structure` (it drops the token-level `$ref` token `blue` and the third `copy` source);\n- `nested_groups_may_extend_the_same_target_but_real_cycles_fail` (its successful part);\n- `tokens_expose_their_own_description_deprecation_and_extensions`;\n- `metadata_does_not_change_the_fingerprint`.\n\nA reviewer probe shows why the first one was dropped. The resolution order `a.y, b.z, a.x` (later source overrides `a.x`) exports as `{a:{y,x}, b:{z}}` and re-resolves as `a.y, a.x, b.z`. A nested document cannot keep an interleaved resolution order, but `assert_round_trip` compares ordered vectors. The same happens for any later source that adds a token to an earlier group. Paths, types, values and metadata do survive, compared as sets. The other omitted fixtures round-trip in the probe.\n\n**Repair.**\n1. Add every successfully resolving fixture of both groups to the round-trip (verbatim or shared).\n2. For interleaved cases, compare as a path-keyed map, or assert the documented grouped order (first emission).\n3. Correct the `to_document` rustdoc: tokens follow resolution order within the grouping by first emission, and re-resolution can reorder interleaved tokens.\n4. If the coordinator considers order part of the contract, amend `export.document`/`export.roundtrip` to state this limitation explicitly.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/document_export.rs",
+          "symbol": "merged_and_metadata_scenarios_round_trip"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/document_export.rs",
+          "symbol": "an_interleaved_resolution_order_comes_back_grouped"
+        }
+      ]
+    },
+    {
+      "id": "s7-derive-path-rename-conflict",
+      "boundaryId": "sprint-7",
+      "criterionIds": [
+        "derive.attributes",
+        "derive.compile-fail"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** The strict attribute parser (`derive-design`) rejects conflicting keys with a spanned error. `path` and `rename` are two spellings of the same setting (the token path), so giving both is effectively a duplicated key.\n\n**Observed.** `#[dtcg(path = \"a\", rename = \"b\")]`, or the two keys split across attributes, compiles. `attributes.path.or(attributes.rename)` silently uses `path` and drops `rename`.\n\n**Repair.**\n- Reject the combination with an error spanned at the second key, for example \"`path` and `rename` cannot be combined\".\n- Add a `tests/ui/field_path_rename.rs` trybuild case with its `.stderr` snapshot.\n- If the coordinator decides this is intended aliasing, document the precedence instead.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/ui/field_path_rename.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/compile_fail.rs",
+          "symbol": "rejected_derive_inputs_fail_to_compile"
+        }
+      ]
     }
   ],
   "handoffMarkdown": "",
