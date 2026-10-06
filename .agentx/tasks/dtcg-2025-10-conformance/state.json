@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 35,
+  "revision": 46,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -64,13 +64,22 @@
       ]
     },
     "task-merged-structure": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-token-metadata": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-incremental": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-resolver-validation": {
       "status": "pending"
@@ -142,6 +151,15 @@
         }
       },
       "recordedAt": "2026-10-06T21:19:05Z"
+    },
+    "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "f43a253e53154f6db3fb12832edd15b5617e61415f13f8dc0daf0f1be2a9a6da"
+        }
+      },
+      "recordedAt": "2026-10-06T21:45:26Z"
     }
   },
   "checkResults": {
@@ -314,6 +332,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-4-final-9deb961eff2a.log",
       "logSha256": "ff83d3762c6cb11211948433488ba7e1e75f426406f5afbec72c4bc486ca872d",
       "inputsHash": "de2285ffde2975fb17ced16d4f0848f5237b447f6cc6d56f0885aaa2d69bad1c"
+    },
+    "sprint-5/check-merged-resolution/final": {
+      "checkId": "check-merged-resolution",
+      "boundaryId": "sprint-5",
+      "phase": "final",
+      "batchId": "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351",
+      "definitionHash": "6fbc9b5907a6928fbc5d61719e43c65def5270cd9a52cc2eb7e0a8c099838675",
+      "basisHash": "7c7d9f73770b6d019241334c34fb9da2b67cabe5c49678e8d2caaa9cf7df25ff",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.2239,
+      "recordedAt": "2026-10-06T21:45:26Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-5-final-06c3d05a19ab.log",
+      "logSha256": "a77514bb49774f0dd6215a268af0dae729912eedd6d730fed6e4e87e1a6b4679",
+      "inputsHash": "05776e6c59a002ddfaeb55e16ed8bc9034646b231978e4240855f1837c7bc613"
+    },
+    "sprint-5/check-token-metadata/final": {
+      "checkId": "check-token-metadata",
+      "boundaryId": "sprint-5",
+      "phase": "final",
+      "batchId": "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351",
+      "definitionHash": "e16c0c7eb89fe6d3fcefae7b573495c920e23a4be6c2bbadc69f1b5dfa2bb843",
+      "basisHash": "70214d2e7a73dee7028985309619478b99860236142a50990da810ee89c91481",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.1454,
+      "recordedAt": "2026-10-06T21:45:26Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-5-final-cc5356daba24.log",
+      "logSha256": "256acbc17504c1c09242e57aefb9ce00fdb92dab6f7aac20b2e276fdc9b2859d",
+      "inputsHash": "728b561b4448f26b6d541a3bffa9b364ed27af7b5618c673eb6c3f86ffac9165"
+    },
+    "sprint-5/check-incremental-consistency/final": {
+      "checkId": "check-incremental-consistency",
+      "boundaryId": "sprint-5",
+      "phase": "final",
+      "batchId": "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351",
+      "definitionHash": "ec4f47bede26a8dd55c635529d6aa6129d07c457ca4b65b84b88daa479a2aa32",
+      "basisHash": "62e505fcf7094223a1319d31653121f5f051c43bf48d29a3c17740e8607961df",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.152,
+      "recordedAt": "2026-10-06T21:45:26Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-5-final-92aad7554833.log",
+      "logSha256": "27bc33992f2a08a4d3682b735bf566ac7cf4972ca02aef23085c2906cf679306",
+      "inputsHash": "6414f772d74bbf213109735fefa6cf3c18b4a68df182cee2627d7f601ede4b82"
     }
   },
   "reviews": {
@@ -885,6 +954,168 @@
       "summaryMarkdown": "Both criteria hold. `validate_value` delegates to `validate_value_with` with `ValueExtensions::default()` (both flags off): a dimension `lineHeight` fails typography and `dev.rayx.blur` is `UnsupportedType`. `DtcgRuntime` stores `RuntimeOptions`; every resolving path (`resolve`, `project`, `preview_source`/`preview_occurrence`, `replace_json_and_resolve_affected`) passes the stored options to `Resolver`, which feeds `extensions` to `validate_value_with` and `line_height_dimension` to every `Position::child` call, so a default `lineHeight` alias must target `number`. `with_limits`, `from_json` and `from_envelope` delegate to the `_with_options` forms with strict defaults. Flags are independent and `rayx()` enables both. `value_extensions` (5), `rayx_export_types` (3, via `ValueExtensions::rayx()`) and `reference_positions` (6) pass; the corpus fixture `typography-lineHeight-wrong-type` is dropped from `KNOWN_GAPS` and its shape is pinned in `value_extensions`. Non-blocking notes for sprint 8 (`task-docs`): the `RuntimeOptions::limits`/`extensions` fields lack per-field doc comments, and docs/05-value-types.md and docs/13-api-reference.md still show `validate_value(BLUR_TYPE, ...)` succeeding. Preview and affected resolution with extensions are correct by construction but have no dedicated test.",
       "findingIds": [],
       "recordedAt": "2026-10-06T21:21:10Z"
+    },
+    "sprint-5": {
+      "reviewerId": "reviewer-sprint-5-c7e2a91f",
+      "snapshotId": "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351",
+      "criterionIds": [
+        "merge.group-properties",
+        "merge.type-inheritance",
+        "merge.extends",
+        "merge.collision",
+        "merge.pointers",
+        "merge.compatibility",
+        "meta.token",
+        "meta.deprecated-inheritance",
+        "meta.groups",
+        "incr.rollback",
+        "incr.group-edits",
+        "incr.pointer-deps",
+        "incr.snapshot-equality",
+        "incr.extends-detection"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "kind": "source",
+          "criterionIds": [
+            "merge.group-properties",
+            "merge.type-inheritance",
+            "merge.extends",
+            "merge.collision",
+            "merge.pointers",
+            "merge.compatibility",
+            "meta.token",
+            "meta.deprecated-inheritance",
+            "meta.groups",
+            "incr.extends-detection"
+          ],
+          "sha256": "f678931eecd0f275e5deb9d27bd38172224d62278f12ec2825d82efd9e32d196"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "merge.compatibility",
+            "meta.token",
+            "meta.deprecated-inheritance",
+            "meta.groups",
+            "incr.rollback",
+            "incr.group-edits",
+            "incr.pointer-deps",
+            "incr.snapshot-equality",
+            "incr.extends-detection"
+          ],
+          "sha256": "79d267ef7e4f4252e9459c482e9927466ec8b274c6d1c9b7ca295a4ce84a37b4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "merge.compatibility",
+            "incr.rollback",
+            "incr.snapshot-equality"
+          ],
+          "sha256": "728582cfefc2d562071558acf113f05fb3c0e76ebcef5c6eca4a6defee1f60bb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/affected_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "incr.snapshot-equality"
+          ],
+          "sha256": "24fd19b6574623a3f895ace7559786c1738659483c56c196058671fab68cd404"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "merge.pointers",
+            "meta.token",
+            "incr.rollback",
+            "incr.pointer-deps"
+          ],
+          "sha256": "ae68cbdd1d962c72ea52f381928eb710de61c8b7f979cd56f59244d3fe6a47a2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/merged_resolution.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.group-properties",
+            "merge.type-inheritance",
+            "merge.extends",
+            "merge.collision",
+            "merge.pointers",
+            "merge.compatibility"
+          ],
+          "sha256": "3b9fcd6b5e380434072295a8d3b9e8b4b2592f33e840f8184f2377d8f2ceb25a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.pointers"
+          ],
+          "sha256": "95daca50a7319be289c735d4a318d41a5ca33c52cd713af947c18d4572baa5ad"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/alias_overlay.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.compatibility"
+          ],
+          "sha256": "4054334d359eabc48efc63b612d2e303d53231c514f94419c7a712f656875fd5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.compatibility"
+          ],
+          "sha256": "56acc5ea1944d8cff1cabb251c414b8a18f79ebe13a75011eacda93a6855fa75"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/token_metadata.rs",
+          "kind": "test",
+          "criterionIds": [
+            "meta.token",
+            "meta.deprecated-inheritance",
+            "meta.groups"
+          ],
+          "sha256": "fd961c735804d71aea719f649233cad95384e66e5297839a4470dc37fc0e0bce"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/incremental_consistency.rs",
+          "kind": "test",
+          "criterionIds": [
+            "incr.rollback",
+            "incr.group-edits",
+            "incr.pointer-deps",
+            "incr.snapshot-equality",
+            "incr.extends-detection"
+          ],
+          "sha256": "adaa0725d7538982a75315ea6a9f9ffede29f17ecc4ff0238d74aaac7cf0a7fc"
+        }
+      ],
+      "summaryMarkdown": "All three sprint-5 findings are resolved.\n\n- **Self/ancestor check.** It catches direct self-copies.\n- **Origin tracking.** Copied groups are stamped with an internal `$origin`, and `flatten_group` checks the origins along the current path. This catches order-dependent cycles: the `b`-first probe, a deeper `b.c.d` variant and a 500-token wide variant all fail fast with `group extension cycle` instead of the path-depth limit. The check is sound: a group's content is determined by its origin, so a repeated origin means unbounded nesting.\n- **No false positives** in the probes: a group and its own nested group extending the same target, repeated targets reached through copied content, chains of copies, and copies of copies.\n- **`$origin` stays internal.** It never reaches tokens, groups or `$extensions`, and authored `$origin` members are still rejected.\n\nAll 14 criteria hold as reviewed earlier.",
+      "findingIds": [
+        "sprint5-extends-false-cycle",
+        "sprint5-memory-rule-group-merge",
+        "sprint5-extends-cycle-order-dependent"
+      ],
+      "recordedAt": "2026-10-06T21:46:40Z"
     }
   },
   "checkpoints": {
@@ -919,6 +1150,14 @@
       },
       "reviewHash": "5eca98eec6ce7e62593c4c0d7eb7601b56ed5c38e32c7378b6bbbc14b3b4db20",
       "recordedAt": "2026-10-06T21:21:27Z"
+    },
+    "sprint-5": {
+      "snapshotId": "6df675565de984186561fa45c54267817798b6781049907ec79df8968d412351",
+      "commits": {
+        "dtcg": "f8f8bb978c8bab04a42d8bcd4779f4ebbc55c8fd"
+      },
+      "reviewHash": "882a861a5aa81d2fa404e22865a96298e5f8e1129f46827b8ea7fcc1463f91b7",
+      "recordedAt": "2026-10-06T21:46:56Z"
     }
   },
   "findings": [
@@ -1060,6 +1299,71 @@
           "repositoryId": "dtcg",
           "path": "crates/dtcg_runtime/tests/format_structure.rs",
           "symbol": "extends_belongs_to_groups_and_targets_groups"
+        }
+      ]
+    },
+    {
+      "id": "sprint5-extends-false-cycle",
+      "boundaryId": "sprint-5",
+      "criterionIds": [
+        "merge.extends"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** `$extends` reports `group extension cycle` only for real cycles, meaning expansions that depend on themselves or whose copied content re-extends the group being copied. A group and its own nested group may both extend the same target. For example, `{\"base\": {\"$type\": \"number\", \"t\": {\"$value\": 1}}, \"a\": {\"$extends\": \"{base}\", \"x\": {\"$extends\": \"{base}\"}}}` is finite and should resolve `base.t`, `a.t` and `a.x.t`.\n\n**Observed:** resolution fails with `DtcgError::Token { path: \"a.x\", message: \"group extension cycle: base -> base\" }`, confirmed by a probe against the working tree. `Flattener::flatten_group` (flatten.rs) pushes every applied `$extends` target onto the `extending` stack and rejects any descendant that names a target already on it. It does this even when that descendant is the extending group's **own** member, not content copied from the target. The same false positive occurs when the repeated target is reached through copied content of a different target, for example `x: {$extends: {leaf}, sub: {$extends: {base}}}` with `base.inner: {$extends: {leaf}}`. HEAD's `Extending.active` set had the same false positive, and the rewrite carries it over into the merged-structure `$extends` this sprint owns.\n\n**Repair:** detect cycles from the expansion dependency graph, which `expansion`/`require` already do. Separately, detect infinite nesting only when copied target content re-extends a target whose expansion is still being copied: either track whether a member came from the target or from the group's own content, or check that the target is the extending path or one of its ancestors and let the depth limit and copy budget bound the rest. Keep the existing real-cycle cases failing: a two-source mutual cycle, a three-cycle, self-extension, and a group extending its ancestor. Add a regression test to `tests/merged_resolution.rs` for a group and its own nested group extending the same target.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/merged_resolution.rs",
+          "symbol": "nested_groups_may_extend_the_same_target_but_real_cycles_fail"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "symbol": "Flattener::flatten_group"
+        }
+      ]
+    },
+    {
+      "id": "sprint5-memory-rule-group-merge",
+      "boundaryId": "sprint-5",
+      "criterionIds": [
+        "merge.group-properties"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** repository memory matches the approved design. `.agentx/memory/knowledge/runtime/resolution/rules.md` should allow per-key merging of group properties, member-by-member merging of groups, and recursive merging of `$extensions` objects, while still forbidding deep merges of token values.\n\n**Observed:** the rule still reads \"Never deep-merge composite values, groups or Serde objects\". Design `merged-structure` and criterion `merge.group-properties` deliberately merge groups member by member and group `$` properties per key. The implementation (`Merger::merge_group`, `merge_extensions`) also merges `$extensions` recursively, which `merge.pointers` relies on. The design lists the whole-token-overlay decision as `buildsOn` and does not declare that part of the rule superseded.\n\n**Repair:** in the sprint's memory sync, reword the rule to cover only token replacement and token values. Record the merged-structure semantics, including the recursive `$extensions` merge, as a decision when the epic completes.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/memory/knowledge/runtime/resolution/rules.md"
+        }
+      ]
+    },
+    {
+      "id": "sprint5-extends-cycle-order-dependent",
+      "boundaryId": "sprint-5",
+      "criterionIds": [
+        "merge.extends"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected** (`merge.extends`): a cyclic `$extends` structure fails with `group extension cycle` whatever order its groups are authored in.\n\n**Observed** (probe against the repaired working tree): the same cyclic document fails differently depending on member order.\n\n- With `a` first, `{\"a\": {\"$extends\": \"{b}\"}, \"b\": {\"t\": {\"$type\": \"number\", \"$value\": 1}, \"c\": {\"$extends\": \"{a}\"}}}` fails with `group extension cycle: a.c -> a`.\n- With `b` first, the same members fail with `LimitExceeded { kind: \"path depth\", limit: 128 }`.\n\nWhen `b` is flattened first, `b.c` extends `a`, and the expansion of `a` is `b`'s content, so it contains `c: {$extends: {a}}`. That gives `b.c.c -> a`, `b.c.c.c -> a`, and so on. The target `a` is never the path itself or one of its ancestors, and no expansion depends on one still in progress, so neither the new ancestor check in `flatten_group` nor `expansion`/`require` sees the cycle. Only the depth backstop stops it. With a 500-token `b`, that takes 128 copy rounds (about 138 ms in release) before the limit error. The repair note's claim that every other cycle is found by dependency resolution does not hold for this case.\n\n**Repair:** run the self/ancestor check against the location a nested `$extends` has inside its target's expansion, not only against where it is copied to. Here `b.c.c` was copied from `a.c`, and `a` is an ancestor of `a.c`, so it is a cycle. Two ways to do that:\n\n- record the origin path of copied content, and check the target against that origin path as well as the current path;\n- when building each expansion `X`, reject any nested `$extends` in its content whose target is `X`, or an ancestor of the nested group's position inside `X`.\n\nAdd the `b`-first ordering of this document, and the `a`-first ordering, to `nested_groups_may_extend_the_same_target_but_real_cycles_fail`, expecting `group extension cycle` in both orders.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/merged_resolution.rs",
+          "symbol": "nested_groups_may_extend_the_same_target_but_real_cycles_fail"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "symbol": "mark_origins"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "symbol": "Flattener::flatten_group"
         }
       ]
     }
