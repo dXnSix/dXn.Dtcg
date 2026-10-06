@@ -1,0 +1,1600 @@
+{
+  "schemaVersion": 6,
+  "epicId": "dtcg-2025-10-conformance",
+  "revision": 1,
+  "title": "DTCG 2025.10 full conformance, robustness and missing functionality",
+  "validationMode": "sprint",
+  "repositories": [
+    {
+      "id": "dtcg",
+      "path": ".",
+      "role": "execution"
+    },
+    {
+      "id": "rayx",
+      "path": "../RayX",
+      "role": "reference"
+    },
+    {
+      "id": "token-editor",
+      "path": "../RayX.TokenEditor",
+      "role": "reference"
+    }
+  ],
+  "boundaries": {
+    "repositoryIds": [
+      "dtcg"
+    ],
+    "forbiddenPaths": [
+      ".agentx/tasks/dtcg-runtime/**",
+      "LICENSE-APACHE",
+      "LICENSE-MIT",
+      "rust-toolchain.toml"
+    ]
+  },
+  "checks": [
+    {
+      "id": "check-official-test-suite",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "corpus.vendored",
+        "corpus.harness",
+        "format.schema-root"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "official_test_suite"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/official_test_suite.rs",
+        "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/**"
+      ],
+      "descriptionMarkdown": "The corpus ratchet group: `KNOWN_GAPS` must equal the failing fixture set exactly. Root `$schema` acceptance cases live in the same group."
+    },
+    {
+      "id": "check-package-excludes-corpus",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "descriptionMarkdown": "The published `dtcg_runtime` package lists `src/lib.rs` and no vendored corpus file.",
+      "criterionIds": [
+        "corpus.vendored"
+      ],
+      "argv": [
+        "cargo",
+        "package",
+        "--list",
+        "-p",
+        "dtcg_runtime",
+        "--allow-dirty"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "(?s)\\A(?!.*tests/fixtures/dtcg-test-suite).*src/lib\\.rs"
+      },
+      "inputs": [
+        "Cargo.toml",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/**"
+      ]
+    },
+    {
+      "id": "check-api-foundations",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "api.nonexhaustive",
+        "api.errors",
+        "api.helpers",
+        "api.fingerprint"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "api_foundations"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/api_foundations.rs"
+      ]
+    },
+    {
+      "id": "check-bounded-references",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "bounds.pointers",
+        "bounds.alias-depth",
+        "pointers.syntax"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "bounded_references"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/bounded_references.rs"
+      ],
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "check-bounded-expansion",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "bounds.expansion"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "bounded_expansion"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/bounded_expansion.rs"
+      ],
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "check-resource-id-portability",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "ids.fragment",
+        "ids.portable"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "resource_id_portability"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/resource_id_portability.rs"
+      ]
+    },
+    {
+      "id": "check-format-structure",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "format.children",
+        "format.root-token",
+        "format.metadata-types"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "format_structure"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/format_structure.rs"
+      ]
+    },
+    {
+      "id": "check-type-determination",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "types.order",
+        "types.token-ref",
+        "types.mismatch"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "type_determination"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/type_determination.rs"
+      ]
+    },
+    {
+      "id": "check-reference-positions",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "refs.curly-positions",
+        "refs.member-types"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "reference_positions"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/reference_positions.rs"
+      ]
+    },
+    {
+      "id": "check-value-extensions",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "ext.strict-default",
+        "ext.opt-in"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "value_extensions"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/value_extensions.rs"
+      ]
+    },
+    {
+      "id": "check-merged-resolution",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "merge.group-properties",
+        "merge.type-inheritance",
+        "merge.extends",
+        "merge.collision",
+        "merge.pointers",
+        "merge.compatibility"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "merged_resolution"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/merged_resolution.rs"
+      ]
+    },
+    {
+      "id": "check-token-metadata",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "meta.token",
+        "meta.deprecated-inheritance",
+        "meta.groups"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "token_metadata"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/token_metadata.rs"
+      ]
+    },
+    {
+      "id": "check-incremental-consistency",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "incr.rollback",
+        "incr.group-edits",
+        "incr.pointer-deps",
+        "incr.snapshot-equality",
+        "incr.extends-detection"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "incremental_consistency"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/incremental_consistency.rs"
+      ]
+    },
+    {
+      "id": "check-resolver-document-validation",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "resdoc.members",
+        "resdoc.order-and-contexts"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "resolver_document_validation"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/resolver_document_validation.rs"
+      ]
+    },
+    {
+      "id": "check-corpus-complete",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "descriptionMarkdown": "Run once the last corpus gaps close: the official corpus passes completely, with an empty `KNOWN_GAPS` list. It runs the corpus group owned by sprint 1, and asserts this sprint's completion criterion through the summary line.",
+      "criterionIds": [
+        "corpus.complete"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "official_test_suite",
+        "--",
+        "--nocapture"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1,
+        "stdoutPattern": "official corpus: 250 passed, 0 known gaps"
+      },
+      "timeoutSeconds": 900,
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/official_test_suite.rs",
+        "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/**"
+      ]
+    },
+    {
+      "id": "check-resolution-step-consistency",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "steps.overrides",
+        "steps.names",
+        "steps.reference-sites"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "resolution_step_consistency"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/resolution_step_consistency.rs"
+      ]
+    },
+    {
+      "id": "check-input-selection",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "inputs.case",
+        "inputs.scope",
+        "inputs.json"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "input_selection"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/input_selection.rs"
+      ]
+    },
+    {
+      "id": "check-typed-values",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "values.model",
+        "values.semantics",
+        "values.conversion"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "typed_values"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/typed_values.rs"
+      ]
+    },
+    {
+      "id": "check-derive-hardening",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "derive.optional",
+        "derive.hygiene",
+        "derive.generics"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime_derive",
+        "--test",
+        "derive_hardening"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime_derive/tests/derive_hardening.rs"
+      ]
+    },
+    {
+      "id": "check-derive-compile-fail",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "descriptionMarkdown": "`trybuild` compile-fail snapshots under the pinned toolchain.",
+      "criterionIds": [
+        "derive.attributes",
+        "derive.compile-fail"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime_derive",
+        "--test",
+        "compile_fail"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "timeoutSeconds": 900,
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime_derive/tests/compile_fail.rs",
+        "crates/dtcg_runtime_derive/tests/ui/**"
+      ]
+    },
+    {
+      "id": "check-document-export",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "export.document",
+        "export.roundtrip"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "document_export"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/document_export.rs",
+        "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/**"
+      ]
+    },
+    {
+      "id": "check-doctests",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "descriptionMarkdown": "Compiles every README and `docs/` example as a doctest, through the `#[cfg(doctest)]` modules.",
+      "criterionIds": [
+        "docs.tested"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--doc"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "timeoutSeconds": 900,
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "README.md",
+        "docs/**"
+      ]
+    },
+    {
+      "id": "final-fmt",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [],
+      "argv": [
+        "cargo",
+        "fmt",
+        "--check"
+      ],
+      "expected": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "final-clippy",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [],
+      "argv": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "expected": {
+        "exitCode": 0
+      },
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "final-wasm",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "descriptionMarkdown": "The crates stay portable to `wasm32-unknown-unknown`, as CI requires.",
+      "criterionIds": [],
+      "argv": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--target",
+        "wasm32-unknown-unknown"
+      ],
+      "expected": {
+        "exitCode": 0
+      },
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "final-package",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "descriptionMarkdown": "Both crates still package. This is a release gate the repository documents and CI runs.",
+      "criterionIds": [],
+      "argv": [
+        "cargo",
+        "package",
+        "--workspace"
+      ],
+      "expected": {
+        "exitCode": 0
+      },
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "final-workspace-tests",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "descriptionMarkdown": "The full workspace suite, run once at epic completion. Running everything is justified under the HARD RULE's whole-codebase condition: the epic replaces the core resolution pipeline (merged-document flattening, type determination, reference handling, validation strictness and limits), which every runtime feature, every existing test group and the doctests consume.",
+      "criterionIds": [],
+      "argv": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "timeoutSeconds": 3600
+    }
+  ],
+  "finalCheckIds": [
+    "final-fmt",
+    "final-clippy",
+    "final-wasm",
+    "final-package",
+    "final-workspace-tests"
+  ],
+  "sprints": [
+    {
+      "id": "sprint-1",
+      "title": "Conformance baseline and API foundations",
+      "dependsOn": [],
+      "checkIds": [
+        "check-official-test-suite",
+        "check-package-excludes-corpus",
+        "check-api-foundations"
+      ],
+      "tasks": [
+        {
+          "id": "task-corpus",
+          "title": "Vendor the official corpus, add the ratchet harness, accept root `$schema`",
+          "descriptionMarkdown": "**Vendoring.**\n- Copy `test-suite/tests/2025.10/` from `design-tokens/community-group` at commit `882ebd6716abef9a46d8ef5fb12e82009d6cee2e`, unmodified, into `crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/`.\n- Add `LICENSE` (the W3C 3-clause BSD notice that covers the repository's test suites, with attribution) and a `README.md` (upstream URL, commit, update procedure).\n- Add `tests/fixtures/dtcg-test-suite/**` to `package.exclude` in `crates/dtcg_runtime/Cargo.toml`.\n\n**Harness.** Write `tests/official_test_suite.rs` as `corpus.harness` describes. Use the ratchet comparison, the purpose-annotated failure report and the exact summary line.\n\n**Root `$schema`.**\n- Accept a string `$schema` at the root of whole-document sources, and reject it elsewhere (`format.schema-root`, in `flatten_group`).\n- Add unit tests for both cases to the same group.\n\n**Seed `KNOWN_GAPS`** with the fixtures that still fail after the `$schema` fix. The planning baseline expects 16:\n\n- the 11 format fixtures and 5 resolver fixtures listed in `requirements.json` scope;\n- confirm the list against the harness, and record any difference in the commit message.",
+          "criterionIds": [
+            "corpus.vendored",
+            "corpus.harness",
+            "format.schema-root"
+          ],
+          "designIds": [
+            "conformance-bar",
+            "corpus-ratchet",
+            "format-structure"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-official-test-suite",
+            "check-package-excludes-corpus"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/Cargo.toml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "flatten_group"
+            }
+          ]
+        },
+        {
+          "id": "task-api",
+          "title": "Make the API extensible and fix the reported API and message defects",
+          "descriptionMarkdown": "Implement design `api-evolution`:\n\n- `#[non_exhaustive]` on the listed types, with `RuntimeLimits` `with_*` setters;\n- `DtcgRuntime::limits()` and a redacted `Debug`;\n- `DtcgError::UnresolvedReference`, replacing every `Projection` that resolution raises (`resolver.rs` missing alias targets, `effective_group_type`, `extension_path`), plus its diagnostic code;\n- `Clone` and `PartialEq` on `DtcgError`;\n- closing backticks in the `InvalidResourceId`/`InvalidPointer` messages;\n- public `Resolution::map`, `is_ready`, `is_missing` and `missing` (remove the private `ResolutionMap` trait);\n- `SourceOccurrence::resource()`;\n- `DtcgRuntime::replace_envelope`;\n- canonical (sorted-key) value serialization in the fingerprint, and canonical equality for `ResolvedTokens`;\n- the corrected `ModifierAxis` and `diagnostics` module docs.\n\n**Existing tests.** Update the tests that pinned old behavior: the `RuntimeLimits` literals in `lazy_catalog` and `source_inspection`, and the `Projection` expectations in `dtcg_2025_10_conformance`.\n\n**New test group.** Cover `api_foundations` with a redaction test for the `Debug` output and an envelope-replacement round trip.",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.errors",
+            "api.helpers",
+            "api.fingerprint",
+            "api.docs"
+          ],
+          "designIds": [
+            "api-evolution"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-api-foundations"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/error.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "Resolution"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/runtime.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/selection.rs",
+              "symbol": "ModifierAxis"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/diagnostics/mod.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_occurrence.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-2",
+      "title": "Bounded resolution work and portable resource ids",
+      "dependsOn": [
+        "sprint-1"
+      ],
+      "checkIds": [
+        "check-bounded-references",
+        "check-bounded-expansion",
+        "check-resource-id-portability"
+      ],
+      "tasks": [
+        {
+          "id": "task-bounded-references",
+          "title": "Bound and memoize reference resolution; strict RFC 6901 pointers",
+          "descriptionMarkdown": "Implement designs `bounded-work` (reference part) and `pointer-syntax`:\n\n- **Hop accounting.** One hop counter covers token aliases, token-target pointers and document pointers, in `resolve_value`, `resolve_json_reference*` and `collect_token_dependencies`.\n- **Memoization.** Memoize document pointers keyed by (document identity, pointer), with the same key for cycle detection. Pop a pointer before its sibling overrides are resolved.\n- **Value size.** `RuntimeLimits::max_value_nodes` with `with_max_value_nodes`. Memo entries carry node counts, which are checked before materializing.\n- **`max_alias_depth`** counts hops only, so a limit of 0 allows literal tokens.\n- **Pointer parsing.** One RFC 6901 URI-fragment parser (percent-decoding, strict array indexes) serves resource fragments and `$ref`s. Token-target and document traversal share one segment walker.\n\n**Probes to turn into tests** (from the 2026-10-06 audit):\n- the 100k-hop chain, run on a spawned thread with a 1 MiB stack;\n- 40-level pointer fan-out, expected to hit `LimitExceeded { kind: \"value nodes\" }`;\n- a cross-source pointer cycle false positive in both orders;\n- a sibling override pointing at its own target;\n- `+1`, `01` and `-1` indexes;\n- `%20` fragments.",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth",
+            "pointers.syntax"
+          ],
+          "designIds": [
+            "bounded-work",
+            "pointer-syntax",
+            "conformance-bar"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-bounded-references"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "resolve_json_reference_target"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "collect_token_dependencies"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/json_pointer.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resource.rs",
+              "symbol": "validate_pointer"
+            }
+          ]
+        },
+        {
+          "id": "task-bounded-expansion",
+          "title": "Bound `$extends` and discovery expansion",
+          "descriptionMarkdown": "Implement design `bounded-work` (expansion part):\n\n- `RuntimeLimits::max_tokens` (default 100,000, with a `with_max_tokens` setter), checked whenever `flatten_group` emits a token;\n- `effective_group_type` and `$extends` targets memoized by group path, with `HashSet` cycle tracking;\n- every discovery expansion step (each set reference, local reference and nested resolver) counted against `max_documents` in `Discovery::append_source` and `expand`.\n\nThe probes for 30-level `$extends` doubling, a 400-group linear chain, and 12-level empty-set fan-out each run through `resolve`, `validate_complete` and `inspect_source`.",
+          "criterionIds": [
+            "bounds.expansion"
+          ],
+          "designIds": [
+            "bounded-work"
+          ],
+          "dependsOn": [
+            "task-bounded-references"
+          ],
+          "checkIds": [
+            "check-bounded-expansion"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "effective_group_type"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_discovery.rs",
+              "symbol": "append_source"
+            }
+          ]
+        },
+        {
+          "id": "task-resource-ids",
+          "title": "Reject fragments and non-portable resource ids",
+          "descriptionMarkdown": "Implement design `resource-ids` in `normalize` and `ResourceId::parse`:\n\n- **Reject:** `#` in ids, control characters, `< > \" | ? *`, segments ending in a dot or space (other than `..`), and Windows device names in any case, with or without an extension.\n- **Keep:** fragments in `ResourceId::resolve` references, and the existing rules.\n\n`resource_id_adversarial` and `resource_id_drive_prefix` must keep passing unchanged.",
+          "criterionIds": [
+            "ids.fragment",
+            "ids.portable"
+          ],
+          "designIds": [
+            "resource-ids"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-resource-id-portability"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resource.rs",
+              "symbol": "normalize"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/tests/resource_id_drive_prefix.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-3",
+      "title": "Token document conformance (Format module)",
+      "dependsOn": [
+        "sprint-2"
+      ],
+      "checkIds": [
+        "check-format-structure",
+        "check-type-determination",
+        "check-reference-positions"
+      ],
+      "tasks": [
+        {
+          "id": "task-format-structure",
+          "title": "Reject token children, `$value`+`$ref`, non-token `$root`, empty names and mistyped metadata",
+          "descriptionMarkdown": "Implement design `format-structure` in `flatten_group`:\n\n- token objects must have no non-`$` members, no `$root`, and not both `$value` and `$ref`;\n- `$root` must be a token;\n- there is no token-level `$ref` at a source root;\n- names are non-empty;\n- `$description` is a string, `$deprecated` a boolean or string, and `$extensions` an object (on tokens, groups and roots).\n\n**Existing tests.** Update any test that relied on silently ignored children.\n\n**Ratchet.** Remove these fixtures from `KNOWN_GAPS`: `group/both-value-and-children`, the four `metadata/*` fixtures, and `references/ref-and-value-both-present`.",
+          "criterionIds": [
+            "format.children",
+            "format.root-token",
+            "format.metadata-types"
+          ],
+          "designIds": [
+            "format-structure",
+            "conformance-bar"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-format-structure"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "flatten_group"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "validate_name"
+            }
+          ]
+        },
+        {
+          "id": "task-type-order",
+          "title": "Spec type-determination order and reference type mismatches",
+          "descriptionMarkdown": "Implement design `type-order`:\n\n- record each token's own type and its group-inherited type separately during flattening;\n- in `resolve_token`, apply own → whole-reference target → group → error, with token-level `$ref` included;\n- report `reference type mismatch` when an own type differs from the whole-reference target's type.\n\nCover with the `type_determination` group: an alias in a differently typed group, a token-level `$ref` to a non-token location that inherits the group type, and a `fontWeight` → `number` mismatch.",
+          "criterionIds": [
+            "types.order",
+            "types.token-ref",
+            "types.mismatch"
+          ],
+          "designIds": [
+            "type-order"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-type-determination"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "resolve_token"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "whole_token_reference"
+            }
+          ]
+        },
+        {
+          "id": "task-reference-positions",
+          "title": "Curly-brace reference positions and composite member type checks",
+          "descriptionMarkdown": "Implement design `reference-positions`:\n\n- thread a position context through `resolve_value`;\n- add the static table of (composite type, member) → expected type, including array elements;\n- reject curly-brace strings outside allowed positions;\n- type-check curly-brace targets at member positions.\n\n**Positive fixtures.** Every positive corpus reference fixture must keep passing.\n\n**Ratchet.** Remove the four `*-curly-brace-in-subvalue` fixtures from `KNOWN_GAPS`.\n\n**Docs.** The `fontFamily` array-alias example in `docs/04-aliases-and-references.md` becomes invalid. Leave the docs for `task-docs`, but note it in the commit.",
+          "criterionIds": [
+            "refs.curly-positions",
+            "refs.member-types"
+          ],
+          "designIds": [
+            "reference-positions"
+          ],
+          "dependsOn": [
+            "task-type-order"
+          ],
+          "checkIds": [
+            "check-reference-positions"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "resolve_value"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/value.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-4",
+      "title": "Strict values with opt-in RayX extensions",
+      "dependsOn": [
+        "sprint-3"
+      ],
+      "checkIds": [
+        "check-value-extensions"
+      ],
+      "tasks": [
+        {
+          "id": "task-value-extensions",
+          "title": "Strict value validation by default; `RuntimeOptions` and the RayX profile",
+          "descriptionMarkdown": "Implement design `strict-default-extensions`.\n\n**New API.**\n- `RuntimeOptions` and `ValueExtensions` (with the `rayx()` profile).\n- `DtcgRuntime::with_options`, `from_json_with_options` and `from_envelope_with_options`.\n- `validate_value_with`, with `validate_value` strict.\n\n**Wiring.** Pass the runtime's extensions to validation and to the `lineHeight` entry of the reference-position table.\n\n**Existing tests.** Switch `tests/rayx_export_types.rs` to `ValueExtensions::rayx()`, and pin its rejection without the profile in the new `value_extensions` group.\n\n**Ratchet.** Remove `typography/typography-lineHeight-wrong-type` from `KNOWN_GAPS`.",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "designIds": [
+            "strict-default-extensions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-value-extensions"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/value.rs",
+              "symbol": "validate_value"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/runtime.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/tests/rayx_export_types.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-5",
+      "title": "Merged-document resolution, metadata and incremental correctness",
+      "dependsOn": [
+        "sprint-4"
+      ],
+      "checkIds": [
+        "check-merged-resolution",
+        "check-token-metadata",
+        "check-incremental-consistency"
+      ],
+      "tasks": [
+        {
+          "id": "task-merged-structure",
+          "title": "Resolve from one merged token structure",
+          "descriptionMarkdown": "Implement design `merged-structure`:\n\n- fold discovery's terminal occurrences into a merged tree, with per-key group properties, whole-token replacement, a provenance map and definition sequence numbers;\n- report collision errors;\n- flatten the merged tree once, with type inheritance and dependency-ordered `$extends` on the merged tree (keeping the `bounded-work` memoization and limits);\n- resolve pointers against the merged tree;\n- fold preview occurrences in last.\n\n**Existing tests.** The groups named in `merge.compatibility` must keep passing, changed only where an expectation intentionally moves. Record each change in the commit.\n\n**Docs example.** The overlay example from `docs/06-resolvers-and-modifiers.md` that previously failed becomes a test case.",
+          "criterionIds": [
+            "merge.group-properties",
+            "merge.type-inheritance",
+            "merge.extends",
+            "merge.collision",
+            "merge.pointers",
+            "merge.compatibility"
+          ],
+          "designIds": [
+            "merged-structure",
+            "bounded-work"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-merged-resolution"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "resolve_sources"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "flatten_group"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/runtime.rs",
+              "symbol": "preview_sources"
+            }
+          ]
+        },
+        {
+          "id": "task-token-metadata",
+          "title": "Expose `$description`, `$deprecated` (with inheritance) and group metadata",
+          "descriptionMarkdown": "Implement design `metadata-model`:\n\n- `Deprecation`;\n- `ResolvedToken::description` and `deprecated`;\n- `ResolvedGroup` with `ResolvedTokens::group` and `groups`;\n- deprecation inheritance with `false` overrides, evaluated on the merged tree;\n- `$extends`-produced groups carrying the extended group's properties.\n\nThe fingerprint stays metadata-neutral.",
+          "criterionIds": [
+            "meta.token",
+            "meta.deprecated-inheritance",
+            "meta.groups"
+          ],
+          "designIds": [
+            "metadata-model"
+          ],
+          "dependsOn": [
+            "task-merged-structure"
+          ],
+          "checkIds": [
+            "check-token-metadata"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "ResolvedToken"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "ResolvedTokens"
+            }
+          ]
+        },
+        {
+          "id": "task-incremental",
+          "title": "Correct affected re-resolution on the merged model",
+          "descriptionMarkdown": "Implement design `incremental-model`.\n\n**Affected set:** changed tokens, group-prefix expansion, removed and renamed paths, and readers of document pointers into the replaced document. Close it over reverse dependencies, including edges to removed paths, and validate every member.\n\n**Output:**\n- `AffectedResolution::removed()` and the new order;\n- `apply_affected` reconciles removals, additions and moves.\n\n**Also:**\n- detect `$extends` only from group members;\n- roll back on any non-`Ready` result.\n\n**Tests.** Turn the audit probes into tests: an aliased-token deletion, a group `$type` edit, an `$extensions` pointer edit, an override move, and an `$extends` string inside `$extensions`.\n\n**Existing tests.** `incremental_resolution` must keep passing.",
+          "criterionIds": [
+            "incr.rollback",
+            "incr.group-edits",
+            "incr.pointer-deps",
+            "incr.snapshot-equality",
+            "incr.extends-detection"
+          ],
+          "designIds": [
+            "incremental-model"
+          ],
+          "dependsOn": [
+            "task-merged-structure",
+            "task-token-metadata"
+          ],
+          "checkIds": [
+            "check-incremental-consistency"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "resolve_affected"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/runtime.rs",
+              "symbol": "replace_json_and_resolve_affected"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/affected_resolution.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-6",
+      "title": "Resolver documents, step consistency and inputs",
+      "dependsOn": [
+        "sprint-5"
+      ],
+      "checkIds": [
+        "check-resolver-document-validation",
+        "check-corpus-complete",
+        "check-resolution-step-consistency",
+        "check-input-selection"
+      ],
+      "tasks": [
+        {
+          "id": "task-resolver-validation",
+          "title": "Validate resolver members, `resolutionOrder` and context counts",
+          "descriptionMarkdown": "Implement design `resolver-validation` (validation part).\n\n**Rules:**\n- allowed-member tables for the root, sets, modifiers and inline steps;\n- root `$extensions` rejected, `$defs` and `$schema` allowed;\n- an empty `resolutionOrder` rejected;\n- single-context modifiers rejected.\n\n**Scope.** The rules apply to nested resolvers and envelope `data`.\n\n**Existing tests.** `alias_overlay` and other tests that use single-context modifiers or extra resolver members change only where the new rules require. Record each change.\n\n**Ratchet.** Remove the five resolver fixtures from `KNOWN_GAPS`. `KNOWN_GAPS` must then be empty, which completes `corpus.complete`; `check-corpus-complete` verifies it.",
+          "criterionIds": [
+            "resdoc.members",
+            "resdoc.order-and-contexts",
+            "corpus.complete"
+          ],
+          "designIds": [
+            "resolver-validation",
+            "conformance-bar",
+            "corpus-ratchet"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-resolver-document-validation",
+            "check-corpus-complete"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_discovery.rs",
+              "symbol": "validate_resolver"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver_definition.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/envelope.rs"
+            }
+          ]
+        },
+        {
+          "id": "task-step-consistency",
+          "title": "One effective step definition for every API; override-aware reference sites",
+          "descriptionMarkdown": "Implement design `resolver-validation` (consistency part):\n\n- an `effective_steps` function, used by discovery, input validation, `modifiers()` and `normalize_selection`, that honors `$ref` sibling overrides;\n- duplicate modifier names and unnamed inline modifiers rejected consistently;\n- token-document roots with a `modifiers` group report no axes;\n- `source_references` walks reference objects that target resolvers through their overlaid `sets` and `modifiers`.\n\nTurn the planning and audit probes into tests: a step `default` override with and without a root default, a root and inline modifier with the same name, and an override-site listing.",
+          "criterionIds": [
+            "steps.overrides",
+            "steps.names",
+            "steps.reference-sites"
+          ],
+          "designIds": [
+            "resolver-validation"
+          ],
+          "dependsOn": [
+            "task-resolver-validation"
+          ],
+          "checkIds": [
+            "check-resolution-step-consistency"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/selection.rs",
+              "symbol": "modifier_axes"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+              "symbol": "validate_inputs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_references.rs",
+              "symbol": "inspect"
+            }
+          ]
+        },
+        {
+          "id": "task-inputs",
+          "title": "Case-insensitive inputs, nested input scope and JSON inputs",
+          "descriptionMarkdown": "Implement design `input-semantics`:\n\n- exact-then-case-folded matching, with ambiguity errors and declared spellings in `normalize_selection`;\n- unknown-key validation against the union of the modifiers declared by reached resolvers, after discovery;\n- per-resolver application of inputs and defaults;\n- inputs ignored when no modifiers are declared;\n- `selection_from_json` and `DtcgError::InvalidInput`.\n\n**Existing tests.** `resolver_2025_10` input expectations change only where case-insensitivity or the scope rule requires it.",
+          "criterionIds": [
+            "inputs.case",
+            "inputs.scope",
+            "inputs.json"
+          ],
+          "designIds": [
+            "input-semantics"
+          ],
+          "dependsOn": [
+            "task-step-consistency"
+          ],
+          "checkIds": [
+            "check-input-selection"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/selection.rs",
+              "symbol": "normalize"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_discovery.rs",
+              "symbol": "Discovery"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/runtime.rs",
+              "symbol": "inspect_source"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-7",
+      "title": "Typed values, derive hardening and export",
+      "dependsOn": [
+        "sprint-6"
+      ],
+      "checkIds": [
+        "check-typed-values",
+        "check-derive-hardening",
+        "check-derive-compile-fail",
+        "check-document-export"
+      ],
+      "tasks": [
+        {
+          "id": "task-typed-values",
+          "title": "Typed value model for all DTCG types",
+          "descriptionMarkdown": "Implement design `typed-values`:\n\n- the `values` module types, `TypedValue` and `ResolvedToken::typed`;\n- `FromDtcgValue` impls;\n- the alpha default, gradient clamping, the font-weight keyword table, the shadow layer and `inset` defaults, and `Dimension::to_px`;\n- the extension types gated by `ValueExtensions`;\n- `f32` overflow reported as an error.\n\nThe tests cover every type with at least one positive corpus fixture value.",
+          "criterionIds": [
+            "values.model",
+            "values.semantics",
+            "values.conversion"
+          ],
+          "designIds": [
+            "typed-values",
+            "strict-default-extensions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-typed-values"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/from_dtcg_value.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/value.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/lib.rs"
+            }
+          ]
+        },
+        {
+          "id": "task-derive",
+          "title": "Harden the projection derives and add `Option<T>` fields",
+          "descriptionMarkdown": "Implement design `derive-design` in `dtcg_runtime_derive`:\n\n- strict attribute models with spanned errors;\n- fully qualified generated paths and `unraw()` identifiers;\n- `Option<T>` leaf fields;\n- per-field bounds;\n- `trybuild` as a dev-dependency (declared once in `[workspace.dependencies]`), with `tests/compile_fail.rs` and `tests/ui/*.rs` plus `.stderr` snapshots;\n- the misnamed `tests/trybuild.rs` renamed to `tests/derive_shapes.rs`.\n\n**Unchanged.** `rest` stays a `Default` placeholder.\n\n**Tests.** The runtime-behavior cases go in `tests/derive_hardening.rs`.",
+          "criterionIds": [
+            "derive.optional",
+            "derive.hygiene",
+            "derive.attributes",
+            "derive.generics",
+            "derive.compile-fail"
+          ],
+          "designIds": [
+            "derive-design"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-derive-hardening",
+            "check-derive-compile-fail"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime_derive/src/lib.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime_derive/Cargo.toml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime_derive/tests/trybuild.rs"
+            }
+          ]
+        },
+        {
+          "id": "task-export",
+          "title": "Export resolved tokens as a DTCG document",
+          "descriptionMarkdown": "Implement design `export-format` as `ResolvedTokens::to_document`.\n\n**Round-trip.** The tests round-trip:\n- the `merged_resolution` and `token_metadata` scenarios;\n- every positive official format fixture.\n\nCompare paths, types, values, descriptions, deprecation and extensions after re-resolution.",
+          "criterionIds": [
+            "export.document",
+            "export.roundtrip"
+          ],
+          "designIds": [
+            "export-format",
+            "metadata-model"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-document-export"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/resolver.rs",
+              "symbol": "ResolvedTokens"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-8",
+      "title": "Documentation, doctests and migration notes",
+      "dependsOn": [
+        "sprint-7"
+      ],
+      "checkIds": [
+        "check-doctests"
+      ],
+      "memoryScopes": [
+        "repository",
+        "repository/validation"
+      ],
+      "tasks": [
+        {
+          "id": "task-docs",
+          "title": "Compile the docs as doctests and update them to the new behavior",
+          "descriptionMarkdown": "Implement design `docs-as-tests`: `#[cfg(doctest)]` modules in `lib.rs` that include the README and every `docs/*.md` chapter.\n\n**Update the README and chapters 1–14** for every behavior change in this epic. Chapter 12 states the official corpus result, the conformance tiers and every implementation-defined choice.\n\n**Remove outdated passages:**\n- the old surprises (type not inherited by overrides, `$extends` limited to one source, the nested-selection constraint, `$schema` rejection);\n- the old `Projection` usage for alias errors;\n- fontFamily array aliases;\n- default-on RayX extensions;\n- `RuntimeLimits` literals.\n\nEvery Rust example must compile under the doctest check.",
+          "criterionIds": [
+            "docs.tested",
+            "docs.updated"
+          ],
+          "designIds": [
+            "docs-as-tests"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-doctests"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "README.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/README.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/lib.rs"
+            }
+          ]
+        },
+        {
+          "id": "task-changelog",
+          "title": "Write `CHANGELOG.md` with consumer migration notes",
+          "descriptionMarkdown": "Create `CHANGELOG.md` (Keep a Changelog format) with an *Unreleased* section covering every breaking and behavior change of this epic.\n\n**Migration subsections** for RayX (`rayx_theme`, the Test Suite DTCG assets, the `ModifierAxis` literals in `tests/dtcg_theme_envelope.rs`) and for RayX.TokenEditor (diagnostic mapping of `UnresolvedReference`, and fixtures with unknown token members, root `$extensions`, `x-*` resolver members and single-context modifiers).\n\n**Consumer repositories.** Read them only to name the affected files. Do not modify or build them.",
+          "criterionIds": [
+            "docs.changelog"
+          ],
+          "designIds": [
+            "docs-as-tests",
+            "strict-default-extensions",
+            "api-evolution"
+          ],
+          "dependsOn": [
+            "task-docs"
+          ],
+          "checkIds": [],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "README.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,613 @@
+{
+  "schemaVersion": 6,
+  "epicId": "dtcg-2025-10-conformance",
+  "scopeMarkdown": "## Goal\n\nMake `dtcg_runtime` and `dtcg_runtime_derive` fully conformant with the DTCG 2025.10 Final Community Group Reports (Format, Color and Resolver modules, published 2025-10-28 with errata through 2026-01). Fix the defects found by the 2026-10-06 code audit, and add the functionality a conformant runtime is missing. \"Fully conformant\" is measured two ways:\n\n1. **The official corpus.** The 2025.10 conformance corpus from `design-tokens/community-group` at commit `882ebd6716abef9a46d8ef5fb12e82009d6cee2e` has 220 format and 30 resolver fixtures. Every positive fixture must be accepted and every negative fixture rejected.\n2. **The specification text.** Rules the corpus does not test are taken from the spec text. Where the published text contradicts itself, design decision `conformance-bar` records which reading wins.\n\n## Baseline (main at `552f229`, measured 2026-10-06 in a scratch harness)\n\n**Against the official corpus**\n\n- As-is: 127/220 format and 21/30 resolver fixtures pass.\n  - Every format *positive* fixture fails, for one reason: the root `$schema` member is rejected.\n- After stripping `$schema` (and selecting each modifier's default or first context): 209/220 format and 25/30 resolver fixtures pass. The remaining gaps:\n  - **Format, 11.**\n    - `group/both-value-and-children`\n    - `metadata/deprecated-number`, `metadata/deprecated-object`, `metadata/description-not-string`, `metadata/extensions-not-object`\n    - `references/ref-and-value-both-present`\n    - `references/{dimension,color,duration,cubicBezier}-curly-brace-in-subvalue`\n    - `typography/typography-lineHeight-wrong-type`, which the default-on RayX `lineHeight` extension accepts.\n  - **Resolver, 5.**\n    - `empty-resolution-order`\n    - `set-with-additional-properties`, `modifier-with-additional-properties`, `root-with-additional-properties`\n    - `modifier-single-context`\n\n**Spec deviations the corpus does not test**\n\n- The type-determination order is reversed: an inherited group `$type` wins over an alias target's type, against Format §5.2.2.\n- Types and `$extends` are evaluated per source, not on the merged token structure (Resolver §6.2–6.3). As a result:\n  - an overriding token does not inherit the `$type` of its group from an earlier source;\n  - `$extends` cannot target a group defined in another source.\n- `$deprecated` and `$description` are neither validated nor surfaced, and group `$deprecated` inheritance is missing.\n- A reference whose explicit `$type` differs from its target's type is accepted when the value shapes happen to match. Composite sub-value references are not type-checked.\n- Inputs are case-sensitive (Resolver §5.1 says SHOULD be case-insensitive).\n- Explicitly selected modifiers must be declared by every nested resolver, and by the root when previewing.\n\n**Code audit, 2026-10-06 (37 findings, 33 confirmed by probes)**\n\n- **Unbounded work.** Small hostile documents defeat `RuntimeLimits`:\n  - document-pointer chains overflow the stack;\n  - pointer and `$extends` fan-out is exponential;\n  - `$extends` chains are O(n⁴);\n  - discovery fan-out through empty sets is exponential.\n- **Pointer handling.** Pointer cycle detection gives false positives across sources.\n- **`$ref` resolution steps.** Sibling overrides on `resolutionOrder` `$ref` steps are honored by `resolve` but not by `modifiers()`, `normalize_selection` or input validation.\n- **Source references.** `source_references` misses reference sites that live in reference-object overrides.\n- **Incremental resolution.**\n  - Its rollback guarantee can be broken by deleting an aliased token.\n  - Snapshots go stale after group-level edits.\n  - Snapshot fingerprints drift from a full resolve.\n- **Resource ids.**\n  - `ResourceId::parse` and `set_root` silently drop fragments.\n  - Ids accept NUL bytes, Windows device names and characters Windows reserves.\n- **Derive macros.**\n  - A local `Result` alias breaks the generated code.\n  - Unknown struct-level attributes are silently ignored.\n  - Conflicting field attributes are accepted.\n  - Generic leaf fields are rejected.\n  - Raw identifiers leak into token paths.\n- **API gaps:**\n  - public enums and structs are not `#[non_exhaustive]`;\n  - `Resolution::map` is private;\n  - `DtcgError` is not `Clone`/`PartialEq`;\n  - the fingerprint depends on member order for equal values;\n  - an envelope cannot be replaced;\n  - `max_alias_depth: 0` rejects literal tokens.\n- **Previously reported:**\n  - the `ModifierAxis` doc comment is wrong about ordering;\n  - the `InvalidResourceId`/`InvalidPointer` messages are missing a closing backtick;\n  - the diagnostics module doc names a non-existent `rayx_diagnostics` feature.\n\n**Already fixed, not re-planned:** Windows drive-prefixed resource ids (`C:/x`), by commit `7bc0407`, which rejects `:` in every id segment. Requirement `ids` extends that hardening.\n\n## In scope\n\n- A vendored corpus with a ratchet test, and API foundations.\n- Bounded resolution work, and resource-id hardening.\n- Format-module structure and metadata validation, the type-determination order, and reference positions and type compatibility.\n- Strict value validation by default, with the RayX value extensions opt-in.\n- Merged-document resolution (group-property merge, cross-source type inheritance and `$extends`, pointers against the merged structure) and metadata exposure.\n- Correct incremental resolution.\n- Resolver-document validation, `$ref` step overrides, case-insensitive inputs with a JSON input API, and nested-resolver input semantics.\n- A typed value model, derive hardening with `Option<T>` fields, and resolved-document export.\n- Documentation compiled as doctests, and a CHANGELOG with consumer migration notes.\n\n## Out of scope (follow-ups)\n\n- **Consumer changes.** Code changes in RayX (`../RayX`) and RayX.TokenEditor (`../RayX.TokenEditor`) are excluded, and so is building them: a gpux refactor currently breaks their builds. This epic documents each migration they need, and they are validated after the refactor lands.\n- **Release work:** bumping the version and publishing to crates.io.\n- **Optional (MAY) features:**\n  - remote/URL document references;\n  - JSONC/JSON5 resolver input;\n  - case-only name-collision warnings, and a general warnings channel.\n- **Other deferred work:**\n  - aggregating several input errors into one report (informative only in the spec);\n  - parse caching or other performance work beyond the bounds in requirement `bounds`;\n  - changing the `TypeRegistry` parameter of `DtcgTokens::project_at`, which RayX's generated code relies on;\n  - removing the vestigial public `DocumentCatalog` and `TypeRegistry` types.\n\n## Assumptions and unresolved product decisions (recorded defaults)\n\n1. **Strict by default.** Every rule that the spec states as MUST, or that the official corpus enforces, is an error by default.\n   - The RayX value extensions (`dev.rayx.blur`, and typography `lineHeight` as a dimension) become opt-in through runtime options. Both RayX and RayX.TokenEditor must opt in.\n   - There is no lenient structural mode. Consumer fixtures that put unknown non-`$` members on tokens, `$extensions` on the resolver root, `x-*` members in resolvers, or single-context modifiers must be migrated.\n2. **Token-level `$ref` follows the published Example 32 and the corpus**, so it targets `…/$value`. A pointer to the token object (Example 21) stays an error until spec errata settle the question.\n3. **Gradient positions are clamped to [0, 1] in the typed model** (Format §9.7 MUST). Resolved JSON values keep the authored numbers.\n4. **`xyz-d65`/`xyz-d50` components stay bounded to [0, 1]**, following the spec's letter, the schema and the corpus.\n5. **Nested resolvers remain a runtime extension.** The spec does not define them, so this epic defines their input semantics.\n6. **Token iteration order is unchanged:** authored order, with each path at its last definition. The spec does not define output order.\n",
+  "constraintsMarkdown": "- **Dependencies and I/O.**\n  - Keep `dtcg_runtime` I/O-free and UI-neutral, with no dependency on RayX, gpux or GPUI.\n  - New runtime dependencies need a design decision.\n  - A `trybuild` dev-dependency of the derive crate is allowed.\n- **Consumer repositories.** Do not build, test or modify `../RayX` or `../RayX.TokenEditor`; their builds are broken by an unrelated gpux refactor. Read them only to document migrations.\n- **Breaking changes are allowed** (the crates are 0.x and unpublished). Every breaking change and every behavior change must be listed in `CHANGELOG.md` together with the matching consumer migration.\n- **Existing tests.** An existing test group may be changed only when an intended behavior change alters its expectation. Mention each such change in the commit message.\n- **Test groups.**\n  - Every task that adds or changes behavior adds a new, separately selectable test group: `crates/<crate>/tests/<group>.rs`.\n  - While iterating, run only that group. Never run the whole workspace before the epic's final checks.\n- **Corpus ratchet.**\n  - When a task fixes an official-corpus fixture, it removes the fixture's id from `KNOWN_GAPS` in `tests/official_test_suite.rs`.\n  - The corpus group itself runs only at the end of the epic.\n- **Packaging.**\n  - `cargo package --workspace` must keep passing.\n  - The vendored corpus must be excluded from the published package.\n- **Portability.** The `wasm32-unknown-unknown` build must keep passing.\n- **Commits.** Use Conventional Commits with meaningful scopes and no co-author lines.\n- **Spec text in repository files.** Paraphrase it, with section references. Never copy long passages.\n",
+  "requirements": [
+    {
+      "id": "corpus",
+      "title": "Official DTCG 2025.10 conformance corpus",
+      "descriptionMarkdown": "Vendor the official corpus and test against it so that conformance is measured, not asserted.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/Cargo.toml"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "corpus.vendored",
+          "descriptionMarkdown": "The official corpus is vendored under `crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/`. It comes from the `test-suite/tests/2025.10/` tree of `design-tokens/community-group` at commit `882ebd6716abef9a46d8ef5fb12e82009d6cee2e`, and includes:\n\n- both manifests;\n- all 220 format and 30 resolver fixtures.\n\nThe same directory has:\n\n- a `LICENSE` notice: the W3C 3-clause BSD License that covers the repository's test suites, with attribution;\n- a `README.md` that records the upstream URL, the commit, and how to update the copy.\n\n`cargo package --list -p dtcg_runtime` must not list any fixture file.",
+          "verification": "automated"
+        },
+        {
+          "id": "corpus.harness",
+          "descriptionMarkdown": "`crates/dtcg_runtime/tests/official_test_suite.rs` reads both manifests and evaluates every entry:\n\n- **A format fixture** is a token document. It is accepted when `DtcgRuntime::from_json` and `resolve(&[])` both succeed with `Ready`.\n- **A resolver fixture** is a root resolver. It is accepted when `validate_complete()` returns `Ready(())`, and then `resolve` succeeds for the selection that picks each modifier's default context, or its first context when it has no default.\n- **Positive and negative.** A positive fixture must be accepted. A negative fixture must fail with `Err`, never with `Missing` and never with a panic.\n- **Ratchet.** The test asserts that the set of fixture ids that fail their expectation is *exactly* the `KNOWN_GAPS` list in the file. A fixed gap that was not removed fails the test, and so does any new failure.\n- **Report.** A failure message lists every mismatching fixture with its manifest `purpose` and the observed outcome.\n- **Summary.** The test prints exactly `official corpus: <passed> passed, <gaps> known gaps`.",
+          "verification": "automated"
+        },
+        {
+          "id": "corpus.complete",
+          "descriptionMarkdown": "At epic completion `KNOWN_GAPS` is empty, all 250 fixtures meet their expectation, and the harness prints `official corpus: 250 passed, 0 known gaps`.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "title": "Public API foundations",
+      "descriptionMarkdown": "Prepare the public API so that later conformance work can add behavior without repeated breaking changes, and fix the reported API and message defects.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/error.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "Resolution"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "api.nonexhaustive",
+          "descriptionMarkdown": "These items are `#[non_exhaustive]`:\n\n- `DtcgError`\n- `ValueValidationError`\n- `DtcgDiagnosticCode`\n- `RuntimeLimits`\n- `ResolvedToken`\n- `ModifierAxis`\n- `DocumentRequest`\n\nBecause external crates can no longer build `RuntimeLimits` with a struct literal, it gains chainable setters: `with_max_documents`, `with_max_reference_depth` and `with_max_alias_depth`, plus a setter for every limit added later. Existing integration tests that built it with a literal use the setters instead.\n\n`DtcgRuntime` gains:\n\n- `limits(&self) -> &RuntimeLimits`;\n- a `Debug` impl that prints the root, the limits, the catalog revision and the document ids, never document bodies.",
+          "verification": "automated"
+        },
+        {
+          "id": "api.errors",
+          "descriptionMarkdown": "**New variant.** `DtcgError` gains `UnresolvedReference { resource, path, target, message }`, where:\n\n- `resource` is the document of the referring token;\n- `path` is the referring token path;\n- `target` is the unresolved alias path or pointer.\n\nIt replaces `DtcgError::Projection` for:\n\n- missing alias targets, including `{group}` and empty `{}` aliases;\n- `$extends` targets that are missing;\n- malformed `$extends` values.\n\n`Projection` is used only by projection. `DtcgDiagnosticCode` gains a matching code, and `DtcgDiagnostic::from_error` maps the variant to it.\n\n**Other changes:**\n\n- `DtcgError` derives `Clone` and `PartialEq`.\n- The `InvalidResourceId` and `InvalidPointer` messages close their backticks, for example ``invalid logical resource id `/abs.json` ``.",
+          "verification": "automated"
+        },
+        {
+          "id": "api.helpers",
+          "descriptionMarkdown": "**`Resolution<T>`** gains public `map`, `is_ready`, `is_missing`, and `missing(&self) -> Option<&[DocumentRequest]>`.\n\n**`SourceOccurrence`** gains `resource(&self) -> &ResourceId`.\n\n**`DtcgRuntime::replace_envelope(resource_id, json)`** re-parses a `.tokeneditor` envelope and replaces the stored root resolver text, with the same checks as `from_envelope`. After that, resolution uses the new resolver. Before this change, `replace_json` stored the envelope itself as the root.",
+          "verification": "automated"
+        },
+        {
+          "id": "api.fingerprint",
+          "descriptionMarkdown": "`ResolvedTokens::fingerprint()` hashes every resolved value with object members in a canonical order (sorted keys, recursively), so equal values give equal fingerprints whatever their authored member order. Two resolutions whose token values differ only in object member order have equal fingerprints and compare equal with `PartialEq`.",
+          "verification": "automated"
+        },
+        {
+          "id": "api.docs",
+          "descriptionMarkdown": "- The `ModifierAxis` doc comment says that axes are listed in `resolutionOrder` order, followed by the remaining root modifiers in **authored** order.\n- The `diagnostics` module doc names the `diagnostics` feature.\n- Every public item touched by this epic has a doc comment that describes its current behavior.",
+          "verification": "manual"
+        }
+      ]
+    },
+    {
+      "id": "bounds",
+      "title": "Bounded resolution work on hostile input",
+      "descriptionMarkdown": "`RuntimeLimits` must bound all work and stack depth, so that no small document can crash the process or run for exponential time. JSON Pointer syntax must follow RFC 6901 exactly.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/json_pointer.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "bounds.pointers",
+          "descriptionMarkdown": "**Hop counting.** Document-pointer hops count toward `max_alias_depth` in both resolution and dependency collection. A chain of 100,000 `$extensions` pointers (`p_i = {\"$ref\":\"#/$extensions/p_{i-1}\"}`) returns `LimitExceeded { kind: \"alias depth\" }`. It never overflows the stack, including on a 1 MiB thread stack, which the test enforces by running the call on a spawned thread with that stack size.\n\n**Memoization and value size.** Resolved document-pointer targets are memoized per (document, pointer), together with their node count. A new `RuntimeLimits::max_value_nodes` (default 4,000,000; setter `with_max_value_nodes`) bounds the total number of JSON nodes in one resolution's resolved values. Sizes are checked before a value is materialized, so a 1.4 KB document whose 40 pointer levels each reference the previous level twice returns `LimitExceeded { kind: \"value nodes\" }` without building the exponential value. The test check has a 300-second timeout.\n\n**Cycle detection** keys visited pointers by (document identity, pointer):\n- two sources that use the same pointer text with different targets resolve in either order;\n- a reference whose sibling override points at its own target is not reported as circular, because the pointer is popped before the overrides resolve.",
+          "verification": "automated"
+        },
+        {
+          "id": "bounds.alias-depth",
+          "descriptionMarkdown": "`max_alias_depth` counts reference hops only:\n\n- with a limit of 0, documents that contain only literal tokens still resolve, and the first alias fails with `LimitExceeded { kind: \"alias depth\" }`;\n- with a limit of N, a chain of N hops resolves and a chain of N+1 hops fails;\n- the result does not depend on the order in which the chain's tokens are authored.",
+          "verification": "automated"
+        },
+        {
+          "id": "bounds.expansion",
+          "descriptionMarkdown": "**`max_tokens`.** A new limit, default 100,000, bounds the number of flattened tokens, counting those produced by `$extends`. A 1 KB document whose `$extends` fan-out doubles at each of 30 levels returns `LimitExceeded { kind: \"tokens\" }`.\n\n**`$extends` chains.** A linear chain of 400 `$extends` groups resolves with memoized group types (the test check timeout is 300 s).\n\n**Discovery.** Every expansion step counts against `max_documents`, including expansions of sets that contribute no sources. A 1.3 KB resolver whose sets each reference the next set four times, 12 levels deep, ending in an empty set, returns `LimitExceeded { kind: \"documents\" }` from `resolve`, `validate_complete` and `inspect_source` alike.",
+          "verification": "automated"
+        },
+        {
+          "id": "pointers.syntax",
+          "descriptionMarkdown": "JSON Pointer `$ref` values and resource fragments follow RFC 6901 in URI-fragment form:\n\n- **Array indexes.** An index is `0`, or a digit sequence without a leading zero, matching only existing elements. `+1`, `01` and `-1` are rejected the same way by token-target and document pointers.\n- **Percent-encoding.** Sequences `%XX` are decoded before `~1`/`~0` unescaping, so `lib.json#/brand%20colors` addresses the member `brand colors`.\n- **Corpus.** The corpus's malformed-pointer negative fixtures stay rejected.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "ids",
+      "title": "Resource id hardening",
+      "descriptionMarkdown": "Resource ids must be unambiguous and portable, so that loaders can map them onto file systems safely. This extends the drive-prefix fix in commit `7bc0407`.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resource.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "ids.fragment",
+          "descriptionMarkdown": "`ResourceId::parse`, `set_root`, `provide_json`, `contains_document`, `replace_json` and `remove_document` reject an id that contains `#` with `InvalidResourceId`. A fragment no longer silently addresses the whole document. `ResourceId::resolve` keeps accepting fragments in references.",
+          "verification": "automated"
+        },
+        {
+          "id": "ids.portable",
+          "descriptionMarkdown": "Id segments are rejected with `InvalidResourceId` when they contain:\n\n- control characters, including NUL;\n- any of `<`, `>`, `\"`, `|`, `?` or `*`;\n- a trailing `.` or space (other than the `..` segment);\n- a Windows reserved device name: `CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9` or `LPT1`–`LPT9`, in any case, with or without an extension.\n\nExisting valid ids, Unicode names among them, keep working.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "format",
+      "title": "Token document structure and metadata (Format §5–§6)",
+      "descriptionMarkdown": "Reject the structural errors the Format module forbids, accept the root members the official corpus uses, and validate metadata value types.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "flatten_group"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "format.schema-root",
+          "descriptionMarkdown": "A string `$schema` member is accepted at a token document's source root, and ignored. Fragment sources are not roots, so the rule does not apply to them. `$schema` on a group or token, or a non-string `$schema`, fails with `DtcgError::Token` `unknown reserved property` or `` `$schema` must be a string``.",
+          "verification": "automated"
+        },
+        {
+          "id": "format.children",
+          "descriptionMarkdown": "These fail with `DtcgError::Token` naming the token path:\n\n- an object with `$value` that also has non-`$` members or a `$root` member: ``token `<path>` must not have children``;\n- an object with both `$value` and `$ref`.\n\nThe official fixtures `group/both-value-and-children` and `references/ref-and-value-both-present` are rejected.",
+          "verification": "automated"
+        },
+        {
+          "id": "format.root-token",
+          "descriptionMarkdown": "These fail with `DtcgError::Token`:\n\n- a `$root` member that is not a token (it has no `$value` and no token-level `$ref`);\n- a token-level `$ref` at a source root;\n- an empty token or group name.\n\nThey no longer produce tokens at paths such as `g.$root.x`, `\"\"` or `g.`.",
+          "verification": "automated"
+        },
+        {
+          "id": "format.metadata-types",
+          "descriptionMarkdown": "These fail with `DtcgError::Token`, at the token, group or source root that carries them:\n\n- `$description` that is not a string;\n- `$deprecated` that is neither a boolean nor a string;\n- `$extensions` that is not an object.\n\nThe four `metadata/*` negative fixtures listed in the baseline are rejected.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "types",
+      "title": "Type determination order (Format §5.2.2, §6.7.3)",
+      "descriptionMarkdown": "Determine each token's type in the order the spec defines, and report incompatible references.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "resolve_token"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "types.order",
+          "descriptionMarkdown": "A token's effective type is determined in this order:\n\n1. its own `$type`;\n2. otherwise, if its whole value is a reference (a curly-brace alias, a `{ \"$ref\": \"#/…/$value\" }` value, or a token-level `$ref` to `…/$value`), the referenced token's resolved type;\n3. otherwise the `$type` of the nearest ancestor group, after `$extends` is applied;\n4. otherwise it fails with `TokenType` `token requires a DTCG type`.\n\nSo an untyped alias inside a `$type: color` group that references a `dimension` token is a valid `dimension` token.",
+          "verification": "automated"
+        },
+        {
+          "id": "types.token-ref",
+          "descriptionMarkdown": "A token-level `$ref` follows the same order. When its pointer does not end at a token's `$value`, the token inherits the nearest group `$type`. For example, a `$type: number` group containing `{ \"$ref\": \"#/$extensions/x\" }` resolves as a number. A whole-value pointer ending in `/$value` whose prefix is not a token path is treated as a document pointer, not reported as a missing alias target.",
+          "verification": "automated"
+        },
+        {
+          "id": "types.mismatch",
+          "descriptionMarkdown": "A token whose own `$type` differs from the resolved type of the token its whole value references fails with `TokenType` `reference type mismatch: expected <T>, found <U>`, even when the value shapes are compatible. For example, `$type: fontWeight` aliasing a `number` token whose value is 400 fails.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "refs",
+      "title": "Reference positions and sub-value type compatibility (Format §7, §9)",
+      "descriptionMarkdown": "Curly-brace aliases are allowed only where the Format module permits them, and composite sub-value references must target tokens of the member's type.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "resolve_value"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "refs.curly-positions",
+          "descriptionMarkdown": "A curly-brace alias string is accepted only in these positions:\n\n1. as the whole `$value`;\n2. as a member of a composite value: `border` `color`/`width`/`style`; `transition` `duration`/`delay`/`timingFunction`; shadow `color`/`offsetX`/`offsetY`/`blur`/`spread`; gradient stop `color`/`position`; `typography` `fontFamily`/`fontSize`/`fontWeight`/`letterSpacing`/`lineHeight`;\n3. as an element of a shadow array, a gradient array or a `strokeStyle` `dashArray`.\n\nAnywhere else a curly-brace string fails with `DtcgError::Token` `curly-brace references are not allowed inside <type> values`. Examples are color `colorSpace`/`components`/`alpha`/`hex`, `dimension`/`duration` members, `cubicBezier` elements, `fontFamily` array elements, `lineCap`, and shadow `inset`.\n\nJSON Pointer `{ \"$ref\": … }` objects stay allowed at any depth. The four `*-curly-brace-in-subvalue` negative fixtures are rejected, and every positive reference fixture still passes.",
+          "verification": "automated"
+        },
+        {
+          "id": "refs.member-types",
+          "descriptionMarkdown": "A curly-brace alias in a composite position (item 2 or 3 of `refs.curly-positions`) must target a token whose type is the member's expected type, otherwise it fails with `TokenType` `reference type mismatch`. The expected types are:\n\n- `color` for color members;\n- `dimension` for widths, offsets, sizes and `dashArray` elements;\n- `strokeStyle` for `style`;\n- `duration` for `duration` and `delay`;\n- `cubicBezier` for `timingFunction`;\n- `number` for gradient `position` and for `lineHeight`, unless the RayX extension is enabled;\n- `fontFamily` and `fontWeight` for those members;\n- `shadow` for shadow array elements;\n- `gradient` for gradient array elements.\n\nThe resolved value is never flattened, so a reference to an array-valued shadow or gradient token inside an array fails validation.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "ext",
+      "title": "Strict values with opt-in RayX extensions",
+      "descriptionMarkdown": "Spec-conformant value validation by default. The RayX value-shape extensions remain available, but only when explicitly enabled.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/value.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/rayx_export_types.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "ext.strict-default",
+          "descriptionMarkdown": "By default:\n\n- typography `lineHeight` must be a number, or a reference to a `number` token;\n- `dev.rayx.blur` is an unsupported type.\n\nThe official fixture `typography/typography-lineHeight-wrong-type` is rejected, and `validate_value` applies the strict rules.",
+          "verification": "automated"
+        },
+        {
+          "id": "ext.opt-in",
+          "descriptionMarkdown": "A public `RuntimeOptions` carries `limits` and `extensions`. `ValueExtensions` has independent flags for the dimension `lineHeight` and the `dev.rayx.blur` type, and a `ValueExtensions::rayx()` profile that enables both.\n\n**Entry points.** `DtcgRuntime::with_options`, `DtcgRuntime::from_json_with_options`, `DtcgRuntime::from_envelope_with_options` and `validate_value_with(type, value, &extensions)` apply them.\n\n**Behavior with the RayX profile:**\n- every case in `tests/rayx_export_types.rs` passes;\n- a `lineHeight` alias to a `dimension` token is accepted;\n- every other rule stays strict.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "merge",
+      "title": "Merged-document resolution (Resolver §6.2–§6.3)",
+      "descriptionMarkdown": "Resolution behaves as if all active sources had been one token document: group trees are united, tokens are replaced whole, and type inheritance, `$extends` and pointers are evaluated on the merged structure.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "merge.group-properties",
+          "descriptionMarkdown": "Groups at the same path in different sources merge member by member. A group's `$type`, `$description`, `$deprecated`, `$extensions` and `$extends` merge per key: a later source's value replaces an earlier one, and a key the later source omits keeps the earlier value. Tokens are still replaced whole: a later token keeps none of the earlier token's members.",
+          "verification": "automated"
+        },
+        {
+          "id": "merge.type-inheritance",
+          "descriptionMarkdown": "A token added or overridden by a later source, without its own `$type`, inherits the group `$type` declared for its group in any earlier source. The overlay example from `docs/06-resolvers-and-modifiers.md` that used to fail with `token requires a DTCG type` now resolves `size.lg` as a `number`.",
+          "verification": "automated"
+        },
+        {
+          "id": "merge.extends",
+          "descriptionMarkdown": "`$extends` targets are resolved on the merged structure:\n\n- a group may extend a group defined in another source or file;\n- a group may extend a group that is itself produced by `$extends`. Extensions are applied in dependency order, and cycles still fail with `group extension cycle`.",
+          "verification": "automated"
+        },
+        {
+          "id": "merge.collision",
+          "descriptionMarkdown": "A path that is a token in one active source and a group in another fails with `DtcgError::Token` `path is a token in <resource> and a group in <resource>`.",
+          "verification": "automated"
+        },
+        {
+          "id": "merge.pointers",
+          "descriptionMarkdown": "Every JSON Pointer `$ref`, whether a token target or a document location, is evaluated against the merged structure. A pointer into `#/$extensions/…` declared by an earlier source resolves, and a later source's value for the same location wins.",
+          "verification": "automated"
+        },
+        {
+          "id": "merge.compatibility",
+          "descriptionMarkdown": "`ResolvedTokens::iter()` order is unchanged: authored order, with each path at its last definition. `ResolvedToken::source` names the document of the winning token definition.\n\nThe existing test groups `alias_overlay`, `resolver_2025_10`, `dtcg_2025_10_conformance` and `source_inspection` keep passing, changed only where requirement `merge` intentionally alters an expectation. Previews (`preview_source`, `preview_occurrence`) merge the previewed occurrences last.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "meta",
+      "title": "Metadata exposure (Format §5.2, §6.3; Resolver §8)",
+      "descriptionMarkdown": "Resolution preserves and exposes token and group properties, so that output keeps `$description`, `$deprecated` and `$extensions`.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "ResolvedToken"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "meta.token",
+          "descriptionMarkdown": "`ResolvedToken` gains:\n\n- `description: Option<Arc<str>>`, the token's own `$description`;\n- `deprecated: Deprecation`, an enum with `NotDeprecated`, `Deprecated` and `DeprecatedWithReason(Arc<str>)`.\n\nIts existing `extensions` field keeps the token's own `$extensions`. A token's `$description` and `$extensions` are never inherited from groups.",
+          "verification": "automated"
+        },
+        {
+          "id": "meta.deprecated-inheritance",
+          "descriptionMarkdown": "A group's `$deprecated` applies to every descendant token unless a nearer group or the token itself sets `$deprecated`. `false` cancels an inherited deprecation.\n\nThe rule is evaluated on the merged structure, and groups produced by `$extends` carry the extended group's properties.",
+          "verification": "automated"
+        },
+        {
+          "id": "meta.groups",
+          "descriptionMarkdown": "`ResolvedTokens::group(path)` returns a `ResolvedGroup` for any group path that has at least one resolved descendant token, including `\"\"` for the merged root. A `ResolvedGroup` exposes the group's effective `$type` (if any), `description`, own `deprecated` value and `extensions`, after merge and `$extends`. `ResolvedTokens::groups()` iterates them in path order.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "incr",
+      "title": "Correct incremental resolution",
+      "descriptionMarkdown": "Affected re-resolution must never accept a broken edit, and must yield exactly the full-resolution snapshot.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "resolve_affected"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "symbol": "replace_json_and_resolve_affected"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/affected_resolution.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "incr.rollback",
+          "descriptionMarkdown": "`replace_json_and_resolve_affected` validates every token whose resolution can change. These include:\n\n- dependents of deleted and renamed tokens;\n- tokens under changed group paths;\n- tokens that read document locations in the replaced document.\n\nIf any of them fails, the previous document is restored and the error is returned. Deleting a token that another token aliases, with `changed_paths` naming the deleted token, returns the `UnresolvedReference` error and leaves the catalog contents as they were before the call.",
+          "verification": "automated"
+        },
+        {
+          "id": "incr.group-edits",
+          "descriptionMarkdown": "A `changed_paths` entry that names a group selects every token under it. Changing a group's `$type`, `$deprecated` or `$extends` therefore updates its descendants' types and metadata in the affected result.",
+          "verification": "automated"
+        },
+        {
+          "id": "incr.pointer-deps",
+          "descriptionMarkdown": "Tokens whose values contain document pointers (not token-target pointers) into the replaced document are always affected, so an edit to `$extensions` data that such a pointer reads is reflected without naming any token path.",
+          "verification": "automated"
+        },
+        {
+          "id": "incr.snapshot-equality",
+          "descriptionMarkdown": "`AffectedResolution` exposes:\n\n- the removed paths, through `removed()`;\n- the resulting token order.\n\n`ResolvedTokens::apply_affected` applies removals, replacements, additions and moves. After any single-document edit (value change, override, addition, deletion, or a move that changes order), the patched snapshot equals a full `resolve` of the same selection: `PartialEq` and the fingerprint both match.",
+          "verification": "automated"
+        },
+        {
+          "id": "incr.extends-detection",
+          "descriptionMarkdown": "Only real `$extends` group members, not `$extends` keys inside `$extensions` or `$value` data, trigger the conservative \"every token is affected\" fallback. A document whose only `$extends` string is inside `$extensions` keeps a minimal affected set.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "resdoc",
+      "title": "Resolver document validation (Resolver §4)",
+      "descriptionMarkdown": "Reject the resolver documents that the official schema and corpus reject, and keep accepting the members the spec allows.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "symbol": "validate_resolver"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "resdoc.members",
+          "descriptionMarkdown": "These are the allowed members. Any other member fails with `InvalidDocument` `unknown resolver member <name> in <location>`:\n\n| Location | Allowed members |\n|---|---|\n| Resolver root | `name`, `version`, `description`, `sets`, `modifiers`, `resolutionOrder`, `$schema`, `$defs` |\n| Set | `description`, `sources`, `$extensions` |\n| Modifier | `description`, `contexts`, `default`, `$extensions` |\n| Inline set step | `type`, `name`, `description`, `sources`, `$extensions` |\n| Inline modifier step | `type`, `name`, `description`, `contexts`, `default`, `$extensions` |\n\nReference objects stay unrestricted, since their extra members are overrides. A root-level `$extensions` is rejected. `$defs` never causes an error.\n\nThe rules apply to root, nested and envelope resolvers alike, and `.tokeneditor` envelopes apply them to `data`. The three `*-with-additional-properties` negative fixtures are rejected, and `resolver-with-defs` and `resolver-with-extensions` pass.",
+          "verification": "automated"
+        },
+        {
+          "id": "resdoc.order-and-contexts",
+          "descriptionMarkdown": "These fail with `InvalidDocument`:\n\n- an empty `resolutionOrder`;\n- a modifier (root or inline) with exactly one context.\n\nThe `empty-resolution-order` and `modifier-single-context` negative fixtures are rejected, and the positive `resolver-with-empty-context-array` passes.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "steps",
+      "title": "Consistent `resolutionOrder` steps and reference sites",
+      "descriptionMarkdown": "Every API that interprets a resolver agrees on the effective definition of each step, and the inspection APIs see every reference that discovery uses.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/selection.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+          "symbol": "validate_inputs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "steps.overrides",
+          "descriptionMarkdown": "A `resolutionOrder` `$ref` step's sibling overrides, such as `{ \"$ref\": \"#/modifiers/theme\", \"default\": \"dark\" }`, define the effective modifier for every consumer of it:\n\n- `resolve`\n- `validate_complete`\n- input validation\n- `modifiers()`\n- `normalize_selection`\n- the inspection APIs\n\nWith a root modifier that has no default, `resolve(&[])` uses `dark` and `normalize_selection(&[])` returns `theme=dark`. With a root default of `light`, both report `dark`.",
+          "verification": "automated"
+        },
+        {
+          "id": "steps.names",
+          "descriptionMarkdown": "These fail with `InvalidDocument`, the same way in `modifiers()`, `normalize_selection` and `resolve`:\n\n- a `resolutionOrder` that defines two modifiers with the same name, for example a root modifier referenced by `$ref` and an inline modifier of the same name;\n- an inline modifier without a `name`.\n\nA token document whose top-level group is named `modifiers` is not a resolver, so `modifiers()` returns no axes and `normalize_selection` returns the empty selection.",
+          "verification": "automated"
+        },
+        {
+          "id": "steps.reference-sites",
+          "descriptionMarkdown": "`source_references()` lists every source `$ref` that discovery can use, including those inside the `sets`/`modifiers` override members of a reference object that targets a resolver. It never requests a document that is reachable only through a definition the override replaced.\n\nExample: for `{ \"$ref\": \"brand.resolver.json\", \"sets\": { \"base\": { \"sources\": [{ \"$ref\": \"override.json\" }] } } }`, the site for `override.json` is listed.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "inputs",
+      "title": "Resolver inputs (Resolver §5, §6.1)",
+      "descriptionMarkdown": "Validate and match inputs as the Resolver module requires, and define input semantics for the runtime's nested-resolver extension.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/selection.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+          "symbol": "validate_inputs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "inputs.case",
+          "descriptionMarkdown": "Modifier names and context names in a selection match case-insensitively, comparing `str::to_lowercase` forms, with exact matches preferred.\n\n- **Ambiguity.** When a case-insensitive input matches more than one declared name, it fails with `UnknownModifier` or `UnknownContext`, and the message lists the candidates.\n- **Normalization.** `normalize_selection` returns the declared spelling.\n- **Resolution.** `resolve(&[(\"Theme\", \"DARK\")])` produces the same tokens as `resolve(&[(\"theme\", \"dark\")])`.",
+          "verification": "automated"
+        },
+        {
+          "id": "inputs.scope",
+          "descriptionMarkdown": "- **Validation scope.** Input validation covers every modifier declared by any resolver that discovery reaches: the root, nested resolvers, and a previewed or inspected source.\n- **Unknown keys.** An input key is unknown only when no reached resolver declares it.\n- **Per-resolver application.** Each resolver applies the inputs that name its own modifiers, uses its defaults for the rest, and requires inputs only for its own modifiers that have no default.\n- **No modifiers.** A graph that declares no modifiers ignores inputs entirely (§6.1).\n- **Examples:**\n  - Explicitly selecting a root modifier that a nested resolver does not declare succeeds.\n  - Previewing a draft resolver source with a non-default context of a modifier that only the draft declares succeeds.",
+          "verification": "automated"
+        },
+        {
+          "id": "inputs.json",
+          "descriptionMarkdown": "`selection_from_json(&serde_json::Value)` turns a JSON input object into owned `(modifier, context)` pairs, accepted by every selection-taking method through `&[(&str, &str)]` adapters. A non-object value, or any non-string member value, fails with `DtcgError::InvalidInput { message }`.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "values",
+      "title": "Typed value model",
+      "descriptionMarkdown": "Public Rust types for all 13 DTCG types (plus the opt-in RayX extensions), implementing the consumer-side MUSTs of the spec, usable directly and through projection.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/value.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/from_dtcg_value.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "values.model",
+          "descriptionMarkdown": "A public `dtcg_runtime::values` module defines these types:\n\n- `Color`, with a 14-variant `ColorSpace`, three `Component`s (`Number(f64)` or `None`), `alpha: f64` and `hex: Option<String>`;\n- `Dimension` (`value`, `DimensionUnit`);\n- `Duration` (`value`, `DurationUnit`);\n- `FontFamily(Vec<String>)`;\n- `FontWeight`;\n- `CubicBezier([f64; 4])`;\n- `StrokeStyle`: a `LineStyle` keyword, or a dash pattern with a `LineCap`;\n- `Border`, `Transition`, `Shadow(Vec<ShadowLayer>)`, `Gradient(Vec<GradientStop>)` and `Typography`;\n- `Blur` and `LineHeight` (`Multiplier(f64)` or `Dimension`) for the extensions.\n\n`TypedValue` is an enum over all of them, and `ResolvedToken::typed(&self, &ValueExtensions) -> Result<TypedValue, DtcgError>` converts by effective type. Every type implements `FromDtcgValue`.",
+          "verification": "automated"
+        },
+        {
+          "id": "values.semantics",
+          "descriptionMarkdown": "The typed model applies the spec's consumer rules:\n\n- **Alpha.** A missing `alpha` is `1.0` (Color §4.1).\n- **Gradient positions** are clamped to [0, 1]: `42` becomes `1` and `-99` becomes `0` (Format §9.7).\n- **Font-weight keywords** map to numbers: `thin`/`hairline` 100, `extra-light`/`ultra-light` 200, `light` 300, `normal`/`regular`/`book` 400, `medium` 500, `semi-bold`/`demi-bold` 600, `bold` 700, `extra-bold`/`ultra-bold` 800, `black`/`heavy` 900, `extra-black`/`ultra-black` 950 (§8.4).\n- **Shadows.** A single shadow object becomes one layer, and `inset` defaults to `false`.\n- **Dimensions.** `Dimension::to_px(rem_base)` converts `rem`.",
+          "verification": "automated"
+        },
+        {
+          "id": "values.conversion",
+          "descriptionMarkdown": "A value whose shape does not match the requested Rust type fails with `DtcgError::Projection` naming the token path. `f32` conversion of a number outside the finite `f32` range now fails with `expected numeric value within f32 range` instead of producing infinity.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "derive",
+      "title": "Projection derive hardening and optional fields",
+      "descriptionMarkdown": "The derives produce hygienic code, reject attribute mistakes at compile time, and support optional tokens.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/src/lib.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/trybuild.rs"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "derive.optional",
+          "descriptionMarkdown": "A leaf field of type `Option<T>`, spelled as `Option`, `core::option::Option` or `std::option::Option`, and with or without `with`, projects to:\n\n- `None` when its token is missing;\n- `Some(converted)` when the token is present;\n- an error when the token is present but conversion fails.\n\nNon-`Option` fields keep failing on missing tokens.",
+          "verification": "automated"
+        },
+        {
+          "id": "derive.hygiene",
+          "descriptionMarkdown": "Generated code uses fully qualified paths (`::core::result::Result`, `::core::result::Result::Ok`, `::core::default::Default`), so it compiles with a local `type Result<T> = …` alias in scope. Raw-identifier fields such as `r#type` look up the unraw name (`type`).",
+          "verification": "automated"
+        },
+        {
+          "id": "derive.attributes",
+          "descriptionMarkdown": "These are compile errors, each spanned at the offending attribute:\n\n- unknown struct-level keys, for example `#[dtcg(roo = \"x\")]`;\n- field-only flags such as `nested`, `rest` or `with` used on the struct;\n- unknown field keys;\n- duplicated keys;\n- the conflicting combinations `nested` + `with`, and `rest` with any of `path`/`rename`/`with`/`nested`;\n- an unparsable `with` path.\n\nThe messages name the attribute.",
+          "verification": "automated"
+        },
+        {
+          "id": "derive.generics",
+          "descriptionMarkdown": "Type parameters used only by leaf fields are bounded by `FromDtcgValue`, and those used by `nested` fields by `DtcgTokens`. A struct with a generic leaf `Leaf<T> { value: T }` therefore derives and projects with `T = String`.",
+          "verification": "automated"
+        },
+        {
+          "id": "derive.compile-fail",
+          "descriptionMarkdown": "`crates/dtcg_runtime_derive/tests/compile_fail.rs` runs `trybuild` compile-fail cases with committed `.stderr` snapshots. It covers every rejected form in `derive.attributes`, plus enums and tuple structs. The misnamed `tests/trybuild.rs` is renamed to describe what it actually tests.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "export",
+      "title": "Resolved document export",
+      "descriptionMarkdown": "Write a resolution back out as a valid DTCG 2025.10 token document, preserving token properties (Resolver §8).",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "ResolvedTokens"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "export.document",
+          "descriptionMarkdown": "`ResolvedTokens::to_document(&self) -> serde_json::Value` returns a nested token document, deterministic and following resolution order:\n\n- **Tokens.** Every token has an explicit `$type`, its resolved `$value` (no references), its own `$description`, `$deprecated` and `$extensions`, and `$root` tokens appear as `$root`.\n- **Groups.** Each group keeps its own `$description`, `$deprecated` and `$extensions`, and the root keeps its merged `$extensions`.",
+          "verification": "automated"
+        },
+        {
+          "id": "export.roundtrip",
+          "descriptionMarkdown": "For every fixture of the test groups `merged_resolution` and `token_metadata`, and for every positive official format fixture, resolving `to_document()` output again with `DtcgRuntime::from_json` yields identical paths, types, values, descriptions, deprecation and extensions.",
+          "verification": "automated"
+        }
+      ]
+    },
+    {
+      "id": "docs",
+      "title": "Documentation, doctests and migration notes",
+      "descriptionMarkdown": "Users and consumers can rely on accurate, compiled documentation and a complete list of migrations.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "README.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/README.md"
+        }
+      ],
+      "criteria": [
+        {
+          "id": "docs.tested",
+          "descriptionMarkdown": "`crates/dtcg_runtime/src/lib.rs` includes `README.md` and every `docs/*.md` chapter as `#[cfg(doctest)]` doc modules. `cargo test -p dtcg_runtime --all-features --doc` compiles every `rust` and `rust,no_run` block and runs every `rust` block. Every code block has a language tag.",
+          "verification": "automated"
+        },
+        {
+          "id": "docs.updated",
+          "descriptionMarkdown": "The README and docs chapters 1–14 describe the behavior after this epic. That includes:\n\n- strict defaults and the `RuntimeOptions`/`ValueExtensions::rayx()` opt-in;\n- merged-document semantics;\n- the type-determination order;\n- reference positions;\n- metadata and groups;\n- the new limits;\n- input matching and nested scope;\n- `selection_from_json`;\n- the typed values;\n- `Option` fields;\n- `to_document`;\n- `replace_envelope`.\n\nChapter 12 states the official corpus result and every implementation-defined choice from the scope. Passages describing the old behavior are removed.",
+          "verification": "manual"
+        },
+        {
+          "id": "docs.changelog",
+          "descriptionMarkdown": "A new `CHANGELOG.md` has an *Unreleased* section listing every breaking and behavior change of this epic. Each entry gives the concrete migration for RayX (`rayx_theme`, Test Suite DTCG assets) and for RayX.TokenEditor. The migrations include:\n\n- enabling `ValueExtensions::rayx()`;\n- fixtures with unknown token members, root `$extensions`, `x-*` resolver members and single-context modifiers;\n- `UnresolvedReference` replacing `Projection` in diagnostic mappings, including the Token Editor contract test `group_name_alias_does_not_implicitly_target_root`;\n- `RuntimeLimits` setters;\n- `ModifierAxis` struct literals in `rayx_theme/tests/dtcg_theme_envelope.rs`, which `#[non_exhaustive]` forbids;\n- fingerprint changes.",
+          "verification": "manual"
+        }
+      ]
+    }
+  ]
+}

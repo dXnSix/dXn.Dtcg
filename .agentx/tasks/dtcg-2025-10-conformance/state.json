@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 6,
+  "epicId": "dtcg-2025-10-conformance",
+  "revision": 0,
+  "planRevision": 1,
+  "specHashes": {
+    "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
+    "design": "cbddc7210fb5c970bf999cf3d46e14d1e5317820936df5a69d89d9dd63d787cd",
+    "plan": "788fbdfb4dd8a35d2e9c1cfd46e9c5a8dc42f798d2c6756a7880aa743c2f10e1"
+  },
+  "tasks": {
+    "task-corpus": {
+      "status": "pending"
+    },
+    "task-api": {
+      "status": "pending"
+    },
+    "task-bounded-references": {
+      "status": "pending"
+    },
+    "task-bounded-expansion": {
+      "status": "pending"
+    },
+    "task-resource-ids": {
+      "status": "pending"
+    },
+    "task-format-structure": {
+      "status": "pending"
+    },
+    "task-type-order": {
+      "status": "pending"
+    },
+    "task-reference-positions": {
+      "status": "pending"
+    },
+    "task-value-extensions": {
+      "status": "pending"
+    },
+    "task-merged-structure": {
+      "status": "pending"
+    },
+    "task-token-metadata": {
+      "status": "pending"
+    },
+    "task-incremental": {
+      "status": "pending"
+    },
+    "task-resolver-validation": {
+      "status": "pending"
+    },
+    "task-step-consistency": {
+      "status": "pending"
+    },
+    "task-inputs": {
+      "status": "pending"
+    },
+    "task-typed-values": {
+      "status": "pending"
+    },
+    "task-derive": {
+      "status": "pending"
+    },
+    "task-export": {
+      "status": "pending"
+    },
+    "task-docs": {
+      "status": "pending"
+    },
+    "task-changelog": {
+      "status": "pending"
+    }
+  },
+  "validationBatches": {},
+  "checkResults": {},
+  "reviews": {},
+  "checkpoints": {},
+  "findings": [],
+  "handoffMarkdown": "",
+  "protectedPaths": {
+    "dtcg": {
+      ".agentx/tasks/dtcg-runtime/**": "4b6ebef6b18cb767c97212b5ed3db924fa3e4a066e838cd75d39749aa450358d",
+      "LICENSE-APACHE": "1d39282f42adc0ef965c88cac88e9b39aa332f31fecfd8615eb0e359f84fa663",
+      "LICENSE-MIT": "c294d59965f77468ec952e70be797cad02f00bc160125f47aede58a2b9291af5",
+      "rust-toolchain.toml": "5b9b2241eaffbd0c55602f818498f0cd3fac28a1df900b116be4240472b96a39"
+    }
+  }
+}
