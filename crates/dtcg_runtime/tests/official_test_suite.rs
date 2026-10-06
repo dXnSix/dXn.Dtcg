@@ -17,18 +17,8 @@ use serde_json::{Value, json};
 /// Manifest ids of fixtures whose expectation is not met yet, sorted.
 const KNOWN_GAPS: &[&str] = &[
     "empty-resolution-order",
-    "group-both-value-and-children",
-    "metadata-deprecated-number",
-    "metadata-deprecated-object",
-    "metadata-description-not-string",
-    "metadata-extensions-not-object",
     "modifier-single-context",
     "modifier-with-additional-properties",
-    "reference-color-curly-brace-in-subvalue",
-    "reference-cubicBezier-curly-brace-in-subvalue",
-    "reference-dimension-curly-brace-in-subvalue",
-    "reference-duration-curly-brace-in-subvalue",
-    "reference-ref-and-value-both-present",
     "root-with-additional-properties",
     "set-with-additional-properties",
     "typography-lineHeight-wrong-type",

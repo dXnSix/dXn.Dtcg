@@ -12,6 +12,7 @@ mod flatten;
 mod from_dtcg_value;
 mod json_pointer;
 mod local_reference;
+mod reference_positions;
 mod resolver;
 mod resolver_definition;
 mod resource;

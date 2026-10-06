@@ -29,7 +29,10 @@ pub(crate) const MAX_PATH_DEPTH: usize = 128;
 /// authored in, against which its document pointers are evaluated.
 #[derive(Clone)]
 pub(crate) struct RawToken {
-    pub(crate) token_type: Option<Arc<str>>,
+    /// The token's own `$type`.
+    pub(crate) own_type: Option<Arc<str>>,
+    /// The `$type` of the nearest ancestor group, after `$extends`.
+    pub(crate) group_type: Option<Arc<str>>,
     pub(crate) authored_value: Value,
     pub(crate) value: Value,
     pub(crate) extensions: Value,
@@ -157,11 +160,8 @@ impl Flattener<'_> {
             });
         }
         let object = self.validate_group(prefix, value)?;
-        if object.contains_key("$value") || object.contains_key("$ref") {
-            let token_type = self
-                .own_or_chain_type(prefix, object)?
-                .or(inherited_type.map(str::to_owned));
-            return self.insert_token(prefix, object, token_type);
+        if is_token(object) {
+            return self.insert_token(prefix, object, inherited_type);
         }
         let chain = match object.get("$extends").and_then(Value::as_str) {
             Some(reference) => self.chain(prefix, reference)?,
@@ -237,6 +237,13 @@ impl Flattener<'_> {
                 return Err(invalid(self.resource, "root token is invalid"));
             }
             let root_path = format!("{prefix}.$root");
+            if !root.as_object().is_some_and(is_token) {
+                return Err(DtcgError::Token {
+                    resource: self.resource.clone(),
+                    path: root_path,
+                    message: "`$root` must be a token".into(),
+                });
+            }
             self.flatten_group(&root_path, depth + 1, root, group_type, extending)?;
         }
         for (name, child) in object {
@@ -291,37 +298,61 @@ impl Flattener<'_> {
         {
             return Err(token_error("`$extends` must be a string".into()));
         }
+        if object
+            .get("$description")
+            .is_some_and(|value| !value.is_string())
+        {
+            return Err(token_error("`$description` must be a string".into()));
+        }
+        if object
+            .get("$deprecated")
+            .is_some_and(|value| !value.is_boolean() && !value.is_string())
+        {
+            return Err(token_error(
+                "`$deprecated` must be a boolean or a string".into(),
+            ));
+        }
+        if object
+            .get("$extensions")
+            .is_some_and(|value| !value.is_object())
+        {
+            return Err(token_error("`$extensions` must be an object".into()));
+        }
         Ok(object)
     }
 
-    /// The type a token or group declares itself or through its `$extends`
-    /// chain, without group inheritance.
-    fn own_or_chain_type(
-        &mut self,
-        prefix: &str,
-        object: &Map<String, Value>,
-    ) -> Result<Option<String>, DtcgError> {
-        if let Some(token_type) = object.get("$type").and_then(Value::as_str) {
-            return Ok(Some(token_type.into()));
-        }
-        match object.get("$extends").and_then(Value::as_str) {
-            Some(reference) => Ok(self
-                .chain(prefix, reference)?
-                .into_iter()
-                .next()
-                .and_then(|link| link.chain_type)),
-            None => Ok(None),
-        }
-    }
-
+    /// Records the token `object` at `prefix`. A token has a `$value` or a
+    /// token-level `$ref` (not both), no `$extends`, no `$root` and no child
+    /// members, and a source root is never a token.
     fn insert_token(
         &mut self,
         prefix: &str,
         object: &Map<String, Value>,
-        token_type: Option<String>,
+        group_type: Option<&str>,
     ) -> Result<(), DtcgError> {
+        let token_error = |message: String| DtcgError::Token {
+            resource: self.resource.clone(),
+            path: prefix.into(),
+            message,
+        };
         if prefix.is_empty() {
-            return Err(invalid(self.resource, "root token is invalid"));
+            return Err(token_error("a source root must not be a token".into()));
+        }
+        if object.contains_key("$extends") {
+            return Err(token_error("`$extends` is only allowed on groups".into()));
+        }
+        if object.contains_key("$value") && object.contains_key("$ref") {
+            return Err(token_error(
+                "a token must not have both `$value` and `$ref`".into(),
+            ));
+        }
+        if object
+            .keys()
+            .any(|name| name == "$root" || !name.starts_with('$'))
+        {
+            return Err(token_error(format!(
+                "token `{prefix}` must not have children"
+            )));
         }
         self.budget.tokens += 1;
         if self.budget.tokens > self.limits.max_tokens {
@@ -331,9 +362,12 @@ impl Flattener<'_> {
             });
         }
         let extensions = object.get("$extensions").cloned().unwrap_or(Value::Null);
+        let own_type = object.get("$type").and_then(Value::as_str).map(Arc::from);
+        let group_type = group_type.map(Arc::from);
         let token = if let Some(token_value) = object.get("$value") {
             RawToken {
-                token_type: token_type.as_deref().map(Arc::from),
+                own_type,
+                group_type,
                 authored_value: token_value.clone(),
                 value: token_value.clone(),
                 extensions,
@@ -341,22 +375,18 @@ impl Flattener<'_> {
                 document: Arc::clone(self.document),
             }
         } else {
-            let token_error = |message: &str| DtcgError::Token {
-                resource: self.resource.clone(),
-                path: prefix.into(),
-                message: message.into(),
-            };
             let reference = object["$ref"]
                 .as_str()
-                .ok_or_else(|| token_error("token-level `$ref` must be a string"))?;
+                .ok_or_else(|| token_error("token-level `$ref` must be a string".into()))?;
             if !reference.starts_with("#/") {
                 return Err(token_error(
-                    "token-level `$ref` must be a local JSON Pointer",
+                    "token-level `$ref` must be a local JSON Pointer".into(),
                 ));
             }
             pointer_parts(reference)?;
             RawToken {
-                token_type: object.get("$type").and_then(Value::as_str).map(Arc::from),
+                own_type,
+                group_type,
                 authored_value: Value::Object(object.clone()),
                 value: Value::Object(Map::from_iter([(
                     "$ref".into(),
@@ -426,7 +456,7 @@ impl Flattener<'_> {
             let extended = group_at_path(&document, &path)
                 .ok_or_else(|| missing_extension(self.resource, &from, &reference))?;
             let extended = self.validate_group(&path, extended)?;
-            if extended.contains_key("$value") {
+            if is_token(extended) {
                 return Err(DtcgError::Token {
                     resource: self.resource.clone(),
                     path: from,
@@ -511,18 +541,28 @@ fn group_at_path<'a>(document: &'a Value, path: &str) -> Option<&'a Value> {
         .try_fold(document, |group, segment| group.get(segment))
 }
 
+/// Whether a group member is a token: it has a `$value` or a token-level
+/// `$ref`.
+fn is_token(object: &Map<String, Value>) -> bool {
+    object.contains_key("$value") || object.contains_key("$ref")
+}
+
 fn validate_name(resource: &ResourceId, prefix: &str, name: &str) -> Result<(), DtcgError> {
-    if name.contains(['{', '}', '.']) {
-        let path = if prefix.is_empty() {
-            name.into()
-        } else {
-            format!("{prefix}.{name}")
-        };
-        return Err(DtcgError::Token {
-            resource: resource.clone(),
-            path,
-            message: "token and group names must not contain `{`, `}`, or `.`".into(),
-        });
-    }
-    Ok(())
+    let message = if name.is_empty() {
+        "token and group names must not be empty"
+    } else if name.contains(['{', '}', '.']) {
+        "token and group names must not contain `{`, `}`, or `.`"
+    } else {
+        return Ok(());
+    };
+    let path = if prefix.is_empty() {
+        name.into()
+    } else {
+        format!("{prefix}.{name}")
+    };
+    Err(DtcgError::Token {
+        resource: resource.clone(),
+        path,
+        message: message.into(),
+    })
 }

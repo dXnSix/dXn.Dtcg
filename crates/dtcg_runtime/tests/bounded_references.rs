@@ -425,7 +425,8 @@ fn nesting_that_adds_up_across_references_hits_the_value_depth_on_a_small_stack(
     assert!(is_limit(&collected, "value depth"), "{collected:?}");
 
     // An alias chain nests the same way; the deepest token comes first so it
-    // is resolved before any value is validated.
+    // is resolved before any value is validated. The tokens are untyped, so
+    // the aliases inside their arrays are not position-checked.
     let mut aliases = Map::new();
     for index in (0..3).rev() {
         let mut value = if index == 0 {
@@ -436,10 +437,7 @@ fn nesting_that_adds_up_across_references_hits_the_value_depth_on_a_small_stack(
         for _ in 0..60 {
             value = json!([value]);
         }
-        aliases.insert(
-            format!("t{index}"),
-            json!({"$type": "number", "$value": value}),
-        );
+        aliases.insert(format!("t{index}"), json!({"$value": value}));
     }
     let aliases = Value::Object(aliases);
     let result = on_small_stack(move || resolve(&aliases).map(|_| ()));

@@ -26,6 +26,7 @@ use crate::{
     DtcgError, ResolvedToken, ResourceId, RuntimeLimits,
     flatten::RawToken,
     json_pointer::{pointer_parts, walk},
+    reference_positions::{Context, Position, Step},
     validate_value,
 };
 
@@ -56,6 +57,8 @@ pub(crate) struct Resolver<'a> {
     pointers: HashMap<PointerKey, (Value, Cost)>,
     stack_hops: usize,
     copied_nodes: usize,
+    /// Whether typography `lineHeight` aliases may target `dimension` tokens.
+    line_height_dimension: bool,
 }
 
 impl<'a> Resolver<'a> {
@@ -70,6 +73,8 @@ impl<'a> Resolver<'a> {
             pointers: HashMap::new(),
             stack_hops: 0,
             copied_nodes: 0,
+            // The RayX value extensions are still accepted by default.
+            line_height_dimension: true,
         }
     }
 
@@ -99,27 +104,43 @@ impl<'a> Resolver<'a> {
                 message: format!("alias cycle: {} -> {path}", self.visiting.join(" -> ")),
             });
         }
+        // Members of a value that is not a whole reference follow the token's
+        // own type, or else its group's.
+        let position = token
+            .own_type
+            .as_deref()
+            .or(token.group_type.as_deref())
+            .map_or(Position::Unchecked, |token_type| {
+                Position::Root(Context::of_type(token_type))
+            });
         self.visiting.push(path.into());
-        let result = self.resolve_value(&token.value, token.document.as_ref(), depth);
+        let result = self.resolve_value(&token.value, token.document.as_ref(), depth, position);
         self.visiting.pop();
         let (value, cost) = result?;
-        let alias_type = if token.token_type.is_none() {
-            whole_token_reference(&token.value)?
-                .and_then(|reference| self.resolved.get(&reference))
-                .and_then(|target| target.token_type.clone())
-        } else {
-            None
-        };
-        let token_type =
-            token
-                .token_type
-                .clone()
-                .or(alias_type)
-                .ok_or_else(|| DtcgError::TokenType {
-                    resource: token.source.clone(),
-                    path: path.into(),
-                    message: "token requires a DTCG type".into(),
-                })?;
+        // Format §5.2.2: own `$type`, then the type of the token a whole-value
+        // reference targets, then the nearest group's `$type`.
+        let reference_type = whole_token_reference(&token.value, raw)?
+            .and_then(|reference| self.resolved.get(&reference))
+            .and_then(|target| target.token_type.clone());
+        if let (Some(own), Some(found)) = (&token.own_type, &reference_type)
+            && own != found
+        {
+            return Err(DtcgError::TokenType {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: format!("reference type mismatch: expected {own}, found {found}"),
+            });
+        }
+        let token_type = token
+            .own_type
+            .clone()
+            .or(reference_type)
+            .or_else(|| token.group_type.clone())
+            .ok_or_else(|| DtcgError::TokenType {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: "token requires a DTCG type".into(),
+            })?;
         validate_value(&token_type, &value).map_err(|error| DtcgError::TokenType {
             resource: token.source.clone(),
             path: path.into(),
@@ -195,16 +216,23 @@ impl<'a> Resolver<'a> {
     }
 
     /// Resolves `value`, placed at absolute depth `depth` (1 for a token's
-    /// whole value) of the value being built.
+    /// whole value) and at `position` of the value being built.
     fn resolve_value(
         &mut self,
         value: &Value,
         document: &Value,
         depth: usize,
+        position: Position,
     ) -> Result<(Value, Cost), DtcgError> {
         check_depth(depth)?;
         if let Some(reference) = curly_reference(value) {
+            if let Position::Inside(_) = position {
+                return Err(self.misplaced_alias());
+            }
             let cost = self.reference_token(reference, depth)?;
+            if let Position::Member { expected, .. } = position {
+                self.check_member_type(reference, expected)?;
+            }
             self.charge(cost.nodes)?;
             let value = self.resolved[reference].value.clone();
             return Ok((
@@ -217,7 +245,7 @@ impl<'a> Resolver<'a> {
         }
         match value {
             Value::Object(object) if object.contains_key("$ref") => {
-                self.resolve_json_reference(object, document, depth)
+                self.resolve_json_reference(object, document, depth, position)
             }
             Value::Array(values) => {
                 let mut cost = Cost {
@@ -226,8 +254,10 @@ impl<'a> Resolver<'a> {
                     depth: 1,
                 };
                 let mut output = Vec::with_capacity(values.len());
+                let element = position.child(Step::Element, self.line_height_dimension);
                 for item in values {
-                    let (item, item_cost) = self.resolve_value(item, document, depth + 1)?;
+                    let (item, item_cost) =
+                        self.resolve_value(item, document, depth + 1, element)?;
                     cost = combine(cost, item_cost);
                     output.push(item);
                 }
@@ -241,7 +271,9 @@ impl<'a> Resolver<'a> {
                 };
                 let mut output = Map::with_capacity(values.len());
                 for (key, item) in values {
-                    let (item, item_cost) = self.resolve_value(item, document, depth + 1)?;
+                    let member = position.child(Step::Member(key), self.line_height_dimension);
+                    let (item, item_cost) =
+                        self.resolve_value(item, document, depth + 1, member)?;
                     cost = combine(cost, item_cost);
                     output.insert(key.clone(), item);
                 }
@@ -267,6 +299,7 @@ impl<'a> Resolver<'a> {
         object: &Map<String, Value>,
         document: &Value,
         depth: usize,
+        position: Position,
     ) -> Result<(Value, Cost), DtcgError> {
         let reference = object
             .get("$ref")
@@ -287,7 +320,8 @@ impl<'a> Resolver<'a> {
             .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
         for (key, item) in object {
             if key != "$ref" {
-                let (item, item_cost) = self.resolve_value(item, document, depth + 1)?;
+                let member = position.child(Step::Member(key), self.line_height_dimension);
+                let (item, item_cost) = self.resolve_value(item, document, depth + 1, member)?;
                 cost = combine(cost, item_cost);
                 target.insert(key.clone(), item);
             }
@@ -362,7 +396,7 @@ impl<'a> Resolver<'a> {
                     .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
                 self.enter_hop()?;
                 self.active_pointers.insert(key.clone());
-                let result = self.resolve_value(target, document, depth);
+                let result = self.resolve_value(target, document, depth, Position::Unchecked);
                 self.active_pointers.remove(&key);
                 self.stack_hops -= 1;
                 let (value, cost) = result?;
@@ -381,6 +415,42 @@ impl<'a> Resolver<'a> {
                 ..cost
             },
         ))
+    }
+
+    /// A curly-brace alias at a position the Format module does not allow.
+    fn misplaced_alias(&self) -> DtcgError {
+        let path = self.visiting.last().cloned().unwrap_or_default();
+        let token = &self.raw[&path];
+        let token_type = token
+            .own_type
+            .as_deref()
+            .or(token.group_type.as_deref())
+            .unwrap_or_default();
+        DtcgError::Token {
+            resource: token.source.clone(),
+            path,
+            message: format!("curly-brace references are not allowed inside {token_type} values"),
+        }
+    }
+
+    /// Fails unless the resolved token at `reference` has one of `expected`.
+    fn check_member_type(&self, reference: &str, expected: &[&str]) -> Result<(), DtcgError> {
+        let found = self.resolved[reference]
+            .token_type
+            .as_deref()
+            .unwrap_or_default();
+        if expected.contains(&found) {
+            return Ok(());
+        }
+        let path = self.visiting.last().cloned().unwrap_or_default();
+        Err(DtcgError::TokenType {
+            resource: self.raw[&path].source.clone(),
+            path,
+            message: format!(
+                "reference type mismatch: expected {}, found {found}",
+                expected.join(" or ")
+            ),
+        })
     }
 
     /// An unresolved reference from the token being resolved (the innermost
@@ -464,8 +534,13 @@ fn token_target(parts: &[String], raw: &BTreeMap<String, RawToken>) -> Option<(u
 }
 
 /// The target token path when a whole value is a reference: a curly-brace
-/// alias, or a single-member `{ "$ref": "#/…/$value" }`.
-pub(crate) fn whole_token_reference(value: &Value) -> Result<Option<String>, DtcgError> {
+/// alias, or a single-member `{ "$ref": "#/…/$value" }` (also the form of a
+/// token-level `$ref`) whose prefix is a token. Any other pointer ending in
+/// `$value` addresses the document.
+pub(crate) fn whole_token_reference(
+    value: &Value,
+    raw: &BTreeMap<String, RawToken>,
+) -> Result<Option<String>, DtcgError> {
     if let Some(reference) = curly_reference(value).filter(|path| !path.is_empty()) {
         return Ok(Some(reference.into()));
     }
@@ -485,7 +560,8 @@ pub(crate) fn whole_token_reference(value: &Value) -> Result<Option<String>, Dtc
     if value_index + 1 != parts.len() || value_index == 0 {
         return Ok(None);
     }
-    Ok(Some(parts[..value_index].join(".")))
+    let path = parts[..value_index].join(".");
+    Ok(raw.contains_key(&path).then_some(path))
 }
 
 /// Collects the token paths a token's value reads directly, following
