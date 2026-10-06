@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 46,
+  "revision": 57,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -82,13 +82,22 @@
       ]
     },
     "task-resolver-validation": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-step-consistency": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-inputs": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-typed-values": {
       "status": "pending"
@@ -160,6 +169,15 @@
         }
       },
       "recordedAt": "2026-10-06T21:45:26Z"
+    },
+    "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "f3eb2ae6b2d77b00ea91822d6c9b2cf543bd1c7bdd14b789aee54722cc7cb778"
+        }
+      },
+      "recordedAt": "2026-10-06T22:05:12Z"
     }
   },
   "checkResults": {
@@ -383,6 +401,74 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-5-final-92aad7554833.log",
       "logSha256": "27bc33992f2a08a4d3682b735bf566ac7cf4972ca02aef23085c2906cf679306",
       "inputsHash": "6414f772d74bbf213109735fefa6cf3c18b4a68df182cee2627d7f601ede4b82"
+    },
+    "sprint-6/check-resolver-document-validation/final": {
+      "checkId": "check-resolver-document-validation",
+      "boundaryId": "sprint-6",
+      "phase": "final",
+      "batchId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "definitionHash": "cd3470c00c4fe49ba7f0f969f894aef39a487234f91bbf0c81e5dea6b4dc0e8d",
+      "basisHash": "62255c3592d40d3706439a4b4ea7359c3db46ab3f98caf5fdeba4c29e28c3e74",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.2538,
+      "recordedAt": "2026-10-06T22:05:11Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-6-final-539c95f5b4ca.log",
+      "logSha256": "a0f399367220bc611a2e0ee203c5f852dcdb9a078ca20b866c4c49fddec0f1b9",
+      "inputsHash": "37b48759f5beacfd4e22fedc059f0394bc059b17e80d490716d925b6852bc3fd"
+    },
+    "sprint-6/check-corpus-complete/final": {
+      "checkId": "check-corpus-complete",
+      "boundaryId": "sprint-6",
+      "phase": "final",
+      "batchId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "definitionHash": "3d7fd5380dafda7d9923cb89974ec5fa8a62ef1c0d98c11ef959d7c807e13cc3",
+      "basisHash": "c421a1997dfb8a12cd75a4ea85b250bc8e3811b0a871fd562e14ae495ffc3ed6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.2016,
+      "recordedAt": "2026-10-06T22:05:11Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-6-final-ef9df8a94ce9.log",
+      "logSha256": "f8f47fa5d59dcff92a4c5a44d64e6a7d1484ba039fdd21f97a427ce6eb2c42d1",
+      "inputsHash": "595a0df0cec4e83983aa80bd1921acdec0c3538e7e73a9a98d28c56a60accb7b"
+    },
+    "sprint-6/check-resolution-step-consistency/final": {
+      "checkId": "check-resolution-step-consistency",
+      "boundaryId": "sprint-6",
+      "phase": "final",
+      "batchId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "definitionHash": "4af9beb0322efc2f3d1dd92d9202d14b2f4f5108ddb1bfbcc1be3c353edebf20",
+      "basisHash": "ac9d9ddbd915307944f78f8c0d86b6944dc0db41dd0672505b7d26cb148cedad",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.1652,
+      "recordedAt": "2026-10-06T22:05:11Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-6-final-296936bc740c.log",
+      "logSha256": "7ebe2bae09fc3404e8f1258aadc2f5cdf36ea91933f89c0041c65d4a69bd6a75",
+      "inputsHash": "9ce559d684b9e64ad57a1dbb0d4e598e884b8268dea3845a7da3fe4f4ce02df8"
+    },
+    "sprint-6/check-input-selection/final": {
+      "checkId": "check-input-selection",
+      "boundaryId": "sprint-6",
+      "phase": "final",
+      "batchId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "definitionHash": "3bc20b73947798fe4e4ec9d6e74c8971576c0bdf1bed43c13536de3b68b8c937",
+      "basisHash": "1b36b5760aee3d941c99bbbba0321312fa22f35039018d50ea876216733c28ae",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.147,
+      "recordedAt": "2026-10-06T22:05:11Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-6-final-04916cf936a4.log",
+      "logSha256": "739232d90db74b776f315a854a2edf50c615d08df7263a92b5306f5081fa4cfd",
+      "inputsHash": "09b3e88bfaa1beb626d8087f7c9c29560c1e6f6a1e4658f0cf9a9d5400aec5b0"
     }
   },
   "reviews": {
@@ -1116,6 +1202,149 @@
         "sprint5-extends-cycle-order-dependent"
       ],
       "recordedAt": "2026-10-06T21:46:40Z"
+    },
+    "sprint-6": {
+      "reviewerId": "reviewer-sprint-6-c4e19a7d",
+      "snapshotId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "criterionIds": [
+        "resdoc.members",
+        "resdoc.order-and-contexts",
+        "corpus.complete",
+        "steps.overrides",
+        "steps.names",
+        "steps.reference-sites",
+        "inputs.case",
+        "inputs.scope",
+        "inputs.json"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+          "kind": "source",
+          "criterionIds": [
+            "resdoc.members",
+            "resdoc.order-and-contexts",
+            "corpus.complete",
+            "steps.overrides",
+            "steps.names"
+          ],
+          "sha256": "98fff7a944e6151536e1ff8d0437feaec5c4d43a0dd0500fb812fb29c37f8a05"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/envelope.rs",
+          "kind": "source",
+          "criterionIds": [
+            "resdoc.members"
+          ],
+          "sha256": "cda2d89e42d0a4d6ae0bdc5fa79b8e76922babe1d56d24afc748a085d782e59f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/selection.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.overrides",
+            "steps.names",
+            "inputs.case",
+            "inputs.json"
+          ],
+          "sha256": "631c5fe7e82c18ede979a51304dca3171738e05530d9ee51c0540e6567b401f1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.overrides",
+            "steps.names",
+            "inputs.case",
+            "inputs.scope"
+          ],
+          "sha256": "faa2f941a04bfb4b4f3d77ddc8c6fd4e9b9f2a02a360dc03c2c2e5470396b4bb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites"
+          ],
+          "sha256": "f1ba73329e262aa37b7e3a4d97dc81664900b15291abd8d1c408c04b2efbb570"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "inputs.scope",
+            "steps.overrides"
+          ],
+          "sha256": "473fe6d5e0e520430801cc12015556846646ea9c959f27ceded24098f8ef52d9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/error.rs",
+          "kind": "source",
+          "criterionIds": [
+            "inputs.json"
+          ],
+          "sha256": "40ba91888c36001a24ef1918501e7f352e668fe229f5a708f194e3531a60732b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolver_document_validation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "resdoc.members",
+            "resdoc.order-and-contexts"
+          ],
+          "sha256": "3909eaa89e9f917193c81e197bf7d697659aa1dd337f83272cbf3e1cbfb3c664"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "corpus.complete",
+            "resdoc.members",
+            "resdoc.order-and-contexts"
+          ],
+          "sha256": "b99bf4339ba9ee86c5f77a71bf387a8dbd02200ce73e376645c8dff4357c30a5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolution_step_consistency.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.overrides",
+            "steps.names",
+            "steps.reference-sites"
+          ],
+          "sha256": "8794ff6c48cc7f87944eb434f292fcd79b691044cb8a33f4d4157029648a7365"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "inputs.case",
+            "inputs.scope",
+            "inputs.json"
+          ],
+          "sha256": "37bdf5859e30b10bb65e54fbc4897f5100a72a71cef8fdaf40f8fb4fe1f30f08"
+        }
+      ],
+      "summaryMarkdown": "Passed after two repair rounds. Resolver validation is correct and the corpus is complete (250/250, empty `KNOWN_GAPS`). Effective steps are consistent across APIs, duplicate and unnamed modifiers fail everywhere, and reference sites follow overlaid resolvers. Inputs match case-insensitively, with ambiguity errors and declared spellings, and `selection_from_json` behaves as specified. Input validation (`resolve`, `normalize_selection`, `inspect_source`, `preview_source`) now uses the union of reached resolvers, with Missing tolerance. `preview_occurrence` documents and tests a root-graph-only selection. Discovery now reports selection errors as `UnknownContext` with allowed contexts and as `UnknownModifier` in declaration order. That restores `normalize_selection`'s contract that RayX `rayx_theme` relies on, and `resolve` now reports the same errors. The `resolve`-side error-kind changes (`Token`/`InvalidDocument` to `UnknownContext`) are behavior changes that the sprint-8 changelog task must list with their RayX/TokenEditor migration.",
+      "findingIds": [
+        "inputs-inspect-source-scope",
+        "inputs-preview-occurrence-scope",
+        "inputs-normalize-nested-scope",
+        "inputs-normalize-error-contract"
+      ],
+      "recordedAt": "2026-10-06T22:05:44Z"
     }
   },
   "checkpoints": {
@@ -1158,6 +1387,14 @@
       },
       "reviewHash": "882a861a5aa81d2fa404e22865a96298e5f8e1129f46827b8ea7fcc1463f91b7",
       "recordedAt": "2026-10-06T21:46:56Z"
+    },
+    "sprint-6": {
+      "snapshotId": "a43c2f8dab6235d1add829f388c899123db5ea079a81ede20a5dffb9fc616843",
+      "commits": {
+        "dtcg": "398071120cda96cdcf479d4e6515192c8d1d0b98"
+      },
+      "reviewHash": "fac6dac547dfad81caa9c7a7ae78c409ceb3c05152dea493de1fcaecc8c5064f",
+      "recordedAt": "2026-10-06T22:06:01Z"
     }
   },
   "findings": [
@@ -1366,6 +1603,101 @@
           "symbol": "Flattener::flatten_group"
         }
       ]
+    },
+    {
+      "id": "inputs-inspect-source-scope",
+      "criterionIds": [
+        "inputs.scope"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** `inspect_source` accepts every input that a resolver reached from the root graph or from the inspected source declares, exactly like `resolve` and `preview_source`; a key is unknown only when no reached resolver declares it.\n\n**Observed.** `discover_source_with_inputs` runs `choose_contexts` only on the root scope and on resolvers reached from the supplied source. The root's nested resolvers are never reached, and `inspect_source` checks inputs through `checked` against that partial set. With the `composed()` fixture of `tests/input_selection.rs` (root declares `theme`, nested `nested.json` declares `density`), `inspect_source(&{\"x\":{...}}, &[(\"theme\",\"dark\"),(\"density\",\"compact\")])` fails with `UnknownModifier { modifier: \"density\", known: [\"theme\"] }`, and so does `inspect_source(&draft, &[(\"contrast\",\"high\"),(\"density\",\"compact\")])`. With the same selections, `resolve` and `preview_source` return `Ready` (probe run during this review).\n\n**Repair.** Make `inspect_source` validate inputs against the same union as `preview_source`: run `discover_source_with_inputs` and `discover_with_inputs` on the root, return `Missing` while either is missing, and call `check_inputs` over both `InputUse`s. Share one helper between `inspect_source` and `preview_source`. Add an `input_selection` test in which `inspect_source` receives a nested-only modifier, alone and together with a draft-only modifier.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "symbol": "inspect_source_accepts_inputs_of_nested_resolvers"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "symbol": "inspect_source"
+        }
+      ],
+      "boundaryId": "sprint-6"
+    },
+    {
+      "id": "inputs-preview-occurrence-scope",
+      "criterionIds": [
+        "inputs.scope"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** The inspection APIs agree on input scope, so a selection that `inspect_source` accepted for a draft resolver can be reused to preview the occurrences it returned. Otherwise the narrower contract must be documented and tested.\n\n**Observed.** `preview_occurrence` (through `preview_sources`) calls `discover` on the root graph, which rejects keys the root graph does not declare. `inspect_source(&draft, &[(\"contrast\",\"high\")])` is `Ready`, but `preview_occurrence(&occurrences[0], &[(\"contrast\",\"high\"),(\"density\",\"compact\")])` fails with `UnknownModifier { modifier: \"contrast\" }`. No test covers `preview_occurrence` with draft-declared inputs.\n\n**Repair.** Choose one contract. Either `preview_occurrence` ignores selection keys that the root graph does not declare (the occurrence's own modifiers were applied when it was inspected), or its rustdoc states that draft-only keys must be dropped. Pin the chosen contract with an `input_selection` test.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "symbol": "previewing_an_occurrence_applies_the_selection_to_the_root_graph_only"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "symbol": "preview_occurrence"
+        }
+      ],
+      "boundaryId": "sprint-6"
+    },
+    {
+      "id": "inputs-normalize-nested-scope",
+      "criterionIds": [
+        "inputs.scope",
+        "inputs.case"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** inputs.scope says a key is unknown only when no reached resolver declares it, and every selection-taking method agrees with `resolve`.\n\n**Observed.** `normalize_selection` validates only against the root resolver's axes from `modifiers()`. On `composed()`:\n- `normalize_selection(&[(\"density\",\"compact\")])` fails with `UnknownModifier { known: [\"theme\"] }`, while `resolve` accepts the input.\n- `normalize_selection(&[])` returns `Ready([theme=light])`, while `resolve(&[])` fails with `missing input for modifier density`.\n\nThe sprint widened `resolve` to the union of reached resolvers, and that change created this disagreement. Before the sprint, both methods rejected nested-only keys.\n\n**Repair.** Either base `normalize_selection` on discovery (normalize against the union of the reached resolvers' axes in declared spelling, return `Missing` while documents are missing, and require inputs only for the modifiers without defaults), or record in the criterion/design and rustdoc that `modifiers()`/`normalize_selection` are root-only. Pin either choice with an `input_selection` test that uses a nested-only modifier.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "symbol": "normalize_selection_validates_like_resolve_across_the_graph"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "symbol": "normalize_selection"
+        }
+      ],
+      "boundaryId": "sprint-6"
+    },
+    {
+      "id": "inputs-normalize-error-contract",
+      "criterionIds": [
+        "inputs.scope",
+        "inputs.case"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected.** Moving `normalize_selection` onto discovery (repair of `inputs-normalize-nested-scope`) keeps its documented selection-error contract, because RayX relies on it. `rayx_theme::ThemeProject::normalize` says unknown modifiers or contexts fail naming the allowed contexts, and `rayx_theme/tests/dtcg_theme_envelope.rs::selections_normalize_to_ordered_defaults_and_name_the_allowed_contexts` asserts four things:\n- an unknown context fails with `UnknownContext { allowed }`;\n- a modifier selected twice fails with `UnknownContext` \"twice\";\n- a missing input for a modifier without a default fails with `UnknownContext { allowed }`;\n- `UnknownModifier.known` is in declaration order (`colorMode, accent, platform`).\n\nOtherwise each change must be an intended, recorded behavior change with a migration.\n\n**Observed** (probe on a three-modifier resolver mirroring that RayX test):\n- `normalize_selection(&[(\"accent\",\"green\")])` now fails with `DtcgError::Token { path: \"#/modifiers/accent\", message: \"selected modifier context is unknown\" }`. It no longer returns `UnknownContext` with the allowed contexts, and its diagnostic code changes from Selection to Token.\n- `[(\"accent\",\"sky\"),(\"accent\",\"blue\")]` fails with `InvalidDocument \"duplicate input `accent`\"`. A case-folded duplicate still gives `UnknownContext` \"selected twice\", so the same mistake now yields two error kinds.\n- A modifier without a default and with no input fails with `InvalidDocument \"missing input for modifier `density`\"`.\n- `UnknownModifier.known` is sorted alphabetically (`accent, colorMode, platform`) because `check_inputs` collects into a `BTreeSet`; before, it was in declaration order.\n\nThe repair note does not mention these changes, and no test pins them.\n\n**Repair.** Report selection errors from discovery with the selection error types, which fixes `resolve` and `normalize_selection` together:\n- In `Discovery::choose_contexts`, an unknown context gives `UnknownContext { modifier, context, allowed: modifier.contexts, message: \"selected modifier context is unknown\" }`, and a missing input gives `UnknownContext { context: \"\", allowed, message: \"modifier has no default and was not selected\" }`.\n- An exact duplicate input gives the same `UnknownContext` \"modifier is selected twice\" as a case-folded duplicate. The pre-validation in `Discovery::new` may stay for keys that no resolver declares.\n- `check_inputs` lists `known` in first-declared order (root first), not sorted.\n\nAdjust the `input_selection` tests that expect `InvalidDocument` for a missing input. Add a test that pins these error kinds and `known` ordering for both `normalize_selection` and `resolve`. If any of these changes is instead intended, record it with its RayX migration for the CHANGELOG task and say so in the design.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "symbol": "resolve_and_normalize_report_the_same_selection_errors"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "symbol": "choose_contexts"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolver_2025_10.rs",
+          "symbol": "resolver_validates_modifier_inputs_and_accepts_inline_sources"
+        }
+      ],
+      "boundaryId": "sprint-6"
     }
   ],
   "handoffMarkdown": "",
