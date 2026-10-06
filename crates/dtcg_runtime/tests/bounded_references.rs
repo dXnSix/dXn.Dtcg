@@ -122,25 +122,29 @@ fn duplicated_pointer_fan_out_is_stopped_by_the_value_node_limit() {
 
 #[test]
 fn equal_pointer_text_in_different_sources_is_not_a_cycle_in_either_order() {
+    // Sources resolve as one merged structure, so `#/$extensions/x` names
+    // the later source's value; the pointer is never mistaken for a cycle
+    // while it resolves through an alias.
     let first = json!({
-        "$extensions": {"x": "{b}"},
+        "$extensions": {"x": "{c}"},
+        "c": {"$type": "number", "$value": 5},
         "a": {"$type": "number", "$value": {"$ref": "#/$extensions/x"}}
     });
     let second = json!({
         "$extensions": {"x": 2},
         "b": {"$type": "number", "$value": {"$ref": "#/$extensions/x"}}
     });
-    for sources in [
-        vec![first.clone(), second.clone()],
-        vec![second.clone(), first.clone()],
+    for (sources, expected) in [
+        (vec![first.clone(), second.clone()], json!(2)),
+        (vec![second.clone(), first.clone()], json!(5)),
     ] {
         let runtime = runtime(&json!({
             "version": "2025.10",
             "resolutionOrder": [{"type": "set", "name": "all", "sources": sources}]
         }));
         let tokens = runtime.resolve(&[]).unwrap().ready().unwrap();
-        assert_eq!(tokens.get("a").unwrap().value, json!(2));
-        assert_eq!(tokens.get("b").unwrap().value, json!(2));
+        assert_eq!(tokens.get("a").unwrap().value, expected);
+        assert_eq!(tokens.get("b").unwrap().value, expected);
     }
 }
 

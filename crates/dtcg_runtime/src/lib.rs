@@ -38,7 +38,10 @@ pub use error::DtcgError;
 pub use from_dtcg_value::FromDtcgValue;
 pub use local_reference::LocalReferencePolicy;
 pub use options::{RuntimeOptions, ValueExtensions};
-pub use resolver::{DocumentRequest, Resolution, ResolvedToken, ResolvedTokens, RuntimeLimits};
+pub use resolver::{
+    Deprecation, DocumentRequest, Resolution, ResolvedGroup, ResolvedToken, ResolvedTokens,
+    RuntimeLimits,
+};
 pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;
 pub use selection::ModifierAxis;

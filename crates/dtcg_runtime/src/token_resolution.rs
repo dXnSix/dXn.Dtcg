@@ -154,6 +154,8 @@ impl<'a> Resolver<'a> {
                 authored_value: token.authored_value.clone(),
                 value,
                 extensions: token.extensions.clone(),
+                description: token.description.clone(),
+                deprecated: token.deprecated.clone(),
                 source: token.source.clone(),
             },
         );
@@ -566,6 +568,14 @@ pub(crate) fn whole_token_reference(
     Ok(raw.contains_key(&path).then_some(path))
 }
 
+/// What a token's value reads: the token paths it references directly (also
+/// missing ones), and whether it follows any document pointer.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Dependencies {
+    pub(crate) tokens: BTreeSet<String>,
+    pub(crate) reads_document: bool,
+}
+
 /// Collects the token paths a token's value reads directly, following
 /// document pointers transitively. Document pointers use the same hop limit,
 /// identity and memoization as resolution.
@@ -573,7 +583,7 @@ pub(crate) struct DependencyCollector<'a> {
     raw: &'a BTreeMap<String, RawToken>,
     limits: &'a RuntimeLimits,
     active: HashSet<PointerKey>,
-    pointers: HashMap<PointerKey, BTreeSet<String>>,
+    pointers: HashMap<PointerKey, Dependencies>,
 }
 
 impl<'a> DependencyCollector<'a> {
@@ -590,7 +600,7 @@ impl<'a> DependencyCollector<'a> {
         &mut self,
         value: &Value,
         document: &Value,
-        dependencies: &mut BTreeSet<String>,
+        dependencies: &mut Dependencies,
     ) -> Result<(), DtcgError> {
         self.collect_at(value, document, 1, dependencies)
     }
@@ -602,13 +612,11 @@ impl<'a> DependencyCollector<'a> {
         value: &Value,
         document: &Value,
         depth: usize,
-        dependencies: &mut BTreeSet<String>,
+        dependencies: &mut Dependencies,
     ) -> Result<(), DtcgError> {
         check_depth(depth)?;
         if let Some(reference) = curly_reference(value) {
-            if self.raw.contains_key(reference) {
-                dependencies.insert(reference.to_owned());
-            }
+            dependencies.tokens.insert(reference.to_owned());
             return Ok(());
         }
         match value {
@@ -619,7 +627,7 @@ impl<'a> DependencyCollector<'a> {
                     .ok_or_else(|| DtcgError::InvalidPointer("$ref must be a string".into()))?;
                 let parts = pointer_parts(reference)?;
                 if let Some((_, token_path)) = token_target(&parts, self.raw) {
-                    dependencies.insert(token_path);
+                    dependencies.tokens.insert(token_path);
                 } else {
                     self.collect_pointer(reference, parts, document, depth, dependencies)?;
                 }
@@ -650,11 +658,12 @@ impl<'a> DependencyCollector<'a> {
         parts: Vec<String>,
         document: &Value,
         depth: usize,
-        dependencies: &mut BTreeSet<String>,
+        dependencies: &mut Dependencies,
     ) -> Result<(), DtcgError> {
+        dependencies.reads_document = true;
         let key = (std::ptr::from_ref(document) as usize, parts);
         if let Some(found) = self.pointers.get(&key) {
-            dependencies.extend(found.iter().cloned());
+            dependencies.tokens.extend(found.tokens.iter().cloned());
             return Ok(());
         }
         if self.active.contains(&key) {
@@ -671,11 +680,11 @@ impl<'a> DependencyCollector<'a> {
         let target =
             walk(document, &key.1).ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
         self.active.insert(key.clone());
-        let mut found = BTreeSet::new();
+        let mut found = Dependencies::default();
         let result = self.collect_at(target, document, depth, &mut found);
         self.active.remove(&key);
         result?;
-        dependencies.extend(found.iter().cloned());
+        dependencies.tokens.extend(found.tokens.iter().cloned());
         self.pointers.insert(key, found);
         Ok(())
     }

@@ -183,6 +183,17 @@ impl DtcgRuntime {
             .get(&resource_id)
             .cloned()
             .ok_or_else(|| DtcgError::UnknownDocument(resource_id.clone()))?;
+        // The flattened tokens before the edit identify removed, renamed and
+        // redefined paths. When they cannot be computed, every token counts
+        // as affected.
+        let before = resolver::flatten_selection(
+            &self.catalog,
+            self.root.as_ref(),
+            &self.options,
+            selection,
+        )
+        .ok()
+        .and_then(Resolution::ready);
         self.catalog.replace(resource_id.clone(), json.into())?;
 
         let result = resolver::resolve_affected(
@@ -191,6 +202,7 @@ impl DtcgRuntime {
             &self.options,
             selection,
             changed_paths,
+            before.as_ref(),
         );
         if matches!(&result, Ok(Resolution::Ready(_))) {
             return result;

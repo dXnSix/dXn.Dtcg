@@ -9,9 +9,9 @@ use sha2::{Digest, Sha256};
 use crate::{
     AffectedResolution, DtcgError, ResourceId, RuntimeOptions, SourceOccurrence,
     catalog::DocumentCatalog,
-    flatten::{FlattenedSources, flatten_sources},
+    flatten::{FlattenedSources, RawGroup, RawToken, flatten_sources},
     source_discovery::{discover, required_root},
-    token_resolution::{DependencyCollector, Resolver},
+    token_resolution::{Dependencies, DependencyCollector, Resolver},
 };
 
 /// A document the caller must load before resolution can continue.
@@ -140,6 +140,50 @@ impl RuntimeLimits {
     }
 }
 
+/// Whether a token or group is deprecated (`$deprecated`, Format §5.2.4).
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+pub enum Deprecation {
+    /// Not deprecated: no `$deprecated` applies, or it is `false`.
+    #[default]
+    NotDeprecated,
+    /// `$deprecated: true`.
+    Deprecated,
+    /// `$deprecated` with an explanation, such as `"Use {color.accent}"`.
+    DeprecatedWithReason(Arc<str>),
+}
+
+impl Deprecation {
+    /// Reads a `$deprecated` value: `true`, `false` or a reason string.
+    pub(crate) fn from_json(value: &Value) -> Self {
+        match value {
+            Value::String(reason) => Self::DeprecatedWithReason(reason.as_str().into()),
+            Value::Bool(true) => Self::Deprecated,
+            _ => Self::NotDeprecated,
+        }
+    }
+
+    pub fn is_deprecated(&self) -> bool {
+        !matches!(self, Self::NotDeprecated)
+    }
+
+    /// The explanation of a deprecation that has one.
+    pub fn reason(&self) -> Option<&str> {
+        match self {
+            Self::DeprecatedWithReason(reason) => Some(reason),
+            _ => None,
+        }
+    }
+
+    /// The `$deprecated` value that expresses this deprecation.
+    pub fn to_json(&self) -> Value {
+        match self {
+            Self::NotDeprecated => Value::Bool(false),
+            Self::Deprecated => Value::Bool(true),
+            Self::DeprecatedWithReason(reason) => Value::String(reason.to_string()),
+        }
+    }
+}
+
 /// One resolved token. Fields may be added in minor releases.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
@@ -148,9 +192,35 @@ pub struct ResolvedToken {
     pub token_type: Option<Arc<str>>,
     pub authored_value: Value,
     pub value: Value,
-    /// The token's authored `$extensions` object, or `Null` when it has none.
+    /// The token's own authored `$extensions` object, or `Null` when it has
+    /// none. Never inherited from groups.
     pub extensions: Value,
+    /// The token's own `$description`. Never inherited from groups.
+    pub description: Option<Arc<str>>,
+    /// The token's own `$deprecated`, or else the nearest ancestor group's,
+    /// where `false` ends an inherited deprecation.
+    pub deprecated: Deprecation,
+    /// The document of the winning definition. A token copied by `$extends`
+    /// names the document of that `$extends`.
     pub source: ResourceId,
+}
+
+/// A group of the merged token structure that contains at least one resolved
+/// token, with its properties after merge and `$extends`. Fields may be added
+/// in minor releases.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct ResolvedGroup {
+    /// The dotted group path; empty for the merged root.
+    pub path: Arc<str>,
+    /// The `$type` its tokens inherit: its own, or else its nearest
+    /// ancestor's.
+    pub token_type: Option<Arc<str>>,
+    pub description: Option<Arc<str>>,
+    /// Its own `$deprecated`, when it declares one.
+    pub deprecated: Option<Deprecation>,
+    /// Its merged `$extensions` object, or `Null` when it has none.
+    pub extensions: Value,
 }
 
 /// The tokens of one resolution. Equality and the fingerprint ignore the
@@ -160,12 +230,22 @@ pub struct ResolvedToken {
 pub struct ResolvedTokens {
     tokens: BTreeMap<String, ResolvedToken>,
     order: Vec<String>,
+    groups: BTreeMap<String, ResolvedGroup>,
     fingerprint: Arc<str>,
 }
 
 impl ResolvedTokens {
     pub fn get(&self, path: &str) -> Option<&ResolvedToken> {
         self.tokens.get(path)
+    }
+    /// The group at `path` (`""` for the merged root), when it contains at
+    /// least one resolved token.
+    pub fn group(&self, path: &str) -> Option<&ResolvedGroup> {
+        self.groups.get(path)
+    }
+    /// Every group that contains a resolved token, in path order.
+    pub fn groups(&self) -> impl Iterator<Item = &ResolvedGroup> {
+        self.groups.values()
     }
     /// Tokens in resolution order.
     pub fn iter(&self) -> impl Iterator<Item = &ResolvedToken> {
@@ -182,14 +262,19 @@ impl ResolvedTokens {
     pub fn is_empty(&self) -> bool {
         self.order.is_empty()
     }
-    /// Merge an affected re-resolution into this projection and refresh the fingerprint.
+    /// Applies an affected re-resolution of the same selection: removes the
+    /// removed paths, replaces and adds the affected tokens, adopts the new
+    /// order and groups, and refreshes the fingerprint. The result equals a
+    /// full resolution of the edited documents.
     pub fn apply_affected(&mut self, affected: &AffectedResolution) {
-        for token in affected.iter() {
-            let path = token.path.to_string();
-            if self.tokens.insert(path.clone(), token.clone()).is_none() {
-                self.order.push(path);
-            }
+        for path in affected.removed() {
+            self.tokens.remove(path);
         }
+        for token in affected.iter() {
+            self.tokens.insert(token.path.to_string(), token.clone());
+        }
+        self.order = affected.order.clone();
+        self.groups = affected.groups.clone();
         self.fingerprint = fingerprint(&self.order, &self.tokens);
     }
 }
@@ -269,7 +354,9 @@ pub(crate) fn resolve_sources(
     sources: &[SourceOccurrence],
     options: &RuntimeOptions,
 ) -> Result<ResolvedTokens, DtcgError> {
-    let FlattenedSources { raw, order } = flatten_sources(sources, &options.limits)?;
+    let FlattenedSources {
+        raw, order, groups, ..
+    } = flatten_sources(sources, &options.limits)?;
     let mut resolver = Resolver::new(&raw, options);
     for path in &order {
         resolver.resolve_token(path)?;
@@ -279,8 +366,46 @@ pub(crate) fn resolve_sources(
     Ok(ResolvedTokens {
         tokens: resolved,
         order,
+        groups: resolved_groups(groups),
         fingerprint,
     })
+}
+
+fn resolved_groups(groups: BTreeMap<String, RawGroup>) -> BTreeMap<String, ResolvedGroup> {
+    groups
+        .into_iter()
+        .map(|(path, group)| {
+            let resolved = ResolvedGroup {
+                path: path.as_str().into(),
+                token_type: group.token_type,
+                description: group.description,
+                deprecated: group.deprecated,
+                extensions: group.extensions,
+            };
+            (path, resolved)
+        })
+        .collect()
+}
+
+/// The flattened tokens of a selection, for comparing an edit against the
+/// state before it.
+pub(crate) fn flatten_selection(
+    catalog: &DocumentCatalog,
+    root: Option<&ResourceId>,
+    options: &RuntimeOptions,
+    selection: &[(&str, &str)],
+) -> Result<Resolution<BTreeMap<String, RawToken>>, DtcgError> {
+    let sources = discover(
+        catalog,
+        required_root(root)?,
+        &options.limits,
+        selection,
+        false,
+    )?;
+    let Resolution::Ready(sources) = sources else {
+        return Ok(sources.map(|_| unreachable!()));
+    };
+    flatten_sources(&sources, &options.limits).map(|flattened| Resolution::Ready(flattened.raw))
 }
 
 pub(crate) fn resolve_affected(
@@ -289,39 +414,68 @@ pub(crate) fn resolve_affected(
     options: &RuntimeOptions,
     selection: &[(&str, &str)],
     changed_paths: &[&str],
+    previous: Option<&BTreeMap<String, RawToken>>,
 ) -> Result<Resolution<AffectedResolution>, DtcgError> {
     let limits = &options.limits;
     let sources = discover(catalog, required_root(root)?, limits, selection, false)?;
     let Resolution::Ready(sources) = sources else {
         return Ok(sources.map(|_| unreachable!()));
     };
-    let FlattenedSources { raw, order } = flatten_sources(&sources, limits)?;
+    let FlattenedSources {
+        raw,
+        order,
+        groups,
+        has_extends,
+    } = flatten_sources(&sources, limits)?;
 
-    let mut affected = changed_paths
-        .iter()
-        .filter(|path| raw.contains_key(**path))
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
-    let mut inspected_documents = BTreeSet::new();
-    if raw.values().any(|token| {
-        inspected_documents.insert(Arc::as_ptr(&token.document) as usize)
-            && contains_group_extension(token.document.as_ref())
-    }) {
-        affected.extend(order.iter().cloned());
+    // Seeds: named tokens and every token under a named group, tokens whose
+    // flattened definition changed or is new, and every token when the
+    // previous state is unknown or any group uses `$extends`.
+    let mut affected = BTreeSet::new();
+    for changed in changed_paths {
+        let prefix = format!("{changed}.");
+        affected.extend(
+            raw.keys()
+                .filter(|path| changed.is_empty() || *path == changed || path.starts_with(&prefix))
+                .cloned(),
+        );
+    }
+    let removed = previous.map_or_else(Vec::new, |previous| {
+        previous
+            .keys()
+            .filter(|path| !raw.contains_key(*path))
+            .cloned()
+            .collect::<Vec<_>>()
+    });
+    match previous {
+        Some(previous) if !has_extends => affected.extend(
+            raw.iter()
+                .filter(|(path, token)| {
+                    previous
+                        .get(*path)
+                        .is_none_or(|before| !same_definition(before, token))
+                })
+                .map(|(path, _)| path.clone()),
+        ),
+        _ => affected.extend(raw.keys().cloned()),
     }
     let mut reverse_dependencies = BTreeMap::<String, BTreeSet<String>>::new();
     let mut collector = DependencyCollector::new(&raw, limits);
     for (path, token) in &raw {
-        let mut dependencies = BTreeSet::new();
+        let mut dependencies = Dependencies::default();
         collector.collect(&token.value, token.document.as_ref(), &mut dependencies)?;
-        for dependency in dependencies {
+        // A document pointer may read any edited location.
+        if dependencies.reads_document {
+            affected.insert(path.clone());
+        }
+        for dependency in dependencies.tokens {
             reverse_dependencies
                 .entry(dependency)
                 .or_default()
                 .insert(path.clone());
         }
     }
-    let mut pending = affected.iter().cloned().collect::<Vec<_>>();
+    let mut pending = affected.iter().chain(&removed).cloned().collect::<Vec<_>>();
     while let Some(path) = pending.pop() {
         if let Some(dependents) = reverse_dependencies.get(&path) {
             for dependent in dependents {
@@ -346,19 +500,26 @@ pub(crate) fn resolve_affected(
         .collect();
     Ok(Resolution::Ready(AffectedResolution {
         tokens,
+        removed,
+        order,
+        groups: resolved_groups(groups),
         #[cfg(feature = "diagnostics")]
         nodes_visited,
     }))
 }
 
-fn contains_group_extension(value: &Value) -> bool {
-    match value {
-        Value::Object(object) => {
-            object.contains_key("$extends") || object.values().any(contains_group_extension)
-        }
-        Value::Array(array) => array.iter().any(contains_group_extension),
-        _ => false,
-    }
+/// Whether two flattened definitions of a path resolve alike, given equal
+/// dependencies. Document contents are compared separately: every token that
+/// reads a document pointer is re-resolved.
+fn same_definition(before: &RawToken, after: &RawToken) -> bool {
+    before.own_type == after.own_type
+        && before.group_type == after.group_type
+        && before.authored_value == after.authored_value
+        && before.value == after.value
+        && before.extensions == after.extensions
+        && before.description == after.description
+        && before.deprecated == after.deprecated
+        && before.source == after.source
 }
 
 pub(crate) fn validate_complete(

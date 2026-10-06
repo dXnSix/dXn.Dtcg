@@ -42,7 +42,9 @@ impl ValueExtensions {
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[non_exhaustive]
 pub struct RuntimeOptions {
+    /// Bounds on the work of every resolution, discovery and inspection.
     pub limits: RuntimeLimits,
+    /// The value shapes beyond DTCG 2025.10 that validation accepts.
     pub extensions: ValueExtensions,
 }
 
