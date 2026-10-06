@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 66,
+  "revision": 74,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -118,10 +118,16 @@
       ]
     },
     "task-docs": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-changelog": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     }
   },
   "validationBatches": {
@@ -196,6 +202,15 @@
         }
       },
       "recordedAt": "2026-10-06T22:19:06Z"
+    },
+    "4a7d21a2af5bead8279a6244efa97db8acd7be2729bd661362df3f9819e3c087": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "e87cabc645210647c3a9f245a7df776ab1b810ee89037cc676683cafa44f068e"
+        }
+      },
+      "recordedAt": "2026-10-06T22:34:53Z"
     }
   },
   "checkResults": {
@@ -555,6 +570,23 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-7-final-eeac2848020d.log",
       "logSha256": "d737bcb8d0f05373525c980cd84e62b55c16ee01c1cde95acf04e122146a7df6",
       "inputsHash": "25a40546808e440b2fe0227d6dcc25cb22a839f69bf0aaa15e9036d72ff522e2"
+    },
+    "sprint-8/check-doctests/final": {
+      "checkId": "check-doctests",
+      "boundaryId": "sprint-8",
+      "phase": "final",
+      "batchId": "4a7d21a2af5bead8279a6244efa97db8acd7be2729bd661362df3f9819e3c087",
+      "definitionHash": "792408aa0d7291b75fbcc8ca0d7347f7b443661795939c7e2fc36b319ae0b8dc",
+      "basisHash": "92eea6b7b31c0000e742ec6fd6cc12af66b9fc91c426b5feeb1bac96fcc2cc11",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 80,
+      "durationSeconds": 2.5281,
+      "recordedAt": "2026-10-06T22:34:53Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-8-final-9355a6b296e1.log",
+      "logSha256": "e1734095da11fded554b6060e896db11308036c6423faf31959a8e96357ef282",
+      "inputsHash": "ce84831e342508ff76b00ce3862ab0f4f7957c56c74cfb2c68fac8dcddd72d63"
     }
   },
   "reviews": {
@@ -1550,6 +1582,127 @@
         "s7-derive-path-rename-conflict"
       ],
       "recordedAt": "2026-10-06T22:19:38Z"
+    },
+    "sprint-8": {
+      "reviewerId": "reviewer-sprint-8-c4f2a917",
+      "snapshotId": "406c2fe3e35dbe2e2a77a86bc95806d3bf3e60b4f7cb034f3027dda9b1be29de",
+      "criterionIds": [
+        "docs.tested",
+        "docs.updated",
+        "docs.changelog"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "docs.tested"
+          ],
+          "sha256": "3a4acdc904706b9708fa3b20bd7c7f442a45384af0b24ebb941bdeba164e36a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "README.md",
+          "kind": "test",
+          "criterionIds": [
+            "docs.tested",
+            "docs.updated"
+          ],
+          "sha256": "31a734200863af93b1f7d05e79c6e8c24813705f82707453656c540c5090f648"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/12-conformance.md",
+          "kind": "test",
+          "criterionIds": [
+            "docs.tested",
+            "docs.updated"
+          ],
+          "sha256": "089de47b87bf8bb3513ce5ae8cdd887a0de93f1d9e08b8a6547943f695fc3149"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/06-resolvers-and-modifiers.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "62fb543c39fc716ba150948064df7edaaa3e49adb1d4e2c392bbc7ada48afbd4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "04c1aec97392a2f0143e298129539dd1dc3d11d6233e7daabce9fdd4f52da272"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/13-api-reference.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "94512afd94135d25b35ea6f36e99bb6fdb10c7b8bf00eba6c0ad8be4c9d435b0"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/14-architecture-and-contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.tested",
+            "docs.updated"
+          ],
+          "sha256": "cf7571efea531b2c0beb039ab3f29c5d944c19f7d3d61be9db4505300f3347ac"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "047d874a77af2857b218e89e3ce41fe74bf2f4aa066d0033b812220adad8102c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolver_document_validation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "eb73dc86dfb5d8f9e7fa1e4ae785d77cce8bcf8dcf24b428aced1f9f40dfc0f4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "docs.updated"
+          ],
+          "sha256": "4649872f38fd247b57a4c4ed148013c6d71b0c4483fdfc49c3c03f91b50143a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.changelog"
+          ],
+          "sha256": "5b268a2e4f4de170025679103c779b8db3ab000141c4ee3109ec2e92f12fe1ef"
+        }
+      ],
+      "summaryMarkdown": "**All three criteria pass.**\n\n- **docs.tested and docs.updated:** unchanged since the first pass of this sprint. The doctest module includes the README and every chapter, every fence is tagged, and chapter 12 states the corpus result and every scope choice. The `source_references` validation change is correct.\n- **docs.changelog:** the repairs hold. I checked them against the consumer repositories.\n  - The RayX.TokenEditor *New projects* entry names `TokenProject::empty` and the empty `resolutionOrder`. The suggested empty inline set is valid, since `set_sources` accepts an empty array.\n  - The fixture and inline-test inventories now list the single-context modifiers (`dormant-edit`, `external-edit`, `history_properties` `contrast`), the `x-*` members on sets, modifiers and steps, root `$extensions`, and the token members (`base.tokens.json`, `editable.tokens.json`, `x-token`, plus the inline `x-*` in the listed tests). The RayX entry adds `base.tokens.json`, which `complete.tokeneditor` loads.\n  - The `source_references` wording states the `InvalidDocument` failure.\n\n**Note, not a defect:** the `apps/test_suite` copy of the Android `default.resolver.dtcg.json` exists only under `build/intermediates`; the source asset is the `apps/lab` one. The entry is conditional on loading, so this is harmless.",
+      "findingIds": [
+        "changelog-tokeneditor-empty-project",
+        "changelog-fixture-inventory",
+        "changelog-source-references-wording"
+      ],
+      "recordedAt": "2026-10-06T22:42:29Z"
     }
   },
   "checkpoints": {
@@ -1608,6 +1761,14 @@
       },
       "reviewHash": "8bf530a55fee5dc21c311843489e3394f788d6473581f1cd0dda03316071c345",
       "recordedAt": "2026-10-06T22:19:57Z"
+    },
+    "sprint-8": {
+      "snapshotId": "406c2fe3e35dbe2e2a77a86bc95806d3bf3e60b4f7cb034f3027dda9b1be29de",
+      "commits": {
+        "dtcg": "5c58a9be27cc1be4b454f445879df71570a43452"
+      },
+      "reviewHash": "c628ac6979b57f368379ee4789f174b99a3760cd4c58d61b5bedac8039afbf84",
+      "recordedAt": "2026-10-06T22:42:48Z"
     }
   },
   "findings": [
@@ -1956,6 +2117,57 @@
           "symbol": "rejected_derive_inputs_fail_to_compile"
         }
       ]
+    },
+    {
+      "id": "changelog-tokeneditor-empty-project",
+      "criterionIds": [
+        "docs.changelog"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** every breaking change has a concrete RayX.TokenEditor migration. **Observed:** `CHANGELOG.md` lists the new rejection of an empty `resolutionOrder` only under *Changed*; the RayX.TokenEditor migration never mentions it. The editor's production new-project template `TokenProject::empty` (`crates/token_editor_app/src/services/tokens/project/token_project.rs:22-29`) writes `\"resolutionOrder\": []`, and `project_loader.rs::new_project` loads it through `ProjectResolution::load` -> `DtcgRuntime::validate_complete`, which now fails with `InvalidDocument: resolutionOrder must not be empty`. So *New project* breaks after the upgrade. Tests that author empty orders inline (`tests/scenarios/editor_interactions.rs:524,588,754`, `tests/scenarios/typed_token.rs:457`, fixture `dormant-edit.tokeneditor`) break too. **Repair:** add a RayX.TokenEditor migration entry for empty `resolutionOrder`: the new-project template (and the tests and fixtures named above) need at least one step, for example an empty default set referenced from `resolutionOrder`, or the editor must not resolve a project before it has a step. Name the files.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "symbol": "Migration / RayX.TokenEditor / New projects"
+        }
+      ],
+      "boundaryId": "sprint-8"
+    },
+    {
+      "id": "changelog-fixture-inventory",
+      "criterionIds": [
+        "docs.changelog"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** the fixture migrations (unknown token members, root `$extensions`, `x-*` resolver members, single-context modifiers) are concrete and correct for both consumers. **Observed:** the inventory is incomplete and partly wrong.\n\n**RayX.TokenEditor.** The entry says \"No fixture uses single-context modifiers\". That is false: `tests/fixtures/dormant-edit.tokeneditor` and `external-edit.tokeneditor` both declare `modifiers.theme` with only a `light` context.\n\nThe list also omits:\n- `dormant-edit`'s root `$extensions` and empty `resolutionOrder`;\n- `workspace.tokeneditor`'s `x-set-member` (set) and `x-modifier-member` (modifier);\n- `table-identity.tokeneditor`'s `x-modifier` (modifier) and `x-token` token members;\n- `tests/fixtures/tokens/base.tokens.json` (`color.primary.unknown`), which `complete`, `dormant-edit` and `external-edit` load;\n- `tests/fixtures/tokens/editable.tokens.json` (`group.first.x-unknown`);\n- inline test JSON with an `x-inline` member on an inline modifier step (`tests/features/resolver/resolution_flows.rs:29`).\n\n**RayX.** The entry says only `complete.tokeneditor`'s `x-resolver` needs a change and that \"the other `rayx_theme` fixtures keep their current outcomes\". But `complete.tokeneditor` loads `tests/fixtures/tokens/base.tokens.json`, whose token `color.primary` has an `\"unknown\": \"preserved\"` member. Format validation now rejects that (`token ... must not have children`). As a result, `theme_project.rs` (around line 268, `open_fixture(\"complete.tokeneditor\")` + `resolve_tokens(dark)`) still fails after the documented migration.\n\n**Repair:** correct the RayX.TokenEditor fixture list: add the single-context modifiers and every unlisted member above, and remove the false single-context claim. Add `rayx_theme/tests/fixtures/tokens/base.tokens.json` (move `unknown` into `$extensions`) to the RayX migration.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "symbol": "Migration / Fixtures (RayX) and Unknown members on tokens / Resolver members (RayX.TokenEditor)"
+        }
+      ],
+      "boundaryId": "sprint-8"
+    },
+    {
+      "id": "changelog-source-references-wording",
+      "criterionIds": [
+        "docs.changelog"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** a clear behavior entry for the sprint's `source_references` change. **Observed:** the *Resolver documents* entry says `source_references()` \"reports them for every resolver it reaches\". This reads as if it lists the invalid members. In fact it now fails with `InvalidDocument` for any reached resolver that breaks the structure rules (`source_references.rs:110-111`, test `source_references_apply_the_same_structure_rules`). Before, it accepted such resolvers. **Repair:** reword it, for example: \"`source_references()` now rejects (`InvalidDocument`) every reached resolver that breaks these rules, as `resolve` does\".",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "symbol": "Changed / Resolver documents"
+        }
+      ],
+      "boundaryId": "sprint-8"
     }
   ],
   "handoffMarkdown": "",
