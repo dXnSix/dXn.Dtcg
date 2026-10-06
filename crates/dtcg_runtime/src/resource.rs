@@ -1,7 +1,9 @@
 use std::{fmt, sync::Arc};
 
-use crate::DtcgError;
+use crate::{DtcgError, json_pointer::validate_fragment};
 
+/// A fragment-free, portable logical document id such as `themes/base.json`.
+/// Callers can join it onto a base directory without re-validating it.
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Hash)]
 pub struct ResourceId(Arc<str>);
 
@@ -13,14 +15,19 @@ pub struct DocumentReference {
 }
 
 impl ResourceId {
+    /// Parses and canonicalizes a document id. Ids name whole documents, so a
+    /// `#` fragment is rejected rather than dropped; see `normalize` for the
+    /// segment rules.
     pub fn parse(value: impl AsRef<str>) -> Result<Self, DtcgError> {
-        let reference = split_reference(value.as_ref())?;
-        if reference.path.is_empty() {
-            return Err(DtcgError::InvalidResourceId(value.as_ref().into()));
+        let value = value.as_ref();
+        if value.is_empty() || value.contains('#') {
+            return Err(DtcgError::InvalidResourceId(value.into()));
         }
-        Ok(Self(normalize(None, reference.path)?.into()))
+        Ok(Self(normalize(None, value)?.into()))
     }
 
+    /// Resolves a reference (`path#/fragment`, or `#/fragment` for this
+    /// document) relative to this id. The fragment is kept separately.
     pub fn resolve(&self, value: impl AsRef<str>) -> Result<DocumentReference, DtcgError> {
         let original = value.as_ref();
         if original.is_empty() {
@@ -77,7 +84,7 @@ fn split_reference(value: &str) -> Result<ParsedReference<'_>, DtcgError> {
         return Err(DtcgError::InvalidPointer(value.into()));
     }
     if let Some(fragment) = fragment {
-        validate_pointer(fragment)?;
+        validate_fragment(fragment).map_err(|_| DtcgError::InvalidPointer(value.into()))?;
     }
     Ok(ParsedReference {
         path,
@@ -85,11 +92,28 @@ fn split_reference(value: &str) -> Result<ParsedReference<'_>, DtcgError> {
     })
 }
 
+/// Canonicalizes `path` relative to `parent`'s directory. Ids must be portable
+/// logical names, so these are rejected:
+///
+/// - a leading `/`, any `\`, and `:` in any segment: `:` forms Windows drive
+///   prefixes (`C:/x`, `c:x`), URI schemes and NTFS alternate data streams, and
+///   `..` can move a later segment to the front (`a/../C:/x.json`);
+/// - `#`, control characters (NUL included) and the characters Windows
+///   reserves: `<`, `>`, `"`, `|`, `?`, `*`;
+/// - empty and `.` segments, `..` above the root, and segments ending in `.`
+///   or a space;
+/// - Windows device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`,
+///   `LPT1`–`LPT9`) in any case, with or without an extension.
 fn normalize(parent: Option<&str>, path: &str) -> Result<String, DtcgError> {
-    // `:` is rejected in every segment, not only the first: it forms Windows drive prefixes
-    // (`C:/x`, `c:x`), URI schemes and NTFS alternate data streams, and `..` can move a later
-    // segment to the front (`a/../C:/x.json`).
-    if path.starts_with('/') || path.contains('\\') || path.contains(':') {
+    if path.starts_with('/')
+        || path.contains(|character: char| {
+            character.is_control()
+                || matches!(
+                    character,
+                    '\\' | ':' | '#' | '<' | '>' | '"' | '|' | '?' | '*'
+                )
+        })
+    {
         return Err(DtcgError::InvalidResourceId(path.into()));
     }
     let mut parts: Vec<String> = parent
@@ -107,6 +131,9 @@ fn normalize(parent: Option<&str>, path: &str) -> Result<String, DtcgError> {
                     return Err(DtcgError::InvalidResourceId(path.into()));
                 }
             }
+            part if part.ends_with(['.', ' ']) || is_device_name(part) => {
+                return Err(DtcgError::InvalidResourceId(path.into()));
+            }
             part => parts.push(part.to_owned()),
         }
     }
@@ -116,14 +143,20 @@ fn normalize(parent: Option<&str>, path: &str) -> Result<String, DtcgError> {
     Ok(parts.join("/"))
 }
 
-fn validate_pointer(pointer: &str) -> Result<(), DtcgError> {
-    for segment in pointer.trim_start_matches('/').split('/') {
-        let mut chars = segment.chars();
-        while let Some(character) = chars.next() {
-            if character == '~' && !matches!(chars.next(), Some('0' | '1')) {
-                return Err(DtcgError::InvalidPointer(pointer.into()));
-            }
+/// Whether the segment's stem (the part before the first `.`) is a Windows
+/// reserved device name.
+fn is_device_name(segment: &str) -> bool {
+    let stem = segment
+        .split_once('.')
+        .map_or(segment, |(stem, _)| stem)
+        .to_ascii_uppercase();
+    match stem.as_str() {
+        "CON" | "PRN" | "AUX" | "NUL" => true,
+        _ => {
+            let bytes = stem.as_bytes();
+            bytes.len() == 4
+                && (stem.starts_with("COM") || stem.starts_with("LPT"))
+                && (b'1'..=b'9').contains(&bytes[3])
         }
     }
-    Ok(())
 }
