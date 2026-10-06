@@ -19,26 +19,36 @@ on a server, in a build script or in the browser through WebAssembly.
 ## Features
 
 - **The DTCG 2025.10 token format**: nested groups, `$type` inheritance, `$root` tokens, group
-  extension with `$extends`, and `$description`, `$deprecated` and `$extensions` metadata.
-- **Aliases and references**: `{curly.brace}` aliases and JSON Pointer `$ref` references, inside
-  composite values too, with cycle detection. A reference can adjust what it points to, for
-  example to take a color with a different alpha.
+  extension with `$extends`, and `$description`, `$deprecated` and `$extensions` metadata exposed
+  on every resolved token and group. Passes all 250 fixtures of the official DTCG 2025.10 test
+  suite.
+- **Aliases and references**: `{curly.brace}` aliases at every position the format allows, with
+  type checks, and JSON Pointer `$ref` references at any depth, with cycle detection. A reference
+  can adjust what it points to, for example to take a color with a different alpha.
 - **Resolver documents**: sets, modifiers with named contexts and defaults, `resolutionOrder`,
-  inline and nested resolvers, file fragments, and source references with shallow overrides.
-- **Value checks**: all 13 DTCG types (color, dimension, typography, shadow, gradient and the rest)
-  are validated after aliases resolve, so bad data surfaces as an error naming the file and the
-  token path.
+  inline and nested resolvers, file fragments, and source references with shallow overrides. All
+  active sources merge into one document, as the resolver specification describes. Inputs match
+  case-insensitively.
+- **Strict value checks**: all 13 DTCG types (color, dimension, typography, shadow, gradient and
+  the rest) are validated after aliases resolve, so bad data surfaces as an error naming the file
+  and the token path. Value extensions are opt-in.
+- **Typed values**: the `values` module models every type (`Color`, `Dimension`, `Typography`,
+  `Shadow` and the rest), and `ResolvedToken::typed` converts a resolved token into it.
 - **Lazy loading without I/O**: `resolve` returns either the tokens or the list of documents it
   still needs (`Resolution::Missing`). Only the documents for the active contexts are requested.
-- **Typed projection**: `#[derive(DtcgTokens)]` maps token paths onto struct fields. You can add
-  your own conversions with `FromDtcgValue` or `#[dtcg(with = "...")]`.
+- **Typed projection**: `#[derive(DtcgTokens)]` maps token paths onto struct fields, with
+  `Option` fields for tokens that may be absent. You can add your own conversions with
+  `FromDtcgValue` or `#[dtcg(with = "...")]`.
+- **Export**: `ResolvedTokens::to_document` writes a resolution back as a plain DTCG token
+  document with explicit types and resolved values.
 - **Incremental updates**: re-resolve only the tokens an edit changed, plus the tokens that depend
   on them. Each resolved set carries a SHA-256 fingerprint you can use as a cache key.
 - **Editor tooling**: inspect authored sources and where they came from, preview unsaved sources
   without touching the catalog, and list every document reference so files can be moved safely.
-- **Bounded on untrusted input**: configurable limits on document count, reference depth and alias
-  depth. Resource ids are normalized and cannot climb above the root, and an opt-in policy
-  rejects absolute paths and URLs.
+- **Bounded on untrusted input**: configurable limits on documents, reference depth, reference
+  chains, copied value size and token count, plus fixed bounds on value and path depth. Resource
+  ids are normalized, portable and cannot climb above the root, and an opt-in policy rejects
+  absolute paths and URLs.
 
 ## Platform support
 
@@ -114,8 +124,8 @@ fn main() -> Result<(), DtcgError> {
 ### Switch themes with a resolver
 
 A resolver document lists the token sets to apply in order, plus *modifiers* whose *contexts* can
-be switched at run time. Later sources replace earlier tokens with the same path, and aliases
-resolve against that final result.
+be switched at run time. The active sources merge into one document: groups merge, later sources
+replace earlier tokens with the same path, and aliases resolve against that final result.
 
 ```rust
 use dtcg_runtime::{DtcgError, DtcgRuntime};
@@ -152,7 +162,6 @@ const BASE: &str = r#"{
 
 const DARK: &str = r#"{
   "surface": {
-    "$type": "color",
     "background": { "$value": "{palette.ink}" },
     "text": { "$value": "{palette.white}" }
   }
@@ -170,7 +179,12 @@ fn main() -> Result<(), DtcgError> {
 
     assert_eq!(light.get("surface.background").unwrap().value["components"][0], 1);
     assert_eq!(dark.get("surface.background").unwrap().value["components"][0], 0.1);
+    // The dark override inherits `color` from the base `surface` group.
+    assert_eq!(dark.get("surface.background").unwrap().token_type.as_deref(), Some("color"));
     assert_ne!(light.fingerprint(), dark.fingerprint());
+
+    // Inputs match case-insensitively.
+    assert!(runtime.resolve(&[("Theme", "Dark")])?.ready().is_some());
     Ok(())
 }
 ```
@@ -287,7 +301,33 @@ fn main() -> Result<(), DtcgError> {
 ```
 
 A projection asks only for its own fields. Tokens it does not mention, such as `button.unused`
-above, are ignored, but they still resolve and can still be alias targets.
+above, are ignored, but they still resolve and can still be alias targets. A field of type
+`Option<T>` is `None` when its token is missing.
+
+### Read typed values
+
+Without a struct of your own, `ResolvedToken::typed` converts any resolved token into the models of
+the `values` module:
+
+```rust
+use dtcg_runtime::values::{DimensionUnit, TypedValue};
+use dtcg_runtime::{DtcgError, DtcgRuntime};
+
+fn main() -> Result<(), DtcgError> {
+    let runtime = DtcgRuntime::from_json(
+        "tokens.json",
+        r#"{ "gutter": { "$type": "dimension", "$value": { "value": 1.5, "unit": "rem" } } }"#,
+    )?;
+    let tokens = runtime.resolve(&[])?.ready().expect("ready");
+
+    let TypedValue::Dimension(gutter) = tokens.get("gutter").unwrap().typed(&runtime.options().extensions)? else {
+        unreachable!()
+    };
+    assert_eq!(gutter.unit, DimensionUnit::Rem);
+    assert_eq!(gutter.to_px(16.0), 24.0);
+    Ok(())
+}
+```
 
 ## How it works
 
@@ -299,13 +339,13 @@ JSON strings ──provide──► catalog (ResourceId → document text)
                               │                                        │
                               │               you load them, provide them, resolve again
                               ▼
-              overlay: later sources replace whole tokens by path
+              merge: one document; groups merge, later tokens replace whole
                               │
                               ▼
               aliases → effective types → value validation
                               │
                               ▼
-              ResolvedTokens ──► #[derive(DtcgTokens)] structs
+              ResolvedTokens ──► typed values, #[derive(DtcgTokens)] structs, to_document
 ```
 
 ## Crates
@@ -321,9 +361,12 @@ The full technical documentation is in [`docs/`](docs/README.md):
 
 1. [Overview](docs/01-overview.md): concepts, architecture, design principles, platforms
 2. [Getting started](docs/02-getting-started.md): a step-by-step tutorial
-3. [Token documents](docs/03-token-documents.md): groups, paths, types, `$root`, `$extends`
-4. [Aliases and references](docs/04-aliases-and-references.md): curly aliases and JSON Pointers
-5. [Value types](docs/05-value-types.md): the 13 DTCG types and how values are validated
+3. [Token documents](docs/03-token-documents.md): structure, merging, types, `$root`, `$extends`,
+   metadata, export
+4. [Aliases and references](docs/04-aliases-and-references.md): curly aliases, where they may
+   appear, JSON Pointers, type determination
+5. [Value types](docs/05-value-types.md): the 13 DTCG types, strict validation, RayX extensions,
+   typed values
 6. [Resolvers and modifiers](docs/06-resolvers-and-modifiers.md): sets, contexts, selections
 7. [Document loading](docs/07-document-loading.md): the catalog, resource ids, lazy loading
 8. [Typed projection](docs/08-typed-projection.md): the derive macros and conversions
@@ -337,9 +380,34 @@ The full technical documentation is in [`docs/`](docs/README.md):
 ## RayX extensions
 
 The crate is UI-neutral, but it supports a few additions used by the
-[RayX](https://github.com/rayx-ui) UI toolkit. Other users can ignore them: the `dev.rayx.blur`
-value type, typography `lineHeight` given as a dimension, and the Token Editor's `.tokeneditor`
-project envelope. See [conformance](docs/12-conformance.md#extensions).
+[RayX](https://github.com/rayx-ui) UI toolkit: the `dev.rayx.blur` value type, typography
+`lineHeight` given as a dimension, and the Token Editor's `.tokeneditor` project envelope.
+
+Validation is strict DTCG 2025.10 by default. The two value extensions are opt-in, so other users
+never see them; RayX and the RayX Token Editor enable them when they create the runtime:
+
+```rust
+use dtcg_runtime::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
+
+fn main() -> Result<(), DtcgError> {
+    let json = r#"{ "frost": { "$type": "dev.rayx.blur",
+                     "$value": { "kind": "background", "radius": { "value": 20, "unit": "px" } } } }"#;
+
+    // Strict by default: `dev.rayx.blur` is an unsupported type.
+    assert!(DtcgRuntime::from_json("tokens.json", json)?.resolve(&[]).is_err());
+
+    let runtime = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        json,
+        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+    )?;
+    assert!(runtime.resolve(&[])?.is_ready());
+    Ok(())
+}
+```
+
+See [value types](docs/05-value-types.md#strict-values-and-the-rayx-extensions) and
+[conformance](docs/12-conformance.md#strict-by-default-rayx-extensions-on-request).
 
 ## Development
 

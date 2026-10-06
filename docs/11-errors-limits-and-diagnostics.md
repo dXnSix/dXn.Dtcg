@@ -21,51 +21,110 @@ Operations that need documents return `Result<Resolution<T>, DtcgError>`, which 
 | `Ok(Resolution::Missing(requests))` | Documents are needed that are not in the catalog | Provide them and call again ([protocol](07-document-loading.md#the-requestprovide-protocol)) |
 | `Err(error)` | The input is wrong, or a limit was hit | Report it; retrying with the same input fails the same way |
 
-Resolution stops at the first error. Errors are deterministic: the same catalog and selection
-always produce the same error.
+Missing documents are reported before input errors: a selection naming a modifier that only a
+not-yet-loaded resolver declares is not rejected while that resolver is missing. Resolution stops
+at the first error. Errors are deterministic: the same catalog, options and selection always
+produce the same error.
 
 ## `DtcgError`
 
-`DtcgError` implements `std::error::Error` (through `thiserror`) and is `Send + Sync + 'static`, so
-it works with `?`, `Box<dyn Error>`, `anyhow` and similar crates. Its `Display` output names the
-resource and token path where there is one.
+`DtcgError` implements `std::error::Error` (through `thiserror`), `Clone`, `PartialEq` and
+`Debug`, and is `Send + Sync + 'static`, so it works with `?`, `Box<dyn Error>`, `anyhow` and
+similar crates, and can be stored and compared in tests. Its `Display` output names the resource
+and token path where there is one.
+
+The enum is `#[non_exhaustive]`: new variants may be added in minor releases, so a `match` on it
+needs a wildcard arm.
 
 | Variant | Raised when |
 |---|---|
-| `InvalidResourceId(String)` | A resource id or document reference path is invalid: absolute, contains `\`, contains `:` in any segment (a drive letter, URI scheme or NTFS stream), has empty or `.` segments, or climbs above the root. |
-| `InvalidPointer(String)` | A JSON Pointer is malformed (no `#/`, a bad `~` escape, more than one `#`), points to nothing, or is part of a circular chain of pointers. Also raised by a `resolutionOrder` step referencing an undefined set or modifier. |
+| `InvalidResourceId(String)` | A resource id or document reference path is invalid: empty, absolute, contains `\`, contains `#` (ids name whole documents), contains `:` in any segment (a drive letter, URI scheme or NTFS stream), has empty or `.` segments, climbs above the root, or has a segment that contains a control character or one of `< > " \| ? *`, ends with `.` or a space, or is a Windows device name (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`, `LPT1`–`LPT9`, in any case, with or without an extension). |
+| `InvalidPointer(String)` | A JSON Pointer is malformed (no `#/`, a bad `~` escape, a bad `%` escape, an array index with a sign or a leading zero), points to nothing, or is part of a circular chain of document pointers. Also raised by a `resolutionOrder` step whose `$ref` names an undefined set or modifier, and by a source reference whose fragment does not exist. |
 | `InvalidJson { resource, message }` | A provided document is not well-formed JSON. `message` is the parser's, with line and column. |
-| `InvalidDocument { resource, message }` | The document structure is wrong: resolver structure, sources, sets, modifiers, a `$value` at the source root, a non-object group, or a selection that `resolve` rejects. Also used with resource `catalog` and message `root document is not set` when no root was set. |
-| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
+| `InvalidDocument { resource, message }` | The resolver structure is wrong: a version other than `2025.10`, an unknown member in a resolver, set, modifier or inline step, a missing or empty `resolutionOrder`, a modifier with fewer than two contexts, an inline step without `type` or `name`, a modifier defined by two steps, a default that names no context, a source reference into `resolutionOrder` or `modifiers`, a local reference cycle. Also a non-object group, and resource `catalog` with message `root document is not set` when no root was set. |
+| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document`, `replace_envelope` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
 | `DuplicateDocument(ResourceId)` | `provide_json_batch` received the same id twice |
-| `LimitExceeded { kind, limit }` | A [runtime limit](#runtime-limits) was exceeded. `kind` is `"documents"`, `"reference depth"` or `"alias depth"`. |
+| `LimitExceeded { kind, limit }` | A [runtime limit](#runtime-limits) or one of the [fixed bounds](#fixed-bounds) was exceeded. `kind` names it. |
 | `DocumentCycle(String)` | A resolver includes itself, directly or through other resolvers. The field is the resource id. |
-| `Token { resource, path, message }` | A token or group is malformed: a bad name, an unknown `$` property, a non-string `$type` or `$extends`, a bad token-level `$ref`, an alias cycle or a group-extension cycle. `resolve` also uses it for an unknown selected context, with `path` like `#/modifiers/theme`. |
-| `TokenType { resource, path, message }` | A token has no type, an unsupported type, or a value that does not match its type |
-| `Projection { path, message }` | A projected token is missing or does not convert. Despite the name, resolution also uses it for a missing alias target and for `$extends` targets that are missing or malformed. |
+| `Token { resource, path, message }` | A token or group is malformed: a bad or empty name, an unknown `$` property (including `$schema` anywhere but a document root), `$type`/`$extends`/`$description` that is not a string, `$deprecated` that is not a boolean or string, `$extensions` that is not an object, a token with children, `$root` or `$extends`, a token with both `$value` and `$ref`, a `$root` that is not a token, a source root that is a token, an `$extends` target that is a token, a path that is a token in one source and a group in another, an alias in a position that does not allow one, an alias cycle or a group-extension cycle. |
+| `TokenType { resource, path, message }` | A token has no type (`token requires a DTCG type`), an unsupported type, or a value that does not match its type; or a reference names a token of the wrong type (`reference type mismatch: expected X, found Y`), either through an own `$type` that differs from the target's or through an alias at a composite member. |
+| `UnresolvedReference { resource, path, target, message }` | A reference names no resolvable target: a missing alias target, an alias to a group (`{group}`) or an empty alias (`{}`), or a missing or malformed `$extends` target. `path` is the referring token or group, `target` the reference as written. |
+| `Projection { path, message }` | A projected token is missing or does not convert into the requested Rust type, or `ResolvedToken::typed` cannot convert a value. Used only for projection. |
 | `InvalidEnvelope { resource, message }` | A `.tokeneditor` envelope lacks an object `data` member or has the wrong version |
 | `InvalidReference { resource, reference, message }` | A reference breaks `LocalReferencePolicy` |
-| `UnknownModifier { modifier, known }` | `normalize_selection` got a modifier the root resolver does not declare. `known` lists the declared ones. |
-| `UnknownContext { modifier, context, allowed, message }` | `normalize_selection` got an unknown context, the same modifier twice, or no context for a modifier without a default. `allowed` lists the modifier's contexts. |
+| `InvalidInput { message }` | `selection_from_json` got something other than a JSON object of strings |
+| `UnknownModifier { modifier, known }` | A selection names a modifier that no reached resolver declares (`known` lists the declared ones in declaration order, root first), or a name that matches several declared modifiers case-insensitively (`known` lists the candidates). |
+| `UnknownContext { modifier, context, allowed, message }` | A selection names a context the modifier does not declare (`selected modifier context is unknown`), a context that matches several case-insensitively, the same modifier twice (`modifier is selected twice`), or omits a modifier without a default (`modifier has no default and was not selected`, with an empty `context`). `allowed` lists the modifier's contexts. |
 
-Examples of `Display` output:
+Selection errors are the same for every method that takes a selection: `resolve`, `project`,
+`normalize_selection`, the previews and `inspect_source` all report `UnknownModifier` and
+`UnknownContext` as described above.
+
+Some `Display` outputs:
+
+```rust
+use dtcg_runtime::{DtcgRuntime, ResourceId, selection_from_json};
+use serde_json::json;
+
+let theme = DtcgRuntime::from_json(
+    "theme.resolver.json",
+    json!({
+        "version": "2025.10",
+        "modifiers": { "density": { "contexts": { "compact": [], "comfortable": [] } } },
+        "resolutionOrder": [{ "$ref": "#/modifiers/density" }]
+    })
+    .to_string(),
+)
+.unwrap();
+assert_eq!(
+    theme.resolve(&[]).unwrap_err().to_string(),
+    "modifier `density` context ``: modifier has no default and was not selected; \
+     allowed contexts: compact, comfortable"
+);
+assert_eq!(
+    theme.resolve(&[("size", "large"), ("density", "compact")]).unwrap_err().to_string(),
+    "unknown modifier `size`; known modifiers: density"
+);
+
+let tokens = DtcgRuntime::from_json(
+    "tokens.json",
+    json!({ "link": { "$type": "color", "$value": "{color.missing}" } }).to_string(),
+)
+.unwrap();
+assert_eq!(
+    tokens.resolve(&[]).unwrap_err().to_string(),
+    "token `link` in `tokens.json`: unresolved reference `color.missing`: missing alias target"
+);
+
+assert_eq!(
+    ResourceId::parse("tokens.json#/a").unwrap_err().to_string(),
+    "invalid logical resource id `tokens.json#/a`"
+);
+assert_eq!(
+    selection_from_json(&json!({ "theme": 1 })).unwrap_err().to_string(),
+    "invalid resolver inputs: input `theme` must be a string"
+);
+```
+
+Other variants read, for example:
 
 ```text
 invalid JSON in `tokens.json`: EOF while parsing an object at line 1 column 1
-invalid DTCG document `theme.resolver.json`: missing input for modifier `density`
 document `nope.json` was not previously provided
 document graph exceeds 64 alias depth
 token `a` in `tokens.json`: alias cycle: a -> b -> a
 token `spacing.md` in `tokens.json`: resolved value does not match DTCG type `dimension`
-projection `color.missing`: missing alias target
+token `weight` in `tokens.json`: reference type mismatch: expected fontWeight, found number
+invalid DTCG document `theme.resolver.json`: resolutionOrder must not be empty
+projection `color.accent`: expected string value
 reference `https://example.com/a.json` in `a.json`: URI schemes are not supported
-unknown modifier `size`; known modifiers: density, theme
 ```
 
 ## Handling errors
 
 Most applications only need to show the message. Tools that point at the problem, such as editors,
-language servers and CI annotations, can match on the variant to get a location:
+language servers and CI annotations, can match on the variant to get a location. Because
+`DtcgError` is `#[non_exhaustive]`, the match ends with a wildcard arm:
 
 ```rust
 use dtcg_runtime::{DtcgError, DtcgRuntime, ResourceId};
@@ -73,9 +132,9 @@ use dtcg_runtime::{DtcgError, DtcgRuntime, ResourceId};
 /// The resource and token path an error is about, where it has them.
 fn location(error: &DtcgError) -> (Option<&ResourceId>, Option<&str>) {
     match error {
-        DtcgError::Token { resource, path, .. } | DtcgError::TokenType { resource, path, .. } => {
-            (Some(resource), Some(path))
-        }
+        DtcgError::Token { resource, path, .. }
+        | DtcgError::TokenType { resource, path, .. }
+        | DtcgError::UnresolvedReference { resource, path, .. } => (Some(resource), Some(path)),
         DtcgError::Projection { path, .. } => (None, Some(path)),
         DtcgError::InvalidJson { resource, .. }
         | DtcgError::InvalidDocument { resource, .. }
@@ -99,57 +158,87 @@ fn main() {
     let (resource, path) = location(&error);
     assert_eq!(resource.map(ResourceId::as_str), Some("tokens.json"));
     assert_eq!(path, Some("radius"));
+    // Errors are `Clone` and `PartialEq`.
+    assert_eq!(error.clone(), runtime.resolve(&[]).unwrap_err());
     eprintln!("error: {error}");
 }
 ```
 
-A `path` is a dotted token path, except for selection errors from `resolve`, where it is a
-resolver pointer such as `#/modifiers/theme`.
+A `path` is a dotted token or group path. It is empty for an error about a source root, such as a
+non-string `$schema`.
 
 ## State after an error
 
-- **Reading methods never change the runtime.** `resolve`, `project`, `modifiers`, the validation
-  methods and the inspection methods take `&self`.
+- **Reading methods never change the runtime.** `resolve`, `project`, `modifiers`,
+  `normalize_selection`, the validation methods and the inspection methods take `&self`.
 - **Catalog mutations are atomic.** A failed `provide_json`, `provide_requested_json`,
-  `provide_json_batch`, `replace_json` or `remove_document` leaves the documents and the revision as
-  they were.
+  `provide_json_batch`, `replace_json`, `replace_envelope` or `remove_document` leaves the
+  documents and the revision as they were.
 - **Affected resolution rolls back.** `replace_json_and_resolve_affected` restores the previous
-  document text when the result is not `Ready` (see [Rollback](09-incremental-resolution.md#rollback)).
+  document text when the result is not `Ready`, for example when an edit deletes a token that
+  another token aliases (`UnresolvedReference`). See
+  [Rollback](09-incremental-resolution.md#rollback).
 
 ## Runtime limits
 
 `RuntimeLimits` bounds the work any set of documents can cause, so cycles that slip past cycle
-detection, accidents and hostile inputs all end in an error.
+detection, accidents and hostile inputs all end in an error instead of exhausting memory or the
+stack. The struct is `#[non_exhaustive]`: build it from `RuntimeLimits::default()` with the
+chainable setters, not with a struct literal.
 
-```rust,ignore
-pub struct RuntimeLimits {
-    pub max_documents: usize,       // default 256
-    pub max_reference_depth: usize, // default 64
-    pub max_alias_depth: usize,     // default 64
-}
-```
+| Limit | Default | Setter | Bounds | Error `kind` |
+|---|---|---|---|---|
+| `max_documents` | 256 | `with_max_documents` | Two counts per discovery, checked separately: the source occurrences it collects (loaded and inline sources and missing-document requests), and its expansion steps (each set reference, local reference, document load and nested resolver, even one that yields no source). Every source counts, inline ones included, so one set with 300 inline sources exceeds the default. Preview occurrences count together with the root's sources. For `source_references`, it bounds the distinct documents loaded. | `"documents"` |
+| `max_reference_depth` | 64 | `with_max_reference_depth` | How deeply resolver and source references nest: each `$ref` hop and each nested resolver adds a level | `"reference depth"` |
+| `max_alias_depth` | 64 | `with_max_alias_depth` | Reference hops in one resolution chain, counting curly-brace aliases, pointers to tokens and pointers to other document locations alike. The count does not depend on authored order. Literal values cost nothing, so a limit of 0 still resolves tokens without references. | `"alias depth"` |
+| `max_value_nodes` | 4,000,000 | `with_max_value_nodes` | JSON nodes that references copy into resolved values in one resolution, checked before each copy. This stops pointer fan-out that would build exponentially large values. | `"value nodes"` |
+| `max_tokens` | 100,000 | `with_max_tokens` | Flattened tokens in one resolution, including tokens copied by `$extends`; and, counted separately, the JSON nodes that `$extends` copies | `"tokens"` |
 
-| Limit | Bounds | Error `kind` |
+### Fixed bounds
+
+Two further bounds are not configurable. They match `serde_json`'s parse recursion limit, so no
+authored document reaches them except through references or `$extends`:
+
+| Bound | Value | Error `kind` |
 |---|---|---|
-| `max_documents` | The number of source occurrences one discovery gathers: terminal sources, sources waiting to be expanded, and missing documents. Every source counts, inline ones included, so one set with 300 inline sources exceeds the default. Preview occurrences count together with the root's sources. For `source_references`, it bounds the distinct documents loaded. | `"documents"` |
-| `max_reference_depth` | How deeply references and nested resolvers nest: each `$ref` hop and each nested resolver adds a level | `"reference depth"` |
-| `max_alias_depth` | How many tokens can be on one alias-resolution chain at the same time | `"alias depth"` |
+| Nesting depth of a resolved value, root level included | 128 | `"value depth"` |
+| Segments of a flattened token or group path | 128 | `"path depth"` |
 
-Limits are fixed when the runtime is created:
+Together with the limits, they keep every algorithm iterative or bounded: nothing recurses without
+a bound, and a chain of 100,000 pointers fails with `alias depth` instead of overflowing the stack.
+
+### Setting limits
+
+Limits are fixed when the runtime is created, through `with_limits` or the options constructors,
+and `DtcgRuntime::limits()` returns them:
 
 ```rust
-use dtcg_runtime::{DtcgRuntime, RuntimeLimits};
+use dtcg_runtime::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
 
-let runtime = DtcgRuntime::with_limits(RuntimeLimits {
-    max_documents: 2048,
-    ..RuntimeLimits::default()
-});
-assert!(runtime.contains_document("tokens.json").is_ok());
+let limits = RuntimeLimits::default()
+    .with_max_documents(2048)
+    .with_max_alias_depth(16);
+
+// An empty runtime: provide documents and set the root afterwards.
+let runtime = DtcgRuntime::with_limits(limits.clone());
+assert_eq!(runtime.limits().max_documents, 2048);
+
+// Or with options, which also carry the value extensions.
+let runtime = DtcgRuntime::from_json_with_options(
+    "tokens.json",
+    r#"{ "gap": { "$type": "number", "$value": 4 } }"#,
+    RuntimeOptions::default()
+        .with_limits(limits)
+        .with_extensions(ValueExtensions::rayx()),
+)
+.unwrap();
+assert_eq!(runtime.limits().max_alias_depth, 16);
+assert!(runtime.resolve(&[]).unwrap().is_ready());
 ```
 
-`from_json` and `from_envelope` always use the defaults. With custom limits, start from
-`with_limits`, then `provide_json` and `set_root`. Raise `max_documents` for design systems
-assembled from many small sources. Lower all three when resolving documents from untrusted users
+`from_json` and `from_envelope` use the default limits; `from_json_with_options` and
+`from_envelope_with_options` take `RuntimeOptions`. Raise `max_documents` for design systems
+assembled from many small sources. Lower the limits when resolving documents from untrusted users
 on a server.
 
 ## The `diagnostics` feature
@@ -181,7 +270,20 @@ assert_eq!(diagnostic.code(), DtcgDiagnosticCode::Token);
 assert_eq!(diagnostic.resource().unwrap().as_str(), "tokens.json");
 assert_eq!(diagnostic.path(), Some("a"));
 assert_eq!(diagnostic.message(), "alias cycle: a -> b -> a");
+
+let runtime = DtcgRuntime::from_json(
+    "tokens.json",
+    r#"{ "a": { "$type": "number", "$value": "{gone}" } }"#,
+)
+.unwrap();
+let diagnostic = DtcgDiagnostic::from_error(&runtime.resolve(&[]).unwrap_err());
+assert_eq!(diagnostic.code(), DtcgDiagnosticCode::UnresolvedReference);
+assert_eq!(diagnostic.path(), Some("a"));
+assert_eq!(diagnostic.message(), "unresolved reference `gone`: missing alias target");
 ```
+
+`DtcgDiagnosticCode` is `#[non_exhaustive]`; new codes arrive together with new `DtcgError`
+variants.
 
 | `DtcgDiagnosticCode` | From | `resource()` | `path()` | `message()` |
 |---|---|---|---|---|
@@ -194,10 +296,12 @@ assert_eq!(diagnostic.message(), "alias cycle: a -> b -> a");
 | `LimitExceeded` | `LimitExceeded` | none | the limit kind | the limit value |
 | `DocumentCycle` | `DocumentCycle` | none | the resource id | empty |
 | `Token` | `Token` and `TokenType` | resource | token path | message |
+| `UnresolvedReference` | `UnresolvedReference` | resource | referring token or group path | ``unresolved reference `<target>`: <message>`` |
 | `Projection` | `Projection` | none | token path | message |
 | `Envelope` | `InvalidEnvelope` | resource | none | message |
 | `Reference` | `InvalidReference` | resource | the reference | message |
 | `Selection` | `UnknownModifier` and `UnknownContext` | none | the modifier | the full `Display` text |
+| `InvalidInput` | `InvalidInput` | none | none | message |
 
 The messages the runtime writes contain ids, paths and short reasons, never document bodies. A
 message from your own conversion function is passed through as is.
