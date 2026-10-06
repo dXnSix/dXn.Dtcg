@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 12,
+  "revision": 21,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -22,13 +22,22 @@
       ]
     },
     "task-bounded-references": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-bounded-expansion": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-resource-ids": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-format-structure": {
       "status": "pending"
@@ -94,6 +103,15 @@
         }
       },
       "recordedAt": "2026-10-06T20:40:19Z"
+    },
+    "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "4293f637d430258fb8db1de48504590f21a6cacb7fd0fb64099681254d2fd8e7"
+        }
+      },
+      "recordedAt": "2026-10-06T21:03:51Z"
     }
   },
   "checkResults": {
@@ -147,6 +165,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-1-final-0a702a01841a.log",
       "logSha256": "8fb336ff1000fd0101e5f8a47565ddebee9b957af1fa4481a9660e1e920461dc",
       "inputsHash": "fce6dcc8c59e94b8284e53264d3705e44e5dcbfbe0065b4fbf9d9696e1bc95a7"
+    },
+    "sprint-2/check-bounded-references/final": {
+      "checkId": "check-bounded-references",
+      "boundaryId": "sprint-2",
+      "phase": "final",
+      "batchId": "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563",
+      "definitionHash": "90fed6f58ead1d6020d8f05ff9ef7d3e523944ab81817d30d718066ff3b19277",
+      "basisHash": "fb05b771d4c04f1072f41d74e169542ee65ae1cf20b89a75bc452c9d2ef9a0e4",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 16,
+      "durationSeconds": 3.5092,
+      "recordedAt": "2026-10-06T21:03:48Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-2-final-fb8422d75fda.log",
+      "logSha256": "a21cc103a1bb144ac5abd2890478521ac003e306a86ed8caef41d2a18e46010d",
+      "inputsHash": "823de530fe9a2b89892666d58a6019e432cba0f59f0d6aeaccb234e6c5de3d29"
+    },
+    "sprint-2/check-bounded-expansion/final": {
+      "checkId": "check-bounded-expansion",
+      "boundaryId": "sprint-2",
+      "phase": "final",
+      "batchId": "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563",
+      "definitionHash": "d5644b2016bd78cd9aa22e0d6a9ae64262312124974f00cfa8be622573d64bda",
+      "basisHash": "aea4afc8307caef7aa69f9ba2af89ec76c129e4cbf05294fedd45b19472f7b2e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 1.7989,
+      "recordedAt": "2026-10-06T21:03:50Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-2-final-dfea595f7fc8.log",
+      "logSha256": "07d9f6859e23c41bc4d59a0717a3125cde274930854584def49a989b8abf8823",
+      "inputsHash": "8d734d20969f5f69157fccbcd59ec6338dbcecb5b58e24b3fe0818bb51bd7ac6"
+    },
+    "sprint-2/check-resource-id-portability/final": {
+      "checkId": "check-resource-id-portability",
+      "boundaryId": "sprint-2",
+      "phase": "final",
+      "batchId": "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563",
+      "definitionHash": "26318010c448cdb64824766ebd82013da3dfe037aa6bb7ec9cb60a7a17a540d1",
+      "basisHash": "9d3960022391e030e64bc93807509464ecdfed358f7fb1a46d8a64b269586725",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.6689,
+      "recordedAt": "2026-10-06T21:03:51Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-2-final-cee9de12f61b.log",
+      "logSha256": "10877517d99d05bbc46b5942a88414a61bf2547bd810ea187f451101d6a92699",
+      "inputsHash": "f112786f359930bfc7ca985885392b80a763711ff17baf16bdb7062e9b00beaa"
     }
   },
   "reviews": {
@@ -365,6 +434,146 @@
         "api-docs-missing-or-inaccurate"
       ],
       "recordedAt": "2026-10-06T20:40:50Z"
+    },
+    "sprint-2": {
+      "reviewerId": "reviewer-sprint-2-indep-7f3c91",
+      "snapshotId": "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563",
+      "criterionIds": [
+        "bounds.pointers",
+        "bounds.alias-depth",
+        "bounds.expansion",
+        "pointers.syntax",
+        "ids.fragment",
+        "ids.portable"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth"
+          ],
+          "sha256": "4ef67735682bd8a055c4e5b6a849ba0c13f77d694e7bb027ca27487555eb79b7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth",
+            "bounds.expansion"
+          ],
+          "sha256": "2fb02d88c558d613cc780a26d857f20853237a73df0f66caaa579a7295dcd6a9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.expansion"
+          ],
+          "sha256": "046fb616f92a73787a32d54d606de9ca7ff264e5d95fd351819265f4f4a6326b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.expansion",
+            "pointers.syntax"
+          ],
+          "sha256": "1e6ad9e47fe2e43a4ff26e1d90461e04a750e8e615cd7623600e000ff34fa0bd"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/json_pointer.rs",
+          "kind": "source",
+          "criterionIds": [
+            "pointers.syntax"
+          ],
+          "sha256": "35e7b38d5ae48ebf5847a42ee5c084f7b62f1f006419b8d265b7fc07f47bbd5c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+          "kind": "source",
+          "criterionIds": [
+            "pointers.syntax"
+          ],
+          "sha256": "b67f0a40ed35e4303e771d9681a857b6bee4181422c60ac9c67830bb8df684e8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "pointers.syntax"
+          ],
+          "sha256": "7cfa2c4be23718be680c3ef743d8827cc0063124211d4a73441834f69ee7d21a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resource.rs",
+          "kind": "source",
+          "criterionIds": [
+            "pointers.syntax",
+            "ids.fragment",
+            "ids.portable"
+          ],
+          "sha256": "ff1fa151dedbe5ad48e4ff4047e9e6769690d6895f3b0dd361b78ef678e3322a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "kind": "test",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth",
+            "pointers.syntax"
+          ],
+          "sha256": "84ee66d03836db4d33b9268003b7ed95beb2df8541f750b902d1bb2ebc85e3d4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_expansion.rs",
+          "kind": "test",
+          "criterionIds": [
+            "bounds.expansion"
+          ],
+          "sha256": "4cee4f684bf366a869d382fe555839463fec1d24a616ee6ad9b849ac2b504faf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "bounds.alias-depth",
+            "bounds.expansion"
+          ],
+          "sha256": "56acc5ea1944d8cff1cabb251c414b8a18f79ebe13a75011eacda93a6855fa75"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resource_id_portability.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ids.fragment",
+            "ids.portable"
+          ],
+          "sha256": "f1afcf68263c748721c0ba644db2d3bcb747c44e58da518877dddbed1d1459f3"
+        }
+      ],
+      "summaryMarkdown": "Re-review after repairs. All three sprint-2 findings are resolved and covered by regression tests in `bounded_references`.\n\n- **Value depth:** resolved-value depth is bounded at 128 (`value depth`) in both resolution and dependency collection, so nesting no longer adds up across hops into a stack overflow.\n- **Forbidden references:** these checks run on decoded pointer parts.\n- **Token pointers:** copies are charged before they are made.\n\nThe original criteria still hold. Hop counting does not depend on authored order (limit 0, N/N+1). Pointer memo and cycle keys use (document, pointer), and overrides resolve after the pointer is released. `max_value_nodes`, `max_tokens`, `$extends` memoization and discovery expansion counting are in place. RFC 6901 indexes and percent-decoding are handled by one walker, and the resource-id fragment and portability rules are complete. The `bounded_references` group passes (16 tests).",
+      "findingIds": [
+        "s2-resolved-value-depth-unbounded",
+        "s2-encoded-forbidden-source-refs",
+        "s2-token-pointer-clone-before-charge"
+      ],
+      "recordedAt": "2026-10-06T21:04:57Z"
     }
   },
   "checkpoints": {
@@ -375,6 +584,14 @@
       },
       "reviewHash": "54319bc2d254a88fcb776cc7c7622522fec072182bd1d27438e8687580af1006",
       "recordedAt": "2026-10-06T20:41:08Z"
+    },
+    "sprint-2": {
+      "snapshotId": "60a1591cdf85507bfa2053b4045f3a0da6f659572e960c43c50978b4055a3563",
+      "commits": {
+        "dtcg": "b3cccd5472488809ce72f24dc163bed947176f71"
+      },
+      "reviewHash": "1cc44d3a2c00f0c82d9b71f9b274f10a18138bb8325fa0bb38f4b6497d7dc77c",
+      "recordedAt": "2026-10-06T21:05:29Z"
     }
   },
   "findings": [
@@ -428,6 +645,62 @@
           "symbol": "RuntimeLimits"
         }
       ]
+    },
+    {
+      "id": "s2-resolved-value-depth-unbounded",
+      "criterionIds": [
+        "bounds.pointers"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected** (design `bounded-work` invariant; `token_resolution.rs` module doc): no entry point recurses more than ~max(max_alias_depth, 128) frames, so small documents cannot overflow the stack.\n\n**Observed:** JSON nesting composes across reference hops. With `p0 = 1` and `p_i = {\"a\":{\"a\":…(120 levels)…{\"$ref\":\"#/$extensions/p_{i-1}\"}}}`, the resolved value is ~120 x hops deep, and `resolve_value` (as well as `node_count`, `clone`/drop, `validate_value` and `hash_canonical`) recurses through all of it. A throwaway probe (deleted) with default limits overflowed the stack: in a release build at 20 hops (~15 KB document) on a 1 MiB stack (the Windows main-thread default), and at 64 hops on a 2 MiB stack; in a debug build at 4 hops on 1 MiB. The 100k-hop test passes only because each hop is shallow. The module doc's claim that literal nesting is bounded by serde's 128 limit is false once values are copied through references.\n\n**Repair:** track the nesting depth of resolved values (store a `depth` in `Cost` next to `hops`/`nodes`, add the JSON depth at the reference site) and fail with `LimitExceeded` (for example `kind: \"value depth\"`, bounded at 128 or a new `RuntimeLimits` field) before descending or copying. Correct the module doc. Add a `bounded_references` test with 20 hops x 120 levels on a 1 MiB stack that expects the limit error.\n\n**Resolution (verified):** `Cost` now carries `depth`. `resolve_value` checks the absolute depth before it descends, and `reference_token`/`resolve_document_pointer` check `depth + target depth - 1` before copying, against `MAX_VALUE_DEPTH` = 128 (`value depth`). Memoized costs are relative, so the result does not depend on order, and recursion is bounded by 128 levels plus the hop limit. `DependencyCollector::collect_at` applies the same bound. The module doc and the `RuntimeLimits` doc are corrected. The 20x120 probe now fails with `value depth` on a 1 MiB debug stack, through both resolve and affected resolution.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "symbol": "nesting_that_adds_up_across_references_hits_the_value_depth_on_a_small_stack"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "symbol": "nesting_within_the_value_depth_is_resolved"
+        }
+      ],
+      "boundaryId": "sprint-2"
+    },
+    {
+      "id": "s2-encoded-forbidden-source-refs",
+      "criterionIds": [
+        "pointers.syntax"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** a pointer means the same thing wherever it is interpreted (design `pointer-syntax`). Source references into `resolutionOrder` or `modifiers` stay forbidden whatever their spelling.\n\n**Observed:** `Discovery::append_source` and `resolve_local_reference` check the forbidden targets on the *raw* text (`starts_with(\"#/resolutionOrder/\")` / `\"#/modifiers/\"`), but traversal now percent-decodes. A probe (deleted) showed:\n\n- a set source `{\"$ref\":\"#/%72esolutionOrder/0\"}` resolves `Ready` (it includes the first resolution step), where `#/resolutionOrder/0` is rejected;\n- `{\"$ref\":\"#/%6Dodifiers/m\"}` is accepted by `validate_complete` and fails `resolve` only with the unrelated message \"token document groups must be objects\".\n\nThe serde pointer this sprint replaced did not decode, so this bypass is new.\n\n**Repair:** run the forbidden-target checks on the decoded `pointer_parts` (first part `resolutionOrder` or `modifiers`) in `append_source` and `resolve_local_reference`. Add tests for both encoded spellings through `resolve` and `validate_complete`.\n\n**Resolution (verified):** `targets_forbidden_member` checks the decoded `pointer_parts` (`resolutionOrder`/`modifiers` with a member below it), and `resolve_local_reference` checks the decoded first part. The encoded spellings are rejected by both `resolve` and `validate_complete`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "symbol": "percent_encoded_references_into_resolution_order_or_modifiers_stay_forbidden"
+        }
+      ],
+      "boundaryId": "sprint-2"
+    },
+    {
+      "id": "s2-token-pointer-clone-before-charge",
+      "criterionIds": [
+        "bounds.pointers"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** `max_value_nodes` is \"checked before each copy\" (the `RuntimeLimits` doc and the criterion's \"checked before a value is materialized\").\n\n**Observed:** `Resolver::resolve_token_pointer` runs `selected.clone()` and only then `node_count` and `charge`. A token-target pointer therefore copies up to one whole resolved token value (as large as the limit) before the limit is enforced.\n\n**Repair:** compute `node_count(selected)` on the borrowed value and `charge` it, then clone. A simple test is a `#/big/$value` pointer with `with_max_value_nodes` just below the target's size.\n\n**Resolution (verified):** `resolve_token_pointer` counts nodes and depth on the borrowed selection, charges them, and only then clones (verified in source; the test pins the limit boundary).",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "symbol": "token_pointer_copies_are_charged_before_they_are_made"
+        }
+      ],
+      "boundaryId": "sprint-2"
     }
   ],
   "handoffMarkdown": "",
