@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 0,
+  "revision": 12,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -10,10 +10,16 @@
   },
   "tasks": {
     "task-corpus": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-api": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-bounded-references": {
       "status": "pending"
@@ -70,11 +76,360 @@
       "status": "pending"
     }
   },
-  "validationBatches": {},
-  "checkResults": {},
-  "reviews": {},
-  "checkpoints": {},
-  "findings": [],
+  "validationBatches": {
+    "17b32363b4d936139fda71ed0cd54eb7761fd93bd4c3b681ffde615c8546eec4": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "1ba2ff14b4cccd18a1633f9ab3eeffe268a12f2a4bcd87deb6ce7f1797f5cdaa"
+        }
+      },
+      "recordedAt": "2026-10-06T20:37:52Z"
+    },
+    "2ad04ace298ca8685cb4c3937bdca48a5f1748219402cc0413893900d5a1ca24": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "adae82aa894a5c1a8756eb6adf05c929c1288619b5f9dbc138c9cb9abbcf03a5"
+        }
+      },
+      "recordedAt": "2026-10-06T20:40:19Z"
+    }
+  },
+  "checkResults": {
+    "sprint-1/check-official-test-suite/final": {
+      "checkId": "check-official-test-suite",
+      "boundaryId": "sprint-1",
+      "phase": "final",
+      "batchId": "2ad04ace298ca8685cb4c3937bdca48a5f1748219402cc0413893900d5a1ca24",
+      "definitionHash": "afa33ae0c39271c3884c7c4f3ccd120cc394c4d3efb3a256a4cc112d69cd60a9",
+      "basisHash": "fdbb9a8fbb4b07f3d309a9a4e31c3ff9a735f838cf2122d44030442208fb6b95",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 1.4641,
+      "recordedAt": "2026-10-06T20:40:18Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-1-final-2673ce4211f6.log",
+      "logSha256": "b48d1bfecd73cc7fe126c701650733d8ca292b3309de511103a36ee9d4ecb61f",
+      "inputsHash": "80c7fb7b974cb127d8ce159812c3d6201cc21a88585e5653c78e23f2584e3af5"
+    },
+    "sprint-1/check-package-excludes-corpus/final": {
+      "checkId": "check-package-excludes-corpus",
+      "boundaryId": "sprint-1",
+      "phase": "final",
+      "batchId": "17b32363b4d936139fda71ed0cd54eb7761fd93bd4c3b681ffde615c8546eec4",
+      "definitionHash": "addf480e691d686512a0a5a14e9a2950c5f3823742f4d93d88066d56baa8855b",
+      "basisHash": "6b3f827c57207b462351bdc6781003dcafa2b081c0e88194e9196731c72936fd",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.1607,
+      "recordedAt": "2026-10-06T20:37:40Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-1-final-fc36005c6d5e.log",
+      "logSha256": "bf529752a003201601876edbbdd57c549ff683f8c00c8138996eac1be6350fb9",
+      "inputsHash": "1ba52c26b663341cd7be2fa11f32f37611ed8a5e0c192bdab6de8627bf32190b"
+    },
+    "sprint-1/check-api-foundations/final": {
+      "checkId": "check-api-foundations",
+      "boundaryId": "sprint-1",
+      "phase": "final",
+      "batchId": "2ad04ace298ca8685cb4c3937bdca48a5f1748219402cc0413893900d5a1ca24",
+      "definitionHash": "c417e8baee066deeb6d2812e66ee64ac1a251bbe449892535d5460ced9babae5",
+      "basisHash": "277f796bd1c38c41902cfcf8b2d7a2faabb4791833a52b1dc37bf1058ef3b072",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.768,
+      "recordedAt": "2026-10-06T20:40:19Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-1-final-0a702a01841a.log",
+      "logSha256": "8fb336ff1000fd0101e5f8a47565ddebee9b957af1fa4481a9660e1e920461dc",
+      "inputsHash": "fce6dcc8c59e94b8284e53264d3705e44e5dcbfbe0065b4fbf9d9696e1bc95a7"
+    }
+  },
+  "reviews": {
+    "sprint-1": {
+      "reviewerId": "reviewer-sprint-1-opus-r7k2",
+      "snapshotId": "2ad04ace298ca8685cb4c3937bdca48a5f1748219402cc0413893900d5a1ca24",
+      "criterionIds": [
+        "corpus.vendored",
+        "corpus.harness",
+        "format.schema-root",
+        "api.nonexhaustive",
+        "api.errors",
+        "api.helpers",
+        "api.fingerprint",
+        "api.docs"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "7e75efdeb58a1ca0139825345762c1f937c18ffbccfab0e367bc8323c2f8e04b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/README.md",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "a6454bf54fe363746545c40450bfc5cce0cbc49f3adfe990525486b87d1ea8ab"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/LICENSE",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "1b26106382beadff4758fd458e602c1f4785b5937d0345867c64f43032ea2f56"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/.gitattributes",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "2803d00c688b54ab9043b27c7a676e321ab443caa9461612b22d830eab0bacfc"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/manifest.json",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored",
+            "corpus.harness"
+          ],
+          "sha256": "4372e9da321369248226b0543b0f1b2848f042aa34bf7424498a12718a3c63b6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "corpus.vendored",
+            "corpus.harness",
+            "format.schema-root"
+          ],
+          "sha256": "9185cbb97730f939560470eb75d6ae05472e967d4b174e93ef3aacd5cb04a735"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.harness",
+            "api.nonexhaustive",
+            "api.helpers",
+            "api.docs"
+          ],
+          "sha256": "97206ba53f6746bb06f3b2034d39fb424496d6990c306f66eab61945b0321591"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.harness",
+            "format.schema-root",
+            "api.nonexhaustive",
+            "api.errors",
+            "api.helpers",
+            "api.fingerprint",
+            "api.docs"
+          ],
+          "sha256": "d9d31931e4a36ce99ab4107b8ac02330ac562dbc496ffa4acee510001d695d12"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "format.schema-root"
+          ],
+          "sha256": "89fbd871267db9e977cfdcf51aad0a67e51d876a07e65b790c306a14f43f2846"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/error.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.errors",
+            "api.docs"
+          ],
+          "sha256": "2e13a24122724736be1619e7ea791b693bf3eadb64a012122adabdbb28163907"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/diagnostics/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.errors",
+            "api.docs"
+          ],
+          "sha256": "25b779758af41316ad919689adee5285a323dbd9c31212333a431b45474456d8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/selection.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.docs"
+          ],
+          "sha256": "97847f78bf009029d43f7eafa80c03f58da2d5f495520fc29cd729f3f254b55e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/value.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive"
+          ],
+          "sha256": "902dfa679226294418a2bdb8f6484aa67b14b086e3fbe4814446ab6903d9ee29"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/catalog.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive"
+          ],
+          "sha256": "dca37bdd7fde40b191329a85d672078fc0221b930c9fe1f674a472c45ec84751"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_occurrence.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.helpers",
+            "api.docs"
+          ],
+          "sha256": "fcf2b250cb399de2088abcdd9a905758b17e22def64afd3956cc3b3399735c45"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/api_foundations.rs",
+          "kind": "test",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.errors",
+            "api.helpers",
+            "api.fingerprint"
+          ],
+          "sha256": "2fb981bb8347115f55464ed28a3da57f3b545a8ac0c92347746d721d0f354bcb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/dtcg_2025_10_conformance.rs",
+          "kind": "test",
+          "criterionIds": [
+            "api.errors"
+          ],
+          "sha256": "c58fadf06eb4409df9f90f14a47b36233debb5f9369fa52cb73c9812e1900b17"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/lazy_catalog.rs",
+          "kind": "test",
+          "criterionIds": [
+            "api.nonexhaustive"
+          ],
+          "sha256": "493246e53a7fb75254236caab050bd03fb07fb929a8da42af39451a68238222c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "api.nonexhaustive"
+          ],
+          "sha256": "ac7f6f8372a4d089291276df1f693b03c4d8ac0f98ccb21085835d23ef4baa99"
+        }
+      ],
+      "summaryMarkdown": "All sprint-1 criteria are met. The three findings from the first pass are resolved: the vendored corpus is now byte-identical to upstream `882ebd6` (253/253 blob ids re-verified) with a CR-byte guard test; root `$schema` is accepted only on whole loaded documents, with a `preview_source` inline regression case; and the new `Resolution`/`RuntimeLimits` items have accurate doc comments. Harness, ratchet, API extensibility, `UnresolvedReference`, helpers, `replace_envelope` and the canonical fingerprint were already correct and covered by `official_test_suite` and `api_foundations`.",
+      "findingIds": [
+        "corpus-crlf-not-byte-identical",
+        "schema-root-inline-preview-source",
+        "api-docs-missing-or-inaccurate"
+      ],
+      "recordedAt": "2026-10-06T20:40:50Z"
+    }
+  },
+  "checkpoints": {
+    "sprint-1": {
+      "snapshotId": "2ad04ace298ca8685cb4c3937bdca48a5f1748219402cc0413893900d5a1ca24",
+      "commits": {
+        "dtcg": "ca2f66038236631ba2b3e0d61316222c44232872"
+      },
+      "reviewHash": "54319bc2d254a88fcb776cc7c7622522fec072182bd1d27438e8687580af1006",
+      "recordedAt": "2026-10-06T20:41:08Z"
+    }
+  },
+  "findings": [
+    {
+      "id": "corpus-crlf-not-byte-identical",
+      "boundaryId": "sprint-1",
+      "criterionIds": [
+        "corpus.vendored"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** the vendored `2025.10/` tree is an unmodified copy of upstream `test-suite/tests/2025.10/` at `882ebd6` (decision `corpus-ratchet`: fixture files are never edited), and the README claims `.gitattributes` keeps the files byte-identical.\n\n**Observed:** all 253 vendored files (3 manifests + 250 fixtures) have CRLF line endings in the working tree; upstream blobs are LF. Because `.gitattributes` sets `* -text`, `git add` stores the CRLF bytes as-is: `git hash-object` of `resolver/positive/minimal-resolver.json` gives `ff38d65a...`, while the upstream tree lists `b76e83e6...`. None of the 253 files match their upstream blob SHA; after stripping CR bytes, all 253 match and the file set is identical. The parse-based harness cannot detect this.\n\n**Repair:** re-export the tree byte-exact (for example `git archive 882ebd6 test-suite/tests/2025.10 | tar -x` with no autocrlf conversion, or convert CRLF to LF), keep `* -text`, and verify each file's `git hash-object --no-filters` against the upstream tree for `882ebd6`. Add a cheap guard to the `official_test_suite` group (for example, assert that no manifest or fixture contains a CR byte) so the automated criterion covers byte identity.\n\n**Resolved:** re-exported with `core.autocrlf=false`; `git hash-object` of all 253 files equals the upstream blob ids at `882ebd6` (re-verified by the reviewer). The README update procedure disables autocrlf and requires blob-id verification, and `vendored_fixtures_keep_the_upstream_line_endings` fails on any CR byte or a changed file count.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "symbol": "vendored_fixtures_keep_the_upstream_line_endings"
+        }
+      ]
+    },
+    {
+      "id": "schema-root-inline-preview-source",
+      "boundaryId": "sprint-1",
+      "criterionIds": [
+        "format.schema-root"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** only whole-document sources may carry a root `$schema`; fragment roots and inline sources do not qualify (design `format-structure`, and the doc comment on `without_root_schema`), so `$schema` there fails with `unknown reserved property`.\n\n**Observed:** `without_root_schema` (resolver.rs) only checks `source.origin.pointer.is_empty()`. The inline source supplied to `inspect_source`/`preview_source` is built in `discover_source` (source_discovery.rs) with `origin { resource: None, pointer: \"\" }`, so it is treated as a document root. Probe: `runtime.preview_source(&json!({\"$schema\":\"x\",\"b\":{\"$type\":\"number\",\"$value\":2}}), &[])` returns `Ok(Ready(..))` with 2 tokens instead of a `Token` error. The existing inline test only covers inline sources inside a resolver `sources` array (non-empty pointer).\n\n**Repair:** treat a source as a document root only when it was loaded as a whole document (for example `source.origin.resource.is_some() && source.origin.pointer.is_empty()`), and add a `preview_source` inline case to `schema_in_fragment_and_inline_sources_is_not_a_document_root`.\n\n**Resolved:** `without_root_schema` now requires `origin.resource.is_some()` and an empty pointer, and `schema_in_fragment_and_inline_sources_is_not_a_document_root` asserts that `preview_source` with an inline root `$schema` fails with `unknown reserved property`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "symbol": "schema_in_fragment_and_inline_sources_is_not_a_document_root"
+        }
+      ]
+    },
+    {
+      "id": "api-docs-missing-or-inaccurate",
+      "boundaryId": "sprint-1",
+      "criterionIds": [
+        "api.docs"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** every public item touched by this epic has a doc comment describing its current behavior.\n\n**Observed (resolver.rs):**\n- New public `Resolution::is_ready`, `Resolution::is_missing`, and `RuntimeLimits::with_max_documents` / `with_max_reference_depth` / `with_max_alias_depth` have no doc comments.\n- The new `RuntimeLimits::max_documents` doc says \"Documents one discovery may load or request\", but `Discovery::check_count` bounds source occurrences (terminal and queued sources, inline ones included, plus missing requests), as user-guide chapter 11 states; a resolver with 300 inline sources and no external document exceeds the default.\n- The new `max_alias_depth` doc says \"Reference hops in one token's resolution chain\", but `resolve_token` rejects when `visiting.len() >= max_alias_depth` before visiting a token, so it bounds tokens on the chain (N hops need a limit of N+1, and `0` rejects literal tokens).\n\n**Repair:** add doc comments to the five new methods and rewrite the two field docs to describe the actual counting (and update them again if requirement `bounds` changes the semantics).\n\n**Resolved:** `is_ready`, `is_missing` and the three `with_*` setters are documented; `max_documents` now documents source-occurrence counting and `max_alias_depth` documents tokens on the chain including the referring token, matching `check_count` and `resolve_token`. Sprint 2 must update the alias-depth doc when it changes the semantics.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "symbol": "RuntimeLimits"
+        }
+      ]
+    }
+  ],
   "handoffMarkdown": "",
   "protectedPaths": {
     "dtcg": {
