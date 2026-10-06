@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 30,
+  "revision": 35,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -58,7 +58,10 @@
       ]
     },
     "task-value-extensions": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-merged-structure": {
       "status": "pending"
@@ -130,6 +133,15 @@
         }
       },
       "recordedAt": "2026-10-06T21:16:07Z"
+    },
+    "c95ce274c484663c9c49850e850e1bed2013d18c2203a459625f53fe5a7ed4c5": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "76983113acd9c836a7c57ea2d6e913467a4ca591a268aac6294cc26ca03912a2"
+        }
+      },
+      "recordedAt": "2026-10-06T21:19:05Z"
     }
   },
   "checkResults": {
@@ -285,6 +297,23 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-3-final-47fefa320f74.log",
       "logSha256": "92b21a2ab858006fc0352851a99b43eca1bdfc50dc696f4342bf0bc57bcaf910",
       "inputsHash": "092dacd4dd97cefae3f1fa9e22886b24e7d6f8c1d92539a10415e9a2faba9c4a"
+    },
+    "sprint-4/check-value-extensions/final": {
+      "checkId": "check-value-extensions",
+      "boundaryId": "sprint-4",
+      "phase": "final",
+      "batchId": "c95ce274c484663c9c49850e850e1bed2013d18c2203a459625f53fe5a7ed4c5",
+      "definitionHash": "cac2956ec5fe45c9137c8b9c2b656cfadfdeb48ff25540962bf6ac71e508ce6d",
+      "basisHash": "5cf35ee6f8c76276a66a291147f2bb47b66c3a13bf093cfa491445fa7359cc9d",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.2222,
+      "recordedAt": "2026-10-06T21:19:05Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-4-final-9deb961eff2a.log",
+      "logSha256": "ff83d3762c6cb11211948433488ba7e1e75f426406f5afbec72c4bc486ca872d",
+      "inputsHash": "de2285ffde2975fb17ced16d4f0848f5237b447f6cc6d56f0885aaa2d69bad1c"
     }
   },
   "reviews": {
@@ -746,6 +775,116 @@
         "s3-extends-ref-token-target"
       ],
       "recordedAt": "2026-10-06T21:16:33Z"
+    },
+    "sprint-4": {
+      "reviewerId": "reviewer-sprint-4-7f3c91d2",
+      "snapshotId": "c95ce274c484663c9c49850e850e1bed2013d18c2203a459625f53fe5a7ed4c5",
+      "criterionIds": [
+        "ext.strict-default",
+        "ext.opt-in"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/value.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "33212b08699f3f17c1725847d86ee150f8dc7c74aa32031962734699cbeece85"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/options.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "7c92983ac6d482cd23fc35c274d48a1289cdaadde895b2f36e2732755cc4d495"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "a6caf252cf1790e078b434fc9e7e95468490bf9fccb6d649d20eacccbcfd66ef"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "4c448983e115567ac052abaee35d4826baf40ba7a47d4766a33a68a26bb76141"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.opt-in"
+          ],
+          "sha256": "23ecd4798353fdc21d59288c993ccef44c1fe87f506f54948f07b9d526d99ba5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/reference_positions.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "83132b4c2aa19f648883f6c0318023b0f7797ea2fa58a782b6902da0f1a679c6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.opt-in"
+          ],
+          "sha256": "be09460ab1062aaf5323320cf3459ed524a7cc116f2312ee19700384e80cd338"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/value_extensions.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "4ce4989fe631b550cdcdd0411b8495f6103a131453486b860f882a17e8913b61"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/rayx_export_types.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ext.opt-in"
+          ],
+          "sha256": "878270daf7bdfd20d39f1548ee24e41865d1c9767b541201eebc22995604b0a4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ext.strict-default"
+          ],
+          "sha256": "93c840a74c54bab117f10bc75f7a1b5bf71e203669620f3afbf5e510dd944efc"
+        }
+      ],
+      "summaryMarkdown": "Both criteria hold. `validate_value` delegates to `validate_value_with` with `ValueExtensions::default()` (both flags off): a dimension `lineHeight` fails typography and `dev.rayx.blur` is `UnsupportedType`. `DtcgRuntime` stores `RuntimeOptions`; every resolving path (`resolve`, `project`, `preview_source`/`preview_occurrence`, `replace_json_and_resolve_affected`) passes the stored options to `Resolver`, which feeds `extensions` to `validate_value_with` and `line_height_dimension` to every `Position::child` call, so a default `lineHeight` alias must target `number`. `with_limits`, `from_json` and `from_envelope` delegate to the `_with_options` forms with strict defaults. Flags are independent and `rayx()` enables both. `value_extensions` (5), `rayx_export_types` (3, via `ValueExtensions::rayx()`) and `reference_positions` (6) pass; the corpus fixture `typography-lineHeight-wrong-type` is dropped from `KNOWN_GAPS` and its shape is pinned in `value_extensions`. Non-blocking notes for sprint 8 (`task-docs`): the `RuntimeOptions::limits`/`extensions` fields lack per-field doc comments, and docs/05-value-types.md and docs/13-api-reference.md still show `validate_value(BLUR_TYPE, ...)` succeeding. Preview and affected resolution with extensions are correct by construction but have no dedicated test.",
+      "findingIds": [],
+      "recordedAt": "2026-10-06T21:21:10Z"
     }
   },
   "checkpoints": {
@@ -772,6 +911,14 @@
       },
       "reviewHash": "6dc105e69cb2149aa3fb946328e0f01f3ac374832f7bbc81b18bad8e442f1f17",
       "recordedAt": "2026-10-06T21:16:46Z"
+    },
+    "sprint-4": {
+      "snapshotId": "c95ce274c484663c9c49850e850e1bed2013d18c2203a459625f53fe5a7ed4c5",
+      "commits": {
+        "dtcg": "2eb481ff858cd20db26935c89f432e598fdad2c4"
+      },
+      "reviewHash": "5eca98eec6ce7e62593c4c0d7eb7601b56ed5c38e32c7378b6bbbc14b3b4db20",
+      "recordedAt": "2026-10-06T21:21:27Z"
     }
   },
   "findings": [
