@@ -25,6 +25,7 @@ mod source_origin;
 mod token_resolution;
 mod type_registry;
 mod value;
+pub mod values;
 
 pub use affected_resolution::AffectedResolution;
 pub use catalog::DocumentCatalog;

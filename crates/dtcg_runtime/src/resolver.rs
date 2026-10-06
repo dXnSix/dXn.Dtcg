@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 use crate::{
@@ -247,6 +247,79 @@ impl ResolvedTokens {
     pub fn groups(&self) -> impl Iterator<Item = &ResolvedGroup> {
         self.groups.values()
     }
+
+    /// Writes this resolution as a DTCG 2025.10 token document (Resolver §8).
+    ///
+    /// Tokens are written in resolution order, each with an explicit `$type`,
+    /// its resolved `$value` (no references), and its own `$description` and
+    /// `$extensions`; `$deprecated` is written where it differs from what the
+    /// token inherits from the written groups. `$root` tokens are written as
+    /// `$root` members. Each group is created with its first token and keeps
+    /// its own `$description`, `$deprecated` and `$extensions`; the root keeps
+    /// its merged `$extensions`. No `$schema` is written.
+    ///
+    /// Resolving the document again yields the same paths, types, values and
+    /// metadata. A nested document keeps a group's tokens together, so when
+    /// resolution order interleaves the tokens of different groups (a later
+    /// source redefined a token), the re-resolved order is grouped: the
+    /// tokens come in the order their groups were first written.
+    pub fn to_document(&self) -> Value {
+        let mut root = Map::new();
+        let mut root_deprecation = Deprecation::NotDeprecated;
+        if let Some(group) = self.groups.get("") {
+            write_group_metadata(&mut root, group);
+            if let Some(deprecated) = &group.deprecated {
+                root_deprecation = deprecated.clone();
+            }
+        }
+        for token in self.iter() {
+            let segments = token.path.split('.').collect::<Vec<_>>();
+            let (name, parents) = segments.split_last().expect("token paths are not empty");
+            let mut inherited = root_deprecation.clone();
+            let mut current = &mut root;
+            let mut path = String::new();
+            for segment in parents {
+                if !path.is_empty() {
+                    path.push('.');
+                }
+                path.push_str(segment);
+                let group = self.groups.get(&path);
+                if let Some(deprecated) = group.and_then(|group| group.deprecated.as_ref()) {
+                    inherited = deprecated.clone();
+                }
+                current = current
+                    .entry((*segment).to_owned())
+                    .or_insert_with(|| {
+                        let mut members = Map::new();
+                        if let Some(group) = group {
+                            write_group_metadata(&mut members, group);
+                        }
+                        Value::Object(members)
+                    })
+                    .as_object_mut()
+                    .expect("groups are objects");
+            }
+            let mut written = Map::new();
+            if let Some(token_type) = &token.token_type {
+                written.insert("$type".into(), Value::String(token_type.to_string()));
+            }
+            written.insert("$value".into(), token.value.clone());
+            if let Some(description) = &token.description {
+                written.insert(
+                    "$description".into(),
+                    Value::String(description.to_string()),
+                );
+            }
+            if token.deprecated != inherited {
+                written.insert("$deprecated".into(), token.deprecated.to_json());
+            }
+            if !token.extensions.is_null() {
+                written.insert("$extensions".into(), token.extensions.clone());
+            }
+            current.insert((*name).to_owned(), Value::Object(written));
+        }
+        Value::Object(root)
+    }
     /// Tokens in resolution order.
     pub fn iter(&self) -> impl Iterator<Item = &ResolvedToken> {
         self.order.iter().filter_map(|path| self.tokens.get(path))
@@ -369,6 +442,21 @@ pub(crate) fn resolve_sources(
         groups: resolved_groups(groups),
         fingerprint,
     })
+}
+
+fn write_group_metadata(members: &mut Map<String, Value>, group: &ResolvedGroup) {
+    if let Some(description) = &group.description {
+        members.insert(
+            "$description".into(),
+            Value::String(description.to_string()),
+        );
+    }
+    if let Some(deprecated) = &group.deprecated {
+        members.insert("$deprecated".into(), deprecated.to_json());
+    }
+    if !group.extensions.is_null() {
+        members.insert("$extensions".into(), group.extensions.clone());
+    }
 }
 
 fn resolved_groups(groups: BTreeMap<String, RawGroup>) -> BTreeMap<String, ResolvedGroup> {
