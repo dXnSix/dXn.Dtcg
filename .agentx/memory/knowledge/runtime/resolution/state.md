@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime/resolution
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-05T18:00:00+02:00
+  updated: 2026-10-06T21:18:58+02:00
   topics:
     - resolution
     - catalog
@@ -22,7 +22,7 @@ Read before changing how documents are supplied, how resolvers select sources, o
 
 ## Current Technical Shape
 
-`ResourceId` is a fragment-free logical identifier; relative references canonicalize against the referencing document, and traversal or invalid ids are rejected. `DocumentCatalog` stores `Arc<str>` JSON per id and the runtime exposes a `catalog_revision()` counter. Supply documents with `from_json`, `from_envelope`, `provide_json`, `provide_requested_json`, the atomic `provide_json_batch`, `replace_json` and `remove_document`; `set_root` picks the root.
+`ResourceId` is a fragment-free logical identifier; relative references canonicalize against the referencing document. `normalize` rejects a leading `/`, any `\`, `:` in any path segment (Windows drive prefixes such as `C:/x` and `c:x`, URI schemes, NTFS streams; `..` could otherwise move a later segment first), empty or `.` segments, and `..` above the root, so a rejected `$ref` fails with `InvalidResourceId` instead of becoming a `DocumentRequest`. Fragments may contain `:`. `DocumentCatalog` stores `Arc<str>` JSON per id and the runtime exposes a `catalog_revision()` counter. Supply documents with `from_json`, `from_envelope`, `provide_json`, `provide_requested_json`, the atomic `provide_json_batch`, `replace_json` and `remove_document`; `set_root` picks the root.
 
 `resolve(selection)` returns `Resolution::Ready(ResolvedTokens)` or `Resolution::Missing(Vec<DocumentRequest>)` (each request carries the canonical id, the referencing id and the original reference); the caller loads the documents and resolves again. `validate_complete` also walks inactive contexts. Resolvers must declare `version: "2025.10"`. `modifiers()` lists `ModifierAxis` values (contexts in authored order, optional default) in resolution order, then the remaining root modifiers by name; `normalize_selection` fills defaults, rejects unknown modifiers or contexts, and orders the result by axis so equal selections compare equal.
 

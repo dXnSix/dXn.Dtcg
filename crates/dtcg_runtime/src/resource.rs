@@ -86,7 +86,10 @@ fn split_reference(value: &str) -> Result<ParsedReference<'_>, DtcgError> {
 }
 
 fn normalize(parent: Option<&str>, path: &str) -> Result<String, DtcgError> {
-    if path.starts_with('/') || path.starts_with('\\') || path.contains('\\') {
+    // `:` is rejected in every segment, not only the first: it forms Windows drive prefixes
+    // (`C:/x`, `c:x`), URI schemes and NTFS alternate data streams, and `..` can move a later
+    // segment to the front (`a/../C:/x.json`).
+    if path.starts_with('/') || path.contains('\\') || path.contains(':') {
         return Err(DtcgError::InvalidResourceId(path.into()));
     }
     let mut parts: Vec<String> = parent
