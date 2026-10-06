@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 21,
+  "revision": 30,
   "planRevision": 1,
   "specHashes": {
     "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
@@ -40,13 +40,22 @@
       ]
     },
     "task-format-structure": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-type-order": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-reference-positions": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     },
     "task-value-extensions": {
       "status": "pending"
@@ -112,6 +121,15 @@
         }
       },
       "recordedAt": "2026-10-06T21:03:51Z"
+    },
+    "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6": {
+      "snapshot": {
+        "specHash": "2398544a022fd0e7428ca3a7f12277b50c9895e0541b3c8c9d98c2beae942004",
+        "repositories": {
+          "dtcg": "e4f29def9a61037cda7e90456cb5e6d3c3f85230bfa667dda56037d2d4a3a2e0"
+        }
+      },
+      "recordedAt": "2026-10-06T21:16:07Z"
     }
   },
   "checkResults": {
@@ -216,6 +234,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-2-final-cee9de12f61b.log",
       "logSha256": "10877517d99d05bbc46b5942a88414a61bf2547bd810ea187f451101d6a92699",
       "inputsHash": "f112786f359930bfc7ca985885392b80a763711ff17baf16bdb7062e9b00beaa"
+    },
+    "sprint-3/check-format-structure/final": {
+      "checkId": "check-format-structure",
+      "boundaryId": "sprint-3",
+      "phase": "final",
+      "batchId": "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6",
+      "definitionHash": "8609b7f42498bbc5d2378b02bb52250f5d6e5ab54c0a35c34eca2766b66cab20",
+      "basisHash": "86115fe27d7462c39a19faf91bbece36cdce535540a8998b9efc32b680b756c2",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.2353,
+      "recordedAt": "2026-10-06T21:16:05Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-3-final-d6c99613b23d.log",
+      "logSha256": "105c84078d7c8d16504287ff4496fa4d25f63b2c203dcf1903497dcd916bd9ba",
+      "inputsHash": "af933de82bf99b10ed449893cddf9f8a42693bdaf89da39bdcff4d158d636717"
+    },
+    "sprint-3/check-type-determination/final": {
+      "checkId": "check-type-determination",
+      "boundaryId": "sprint-3",
+      "phase": "final",
+      "batchId": "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6",
+      "definitionHash": "57bf5e14ec12626960aedc0322c148180490e09ef994df9be5ad2452153b5731",
+      "basisHash": "a3f82beda7f7ba520ec1239e20f057f65c56ffba8d84379a3b2385b5b42f329e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 7,
+      "durationSeconds": 0.697,
+      "recordedAt": "2026-10-06T21:16:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-3-final-aad4d7e05d79.log",
+      "logSha256": "02a168d8362fd9d8fde46c506e90fc82257261f7b864ff7863e15fbee7708997",
+      "inputsHash": "dd5c15b1985a88b926578a29372b787f54d87f8e2f490ff8295de393aba8ea87"
+    },
+    "sprint-3/check-reference-positions/final": {
+      "checkId": "check-reference-positions",
+      "boundaryId": "sprint-3",
+      "phase": "final",
+      "batchId": "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6",
+      "definitionHash": "61ad3feac688e8cff0307ce99b164c48bda3330cc32e6ca733b9eddaa30233f1",
+      "basisHash": "2ca5f67bc573cb46df6a8471c85e5b3bfb3fb058c5566ab43620ef44dec5921c",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.7343,
+      "recordedAt": "2026-10-06T21:16:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-3-final-47fefa320f74.log",
+      "logSha256": "92b21a2ab858006fc0352851a99b43eca1bdfc50dc696f4342bf0bc57bcaf910",
+      "inputsHash": "092dacd4dd97cefae3f1fa9e22886b24e7d6f8c1d92539a10415e9a2faba9c4a"
     }
   },
   "reviews": {
@@ -574,6 +643,109 @@
         "s2-token-pointer-clone-before-charge"
       ],
       "recordedAt": "2026-10-06T21:04:57Z"
+    },
+    "sprint-3": {
+      "reviewerId": "reviewer-sprint-3-7f3c91e2",
+      "snapshotId": "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6",
+      "criterionIds": [
+        "format.children",
+        "format.root-token",
+        "format.metadata-types",
+        "types.order",
+        "types.token-ref",
+        "types.mismatch",
+        "refs.curly-positions",
+        "refs.member-types"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "kind": "source",
+          "criterionIds": [
+            "format.children",
+            "format.root-token",
+            "format.metadata-types",
+            "types.order",
+            "types.token-ref"
+          ],
+          "sha256": "2e54427fcdce028383c7b1dbf35f0c9adcc10d23fb313bbe2ee811da874793c6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/format_structure.rs",
+          "kind": "test",
+          "criterionIds": [
+            "format.children",
+            "format.root-token",
+            "format.metadata-types"
+          ],
+          "sha256": "17b74d13f03d57c1a5bf3da63e81ec03471c6b424be3ca1590b4edec37c77067"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "format.children",
+            "format.root-token",
+            "format.metadata-types",
+            "refs.curly-positions"
+          ],
+          "sha256": "dd21b32a0f97a614a5541a919d438f75e12e5937c4bf07b27106f8cdfa9b4917"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "types.order",
+            "types.token-ref",
+            "types.mismatch",
+            "refs.curly-positions",
+            "refs.member-types"
+          ],
+          "sha256": "c3eef27cf59744befc02898d9908b13b5870a5292c12e68f04b326d36b504df8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/type_determination.rs",
+          "kind": "test",
+          "criterionIds": [
+            "types.order",
+            "types.token-ref",
+            "types.mismatch"
+          ],
+          "sha256": "5e3a1965f4854e65643343b0a4db2014c86b89bf9e6a313ec156202322457d07"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/reference_positions.rs",
+          "kind": "source",
+          "criterionIds": [
+            "refs.curly-positions",
+            "refs.member-types"
+          ],
+          "sha256": "83132b4c2aa19f648883f6c0318023b0f7797ea2fa58a782b6902da0f1a679c6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/reference_positions.rs",
+          "kind": "test",
+          "criterionIds": [
+            "refs.curly-positions",
+            "refs.member-types"
+          ],
+          "sha256": "6379cba1d298fa4781e9c3065f97d0b12f21f8b9a7c858e3255652886e364a69"
+        }
+      ],
+      "summaryMarkdown": "Re-review after repairs. The eight criteria hold, and both minor findings are resolved and covered by `format_structure::extends_belongs_to_groups_and_targets_groups`, which passes.\n\n- **`$extends` on a token** is rejected with ``Token `$extends` is only allowed on groups``.\n- **`$extends` targets** that are any token, whether `$value` or token-level `$ref`, fail with ``must be a group``.\n\nThe earlier conclusions stand:\n\n- **Format structure:** the rules apply at the correct paths, including inside `$extends` copies.\n- **Type order:** own type, then whole-reference target, then group type. A `/$value` pointer whose prefix is not a token reads the document.\n- **Type checks:** the mismatch check compares type names, and the position table matches the criteria, independent of order.\n- **Corpus:** passes with the 10 ids removed from `KNOWN_GAPS`.\n\n`lineHeight` dimension stays default-on as planned for sprint 4. The CHANGELOG entry for token `$extends` is deferred to the sprint-8 docs task.",
+      "findingIds": [
+        "s3-token-extends-ignored",
+        "s3-extends-ref-token-target"
+      ],
+      "recordedAt": "2026-10-06T21:16:33Z"
     }
   },
   "checkpoints": {
@@ -592,6 +764,14 @@
       },
       "reviewHash": "1cc44d3a2c00f0c82d9b71f9b274f10a18138bb8325fa0bb38f4b6497d7dc77c",
       "recordedAt": "2026-10-06T21:05:29Z"
+    },
+    "sprint-3": {
+      "snapshotId": "98989dcb95e19270b882e98834a359c062ad0fd1eec5d3de99beb3c39f55d7b6",
+      "commits": {
+        "dtcg": "6d7cfea888de7baed0755d68efffa9a530525a03"
+      },
+      "reviewHash": "6dc105e69cb2149aa3fb946328e0f01f3ac374832f7bbc81b18bad8e442f1f17",
+      "recordedAt": "2026-10-06T21:16:46Z"
     }
   },
   "findings": [
@@ -701,6 +881,40 @@
         }
       ],
       "boundaryId": "sprint-2"
+    },
+    {
+      "id": "s3-token-extends-ignored",
+      "boundaryId": "sprint-3",
+      "criterionIds": [
+        "format.children"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** `$extends` is a group-only property, and the strict structural rules (no lenient mode) reject it on a token object with `DtcgError::Token` at the token path, as for any other property a token may not carry. At minimum, removing the old handling must not turn it into a silently ignored member.\n\n**Observed:** this sprint removed `own_or_chain_type`, which at HEAD resolved a token's `$extends` chain (reporting a missing target and supplying the type). `insert_token` now neither rejects nor reads it. `{\"t\": {\"$type\": \"number\", \"$value\": 1, \"$extends\": \"{missing}\"}}` resolves successfully, and an untyped `{\"$value\": 1, \"$extends\": \"{g}\"}` now fails only with `token requires a DTCG type`. This is an unlisted behavior change with no test.\n\n**Repair:** in `flatten.rs` `insert_token`, reject `$extends` on token objects (for example, ``token `<path>` must not have `$extends` ``). Add a case to `tests/format_structure.rs`, and record the change for the CHANGELOG.\n\n**Resolved:** `insert_token` now rejects a token carrying `$extends` with ``Token `$extends` is only allowed on groups``.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/format_structure.rs",
+          "symbol": "extends_belongs_to_groups_and_targets_groups"
+        }
+      ]
+    },
+    {
+      "id": "s3-extends-ref-token-target",
+      "boundaryId": "sprint-3",
+      "criterionIds": [
+        "format.children"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Expected:** this sprint defines a token as an object with `$value` or a token-level `$ref` (`is_token`). An `$extends` that targets any token fails with ``Token `$extends` target `{r}` must be a group``, as it already does for `$value` tokens (corpus `group/extends-token`).\n\n**Observed:** `compute_links` in `flatten.rs` still tests only `extended.contains_key(\"$value\")`. `{\"$extensions\": {\"x\": 1}, \"r\": {\"$type\": \"number\", \"$ref\": \"#/$extensions/x\"}, \"d\": {\"$extends\": \"{r}\"}}` resolves successfully: the token-level `$ref` token is treated as an empty group and `d` silently gets no members.\n\n**Repair:** use `is_token(extended)` in `compute_links`, and add a `format_structure` case for an `$extends` targeting a token-level `$ref` token.\n\n**Resolved:** `compute_links` now uses `is_token(extended)`, so `$value` and token-level `$ref` targets both fail with ``must be a group``.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/format_structure.rs",
+          "symbol": "extends_belongs_to_groups_and_targets_groups"
+        }
+      ]
     }
   ],
   "handoffMarkdown": "",
