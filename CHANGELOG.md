@@ -158,10 +158,10 @@ for the conformance tiers and every implementation-defined choice.
   `unsupported-version.tokeneditor` and the absolute-reference envelope in
   `tests/dtcg_theme_envelope.rs` also have an empty `resolutionOrder`, but they keep failing for
   their intended reason first (version, local-reference policy).
-- **Android assets.** `apps/lab/platform/android/.../assets/dtcg/default.resolver.dtcg.json` and
-  its `apps/test_suite` copy declare the single-context modifiers `contrast`, `density` and
-  `platform`; if they are loaded with `dtcg_runtime`, give each modifier a second context or turn
-  it into a set.
+- **Android assets.** `apps/lab/platform/android/gradle/app/src/main/assets/assets/dtcg/default.resolver.dtcg.json`
+  (copied into build outputs, including the Test Suite's) declares the single-context modifiers
+  `contrast`, `density` and `platform`; if it is loaded with `dtcg_runtime`, give each modifier a
+  second context or turn it into a set.
 - **Test Suite DTCG page.** `apps/test_suite/src/pages/dtcg_runtime.rs` shows the diagnostic of the
   invalid-alias fixture; its code is now `UnresolvedReference` (was `Projection`), with
   `path=button.fill` and the target `missing.token` in the message. The spec
