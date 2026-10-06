@@ -9,9 +9,10 @@ use crate::{
     error::invalid,
     json_pointer::{fragment_parts, plain_pointer, pointer_parts, walk},
     resolver_definition::{
-        modifier_documents, optional_object, resolution_step, resolve_local_reference,
-        set_documents, validate_inputs,
+        Step, StepKind, all_context_documents, context_documents, declared_modifiers,
+        effective_steps, is_resolver, resolve_local_reference, set_documents, validate_resolver,
     },
+    selection::{Match, match_name},
 };
 
 pub(crate) fn required_root(root: Option<&ResourceId>) -> Result<&ResourceId, DtcgError> {
@@ -23,6 +24,57 @@ pub(crate) fn required_root(root: Option<&ResourceId>) -> Result<&ResourceId, Dt
     })
 }
 
+/// The terminal sources of one discovery, how it used the inputs, and the
+/// context it chose for every modifier it reached, in declaration order
+/// (root first) and with declared spellings.
+pub(crate) struct Discovered {
+    pub(crate) sources: Vec<SourceOccurrence>,
+    pub(crate) inputs: InputUse,
+    pub(crate) choices: Vec<(String, String)>,
+}
+
+/// Which inputs a discovery matched to a declared modifier, and every
+/// modifier name the resolvers it reached declare.
+#[derive(Default)]
+pub(crate) struct InputUse {
+    claimed: BTreeSet<usize>,
+    /// Declared modifier names in first-declared order, root first.
+    declared: Vec<String>,
+}
+
+impl InputUse {
+    /// Whether every one of `count` inputs matched a declared modifier.
+    pub(crate) fn claims_all(&self, count: usize) -> bool {
+        self.claimed.len() == count
+    }
+}
+
+/// Fails for an input that no reached resolver declares. A graph that
+/// declares no modifiers ignores inputs (Resolver §6.1).
+pub(crate) fn check_inputs(
+    selection: &[(&str, &str)],
+    uses: &[&InputUse],
+) -> Result<(), DtcgError> {
+    let mut declared = Vec::<String>::new();
+    for name in uses.iter().flat_map(|used| &used.declared) {
+        if !declared.contains(name) {
+            declared.push(name.clone());
+        }
+    }
+    if declared.is_empty() {
+        return Ok(());
+    }
+    for (index, (modifier, _)) in selection.iter().enumerate() {
+        if !uses.iter().any(|used| used.claimed.contains(&index)) {
+            return Err(DtcgError::UnknownModifier {
+                modifier: (*modifier).into(),
+                known: declared,
+            });
+        }
+    }
+    Ok(())
+}
+
 pub(crate) fn discover(
     catalog: &DocumentCatalog,
     root: &ResourceId,
@@ -30,9 +82,40 @@ pub(crate) fn discover(
     selection: &[(&str, &str)],
     include_inactive: bool,
 ) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
-    let mut discovery = Discovery::new(catalog, root, limits, selection, include_inactive)?;
+    checked(
+        discover_with_inputs(catalog, root, limits, selection, include_inactive)?,
+        selection,
+        include_inactive,
+    )
+}
+
+/// Like [`discover`], leaving the check for undeclared inputs to the caller.
+pub(crate) fn discover_with_inputs(
+    catalog: &DocumentCatalog,
+    root: &ResourceId,
+    limits: &RuntimeLimits,
+    selection: &[(&str, &str)],
+    include_inactive: bool,
+) -> Result<Resolution<Discovered>, DtcgError> {
+    let mut discovery = Discovery::new(catalog, limits, selection, include_inactive)?;
     let root = discovery.load(root, None, root, root.as_str())?;
     discovery.expand(root.into_iter().map(|source| (source, 0)).collect())
+}
+
+fn checked(
+    discovered: Resolution<Discovered>,
+    selection: &[(&str, &str)],
+    include_inactive: bool,
+) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
+    match discovered {
+        Resolution::Ready(discovered) => {
+            if !include_inactive {
+                check_inputs(selection, &[&discovered.inputs])?;
+            }
+            Ok(Resolution::Ready(discovered.sources))
+        }
+        Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
+    }
 }
 
 /// Discover a supplied source in the root resolver's logical reference scope.
@@ -44,12 +127,33 @@ pub(crate) fn discover_source(
     selection: &[(&str, &str)],
     include_inactive: bool,
 ) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
-    let mut discovery = Discovery::new(catalog, root, limits, selection, include_inactive)?;
+    checked(
+        discover_source_with_inputs(catalog, root, limits, source, selection, include_inactive)?,
+        selection,
+        include_inactive,
+    )
+}
+
+/// Like [`discover_source`], leaving the check for undeclared inputs to the
+/// caller.
+pub(crate) fn discover_source_with_inputs(
+    catalog: &DocumentCatalog,
+    root: &ResourceId,
+    limits: &RuntimeLimits,
+    source: &Value,
+    selection: &[(&str, &str)],
+    include_inactive: bool,
+) -> Result<Resolution<Discovered>, DtcgError> {
+    let mut discovery = Discovery::new(catalog, limits, selection, include_inactive)?;
     let Some(scope) = discovery.load(root, None, root, root.as_str())? else {
         return discovery.expand(Vec::new());
     };
     if is_resolver(&scope.value) {
-        validate_resolver(&scope, &discovery.selections, include_inactive)?;
+        validate_resolver(&scope.resource, &scope.value)?;
+        let steps = effective_steps(&scope)?;
+        if !include_inactive {
+            discovery.choose_contexts(&scope, &steps)?;
+        }
     }
     let supplied = SourceOccurrence {
         resource: root.clone(),
@@ -68,7 +172,9 @@ pub(crate) fn discover_source(
 struct Discovery<'a> {
     catalog: &'a DocumentCatalog,
     limits: &'a RuntimeLimits,
-    selections: BTreeMap<&'a str, &'a str>,
+    selection: &'a [(&'a str, &'a str)],
+    inputs: InputUse,
+    choices: Vec<(String, String)>,
     include_inactive: bool,
     missing: BTreeMap<ResourceId, DocumentRequest>,
     /// Expansion steps so far: set references, local references, document
@@ -79,21 +185,18 @@ struct Discovery<'a> {
 impl<'a> Discovery<'a> {
     fn new(
         catalog: &'a DocumentCatalog,
-        root: &ResourceId,
         limits: &'a RuntimeLimits,
         selection: &'a [(&'a str, &'a str)],
         include_inactive: bool,
     ) -> Result<Self, DtcgError> {
-        let mut selections = BTreeMap::new();
-        for (name, value) in selection {
-            if selections.insert(*name, *value).is_some() {
-                return Err(invalid(root, &format!("duplicate input `{name}`")));
-            }
-        }
+        // A modifier selected twice, exactly or case-insensitively, is
+        // reported by the resolver that declares it.
         Ok(Self {
             catalog,
             limits,
-            selections,
+            selection,
+            inputs: InputUse::default(),
+            choices: Vec::new(),
             include_inactive,
             missing: BTreeMap::new(),
             expansions: 0,
@@ -141,7 +244,7 @@ impl<'a> Discovery<'a> {
     fn expand(
         mut self,
         sources: Vec<(SourceOccurrence, usize)>,
-    ) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
+    ) -> Result<Resolution<Discovered>, DtcgError> {
         self.check_count(sources.len())?;
         let mut queue = sources
             .into_iter()
@@ -169,7 +272,11 @@ impl<'a> Discovery<'a> {
             self.check_count(queue.len().saturating_add(terminal.len()))?;
         }
         if self.missing.is_empty() {
-            Ok(Resolution::Ready(terminal))
+            Ok(Resolution::Ready(Discovered {
+                sources: terminal,
+                inputs: self.inputs,
+                choices: self.choices,
+            }))
         } else {
             Ok(Resolution::Missing(self.missing.into_values().collect()))
         }
@@ -180,42 +287,119 @@ impl<'a> Discovery<'a> {
         source: &SourceOccurrence,
         depth: usize,
     ) -> Result<Vec<(SourceOccurrence, usize)>, DtcgError> {
-        validate_resolver(source, &self.selections, self.include_inactive)?;
-        let order = source.child("resolutionOrder")?;
+        validate_resolver(&source.resource, &source.value)?;
+        let steps = effective_steps(source)?;
+        let contexts = if self.include_inactive {
+            BTreeMap::new()
+        } else {
+            self.choose_contexts(source, &steps)?
+        };
         let mut result = Vec::new();
-        let mut inline_names = BTreeSet::new();
-        // validate_resolver checked the array before provenance traversal.
-        for index in 0..order
-            .value
-            .as_array()
-            .expect("validated resolution order")
-            .len()
-        {
-            let step = order.child(&index.to_string())?;
-            let (kind, name, definition) = resolution_step(source, &step)?;
-            if step.value.get("$ref").is_none() && !inline_names.insert(name.clone()) {
-                return Err(invalid(
-                    &source.resource,
-                    &format!("duplicate inline resolution name `{name}`"),
-                ));
-            }
-            let documents = match kind.as_str() {
-                "set" => set_documents(&definition)?,
-                "modifier" => {
-                    modifier_documents(&definition, &name, &self.selections, self.include_inactive)?
+        for step in &steps {
+            let documents = match step.kind {
+                StepKind::Set => set_documents(&step.definition)?,
+                StepKind::Modifier if self.include_inactive => {
+                    all_context_documents(&step.definition)?
                 }
-                _ => {
-                    return Err(invalid(
-                        &source.resource,
-                        "resolution step type must be `set` or `modifier`",
-                    ));
-                }
+                StepKind::Modifier => context_documents(&step.definition, &contexts[&step.name])?,
             };
             for document in documents {
                 self.append_source(source, document, &mut result, &mut Vec::new(), depth)?;
             }
         }
         Ok(result)
+    }
+
+    /// Chooses the context of every modifier `resolver` declares: the input
+    /// that names it (matched case-insensitively among this resolver's
+    /// modifiers), or else its default. Records the matched inputs and the
+    /// declared names; an input this resolver does not declare is left for
+    /// the other reached resolvers.
+    fn choose_contexts(
+        &mut self,
+        resolver: &SourceOccurrence,
+        steps: &[Step],
+    ) -> Result<BTreeMap<String, String>, DtcgError> {
+        let modifiers = declared_modifiers(resolver, steps)?;
+        let names = modifiers
+            .iter()
+            .map(|modifier| modifier.name.as_str())
+            .collect::<Vec<_>>();
+        let mut selected = BTreeMap::<&str, &str>::new();
+        for (index, (input, context)) in self.selection.iter().enumerate() {
+            match match_name(input, &names) {
+                Match::Found(name) => {
+                    if selected.insert(name, context).is_some() {
+                        let modifier =
+                            &modifiers[names.iter().position(|n| *n == name).expect("declared")];
+                        return Err(DtcgError::UnknownContext {
+                            modifier: name.into(),
+                            context: (*context).into(),
+                            allowed: modifier.contexts.clone(),
+                            message: "modifier is selected twice".into(),
+                        });
+                    }
+                    self.inputs.claimed.insert(index);
+                }
+                Match::Ambiguous(candidates) => {
+                    return Err(DtcgError::UnknownModifier {
+                        modifier: (*input).into(),
+                        known: candidates,
+                    });
+                }
+                Match::None => {}
+            }
+        }
+        for name in &names {
+            if !self.inputs.declared.iter().any(|declared| declared == name) {
+                self.inputs.declared.push((*name).to_owned());
+            }
+        }
+        let mut contexts = BTreeMap::new();
+        for modifier in &modifiers {
+            let context = match selected.get(modifier.name.as_str()) {
+                Some(input) => {
+                    let declared = modifier
+                        .contexts
+                        .iter()
+                        .map(String::as_str)
+                        .collect::<Vec<_>>();
+                    match match_name(input, &declared) {
+                        Match::Found(context) => context.to_owned(),
+                        Match::Ambiguous(candidates) => {
+                            return Err(DtcgError::UnknownContext {
+                                modifier: modifier.name.clone(),
+                                context: (*input).into(),
+                                allowed: candidates,
+                                message: "context matches more than one declared context".into(),
+                            });
+                        }
+                        Match::None => {
+                            return Err(DtcgError::UnknownContext {
+                                modifier: modifier.name.clone(),
+                                context: (*input).into(),
+                                allowed: modifier.contexts.clone(),
+                                message: "selected modifier context is unknown".into(),
+                            });
+                        }
+                    }
+                }
+                None => modifier
+                    .default
+                    .clone()
+                    .ok_or_else(|| DtcgError::UnknownContext {
+                        modifier: modifier.name.clone(),
+                        context: String::new(),
+                        allowed: modifier.contexts.clone(),
+                        message: "modifier has no default and was not selected".into(),
+                    })?,
+            };
+            if !self.choices.iter().any(|(name, _)| *name == modifier.name) {
+                self.choices.push((modifier.name.clone(), context.clone()));
+            }
+            contexts.insert(modifier.name.clone(), context);
+        }
+        Ok(contexts)
     }
 
     fn append_source(
@@ -326,32 +510,4 @@ impl<'a> Discovery<'a> {
 fn targets_forbidden_member(reference: &str) -> Result<bool, DtcgError> {
     let parts = pointer_parts(reference)?;
     Ok(parts.len() > 1 && matches!(parts[0].as_str(), "resolutionOrder" | "modifiers"))
-}
-
-fn is_resolver(value: &Value) -> bool {
-    value
-        .as_object()
-        .is_some_and(|object| object.contains_key("resolutionOrder"))
-}
-
-fn validate_resolver(
-    source: &SourceOccurrence,
-    selections: &BTreeMap<&str, &str>,
-    include_inactive: bool,
-) -> Result<(), DtcgError> {
-    let parent = &source.resource;
-    let object = source
-        .value
-        .as_object()
-        .ok_or_else(|| invalid(parent, "expected resolver object"))?;
-    if object.get("version").and_then(Value::as_str) != Some("2025.10") {
-        return Err(invalid(parent, "resolver version must be `2025.10`"));
-    }
-    optional_object(parent, object, "sets")?;
-    let modifiers = optional_object(parent, object, "modifiers")?;
-    let order = object
-        .get("resolutionOrder")
-        .and_then(Value::as_array)
-        .ok_or_else(|| invalid(parent, "resolutionOrder is required"))?;
-    validate_inputs(parent, modifiers, order, selections, include_inactive)
 }

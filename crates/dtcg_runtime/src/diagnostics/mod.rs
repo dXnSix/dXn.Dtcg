@@ -25,6 +25,8 @@ pub enum DtcgDiagnosticCode {
     Envelope,
     Reference,
     Selection,
+    /// [`DtcgError::InvalidInput`]: malformed resolver inputs.
+    InvalidInput,
 }
 
 /// Redacted diagnostic information derived from a [`DtcgError`].
@@ -134,6 +136,12 @@ impl DtcgDiagnostic {
                 DtcgDiagnosticCode::Reference,
                 Some(resource.clone()),
                 Some(reference.clone()),
+                message.clone(),
+            ),
+            DtcgError::InvalidInput { message } => (
+                DtcgDiagnosticCode::InvalidInput,
+                None,
+                None,
                 message.clone(),
             ),
             DtcgError::UnknownModifier { modifier, .. }

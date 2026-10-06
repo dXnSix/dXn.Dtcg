@@ -29,8 +29,8 @@ fn resolver_validates_modifier_inputs_and_accepts_inline_sources() {
     let error = runtime.resolve(&[("theme", "blue")]).unwrap_err();
     assert!(matches!(
         error,
-        dtcg_runtime::DtcgError::Token { ref path, ref message, .. }
-            if path == "#/modifiers/theme" && message == "selected modifier context is unknown"
+        dtcg_runtime::DtcgError::UnknownContext { ref modifier, ref message, .. }
+            if modifier == "theme" && message == "selected modifier context is unknown"
     ));
     assert!(runtime.resolve(&[("unknown", "dark")]).is_err());
     assert!(
@@ -51,7 +51,7 @@ fn resolver_validates_modifier_inputs_and_accepts_inline_sources() {
 fn inline_sets_and_local_reference_overrides_respect_array_order() {
     let resolver = r##"{
       "version":"2025.10",
-      "templates":{
+      "$defs":{
         "tokens":{"value":{"$type":"number","$value":1}}
       },
       "resolutionOrder":[
@@ -59,8 +59,8 @@ fn inline_sets_and_local_reference_overrides_respect_array_order() {
           "type":"set",
           "name":"foundation",
           "sources":[
-            {"$ref":"#/templates/tokens"},
-            {"$ref":"#/templates/tokens","value":{"$type":"number","$value":2}}
+            {"$ref":"#/$defs/tokens"},
+            {"$ref":"#/$defs/tokens","value":{"$type":"number","$value":2}}
           ]
         },
         {

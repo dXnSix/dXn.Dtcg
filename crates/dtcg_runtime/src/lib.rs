@@ -44,7 +44,7 @@ pub use resolver::{
 };
 pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;
-pub use selection::ModifierAxis;
+pub use selection::{ModifierAxis, selection_from_json, selection_refs};
 pub use type_registry::TypeRegistry;
 pub use value::{BLUR_TYPE, ValueValidationError, validate_value, validate_value_with};
 

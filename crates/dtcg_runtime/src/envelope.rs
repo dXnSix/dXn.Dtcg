@@ -2,11 +2,15 @@ use std::sync::Arc;
 
 use serde_json::Value;
 
-use crate::{DtcgError, LocalReferencePolicy, ResourceId, catalog::parse_document};
+use crate::{
+    DtcgError, LocalReferencePolicy, ResourceId, catalog::parse_document,
+    resolver_definition::validate_resolver,
+};
 
 /// The Token Editor project envelope: `{ "data": <resolver> }` whose resolver
-/// declares `version: "2025.10"` and references only relative local documents,
-/// resolved against the envelope's own location.
+/// declares `version: "2025.10"`, is a valid resolver document (Resolver §4)
+/// and references only relative local documents, resolved against the
+/// envelope's own location.
 #[derive(Clone, Debug)]
 pub struct ResolverEnvelope {
     name: Option<String>,
@@ -34,6 +38,7 @@ impl ResolverEnvelope {
             )));
         }
         LocalReferencePolicy::check_resolver(resource, data)?;
+        validate_resolver(resource, data)?;
         Ok(Self {
             name: data.get("name").and_then(Value::as_str).map(str::to_owned),
             resolver: data.to_string().into(),

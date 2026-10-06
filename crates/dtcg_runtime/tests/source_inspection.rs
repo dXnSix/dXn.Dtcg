@@ -393,10 +393,17 @@ fn definition_accessors_validate_standard_shapes_without_editor_default_policy()
             .is_empty()
     );
     assert!(dtcg_runtime::set_sources(&id, &json!({"sources":{}})).is_err());
-    assert!(dtcg_runtime::modifier_contexts(&id, &json!({"contexts":{"dark":[]}})).is_ok());
     assert!(
-        dtcg_runtime::modifier_contexts(&id, &json!({"contexts":{"dark":[]}, "default":"missing"}))
-            .is_err()
+        dtcg_runtime::modifier_contexts(&id, &json!({"contexts":{"dark":[], "light":[]}})).is_ok()
+    );
+    // Resolver §4.2: a modifier needs at least two contexts.
+    assert!(dtcg_runtime::modifier_contexts(&id, &json!({"contexts":{"dark":[]}})).is_err());
+    assert!(
+        dtcg_runtime::modifier_contexts(
+            &id,
+            &json!({"contexts":{"dark":[], "light":[]}, "default":"missing"})
+        )
+        .is_err()
     );
     assert!(dtcg_runtime::modifier_contexts(&id, &json!({"contexts":{}})).is_err());
 }

@@ -70,7 +70,12 @@ pub enum DtcgError {
         reference: String,
         message: String,
     },
-    /// A selection names a modifier the resolver does not declare.
+    /// Resolver inputs that are not a JSON object of strings.
+    #[error("invalid resolver inputs: {message}")]
+    InvalidInput { message: String },
+    /// A selection names a modifier no reached resolver declares, or a name
+    /// that matches several declared modifiers case-insensitively (then
+    /// `known` lists the candidates).
     #[error("unknown modifier `{modifier}`; known modifiers: {}", known.join(", "))]
     UnknownModifier {
         modifier: String,

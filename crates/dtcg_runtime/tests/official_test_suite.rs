@@ -15,13 +15,7 @@ use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
 use serde_json::{Value, json};
 
 /// Manifest ids of fixtures whose expectation is not met yet, sorted.
-const KNOWN_GAPS: &[&str] = &[
-    "empty-resolution-order",
-    "modifier-single-context",
-    "modifier-with-additional-properties",
-    "root-with-additional-properties",
-    "set-with-additional-properties",
-];
+const KNOWN_GAPS: &[&str] = &[];
 
 const FORMAT_FIXTURES: usize = 220;
 const RESOLVER_FIXTURES: usize = 30;

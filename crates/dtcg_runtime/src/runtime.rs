@@ -257,16 +257,26 @@ impl DtcgRuntime {
         selection::modifier_axes(root, &parse_document(root, json)?).map(Resolution::Ready)
     }
 
-    /// Completes a selection with the modifier defaults and validates every
-    /// named modifier and context; the result is ordered by axis, so equal
-    /// selections normalize to equal vectors.
+    /// Validates a selection exactly as [`DtcgRuntime::resolve`] does, across
+    /// every resolver the root graph reaches, and completes it with the
+    /// defaults. The result lists the chosen context of every reached
+    /// modifier in declaration order (the root's first) with the declared
+    /// spellings, so equal selections normalize to equal vectors.
     pub fn normalize_selection(
         &self,
         selection: &[(&str, &str)],
     ) -> Result<Resolution<Vec<(String, String)>>, DtcgError> {
-        match self.modifiers()? {
-            Resolution::Ready(axes) => {
-                selection::normalize(&axes, selection).map(Resolution::Ready)
+        let discovered = source_discovery::discover_with_inputs(
+            &self.catalog,
+            required_root(self.root.as_ref())?,
+            &self.options.limits,
+            selection,
+            false,
+        )?;
+        match discovered {
+            Resolution::Ready(discovered) => {
+                source_discovery::check_inputs(selection, &[&discovered.inputs])?;
+                Ok(Resolution::Ready(discovered.choices))
             }
             Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
         }
@@ -298,19 +308,42 @@ impl DtcgRuntime {
     /// Inspect a source in the root document's resolver context without resolving
     /// token values. Ordered duplicates, empty groups and override origins remain
     /// available. `None` origins belong to the supplied inline source.
+    ///
+    /// Inputs are valid when the supplied source, the root resolver or any
+    /// resolver the root graph reaches declares them; the root graph is
+    /// discovered only when an input names none of the first two.
     pub fn inspect_source(
         &self,
         source: &serde_json::Value,
         selection: &[(&str, &str)],
     ) -> Result<Resolution<Vec<SourceOccurrence>>, DtcgError> {
-        source_discovery::discover_source(
+        let root = required_root(self.root.as_ref())?;
+        let limits = &self.options.limits;
+        let inspected = match source_discovery::discover_source_with_inputs(
             &self.catalog,
-            required_root(self.root.as_ref())?,
-            &self.options.limits,
+            root,
+            limits,
             source,
             selection,
             false,
-        )
+        )? {
+            Resolution::Ready(inspected) => inspected,
+            Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+        };
+        if !inspected.inputs.claims_all(selection.len()) {
+            let base = match source_discovery::discover_with_inputs(
+                &self.catalog,
+                root,
+                limits,
+                selection,
+                false,
+            )? {
+                Resolution::Ready(base) => base,
+                Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+            };
+            source_discovery::check_inputs(selection, &[&inspected.inputs, &base.inputs])?;
+        }
+        Ok(Resolution::Ready(inspected.sources))
     }
 
     /// Discover dependencies in every context of a supplied source. Like
@@ -332,20 +365,50 @@ impl DtcgRuntime {
     /// Resolve with the supplied source's occurrences applied last. This uses the
     /// same discovery, ordering, alias, inheritance and limit rules as `resolve`;
     /// it does not alter catalog documents or create a synthetic resolver.
+    ///
+    /// Inputs are valid when the root graph or the supplied source declares
+    /// them, so a draft resolver can be previewed with its own modifiers.
     pub fn preview_source(
         &self,
         source: &serde_json::Value,
         selection: &[(&str, &str)],
     ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
-        match self.inspect_source(source, selection)? {
-            Resolution::Ready(sources) => self.preview_sources(&sources, selection),
-            Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
-        }
+        let root = required_root(self.root.as_ref())?;
+        let limits = &self.options.limits;
+        let inspected = match source_discovery::discover_source_with_inputs(
+            &self.catalog,
+            root,
+            limits,
+            source,
+            selection,
+            false,
+        )? {
+            Resolution::Ready(inspected) => inspected,
+            Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+        };
+        let base = match source_discovery::discover_with_inputs(
+            &self.catalog,
+            root,
+            limits,
+            selection,
+            false,
+        )? {
+            Resolution::Ready(base) => base,
+            Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+        };
+        source_discovery::check_inputs(selection, &[&inspected.inputs, &base.inputs])?;
+        self.preview_merged(base.sources, &inspected.sources)
+            .map(Resolution::Ready)
     }
 
     /// Preview one terminal occurrence returned by `inspect_source`, including a
     /// shadowed source within a referenced resolver. The occurrence is a detached
     /// authored snapshot; the surrounding context is resolved from this runtime.
+    ///
+    /// The selection applies to the root graph only, like `resolve`: an input
+    /// that only an inspected draft resolver declares is unknown here, because
+    /// the occurrence already reflects the selection it was inspected with.
+    /// Drop such inputs before previewing.
     pub fn preview_occurrence(
         &self,
         source: &SourceOccurrence,
@@ -359,7 +422,7 @@ impl DtcgRuntime {
         preview: &[SourceOccurrence],
         selection: &[(&str, &str)],
     ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
-        let mut sources = match source_discovery::discover(
+        let sources = match source_discovery::discover(
             &self.catalog,
             required_root(self.root.as_ref())?,
             &self.options.limits,
@@ -369,6 +432,15 @@ impl DtcgRuntime {
             Resolution::Ready(sources) => sources,
             Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
         };
+        self.preview_merged(sources, preview).map(Resolution::Ready)
+    }
+
+    /// Resolves `sources` with the `preview` occurrences merged last.
+    fn preview_merged(
+        &self,
+        mut sources: Vec<SourceOccurrence>,
+        preview: &[SourceOccurrence],
+    ) -> Result<ResolvedTokens, DtcgError> {
         if sources.len().saturating_add(preview.len()) > self.options.limits.max_documents {
             return Err(DtcgError::LimitExceeded {
                 kind: "documents",
@@ -376,7 +448,7 @@ impl DtcgRuntime {
             });
         }
         sources.extend_from_slice(preview);
-        resolver::resolve_sources(&sources, &self.options).map(Resolution::Ready)
+        resolver::resolve_sources(&sources, &self.options)
     }
 
     pub fn project<T: DtcgTokens>(
