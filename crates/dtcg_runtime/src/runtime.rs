@@ -2,8 +2,8 @@ use std::{fmt, sync::Arc};
 
 use crate::{
     AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, ModifierAxis,
-    Resolution, ResolvedTokens, ResolverEnvelope, ResourceId, RuntimeLimits, SourceOccurrence,
-    TypeRegistry,
+    Resolution, ResolvedTokens, ResolverEnvelope, ResourceId, RuntimeLimits, RuntimeOptions,
+    SourceOccurrence, TypeRegistry,
     catalog::parse_document,
     resolver, selection,
     source_discovery::{self, required_root},
@@ -13,18 +13,18 @@ use crate::{
 pub struct DtcgRuntime {
     catalog: DocumentCatalog,
     root: Option<ResourceId>,
-    limits: RuntimeLimits,
+    options: RuntimeOptions,
     registry: TypeRegistry,
 }
 
-/// Prints the root, the limits, the catalog revision and the document ids,
+/// Prints the root, the options, the catalog revision and the document ids,
 /// never document bodies.
 impl fmt::Debug for DtcgRuntime {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
             .debug_struct("DtcgRuntime")
             .field("root", &self.root)
-            .field("limits", &self.limits)
+            .field("options", &self.options)
             .field("catalog_revision", &self.catalog.revision())
             .field("documents", &self.catalog.ids().collect::<Vec<_>>())
             .finish()
@@ -33,16 +33,23 @@ impl fmt::Debug for DtcgRuntime {
 
 impl Default for DtcgRuntime {
     fn default() -> Self {
-        Self::with_limits(RuntimeLimits::default())
+        Self::with_options(RuntimeOptions::default())
     }
 }
 
 impl DtcgRuntime {
+    /// Creates an empty runtime with `limits` and strict DTCG values.
     pub fn with_limits(limits: RuntimeLimits) -> Self {
+        Self::with_options(RuntimeOptions::default().with_limits(limits))
+    }
+
+    /// Creates an empty runtime with `options`, for example
+    /// `RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`.
+    pub fn with_options(options: RuntimeOptions) -> Self {
         Self {
             catalog: DocumentCatalog::default(),
             root: None,
-            limits,
+            options,
             registry: TypeRegistry,
         }
     }
@@ -63,7 +70,16 @@ impl DtcgRuntime {
         resource_id: impl AsRef<str>,
         json: impl Into<Arc<str>>,
     ) -> Result<Self, DtcgError> {
-        let mut runtime = Self::default();
+        Self::from_json_with_options(resource_id, json, RuntimeOptions::default())
+    }
+
+    /// Like [`DtcgRuntime::from_json`], with `options`.
+    pub fn from_json_with_options(
+        resource_id: impl AsRef<str>,
+        json: impl Into<Arc<str>>,
+        options: RuntimeOptions,
+    ) -> Result<Self, DtcgError> {
+        let mut runtime = Self::with_options(options);
         runtime.provide_json(resource_id.as_ref(), json)?;
         runtime.root = Some(ResourceId::parse(resource_id)?);
         Ok(runtime)
@@ -76,9 +92,22 @@ impl DtcgRuntime {
         resource_id: impl AsRef<str>,
         json: &str,
     ) -> Result<(Self, ResolverEnvelope), DtcgError> {
+        Self::from_envelope_with_options(resource_id, json, RuntimeOptions::default())
+    }
+
+    /// Like [`DtcgRuntime::from_envelope`], with `options`.
+    pub fn from_envelope_with_options(
+        resource_id: impl AsRef<str>,
+        json: &str,
+        options: RuntimeOptions,
+    ) -> Result<(Self, ResolverEnvelope), DtcgError> {
         let resource = ResourceId::parse(resource_id.as_ref())?;
         let envelope = ResolverEnvelope::parse(&resource, json)?;
-        let runtime = Self::from_json(resource.as_str(), envelope.resolver_json().clone())?;
+        let runtime = Self::from_json_with_options(
+            resource.as_str(),
+            envelope.resolver_json().clone(),
+            options,
+        )?;
         Ok((runtime, envelope))
     }
 
@@ -159,7 +188,7 @@ impl DtcgRuntime {
         let result = resolver::resolve_affected(
             &self.catalog,
             self.root.as_ref(),
-            &self.limits,
+            &self.options,
             selection,
             changed_paths,
         );
@@ -190,7 +219,12 @@ impl DtcgRuntime {
 
     /// The limits every resolution, discovery and inspection call applies.
     pub fn limits(&self) -> &RuntimeLimits {
-        &self.limits
+        &self.options.limits
+    }
+
+    /// The limits and value extensions this runtime applies.
+    pub fn options(&self) -> &RuntimeOptions {
+        &self.options
     }
 
     pub fn registry(&self) -> &TypeRegistry {
@@ -230,11 +264,11 @@ impl DtcgRuntime {
         &self,
         selection: &[(&str, &str)],
     ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
-        resolver::resolve(&self.catalog, self.root.as_ref(), &self.limits, selection)
+        resolver::resolve(&self.catalog, self.root.as_ref(), &self.options, selection)
     }
 
     pub fn validate_complete(&self) -> Result<Resolution<()>, DtcgError> {
-        resolver::validate_complete(&self.catalog, self.root.as_ref(), &self.limits)
+        resolver::validate_complete(&self.catalog, self.root.as_ref(), &self.options.limits)
     }
 
     /// Inspect all authored resolver-source references, including dormant sets,
@@ -245,7 +279,7 @@ impl DtcgRuntime {
         crate::source_references::inspect(
             &self.catalog,
             required_root(self.root.as_ref())?,
-            &self.limits,
+            &self.options.limits,
         )
     }
 
@@ -260,7 +294,7 @@ impl DtcgRuntime {
         source_discovery::discover_source(
             &self.catalog,
             required_root(self.root.as_ref())?,
-            &self.limits,
+            &self.options.limits,
             source,
             selection,
             false,
@@ -273,7 +307,7 @@ impl DtcgRuntime {
         match source_discovery::discover_source(
             &self.catalog,
             required_root(self.root.as_ref())?,
-            &self.limits,
+            &self.options.limits,
             source,
             &[],
             true,
@@ -316,21 +350,21 @@ impl DtcgRuntime {
         let mut sources = match source_discovery::discover(
             &self.catalog,
             required_root(self.root.as_ref())?,
-            &self.limits,
+            &self.options.limits,
             selection,
             false,
         )? {
             Resolution::Ready(sources) => sources,
             Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
         };
-        if sources.len().saturating_add(preview.len()) > self.limits.max_documents {
+        if sources.len().saturating_add(preview.len()) > self.options.limits.max_documents {
             return Err(DtcgError::LimitExceeded {
                 kind: "documents",
-                limit: self.limits.max_documents,
+                limit: self.options.limits.max_documents,
             });
         }
         sources.extend_from_slice(preview);
-        resolver::resolve_sources(&sources, &self.limits).map(Resolution::Ready)
+        resolver::resolve_sources(&sources, &self.options).map(Resolution::Ready)
     }
 
     pub fn project<T: DtcgTokens>(

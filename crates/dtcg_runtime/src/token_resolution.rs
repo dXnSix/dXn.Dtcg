@@ -23,11 +23,11 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use serde_json::{Map, Value};
 
 use crate::{
-    DtcgError, ResolvedToken, ResourceId, RuntimeLimits,
+    DtcgError, ResolvedToken, ResourceId, RuntimeLimits, RuntimeOptions, ValueExtensions,
     flatten::RawToken,
     json_pointer::{pointer_parts, walk},
     reference_positions::{Context, Position, Step},
-    validate_value,
+    validate_value_with,
 };
 
 /// The deepest nesting of a resolved value, root level included: the
@@ -50,6 +50,7 @@ struct Cost {
 pub(crate) struct Resolver<'a> {
     raw: &'a BTreeMap<String, RawToken>,
     limits: &'a RuntimeLimits,
+    extensions: &'a ValueExtensions,
     resolved: BTreeMap<String, ResolvedToken>,
     costs: HashMap<String, Cost>,
     visiting: Vec<String>,
@@ -57,15 +58,14 @@ pub(crate) struct Resolver<'a> {
     pointers: HashMap<PointerKey, (Value, Cost)>,
     stack_hops: usize,
     copied_nodes: usize,
-    /// Whether typography `lineHeight` aliases may target `dimension` tokens.
-    line_height_dimension: bool,
 }
 
 impl<'a> Resolver<'a> {
-    pub(crate) fn new(raw: &'a BTreeMap<String, RawToken>, limits: &'a RuntimeLimits) -> Self {
+    pub(crate) fn new(raw: &'a BTreeMap<String, RawToken>, options: &'a RuntimeOptions) -> Self {
         Self {
             raw,
-            limits,
+            limits: &options.limits,
+            extensions: &options.extensions,
             resolved: BTreeMap::new(),
             costs: HashMap::new(),
             visiting: Vec::new(),
@@ -73,8 +73,6 @@ impl<'a> Resolver<'a> {
             pointers: HashMap::new(),
             stack_hops: 0,
             copied_nodes: 0,
-            // The RayX value extensions are still accepted by default.
-            line_height_dimension: true,
         }
     }
 
@@ -141,10 +139,12 @@ impl<'a> Resolver<'a> {
                 path: path.into(),
                 message: "token requires a DTCG type".into(),
             })?;
-        validate_value(&token_type, &value).map_err(|error| DtcgError::TokenType {
-            resource: token.source.clone(),
-            path: path.into(),
-            message: error.to_string(),
+        validate_value_with(&token_type, &value, self.extensions).map_err(|error| {
+            DtcgError::TokenType {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: error.to_string(),
+            }
         })?;
         self.resolved.insert(
             path.into(),
@@ -254,7 +254,7 @@ impl<'a> Resolver<'a> {
                     depth: 1,
                 };
                 let mut output = Vec::with_capacity(values.len());
-                let element = position.child(Step::Element, self.line_height_dimension);
+                let element = position.child(Step::Element, self.extensions.line_height_dimension);
                 for item in values {
                     let (item, item_cost) =
                         self.resolve_value(item, document, depth + 1, element)?;
@@ -271,7 +271,8 @@ impl<'a> Resolver<'a> {
                 };
                 let mut output = Map::with_capacity(values.len());
                 for (key, item) in values {
-                    let member = position.child(Step::Member(key), self.line_height_dimension);
+                    let member =
+                        position.child(Step::Member(key), self.extensions.line_height_dimension);
                     let (item, item_cost) =
                         self.resolve_value(item, document, depth + 1, member)?;
                     cost = combine(cost, item_cost);
@@ -320,7 +321,8 @@ impl<'a> Resolver<'a> {
             .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
         for (key, item) in object {
             if key != "$ref" {
-                let member = position.child(Step::Member(key), self.line_height_dimension);
+                let member =
+                    position.child(Step::Member(key), self.extensions.line_height_dimension);
                 let (item, item_cost) = self.resolve_value(item, document, depth + 1, member)?;
                 cost = combine(cost, item_cost);
                 target.insert(key.clone(), item);

@@ -21,7 +21,6 @@ const KNOWN_GAPS: &[&str] = &[
     "modifier-with-additional-properties",
     "root-with-additional-properties",
     "set-with-additional-properties",
-    "typography-lineHeight-wrong-type",
 ];
 
 const FORMAT_FIXTURES: usize = 220;

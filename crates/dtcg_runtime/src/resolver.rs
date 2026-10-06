@@ -7,7 +7,7 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 use crate::{
-    AffectedResolution, DtcgError, ResourceId, SourceOccurrence,
+    AffectedResolution, DtcgError, ResourceId, RuntimeOptions, SourceOccurrence,
     catalog::DocumentCatalog,
     flatten::{FlattenedSources, flatten_sources},
     source_discovery::{discover, required_root},
@@ -249,22 +249,28 @@ fn hash_canonical(hasher: &mut Sha256, value: &Value) {
 pub(crate) fn resolve(
     catalog: &DocumentCatalog,
     root: Option<&ResourceId>,
-    limits: &RuntimeLimits,
+    options: &RuntimeOptions,
     selection: &[(&str, &str)],
 ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
-    let sources = discover(catalog, required_root(root)?, limits, selection, false)?;
+    let sources = discover(
+        catalog,
+        required_root(root)?,
+        &options.limits,
+        selection,
+        false,
+    )?;
     let Resolution::Ready(sources) = sources else {
         return Ok(sources.map(|_| unreachable!()));
     };
-    resolve_sources(&sources, limits).map(Resolution::Ready)
+    resolve_sources(&sources, options).map(Resolution::Ready)
 }
 
 pub(crate) fn resolve_sources(
     sources: &[SourceOccurrence],
-    limits: &RuntimeLimits,
+    options: &RuntimeOptions,
 ) -> Result<ResolvedTokens, DtcgError> {
-    let FlattenedSources { raw, order } = flatten_sources(sources, limits)?;
-    let mut resolver = Resolver::new(&raw, limits);
+    let FlattenedSources { raw, order } = flatten_sources(sources, &options.limits)?;
+    let mut resolver = Resolver::new(&raw, options);
     for path in &order {
         resolver.resolve_token(path)?;
     }
@@ -280,10 +286,11 @@ pub(crate) fn resolve_sources(
 pub(crate) fn resolve_affected(
     catalog: &DocumentCatalog,
     root: Option<&ResourceId>,
-    limits: &RuntimeLimits,
+    options: &RuntimeOptions,
     selection: &[(&str, &str)],
     changed_paths: &[&str],
 ) -> Result<Resolution<AffectedResolution>, DtcgError> {
+    let limits = &options.limits;
     let sources = discover(catalog, required_root(root)?, limits, selection, false)?;
     let Resolution::Ready(sources) = sources else {
         return Ok(sources.map(|_| unreachable!()));
@@ -325,7 +332,7 @@ pub(crate) fn resolve_affected(
         }
     }
 
-    let mut resolver = Resolver::new(&raw, limits);
+    let mut resolver = Resolver::new(&raw, options);
     for path in order.iter().filter(|path| affected.contains(*path)) {
         resolver.resolve_token(path)?;
     }
