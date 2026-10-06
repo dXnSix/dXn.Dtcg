@@ -15,6 +15,12 @@ pub struct SourceOccurrence {
 }
 
 impl SourceOccurrence {
+    /// The document that holds this source. An inline source supplied to
+    /// `DtcgRuntime::inspect_source` reports the root resolver's id.
+    pub fn resource(&self) -> &ResourceId {
+        &self.resource
+    }
+
     pub fn value(&self) -> &Value {
         &self.value
     }

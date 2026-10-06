@@ -69,6 +69,9 @@ impl DocumentCatalog {
     pub(crate) fn get(&self, id: &ResourceId) -> Option<&Arc<str>> {
         self.documents.get(id)
     }
+    pub(crate) fn ids(&self) -> impl Iterator<Item = &ResourceId> {
+        self.documents.keys()
+    }
     pub(crate) fn contains(&self, id: &ResourceId) -> bool {
         self.documents.contains_key(id)
     }

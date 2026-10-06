@@ -5,9 +5,10 @@ use serde_json::Value;
 use crate::{DtcgError, ResourceId, error::invalid, resolver_definition::modifier_contexts};
 
 /// One resolver input: a modifier with its contexts in authored order and its
-/// optional default. Axes are listed in resolution order, then the remaining
-/// root modifiers by name.
+/// optional default. Axes are listed in `resolutionOrder` order, followed by
+/// the remaining root modifiers in authored order.
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub struct ModifierAxis {
     pub name: String,
     pub contexts: Vec<String>,

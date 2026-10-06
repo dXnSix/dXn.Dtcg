@@ -1,12 +1,14 @@
 //! Opt-in, redacted diagnostics for Test Suite and DevKit harnesses.
 //!
-//! This module is intentionally compiled only with `rayx_diagnostics`. It
+//! This module is intentionally compiled only with the `diagnostics` feature. It
 //! exposes logical identifiers and paths, never supplied document bodies.
 
 use crate::{DtcgError, ResourceId};
 
-/// A stable category for a DTCG failure.
+/// A stable category for a DTCG failure. New codes may be added together with
+/// new [`DtcgError`] variants.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum DtcgDiagnosticCode {
     InvalidResourceId,
     InvalidPointer,
@@ -17,6 +19,8 @@ pub enum DtcgDiagnosticCode {
     LimitExceeded,
     DocumentCycle,
     Token,
+    /// [`DtcgError::UnresolvedReference`]: a missing alias or `$extends` target.
+    UnresolvedReference,
     Projection,
     Envelope,
     Reference,
@@ -98,6 +102,17 @@ impl DtcgDiagnostic {
                 Some(resource.clone()),
                 Some(path.clone()),
                 message.clone(),
+            ),
+            DtcgError::UnresolvedReference {
+                resource,
+                path,
+                target,
+                message,
+            } => (
+                DtcgDiagnosticCode::UnresolvedReference,
+                Some(resource.clone()),
+                Some(path.clone()),
+                format!("unresolved reference `{target}`: {message}"),
             ),
             DtcgError::Projection { path, message } => (
                 DtcgDiagnosticCode::Projection,

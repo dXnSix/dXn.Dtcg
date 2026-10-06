@@ -251,11 +251,12 @@ fn external_occurrence_preview_keeps_fragment_metadata_and_catalog_unchanged() {
 
 #[test]
 fn source_and_preview_limits_are_shared_with_resolution() {
-    let mut runtime = DtcgRuntime::with_limits(RuntimeLimits {
-        max_documents: 2,
-        max_reference_depth: 2,
-        max_alias_depth: 2,
-    });
+    let mut runtime = DtcgRuntime::with_limits(
+        RuntimeLimits::default()
+            .with_max_documents(2)
+            .with_max_reference_depth(2)
+            .with_max_alias_depth(2),
+    );
     runtime
         .provide_json(
             "root.json",
@@ -290,10 +291,8 @@ fn source_and_preview_limits_are_shared_with_resolution() {
         })
     ));
 
-    let mut alias_runtime = DtcgRuntime::with_limits(RuntimeLimits {
-        max_alias_depth: 2,
-        ..RuntimeLimits::default()
-    });
+    let mut alias_runtime =
+        DtcgRuntime::with_limits(RuntimeLimits::default().with_max_alias_depth(2));
     alias_runtime.provide_json("root.json", resolver(vec![json!({
         "a":{"$type":"number","$value":1}, "b":{"$type":"number","$value":"{a}"}, "c":{"$type":"number","$value":"{b}"}
     })]).to_string()).unwrap();

@@ -15,13 +15,16 @@ use crate::{
     validate_value,
 };
 
+/// A document the caller must load before resolution can continue.
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub struct DocumentRequest {
     pub resource_id: ResourceId,
     pub referenced_from: ResourceId,
     pub original_reference: Arc<str>,
 }
 
+/// The result of an operation that may need documents the catalog lacks.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Resolution<T> {
     Ready(T),
@@ -29,18 +32,52 @@ pub enum Resolution<T> {
 }
 
 impl<T> Resolution<T> {
+    /// The ready value, or `None` when documents are missing.
     pub fn ready(self) -> Option<T> {
         match self {
             Self::Ready(value) => Some(value),
             Self::Missing(_) => None,
         }
     }
+
+    /// Converts a ready value and keeps missing-document requests unchanged.
+    pub fn map<U>(self, function: impl FnOnce(T) -> U) -> Resolution<U> {
+        match self {
+            Self::Ready(value) => Resolution::Ready(function(value)),
+            Self::Missing(requests) => Resolution::Missing(requests),
+        }
+    }
+
+    /// Whether every document was available and the value is ready.
+    pub fn is_ready(&self) -> bool {
+        matches!(self, Self::Ready(_))
+    }
+
+    /// Whether the caller must load documents before the value is ready.
+    pub fn is_missing(&self) -> bool {
+        matches!(self, Self::Missing(_))
+    }
+
+    /// The documents to load, or `None` when the value is ready.
+    pub fn missing(&self) -> Option<&[DocumentRequest]> {
+        match self {
+            Self::Ready(_) => None,
+            Self::Missing(requests) => Some(requests),
+        }
+    }
 }
 
-#[derive(Clone, Debug)]
+/// Bounds on the work one call may perform. Construct it with
+/// [`RuntimeLimits::default`] and the chainable `with_*` setters.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub struct RuntimeLimits {
+    /// Source occurrences one discovery may collect, counting loaded and inline
+    /// sources and missing-document requests (default 256).
     pub max_documents: usize,
+    /// Nesting depth of resolver and source references (default 64).
     pub max_reference_depth: usize,
+    /// Tokens on one alias chain, the referring token included (default 64).
     pub max_alias_depth: usize,
 }
 
@@ -54,7 +91,29 @@ impl Default for RuntimeLimits {
     }
 }
 
+impl RuntimeLimits {
+    /// Sets [`RuntimeLimits::max_documents`].
+    pub fn with_max_documents(mut self, limit: usize) -> Self {
+        self.max_documents = limit;
+        self
+    }
+
+    /// Sets [`RuntimeLimits::max_reference_depth`].
+    pub fn with_max_reference_depth(mut self, limit: usize) -> Self {
+        self.max_reference_depth = limit;
+        self
+    }
+
+    /// Sets [`RuntimeLimits::max_alias_depth`].
+    pub fn with_max_alias_depth(mut self, limit: usize) -> Self {
+        self.max_alias_depth = limit;
+        self
+    }
+}
+
+/// One resolved token. Fields may be added in minor releases.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct ResolvedToken {
     pub path: Arc<str>,
     pub token_type: Option<Arc<str>>,
@@ -65,6 +124,9 @@ pub struct ResolvedToken {
     pub source: ResourceId,
 }
 
+/// The tokens of one resolution. Equality and the fingerprint ignore the
+/// member order of object values: `serde_json` objects compare as maps, and the
+/// fingerprint hashes them with sorted keys.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ResolvedTokens {
     tokens: BTreeMap<String, ResolvedToken>,
@@ -80,6 +142,8 @@ impl ResolvedTokens {
     pub fn iter(&self) -> impl Iterator<Item = &ResolvedToken> {
         self.order.iter().filter_map(|path| self.tokens.get(path))
     }
+    /// A SHA-256 digest of every token's path, type, canonical value and
+    /// source, in resolution order. Metadata does not contribute.
     pub fn fingerprint(&self) -> &str {
         &self.fingerprint
     }
@@ -113,12 +177,44 @@ fn fingerprint(order: &[String], tokens: &BTreeMap<String, ResolvedToken>) -> Ar
             hasher.update(token_type.as_bytes());
         }
         hasher.update([0]);
-        hasher.update(token.value.to_string().as_bytes());
+        hash_canonical(&mut hasher, &token.value);
         hasher.update([0]);
         hasher.update(token.source.as_str().as_bytes());
         hasher.update([0]);
     }
     format!("{:x}", hasher.finalize()).into()
+}
+
+/// Hashes `value` as JSON with object keys sorted recursively, so equal values
+/// hash equally whatever their authored member order.
+fn hash_canonical(hasher: &mut Sha256, value: &Value) {
+    match value {
+        Value::Array(values) => {
+            hasher.update(b"[");
+            for (index, value) in values.iter().enumerate() {
+                if index > 0 {
+                    hasher.update(b",");
+                }
+                hash_canonical(hasher, value);
+            }
+            hasher.update(b"]");
+        }
+        Value::Object(object) => {
+            let mut members = object.iter().collect::<Vec<_>>();
+            members.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
+            hasher.update(b"{");
+            for (index, (key, value)) in members.into_iter().enumerate() {
+                if index > 0 {
+                    hasher.update(b",");
+                }
+                hasher.update(Value::String(key.clone()).to_string().as_bytes());
+                hasher.update(b":");
+                hash_canonical(hasher, value);
+            }
+            hasher.update(b"}");
+        }
+        scalar => hasher.update(scalar.to_string().as_bytes()),
+    }
 }
 
 pub(crate) fn resolve(
@@ -267,34 +363,49 @@ pub(crate) fn validate_complete(
     }
 }
 
-trait ResolutionMap<T> {
-    fn map<U>(self, function: impl FnOnce(T) -> U) -> Resolution<U>;
-}
-impl<T> ResolutionMap<T> for Resolution<T> {
-    fn map<U>(self, function: impl FnOnce(T) -> U) -> Resolution<U> {
-        match self {
-            Resolution::Ready(value) => Resolution::Ready(function(value)),
-            Resolution::Missing(requests) => Resolution::Missing(requests),
-        }
-    }
-}
-
 fn flatten_source(
     source: &SourceOccurrence,
     target: &mut BTreeMap<String, RawToken>,
     order: &mut Vec<String>,
 ) -> Result<(), DtcgError> {
-    let value = Arc::new(source.value.clone());
+    let document = Arc::new(source.value.clone());
+    let root = without_root_schema(source)?;
     let mut output = FlattenedTokens { target, order };
     flatten_group(
         &source.resource,
         "",
-        value.as_ref(),
+        root.as_ref().unwrap_or(document.as_ref()),
         None,
-        &value,
+        &document,
         &mut output,
         &mut Vec::new(),
     )
+}
+
+/// A whole-document source may name its JSON Schema with a string `$schema`
+/// root member, which resolution ignores. Fragment sources, inline resolver
+/// sources and the inline source supplied to a preview are not document roots,
+/// so `$schema` there stays an unknown reserved property.
+/// Returns the root without `$schema`, or `None` when nothing was removed.
+fn without_root_schema(source: &SourceOccurrence) -> Result<Option<Value>, DtcgError> {
+    let Some(schema) = source.value.get("$schema") else {
+        return Ok(None);
+    };
+    if source.origin.resource.is_none() || !source.origin.pointer.is_empty() {
+        return Ok(None);
+    }
+    if !schema.is_string() {
+        return Err(DtcgError::Token {
+            resource: source.resource.clone(),
+            path: String::new(),
+            message: "`$schema` must be a string".into(),
+        });
+    }
+    let mut root = source.value.clone();
+    if let Some(object) = root.as_object_mut() {
+        object.shift_remove("$schema");
+    }
+    Ok(Some(root))
 }
 
 #[derive(Clone)]
@@ -362,6 +473,7 @@ fn flatten_group(
     }
     let token_type = effective_group_type(
         resource,
+        prefix,
         value,
         document.as_ref(),
         inherited_type,
@@ -417,7 +529,7 @@ fn flatten_group(
         return Ok(());
     }
     if let Some(reference) = object.get("$extends").and_then(Value::as_str) {
-        let group_path = extension_path(reference)?;
+        let group_path = extension_path(resource, prefix, reference)?;
         if extensions.iter().any(|path| path == &group_path) {
             return Err(DtcgError::Token {
                 resource: resource.clone(),
@@ -429,7 +541,7 @@ fn flatten_group(
             });
         }
         let extended = group_at_path(document, &group_path)
-            .ok_or_else(|| invalid(resource, "extended group was not found"))?;
+            .ok_or_else(|| missing_extension(resource, prefix, reference))?;
         if extended.get("$value").is_some() {
             return Err(DtcgError::Token {
                 resource: resource.clone(),
@@ -510,6 +622,7 @@ fn keep_last_definitions(order: &mut Vec<String>) {
 
 fn effective_group_type(
     resource: &ResourceId,
+    group_path: &str,
     group: &Value,
     document: &Value,
     inherited: Option<&str>,
@@ -519,7 +632,7 @@ fn effective_group_type(
         return Ok(Some(token_type.into()));
     }
     if let Some(reference) = group.get("$extends").and_then(Value::as_str) {
-        let path = extension_path(reference)?;
+        let path = extension_path(resource, group_path, reference)?;
         if visiting.iter().any(|entry| entry == &path) {
             return Err(DtcgError::Token {
                 resource: resource.clone(),
@@ -527,19 +640,21 @@ fn effective_group_type(
                 message: format!("group extension cycle: {} -> {path}", visiting.join(" -> ")),
             });
         }
-        let extended = group_at_path(document, &path).ok_or_else(|| DtcgError::Projection {
-            path: path.clone(),
-            message: "extended group was not found".into(),
-        })?;
-        visiting.push(path);
-        let result = effective_group_type(resource, extended, document, inherited, visiting);
+        let extended = group_at_path(document, &path)
+            .ok_or_else(|| missing_extension(resource, group_path, reference))?;
+        visiting.push(path.clone());
+        let result = effective_group_type(resource, &path, extended, document, inherited, visiting);
         visiting.pop();
         return result;
     }
     Ok(inherited.map(str::to_owned))
 }
 
-fn extension_path(reference: &str) -> Result<String, DtcgError> {
+fn extension_path(
+    resource: &ResourceId,
+    group_path: &str,
+    reference: &str,
+) -> Result<String, DtcgError> {
     if reference.starts_with("#/") {
         return pointer_parts(reference).map(|parts| parts.join("."));
     }
@@ -548,10 +663,42 @@ fn extension_path(reference: &str) -> Result<String, DtcgError> {
         .and_then(|path| path.strip_suffix('}'))
         .filter(|path| !path.is_empty())
         .map(str::to_owned)
-        .ok_or_else(|| DtcgError::Projection {
-            path: reference.into(),
-            message: "$extends must be a group alias or local JSON Pointer".into(),
+        .ok_or_else(|| DtcgError::UnresolvedReference {
+            resource: resource.clone(),
+            path: group_path.into(),
+            target: reference.into(),
+            message: "`$extends` must be a group alias or local JSON Pointer".into(),
         })
+}
+
+fn missing_extension(resource: &ResourceId, group_path: &str, reference: &str) -> DtcgError {
+    DtcgError::UnresolvedReference {
+        resource: resource.clone(),
+        path: group_path.into(),
+        target: reference.into(),
+        message: "extended group was not found".into(),
+    }
+}
+
+/// An unresolved reference from the token being resolved (the innermost entry
+/// of `visiting`) to `target`.
+fn unresolved(
+    raw: &BTreeMap<String, RawToken>,
+    visiting: &[String],
+    target: &str,
+    message: &str,
+) -> DtcgError {
+    let path = visiting.last().cloned().unwrap_or_default();
+    let resource = raw
+        .get(&path)
+        .map(|token| token.source.clone())
+        .unwrap_or_else(|| ResourceId::parse("tokens").expect("static id"));
+    DtcgError::UnresolvedReference {
+        resource,
+        path,
+        target: target.into(),
+        message: message.into(),
+    }
 }
 
 fn group_at_path<'a>(document: &'a Value, path: &str) -> Option<&'a Value> {
@@ -587,10 +734,9 @@ fn resolve_token(
             message: format!("alias cycle: {} -> {path}", visiting.join(" -> ")),
         });
     }
-    let token = raw.get(path).ok_or_else(|| DtcgError::Projection {
-        path: path.into(),
-        message: "missing alias target".into(),
-    })?;
+    let token = raw
+        .get(path)
+        .ok_or_else(|| unresolved(raw, visiting, path, "missing alias target"))?;
     visiting.push(path.into());
     let alias_type = if token.token_type.is_none() {
         whole_token_reference(&token.value)?
@@ -606,9 +752,8 @@ fn resolve_token(
                 resolved
                     .get(&reference)
                     .and_then(|target| target.token_type.clone())
-                    .ok_or_else(|| DtcgError::Projection {
-                        path: reference,
-                        message: "alias target has no DTCG type".into(),
+                    .ok_or_else(|| {
+                        unresolved(raw, visiting, &reference, "alias target has no DTCG type")
                     })
             })
             .transpose()?
@@ -788,10 +933,7 @@ fn resolve_value(
         return resolved
             .get(reference)
             .map(|token| token.value.clone())
-            .ok_or_else(|| DtcgError::Projection {
-                path: reference.into(),
-                message: "alias target was not resolved".into(),
-            });
+            .ok_or_else(|| unresolved(raw, visiting, reference, "alias target was not resolved"));
     }
     if let Some(object) = value.as_object()
         && object.contains_key("$ref")
@@ -904,12 +1046,14 @@ fn resolve_json_reference_target(
             pointer_visiting,
             limits,
         )?;
-        let token = resolved
-            .get(&token_path)
-            .ok_or_else(|| DtcgError::Projection {
-                path: token_path.clone(),
-                message: "JSON Pointer target was not resolved".into(),
-            })?;
+        let token = resolved.get(&token_path).ok_or_else(|| {
+            unresolved(
+                raw,
+                visiting,
+                reference,
+                "JSON Pointer target was not resolved",
+            )
+        })?;
         let mut value = if parts[marker_index] == "$value" {
             token.value.clone()
         } else {
@@ -917,9 +1061,13 @@ fn resolve_json_reference_target(
                 token
                     .token_type
                     .as_deref()
-                    .ok_or_else(|| DtcgError::Projection {
-                        path: token_path,
-                        message: "JSON Pointer type target is missing".into(),
+                    .ok_or_else(|| {
+                        unresolved(
+                            raw,
+                            visiting,
+                            reference,
+                            "JSON Pointer type target is missing",
+                        )
                     })?
                     .into(),
             )

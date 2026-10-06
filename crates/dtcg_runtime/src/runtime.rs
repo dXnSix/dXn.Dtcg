@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use crate::{
     AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, ModifierAxis,
@@ -15,6 +15,20 @@ pub struct DtcgRuntime {
     root: Option<ResourceId>,
     limits: RuntimeLimits,
     registry: TypeRegistry,
+}
+
+/// Prints the root, the limits, the catalog revision and the document ids,
+/// never document bodies.
+impl fmt::Debug for DtcgRuntime {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("DtcgRuntime")
+            .field("root", &self.root)
+            .field("limits", &self.limits)
+            .field("catalog_revision", &self.catalog.revision())
+            .field("documents", &self.catalog.ids().collect::<Vec<_>>())
+            .finish()
+    }
 }
 
 impl Default for DtcgRuntime {
@@ -66,6 +80,22 @@ impl DtcgRuntime {
         let envelope = ResolverEnvelope::parse(&resource, json)?;
         let runtime = Self::from_json(resource.as_str(), envelope.resolver_json().clone())?;
         Ok((runtime, envelope))
+    }
+
+    /// Re-parses a `.tokeneditor` envelope with the same checks as
+    /// [`DtcgRuntime::from_envelope`] and replaces the stored resolver of the
+    /// already-provided document `resource_id`. Later resolutions use the new
+    /// resolver. An invalid envelope leaves the catalog unchanged.
+    pub fn replace_envelope(
+        &mut self,
+        resource_id: impl AsRef<str>,
+        json: &str,
+    ) -> Result<ResolverEnvelope, DtcgError> {
+        let resource = ResourceId::parse(resource_id.as_ref())?;
+        let envelope = ResolverEnvelope::parse(&resource, json)?;
+        self.catalog
+            .replace(resource, envelope.resolver_json().clone())?;
+        Ok(envelope)
     }
 
     pub fn provide_json(
@@ -156,6 +186,11 @@ impl DtcgRuntime {
     pub fn set_root(&mut self, resource_id: impl AsRef<str>) -> Result<(), DtcgError> {
         self.root = Some(ResourceId::parse(resource_id)?);
         Ok(())
+    }
+
+    /// The limits every resolution, discovery and inspection call applies.
+    pub fn limits(&self) -> &RuntimeLimits {
+        &self.limits
     }
 
     pub fn registry(&self) -> &TypeRegistry {

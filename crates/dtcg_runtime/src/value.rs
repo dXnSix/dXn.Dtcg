@@ -4,6 +4,7 @@ use serde_json::{Map, Value};
 
 /// A final DTCG 2025.10 token-value validation failure.
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum ValueValidationError {
     UnsupportedType(String),
     InvalidValue(String),
