@@ -1,0 +1,5 @@
+error: duplicate `dtcg` attribute `root`
+ --> tests/ui/struct_duplicate_key.rs:4:20
+  |
+4 | #[dtcg(root = "a", root = "b")]
+  |                    ^^^^^^^^^^

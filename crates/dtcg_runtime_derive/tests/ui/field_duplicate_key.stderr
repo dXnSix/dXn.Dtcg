@@ -1,0 +1,5 @@
+error: duplicate `dtcg` attribute `path`
+ --> tests/ui/field_duplicate_key.rs:6:12
+  |
+6 |     #[dtcg(path = "y")]
+  |            ^^^^^^^^^^

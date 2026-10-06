@@ -1,0 +1,5 @@
+error: `nested` takes no value
+ --> tests/ui/field_flag_with_value.rs:5:12
+  |
+5 |     #[dtcg(nested = "yes")]
+  |            ^^^^^^

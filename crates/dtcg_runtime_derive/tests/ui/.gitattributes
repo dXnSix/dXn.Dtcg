@@ -1,0 +1,2 @@
+# trybuild snapshots compare text; keep them LF on every platform.
+*.stderr text eol=lf

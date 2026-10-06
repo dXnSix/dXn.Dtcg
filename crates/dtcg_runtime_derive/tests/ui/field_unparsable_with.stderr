@@ -1,0 +1,5 @@
+error: `with` must name a conversion function, such as "crate::convert"
+ --> tests/ui/field_unparsable_with.rs:5:19
+  |
+5 |     #[dtcg(with = "not a path!")]
+  |                   ^^^^^^^^^^^^^

@@ -1,0 +1,5 @@
+error: `rest` cannot be combined with `rename`
+ --> tests/ui/field_rest_rename.rs:5:18
+  |
+5 |     #[dtcg(rest, rename = "x")]
+  |                  ^^^^^^

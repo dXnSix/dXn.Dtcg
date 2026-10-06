@@ -1,0 +1,5 @@
+error: DtcgTokens only supports structs
+ --> tests/ui/enum_input.rs:4:6
+  |
+4 | enum Subject {
+  |      ^^^^^^^

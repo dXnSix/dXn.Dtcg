@@ -1,0 +1,5 @@
+error: unknown `dtcg` field attribute `pth`; expected one of path, rename, with, nested, rest
+ --> tests/ui/field_unknown_key.rs:5:12
+  |
+5 |     #[dtcg(pth = "x")]
+  |            ^^^
