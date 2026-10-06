@@ -2,7 +2,11 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::{DtcgError, ResourceId, SourceOrigin, error::invalid, json_pointer::pointer_parts};
+use crate::{
+    DtcgError, ResourceId, SourceOrigin,
+    error::invalid,
+    json_pointer::{pointer_parts, walk},
+};
 
 /// One ordered terminal source, before token shadowing and group inheritance.
 /// Its authored tree includes empty groups and shallow reference overrides.
@@ -59,14 +63,9 @@ impl SourceOccurrence {
 
     pub(crate) fn select(&self, reference: &str) -> Result<Self, DtcgError> {
         let parts = pointer_parts(reference)?;
-        let pointer = reference
-            .strip_prefix('#')
-            .expect("validated local pointer");
-        let value = self
-            .value
-            .pointer(pointer)
+        let value = walk(&self.value, &parts)
             .cloned()
-            .ok_or_else(|| DtcgError::InvalidPointer(pointer.into()))?;
+            .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
         let mut origin = self.origin.clone();
         for (index, name) in parts.iter().enumerate() {
             if index == 0 {

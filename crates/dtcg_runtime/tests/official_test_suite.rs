@@ -51,12 +51,22 @@ struct Fixture {
     positive: bool,
 }
 
-#[derive(Debug)]
 enum Outcome {
     Accepted,
     Rejected(String),
     Missing(String),
     Panicked(String),
+}
+
+impl std::fmt::Display for Outcome {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Accepted => formatter.write_str("accepted"),
+            Self::Rejected(error) => write!(formatter, "rejected: {error}"),
+            Self::Missing(documents) => write!(formatter, "missing documents: {documents}"),
+            Self::Panicked(message) => write!(formatter, "panicked: {message}"),
+        }
+    }
 }
 
 fn corpus_root() -> PathBuf {
@@ -224,7 +234,7 @@ fn official_corpus_matches_the_known_gaps_exactly() {
                 "fixed gap still listed in KNOWN_GAPS"
             };
             report.push(format!(
-                "- {} ({status}; expected to {expectation}): {}\n  observed: {outcome:?}",
+                "- {} ({status}; expected to {expectation}): {}\n  observed: {outcome}",
                 fixture.id, fixture.purpose
             ));
         }

@@ -2,7 +2,10 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::{DtcgError, ResourceId, error::invalid, resolver_definition::modifier_contexts};
+use crate::{
+    DtcgError, ResourceId, error::invalid, json_pointer::pointer_parts,
+    resolver_definition::modifier_contexts,
+};
 
 /// One resolver input: a modifier with its contexts in authored order and its
 /// optional default. Axes are listed in `resolutionOrder` order, followed by
@@ -52,12 +55,16 @@ pub(crate) fn modifier_axes(
         let Some(step) = step.as_object() else {
             continue;
         };
-        if let Some(name) = step
-            .get("$ref")
-            .and_then(Value::as_str)
-            .and_then(|pointer| pointer.strip_prefix("#/modifiers/"))
-        {
-            let name = name.replace("~1", "/").replace("~0", "~");
+        let reference = step.get("$ref").and_then(Value::as_str);
+        let modifier =
+            reference
+                .map(pointer_parts)
+                .transpose()?
+                .and_then(|parts| match parts.as_slice() {
+                    [kind, name] if kind == "modifiers" => Some(name.clone()),
+                    _ => None,
+                });
+        if let Some(name) = modifier {
             let definition = root
                 .get(&name)
                 .ok_or_else(|| invalid(resource, &format!("unknown modifier `{name}`")))?;

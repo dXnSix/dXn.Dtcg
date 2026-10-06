@@ -283,8 +283,19 @@ fn source_and_preview_limits_are_shared_with_resolution() {
     for _ in 0..4 {
         deep = resolver(vec![deep]);
     }
+    // Every expansion step counts against `max_documents`, so the depth probe
+    // needs room for the nested resolvers it expands.
+    let mut nested = DtcgRuntime::with_limits(
+        RuntimeLimits::default()
+            .with_max_documents(64)
+            .with_max_reference_depth(2),
+    );
+    nested
+        .provide_json("root.json", resolver(vec![number(1)]).to_string())
+        .unwrap();
+    nested.set_root("root.json").unwrap();
     assert!(matches!(
-        runtime.inspect_source(&deep, &[]),
+        nested.inspect_source(&deep, &[]),
         Err(DtcgError::LimitExceeded {
             kind: "reference depth",
             ..
@@ -299,8 +310,21 @@ fn source_and_preview_limits_are_shared_with_resolution() {
     alias_runtime.set_root("root.json").unwrap();
     assert!(alias_runtime.resolve(&[]).unwrap().ready().is_some());
     let reverse: Value = serde_json::from_str(r#"{"c":{"$type":"number","$value":"{b}"},"b":{"$type":"number","$value":"{a}"},"a":{"$type":"number","$value":1}}"#).unwrap();
+    // Alias depth counts reference hops, whatever the authored order.
+    assert!(
+        alias_runtime
+            .preview_source(&reverse, &[])
+            .unwrap()
+            .ready()
+            .is_some()
+    );
+    let mut shallow = DtcgRuntime::with_limits(RuntimeLimits::default().with_max_alias_depth(1));
+    shallow
+        .provide_json("root.json", resolver(vec![json!({})]).to_string())
+        .unwrap();
+    shallow.set_root("root.json").unwrap();
     assert!(matches!(
-        alias_runtime.preview_source(&reverse, &[]),
+        shallow.preview_source(&reverse, &[]),
         Err(DtcgError::LimitExceeded {
             kind: "alias depth",
             ..

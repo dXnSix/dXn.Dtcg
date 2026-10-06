@@ -8,6 +8,7 @@ mod dtcg_component_tokens;
 mod dtcg_tokens;
 mod envelope;
 mod error;
+mod flatten;
 mod from_dtcg_value;
 mod json_pointer;
 mod local_reference;
@@ -19,6 +20,7 @@ mod selection;
 mod source_discovery;
 mod source_occurrence;
 mod source_origin;
+mod token_resolution;
 mod type_registry;
 mod value;
 

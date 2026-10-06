@@ -72,7 +72,7 @@ pub(crate) fn resolve_local_reference(
             "resolver structure reference must be local",
         ));
     }
-    if pointer.starts_with("#/resolutionOrder/") {
+    if pointer_parts(pointer)?.first().map(String::as_str) == Some("resolutionOrder") {
         return Err(invalid(
             &document.resource,
             "references into resolutionOrder are forbidden",

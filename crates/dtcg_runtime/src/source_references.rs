@@ -4,7 +4,9 @@ use serde_json::Value;
 
 use crate::{
     DocumentCatalog, DocumentRequest, DtcgError, Resolution, ResourceId, RuntimeLimits,
-    SourceOrigin, SourceReference, catalog::parse_document,
+    SourceOrigin, SourceReference,
+    catalog::parse_document,
+    json_pointer::{escape, fragment_parts, plain_pointer},
 };
 
 /// Walk authored source sites rather than effective sources. Relocation must
@@ -147,7 +149,8 @@ pub(crate) fn inspect(
                     Position::Resolver,
                     depth,
                 ));
-                let fragment = target.fragment().unwrap_or_default();
+                let fragment =
+                    plain_pointer(&fragment_parts(target.fragment().unwrap_or_default())?);
                 if reference.starts_with('#') {
                     let position = if fragment.starts_with("/sets/") {
                         Position::Definition
@@ -164,7 +167,7 @@ pub(crate) fn inspect(
                 } else if catalog.contains(target.resource_id()) {
                     children.push((
                         target.resource_id().clone(),
-                        fragment.into(),
+                        fragment,
                         String::new(),
                         Position::Source,
                         depth + 1,
@@ -194,8 +197,4 @@ enum Position {
     Resolver,
     Definition,
     Source,
-}
-
-fn escape(name: &str) -> String {
-    name.replace('~', "~0").replace('/', "~1")
 }

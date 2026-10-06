@@ -7,7 +7,7 @@ use crate::{
     SourceOccurrence, SourceOrigin,
     catalog::parse_document,
     error::invalid,
-    json_pointer::pointer_parts,
+    json_pointer::{fragment_parts, plain_pointer, pointer_parts, walk},
     resolver_definition::{
         modifier_documents, optional_object, resolution_step, resolve_local_reference,
         set_documents, validate_inputs,
@@ -71,6 +71,9 @@ struct Discovery<'a> {
     selections: BTreeMap<&'a str, &'a str>,
     include_inactive: bool,
     missing: BTreeMap<ResourceId, DocumentRequest>,
+    /// Expansion steps so far: set references, local references, document
+    /// loads and nested resolvers, including those that contribute no source.
+    expansions: usize,
 }
 
 impl<'a> Discovery<'a> {
@@ -93,6 +96,7 @@ impl<'a> Discovery<'a> {
             selections,
             include_inactive,
             missing: BTreeMap::new(),
+            expansions: 0,
         })
     }
 
@@ -115,18 +119,20 @@ impl<'a> Discovery<'a> {
             return Ok(None);
         };
         let mut value = parse_document(resource, json)?;
+        let mut pointer = String::new();
         if let Some(fragment) = fragment {
-            value = value
-                .pointer(fragment)
+            let parts = fragment_parts(fragment)?;
+            value = walk(&value, &parts)
                 .cloned()
                 .ok_or_else(|| DtcgError::InvalidPointer(fragment.into()))?;
+            pointer = plain_pointer(&parts);
         }
         Ok(Some(SourceOccurrence {
             resource: resource.clone(),
             value,
             origin: SourceOrigin {
                 resource: Some(resource.clone()),
-                pointer: fragment.unwrap_or_default().into(),
+                pointer,
             },
             member_origins: BTreeMap::new(),
         }))
@@ -152,6 +158,7 @@ impl<'a> Discovery<'a> {
             if ancestors.contains(&source.origin) {
                 return Err(DtcgError::DocumentCycle(source.resource.to_string()));
             }
+            self.count_expansion()?;
             let children = self.resolver_sources(&source, depth + 1)?;
             // Identity is tracked along this occurrence's ancestry only. Repeated
             // resolver sources must still participate at their authored position.
@@ -231,12 +238,13 @@ impl<'a> Discovery<'a> {
         let reference = reference
             .as_str()
             .ok_or_else(|| invalid(&scope.resource, "reference object `$ref` must be a string"))?;
-        if reference.starts_with("#/resolutionOrder/") || reference.starts_with("#/modifiers/") {
+        if reference.starts_with('#') && targets_forbidden_member(reference)? {
             return Err(invalid(
                 &scope.resource,
                 &format!("forbidden source reference `{reference}`"),
             ));
         }
+        self.count_expansion()?;
         if reference.starts_with('#') {
             if references.iter().any(|active| active == reference) {
                 return Err(invalid(
@@ -294,6 +302,13 @@ impl<'a> Discovery<'a> {
         }
     }
 
+    /// Counts one expansion step against `max_documents`, so reference fan-out
+    /// is bounded even when the expanded sets contribute no source.
+    fn count_expansion(&mut self) -> Result<(), DtcgError> {
+        self.expansions += 1;
+        self.check_count(self.expansions)
+    }
+
     fn check_count(&self, count: usize) -> Result<(), DtcgError> {
         if count > self.limits.max_documents {
             Err(DtcgError::LimitExceeded {
@@ -304,6 +319,13 @@ impl<'a> Discovery<'a> {
             Ok(())
         }
     }
+}
+
+/// Whether a local source reference points into `resolutionOrder` or
+/// `modifiers`, judged on the decoded pointer so every spelling is caught.
+fn targets_forbidden_member(reference: &str) -> Result<bool, DtcgError> {
+    let parts = pointer_parts(reference)?;
+    Ok(parts.len() > 1 && matches!(parts[0].as_str(), "resolutionOrder" | "modifiers"))
 }
 
 fn is_resolver(value: &Value) -> bool {
