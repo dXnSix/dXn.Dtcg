@@ -91,8 +91,9 @@ pub struct RuntimeLimits {
     /// references, checked before each copy (default 4,000,000).
     pub max_value_nodes: usize,
     /// Flattened tokens of one resolution, counting those produced by
-    /// `$extends`; it separately bounds the `$extends` links applied
-    /// (default 100,000).
+    /// `$extends`; it separately bounds the JSON nodes (tokens and groups)
+    /// that `$extends` copies (default 100,000). Both report
+    /// `LimitExceeded { kind: "tokens" }`.
     pub max_tokens: usize,
 }
 

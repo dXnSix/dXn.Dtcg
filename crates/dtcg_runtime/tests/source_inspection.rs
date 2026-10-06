@@ -336,7 +336,7 @@ fn source_and_preview_limits_are_shared_with_resolution() {
 fn reference_sites_include_dormant_and_overridden_sources_but_exclude_extensions_and_aliases() {
     let mut data = resolver(vec![json!({"$ref":"nested/wrapper.json#/embedded"})]);
     data["sets"]["dormant"] = json!({"sources":[{"$ref":"unused.json"}]});
-    data["$extensions"] = json!({"example":{"$ref":"do-not-load.json"}});
+    data["sets"]["base"]["$extensions"] = json!({"example":{"$ref":"do-not-load.json"}});
     let mut runtime = runtime(data);
     runtime
         .provide_json(

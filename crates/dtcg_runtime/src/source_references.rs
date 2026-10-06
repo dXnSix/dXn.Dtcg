@@ -7,7 +7,7 @@ use crate::{
     SourceOccurrence, SourceOrigin, SourceReference,
     catalog::parse_document,
     json_pointer::{fragment_parts, walk},
-    resolver_definition::is_resolver,
+    resolver_definition::{is_resolver, validate_resolver},
 };
 
 /// Walk authored source sites rather than effective sources. Relocation must
@@ -107,6 +107,8 @@ impl Walker<'_> {
                 if !is_resolver(&occurrence.value) {
                     return Ok(children);
                 }
+                // The same structure rules as discovery, for every reached resolver.
+                validate_resolver(&occurrence.resource, &occurrence.value)?;
                 for member in ["sets", "modifiers"] {
                     if let Some(definitions) =
                         occurrence.value.get(member).and_then(Value::as_object)

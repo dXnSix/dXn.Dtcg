@@ -149,3 +149,17 @@ fn nested_resolvers_and_envelopes_follow_the_same_rules() {
     assert!(ResolverEnvelope::parse(&id, &json!({"data": empty}).to_string()).is_err());
     assert!(ResolverEnvelope::parse(&id, &json!({"data": resolver()}).to_string()).is_ok());
 }
+
+#[test]
+fn source_references_apply_the_same_structure_rules() {
+    let mut document = resolver();
+    document["$extensions"] = json!({"example": {"$ref": "do-not-load.json"}});
+    let runtime = DtcgRuntime::from_json("root.json", document.to_string()).unwrap();
+    assert!(matches!(
+        runtime.source_references(),
+        Err(DtcgError::InvalidDocument { message, .. })
+            if message == "unknown resolver member `$extensions` in the resolver root"
+    ));
+    let valid = DtcgRuntime::from_json("root.json", resolver().to_string()).unwrap();
+    assert!(valid.source_references().unwrap().is_ready());
+}
