@@ -1,12 +1,12 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 74,
-  "planRevision": 1,
+  "revision": 99,
+  "planRevision": 5,
   "specHashes": {
-    "requirements": "7d2f2304cf2efe8a8f1120cd03025ca7f3c613d2ccef1dcfac7068a61eddb5e2",
-    "design": "cbddc7210fb5c970bf999cf3d46e14d1e5317820936df5a69d89d9dd63d787cd",
-    "plan": "788fbdfb4dd8a35d2e9c1cfd46e9c5a8dc42f798d2c6756a7880aa743c2f10e1"
+    "requirements": "0c542124e41e0c747e5a6a66ed5e870b0a64f4db7f051c5e2deabdcf994b8fd1",
+    "design": "ee2156ce9e1cfe2315772e197ceb39b3327639d3ae41868b8237abb0674bfd37",
+    "plan": "afa1ebcf972ab2ce2e3365dbe7fefb1af5c041fed7e6cbc9044a0ec387996155"
   },
   "tasks": {
     "task-corpus": {
@@ -128,6 +128,24 @@
       "workerIds": [
         "1babe233-bac0-4efc-9387-c17ffea64c27"
       ]
+    },
+    "task-source-reference-bounds": {
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
+    },
+    "task-extensions-merge": {
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
+    },
+    "task-source-reference-parity": {
+      "status": "done",
+      "workerIds": [
+        "1babe233-bac0-4efc-9387-c17ffea64c27"
+      ]
     }
   },
   "validationBatches": {
@@ -211,6 +229,24 @@
         }
       },
       "recordedAt": "2026-10-06T22:34:53Z"
+    },
+    "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704": {
+      "snapshot": {
+        "specHash": "d243322274efd54d18154261af5165d74936ec7de51880e5da4834de704daf35",
+        "repositories": {
+          "dtcg": "330cee7c569ab0e8651116861fefa7ad9d8d9e5a0c9a62d3992a99f229ffc283"
+        }
+      },
+      "recordedAt": "2026-10-07T00:09:20Z"
+    },
+    "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15": {
+      "snapshot": {
+        "specHash": "c84df801c931d4eac173d31591bd95e23cc472e34d836d7ea4e0cade1cfec887",
+        "repositories": {
+          "dtcg": "e31ea3ef76c5871f43479ec3305c4cbe96740c6492a41647b2f92dce771d4bfb"
+        }
+      },
+      "recordedAt": "2026-10-07T00:31:34Z"
     }
   },
   "checkResults": {
@@ -587,6 +623,579 @@
       "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-8-final-9355a6b296e1.log",
       "logSha256": "e1734095da11fded554b6060e896db11308036c6423faf31959a8e96357ef282",
       "inputsHash": "ce84831e342508ff76b00ce3862ab0f4f7957c56c74cfb2c68fac8dcddd72d63"
+    },
+    "final/check-official-test-suite/final": {
+      "checkId": "check-official-test-suite",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "afa33ae0c39271c3884c7c4f3ccd120cc394c4d3efb3a256a4cc112d69cd60a9",
+      "basisHash": "cf57f037b4166012640ded791edc2db6671e496ac150e08f282f6882be486e23",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.871,
+      "recordedAt": "2026-10-07T00:30:35Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-153f09a28f75.log",
+      "logSha256": "1a11fdde8af7cd4cffbe0ffe9ca01933796eec425bc926b9025f2edbc2f6de37",
+      "inputsHash": "a9e13b7e5e24dc60529506e2deacc3b4a8fb0f98745daf5942677c4e4dc66b39"
+    },
+    "final/check-package-excludes-corpus/final": {
+      "checkId": "check-package-excludes-corpus",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704",
+      "definitionHash": "addf480e691d686512a0a5a14e9a2950c5f3823742f4d93d88066d56baa8855b",
+      "basisHash": "1ae9d51de1f57fc8cec31633af05a9ac7057fedf8c001ebd2bb243b8577ad789",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.4523,
+      "recordedAt": "2026-10-07T00:08:21Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-0765499a0a59.log",
+      "logSha256": "8f6e03b543e725259dcf3cb954132419a3b7aa9fcbf97c8ff0eb6fdd28cfda3a",
+      "inputsHash": "625baa60bffb14b814eb7ac57f4099ab735262c245bed208400517dc12851b66"
+    },
+    "final/check-api-foundations/final": {
+      "checkId": "check-api-foundations",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "c417e8baee066deeb6d2812e66ee64ac1a251bbe449892535d5460ced9babae5",
+      "basisHash": "b07bbc5dd58b0bc42df69f8be5733ee96736096cb756c4c5ff88a7a4b3963751",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.809,
+      "recordedAt": "2026-10-07T00:30:36Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-1829cdd9875e.log",
+      "logSha256": "63b721b6d15fefbd245b3803e948b7fca36949a4a89605ebf1a5a686a1687ed7",
+      "inputsHash": "49a0c2bfebf02483eec81fd82e98cf7ceb535ba4a67934be0f06556f0ecec2ba"
+    },
+    "final/check-bounded-references/final": {
+      "checkId": "check-bounded-references",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "90fed6f58ead1d6020d8f05ff9ef7d3e523944ab81817d30d718066ff3b19277",
+      "basisHash": "bb7c2012b45aba433ea41090ed536ed829026b19f244e2be0da0b6c09fbc8d9d",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 16,
+      "durationSeconds": 5.1493,
+      "recordedAt": "2026-10-07T00:30:41Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-d7bb40915182.log",
+      "logSha256": "238637b25f83f2ec0a8606eee6def7e2aa4b846766be8454e7449cbf08f667f2",
+      "inputsHash": "842701d7d5bec57db97bc96f4b4061e35352f56da6b3774dbee115ba253ba760"
+    },
+    "final/check-bounded-expansion/final": {
+      "checkId": "check-bounded-expansion",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "d5644b2016bd78cd9aa22e0d6a9ae64262312124974f00cfa8be622573d64bda",
+      "basisHash": "b857da7a11a4c05872190b93799f72e67f41a0508b5be4c98bf26dcb75abdc66",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 5.2368,
+      "recordedAt": "2026-10-07T00:30:46Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-e2cdcbb94228.log",
+      "logSha256": "b7288bba0a90d851b6b4160a493e1c761866d429542c5e1d4a5aef25897b90e8",
+      "inputsHash": "55ad68cc68137d5c4aa8d229f6b9b0db33f0d30e851def563b33b727694da03b"
+    },
+    "final/check-resource-id-portability/final": {
+      "checkId": "check-resource-id-portability",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "26318010c448cdb64824766ebd82013da3dfe037aa6bb7ec9cb60a7a17a540d1",
+      "basisHash": "e9bdc6d0efbf7d4fdfd9ca085990ac2eb7374b210c6f37087c2cd1b6bea3bf24",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 1.1165,
+      "recordedAt": "2026-10-07T00:30:47Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-d74cf1f5494c.log",
+      "logSha256": "80127ba0c947ca9e559456047be33a7293deb67c326014bf747bd0eeb72d554e",
+      "inputsHash": "16f4dd7f443baa9344796d0ad503c149e87dd9a76070036acc6ac283451f70e3"
+    },
+    "final/check-format-structure/final": {
+      "checkId": "check-format-structure",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "8609b7f42498bbc5d2378b02bb52250f5d6e5ab54c0a35c34eca2766b66cab20",
+      "basisHash": "70fce700b8333693adb08bf3bf525a919c02d88f8016fa6ebc5698bd313c13dd",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 1.0046,
+      "recordedAt": "2026-10-07T00:30:48Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-f3c13fd870a4.log",
+      "logSha256": "e73244a1bd8e41e818ec7c545d6c91c83323ca0954bc7b2e92210fc2c868880c",
+      "inputsHash": "4a89729970c936233cc49547e0d10ceff8ba711021195cc0f08010207a69ca66"
+    },
+    "final/check-type-determination/final": {
+      "checkId": "check-type-determination",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "57bf5e14ec12626960aedc0322c148180490e09ef994df9be5ad2452153b5731",
+      "basisHash": "c8262b3a085371e92ed8f01872872ad624355d6720fbacb56356757b34c001fe",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 7,
+      "durationSeconds": 0.9147,
+      "recordedAt": "2026-10-07T00:30:49Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-5552b85d2971.log",
+      "logSha256": "12fc563a252b071a03da646f5559ca074afc7767967f05d15d5e318e8a4932c0",
+      "inputsHash": "f4eec1d8f5ce364522eeb7c079553019496e1135e800630818f28b62c93a6a70"
+    },
+    "final/check-reference-positions/final": {
+      "checkId": "check-reference-positions",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "61ad3feac688e8cff0307ce99b164c48bda3330cc32e6ca733b9eddaa30233f1",
+      "basisHash": "5289cd21b7297235db4b200b363c1115649a8fbb6938e7a33d38474d71570017",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.9735,
+      "recordedAt": "2026-10-07T00:30:50Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-941c229c22ff.log",
+      "logSha256": "7589267639491b9b41f0243ae543d174410653599d2ed68a80771d4d0b28989d",
+      "inputsHash": "d9579fec05bc9e806595dee3829fa40cf970559b0a968478b979532b3e2ac412"
+    },
+    "final/check-value-extensions/final": {
+      "checkId": "check-value-extensions",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "cac2956ec5fe45c9137c8b9c2b656cfadfdeb48ff25540962bf6ac71e508ce6d",
+      "basisHash": "89a6e6342764c32525ddf282cbd31ae9b6b1813ead3405f4acf861908915d870",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.8229,
+      "recordedAt": "2026-10-07T00:30:51Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-6232ae50082b.log",
+      "logSha256": "17e2ce1859901ed74653daf0260a64f5ebe3f0a51c927f79ffdac9ffb7bf6cd3",
+      "inputsHash": "bbf1127723677ccbde24567480961886f9dd7b398f641470fb9fdab85c33735f"
+    },
+    "final/check-merged-resolution/final": {
+      "checkId": "check-merged-resolution",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "6fbc9b5907a6928fbc5d61719e43c65def5270cd9a52cc2eb7e0a8c099838675",
+      "basisHash": "50ed9ac5e6c1152f491bd06ff8c529b874ea960181d64830118fef2c7503233d",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.8775,
+      "recordedAt": "2026-10-07T00:30:52Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-e9c82bf45e06.log",
+      "logSha256": "af261b89f01282d2c2d29f04dc9864dd77a6a796ed0447a5fa0c95bd0112e938",
+      "inputsHash": "292145f7ff7eed2df1b09357e15c00ed5b4922138771940f97a9a3081fc8569c"
+    },
+    "final/check-token-metadata/final": {
+      "checkId": "check-token-metadata",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "e16c0c7eb89fe6d3fcefae7b573495c920e23a4be6c2bbadc69f1b5dfa2bb843",
+      "basisHash": "028f6fcdce34af4d22802388c84a7e5a92f5966a24643b0063edc104d61cb5d6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.7828,
+      "recordedAt": "2026-10-07T00:30:53Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-f134da845ef8.log",
+      "logSha256": "3e4dde48b27a3cd9c58515bdf655f31cb4d154e99d1c05782bbd12077865e780",
+      "inputsHash": "4bcbd8cac123b6f94327b35156e3b41467e091aae4f9abd022ed81311498c41a"
+    },
+    "final/check-incremental-consistency/final": {
+      "checkId": "check-incremental-consistency",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "ec4f47bede26a8dd55c635529d6aa6129d07c457ca4b65b84b88daa479a2aa32",
+      "basisHash": "5a13b54b1b2f7bf0dd8d276a227fc6674da5f50c64829aac3baed4b60793d34a",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.7576,
+      "recordedAt": "2026-10-07T00:30:54Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-2f7106f31889.log",
+      "logSha256": "2cd7db52631669e86c99eb092ce30f102ccb5b80882561146ffbcb57a1a2fa64",
+      "inputsHash": "3e580fd827d146ce12c6a3d78b9a7544df2d242552868cc6862cf162d0a8e197"
+    },
+    "final/check-resolver-document-validation/final": {
+      "checkId": "check-resolver-document-validation",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "cd3470c00c4fe49ba7f0f969f894aef39a487234f91bbf0c81e5dea6b4dc0e8d",
+      "basisHash": "47210749d063a75668688be49e01e4267e56391e99383981134b597205612aa4",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.7817,
+      "recordedAt": "2026-10-07T00:30:54Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-d40ea4211468.log",
+      "logSha256": "21e9f8b354f6a44f981a468ee275550945d99ace0c8bf9651c52d2b3d0d86f48",
+      "inputsHash": "db144a896c99f51b61819cfb0148f0ebfd4e31495c62ee2f6be6b3642ef95f75"
+    },
+    "final/check-corpus-complete/final": {
+      "checkId": "check-corpus-complete",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "3d7fd5380dafda7d9923cb89974ec5fa8a62ef1c0d98c11ef959d7c807e13cc3",
+      "basisHash": "51e5d10a3c2ad175559c4b1bd3beb975d381442bea595bc264b4df09edad23fe",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.1888,
+      "recordedAt": "2026-10-07T00:30:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-45fbbb802af4.log",
+      "logSha256": "61ab5b3c29f1de51bf4321a935e144c40c5db0bab911562990b72ddf8d04ae5e",
+      "inputsHash": "a9e13b7e5e24dc60529506e2deacc3b4a8fb0f98745daf5942677c4e4dc66b39"
+    },
+    "final/check-resolution-step-consistency/final": {
+      "checkId": "check-resolution-step-consistency",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "4af9beb0322efc2f3d1dd92d9202d14b2f4f5108ddb1bfbcc1be3c353edebf20",
+      "basisHash": "9e624c5632ee296025cb2fc678ef995714614575067dbd19b28e19c5723653d8",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.8671,
+      "recordedAt": "2026-10-07T00:30:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-406cb70c54aa.log",
+      "logSha256": "485e774949111df743cf9955974dbc6b0e62d287a2dde1cd28207c5f37611421",
+      "inputsHash": "11266cd9824a457a637904a2d36da6623ab24e0b4e015d7c00525fd85eea98ab"
+    },
+    "final/check-input-selection/final": {
+      "checkId": "check-input-selection",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "3bc20b73947798fe4e4ec9d6e74c8971576c0bdf1bed43c13536de3b68b8c937",
+      "basisHash": "8024d06845d7635fd9348f74be3873e1b826201d66811b39ed87a5a8c961f3ce",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.7928,
+      "recordedAt": "2026-10-07T00:30:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-9fc7c163d46a.log",
+      "logSha256": "f06964c9fc719e26e6f49264ed1e195685cc41a5f8d896919315e6789fe616b0",
+      "inputsHash": "31171786ebf803eb71254c82c6658e7f56dc69b91ce0a5fd2419e37a66744775"
+    },
+    "final/check-typed-values/final": {
+      "checkId": "check-typed-values",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "25ba59e2f729a1605c8ccd5108196078a84c7985f3e0c6afff11917a435cebaa",
+      "basisHash": "fea18212e937e5d04d645721f27bb706e016f4253e03a8e5b201deab62710870",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.8297,
+      "recordedAt": "2026-10-07T00:30:57Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-43567dda2b90.log",
+      "logSha256": "f720beae155daf5c3d26453a01a4e8cb473afae8b0283d44748a88327204668a",
+      "inputsHash": "2da413762a601a8c35fd8f15cd33bac01c420b78558f7ab0a265a80a21398a94"
+    },
+    "final/check-derive-hardening/final": {
+      "checkId": "check-derive-hardening",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "9fa0e4ece6965c49510f7cebcd82ba418f5307e77b91fb57a9c8a7a077b89c89",
+      "basisHash": "f3e7c5ad54cf91c931e7d83f66dcf97e10661bf5b9f5c2f5b2ed71ce66cbfe56",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 1.6532,
+      "recordedAt": "2026-10-07T00:30:59Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-23a71f54a64c.log",
+      "logSha256": "0721a3771e85d33abdf89221bf9bd70e54cd8d8887dd974e3f57be803062b72d",
+      "inputsHash": "e8eaa35cf60ef25a4faa9f45bfdee4f6a16ed15ac8dba36d4a6fa7124e1df82f"
+    },
+    "final/check-derive-compile-fail/final": {
+      "checkId": "check-derive-compile-fail",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "3162d65e62b6ba2d8655e27b6b79ed5374433dd352cf6073c888f92769ec80fa",
+      "basisHash": "6113a47f434beeac1f33d031e98336645e1de4a1c3632fb7b9e389af2114dfee",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 1,
+      "durationSeconds": 2.8857,
+      "recordedAt": "2026-10-07T00:31:02Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-2c06f67c0462.log",
+      "logSha256": "c887e1edcad07a9622574cd27ee2d2f083580b0e08aaa6afdd4cc492c9e43278",
+      "inputsHash": "88471f5effe6e5d9c2b0665f3270d8d6f1de98204e76a73ba81f42a3f6dd4842"
+    },
+    "final/check-document-export/final": {
+      "checkId": "check-document-export",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "85b86db04352dd77a7100918d8d82d6897f4d40047ea53951922d693351a7092",
+      "basisHash": "ee6efc9c97c92f8cf9601a23edd603c3ba8ab67e6c31c1add9b1b713da2ca7a6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.9938,
+      "recordedAt": "2026-10-07T00:31:03Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-affdd0b3f376.log",
+      "logSha256": "b992d29382c83d2bd6decff1b692fd8f5ed53747b8aa12f4e735d58d05f9e08a",
+      "inputsHash": "757053949c54a7f00f35abfb3bbe3a1ccac01cffa24c39fc49cf0c50ac99b23f"
+    },
+    "final/check-doctests/final": {
+      "checkId": "check-doctests",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "792408aa0d7291b75fbcc8ca0d7347f7b443661795939c7e2fc36b319ae0b8dc",
+      "basisHash": "bda6406e1753124a5d94241b9bd29df0e03663025dc022052b4c4da12916ac44",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 80,
+      "durationSeconds": 2.1053,
+      "recordedAt": "2026-10-07T00:31:05Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-dfcf479e0bef.log",
+      "logSha256": "9f81c098a61706680a9c25bb74619355927121c6966597086f4da36b0c8f17a7",
+      "inputsHash": "a75faee288804bdd299e133fc6602ef6fce3638576af7e85eb78f5bb850c9938"
+    },
+    "final/final-fmt/final": {
+      "checkId": "final-fmt",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "a15532af5e722227b43aec83ce3d564381b81569eb30d21d61250e3fcb80df8a",
+      "basisHash": "2d3d1754c22e27c509c410590b93e689daa8bcc37e034a75ed0cd78be2662d64",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.315,
+      "recordedAt": "2026-10-07T00:31:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-de04a72fc346.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "final/final-clippy/final": {
+      "checkId": "final-clippy",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "8bafd329a3e0b3b5bcbf667fef903d2e9ae49e879f30dcb595b9dd3921fe9179",
+      "basisHash": "88db35e4ed18900518826879aea4752309bc02374e6215942fb81ffa90abc927",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 1.4769,
+      "recordedAt": "2026-10-07T00:31:08Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-00cc22c4a6f1.log",
+      "logSha256": "dc5cd29eb8f2d05983c1a1d6cb3422503bb6e8bbbda3cd8f2074651f2bb68260"
+    },
+    "final/final-wasm/final": {
+      "checkId": "final-wasm",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "8fdc04df462d4b3593d21db5400a959ef7e0e79e8a0e4790d7a11b884808f1ab",
+      "basisHash": "1a9236b4c0d2fb78e6961b722460d76c7493d4d7fe76e2e87df8bda1763a5974",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.7642,
+      "recordedAt": "2026-10-07T00:31:08Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-a1f62a4c778c.log",
+      "logSha256": "1da55d74cad58e94c2da5a9fbd241cb5c015d7693cbe0aedf4badf7004362e43"
+    },
+    "final/final-package/final": {
+      "checkId": "final-package",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "f4618c1be014278448d84447d35b46b4123ccf780cb214d0f5714c6ed32740b3",
+      "basisHash": "d34d89e2d93b3bdc795b121e10e45a920d2299f406c06360c8a6d2988a2d11a2",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 3.2541,
+      "recordedAt": "2026-10-07T00:31:12Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-d81a91960ef1.log",
+      "logSha256": "0c1993faaf5f0a900d041de16d10a83fa82d0a01140e17513bfc94f00cdb69e3"
+    },
+    "final/final-workspace-tests/final": {
+      "checkId": "final-workspace-tests",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "1f46a7d84de7a1e11f6790aa75e7cd502c6aa01632a6d6af8f921df9fac8eb29",
+      "basisHash": "dd5d94c5f12801350577a96477dd6bebb55970a039cdfbc0dc06c8dbebd2440f",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 268,
+      "durationSeconds": 21.8108,
+      "recordedAt": "2026-10-07T00:31:34Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-e28a7869a20b.log",
+      "logSha256": "6b59ff3263bead92d7890c9c397a168694587abdea5edb89d98942ead4d2b11c"
+    },
+    "sprint-9/check-source-reference-bounds/final": {
+      "checkId": "check-source-reference-bounds",
+      "boundaryId": "sprint-9",
+      "phase": "final",
+      "batchId": "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704",
+      "definitionHash": "bbbe78c1a4e23ae9c150ebdad398c32d8d960f96440c373880580a4095b88123",
+      "basisHash": "9949c1aa3f87211da9a856debbe3143286fb0d095488a0dbf7199e007a6c2d4e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 1.4902,
+      "recordedAt": "2026-10-07T00:04:39Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-9-final-467192cc3f85.log",
+      "logSha256": "fb9b9879901a14578068443df2ca952e08159396734e9d403eb1095588aca1d0",
+      "inputsHash": "65a78e747a1f1c82b6aa50f0e9439c7aea42de8dd4be6f402b65a0ea8665ca5d"
+    },
+    "sprint-9/check-extensions-merge/final": {
+      "checkId": "check-extensions-merge",
+      "boundaryId": "sprint-9",
+      "phase": "final",
+      "batchId": "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704",
+      "definitionHash": "173ce3389b5c2977ab5c29b0b029ad22e931e7b4fb4bf25c6c938c6c876b59b7",
+      "basisHash": "e0ea7af38995853bf69f48e9a0438d7a2f0414cb84d50739f3e085e5281b6585",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.7979,
+      "recordedAt": "2026-10-07T00:04:40Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-9-final-231f6b6e94bf.log",
+      "logSha256": "632552752b68af2b66e6223705089eb31af8e60acaa6b890234a5d70640ed70d",
+      "inputsHash": "a85b80e350f346992e469ac56f9e71707e9a1fd8114507af7c1e20a63091ceb0"
+    },
+    "final/check-source-reference-bounds/final": {
+      "checkId": "check-source-reference-bounds",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "bbbe78c1a4e23ae9c150ebdad398c32d8d960f96440c373880580a4095b88123",
+      "basisHash": "c052d6da0cb760a4b42bf3fd3d5d5709714af6299a8a540da134bd0ce2d3b5c6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.9988,
+      "recordedAt": "2026-10-07T00:22:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-10-final-a4c250d3b2cc.log",
+      "logSha256": "bd2facddfa3ce49ee8f114452be37723c5057cfcd6ccda2623e32f143c27735b",
+      "inputsHash": "97f822f6f71feb26d1180133cd60d1b58178292281c389434eb1a270b9bba767"
+    },
+    "final/check-extensions-merge/final": {
+      "checkId": "check-extensions-merge",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "173ce3389b5c2977ab5c29b0b029ad22e931e7b4fb4bf25c6c938c6c876b59b7",
+      "basisHash": "0b84fa0f8440735ab56ee70275b701412bdce7838c4be6271cbcaef2d1842a9f",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.828,
+      "recordedAt": "2026-10-07T00:31:06Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/final-final-3266c46bd636.log",
+      "logSha256": "04f2eca9668aece73bf114217bdcbab766ae415a17fdc2390494e47078db35cb",
+      "inputsHash": "a23a4e042751a6c3df043492351395d43efe7c55f7f1f1803c99220b26790140"
+    },
+    "sprint-10/check-source-reference-bounds/final": {
+      "checkId": "check-source-reference-bounds",
+      "boundaryId": "sprint-10",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "bbbe78c1a4e23ae9c150ebdad398c32d8d960f96440c373880580a4095b88123",
+      "basisHash": "c052d6da0cb760a4b42bf3fd3d5d5709714af6299a8a540da134bd0ce2d3b5c6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.9988,
+      "recordedAt": "2026-10-07T00:22:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-10-final-a4c250d3b2cc.log",
+      "logSha256": "bd2facddfa3ce49ee8f114452be37723c5057cfcd6ccda2623e32f143c27735b",
+      "inputsHash": "97f822f6f71feb26d1180133cd60d1b58178292281c389434eb1a270b9bba767"
+    },
+    "sprint-10/check-source-reference-parity/final": {
+      "checkId": "check-source-reference-parity",
+      "boundaryId": "sprint-10",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "04535cec4e238dc1fff24c29fa1b1f7473cc58f31fc2a2e6b2d9bf376ed11f82",
+      "basisHash": "cbb221d01a71e4fb031c67ac33733348ab9f49f80be55d0ef5ea74747dc94e6e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 2,
+      "durationSeconds": 2.2908,
+      "recordedAt": "2026-10-07T00:22:58Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-10-final-894928fdeb6a.log",
+      "logSha256": "92ff0d7af5858bf617641b030492780b8594b754bb7b25bcdbfa7490b6ee44a5",
+      "inputsHash": "c3374b6a1cc93cd4561e7671f8fd280dc59028729945c4d5b0711cd220dd1e49"
+    },
+    "final/check-source-reference-parity/final": {
+      "checkId": "check-source-reference-parity",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "definitionHash": "04535cec4e238dc1fff24c29fa1b1f7473cc58f31fc2a2e6b2d9bf376ed11f82",
+      "basisHash": "cbb221d01a71e4fb031c67ac33733348ab9f49f80be55d0ef5ea74747dc94e6e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 2,
+      "durationSeconds": 2.2908,
+      "recordedAt": "2026-10-07T00:22:58Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-2025-10-conformance/sprint-10-final-894928fdeb6a.log",
+      "logSha256": "92ff0d7af5858bf617641b030492780b8594b754bb7b25bcdbfa7490b6ee44a5",
+      "inputsHash": "c3374b6a1cc93cd4561e7671f8fd280dc59028729945c4d5b0711cd220dd1e49"
     }
   },
   "reviews": {
@@ -1703,6 +2312,931 @@
         "changelog-source-references-wording"
       ],
       "recordedAt": "2026-10-06T22:42:29Z"
+    },
+    "sprint-9": {
+      "reviewerId": "reviewer-s9-40cec599",
+      "snapshotId": "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704",
+      "criterionIds": [
+        "steps.reference-sites-bounded",
+        "steps.reference-sites",
+        "bounds.expansion",
+        "merge.extensions-recursive",
+        "merge.group-properties",
+        "merge.pointers"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "sha256": "008af8aa663f3c2157c8c40158b388c4e693022c7ae486133d068137ba696407"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_occurrence.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "steps.reference-sites"
+          ],
+          "sha256": "5a941c49d08815d1ede07ea88b8cb9f9b37147dd343142451c37623dc3e36a97"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "bounds.expansion"
+          ],
+          "sha256": "faa2f941a04bfb4b4f3d77ddc8c6fd4e9b9f2a02a360dc03c2c2e5470396b4bb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "sha256": "b9fee279eb429e4b068d4a71542240b45971a4599cc2e50edaec3fa48b52631f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "sha256": "4649872f38fd247b57a4c4ed148013c6d71b0c4483fdfc49c3c03f91b50143a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/10-source-inspection.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "6d19751140f2c60ef8eab462e6329a4c2a3a757da5a5b084cd45bffad8e0a1d8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "bounds.expansion"
+          ],
+          "sha256": "fb06b02274ef1d6ae5e02d237f6a98a1b2ddd432d9bdda97d0f70f95a226a12e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "d1b53b65347c2ce38a437cf19e480a36480e75e3321b38f8ebbf97cf1231d044"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "kind": "source",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "sha256": "4bae58e55b45dba60c86cd0bcd8151366e974c096e2f148af0cede17356fcb37"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/extensions_merge.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "sha256": "f29c8ecfea0cdec24159f06c31663befbbc4c82c577bdda6ce96cc1db358b53a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/03-token-documents.md",
+          "kind": "source",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties"
+          ],
+          "sha256": "a3774dd10390bafa46b8dcd5ea190f286ce4ac8fd1f9085f6c9fdb008bf42192"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/12-conformance.md",
+          "kind": "source",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "sha256": "c26307ff05009ab1d835ddaf09ed1aa9db2d804bf163f87a3091188cf42acbce"
+        }
+      ],
+      "summaryMarkdown": "**Passed: every sprint-9 criterion holds and every finding from this review is resolved.**\n\n- **merge.extensions-recursive, merge.group-properties, merge.pointers: pass.** `merge_extensions` (`flatten.rs`) plus `tests/extensions_merge.rs`. Docs 03 and 12 state the rule.\n- **steps.reference-sites: pass.** Sites are deduplicated by authored location. Across three repair rounds, the 21-document differential probe matches HEAD exactly on sites, missing requests and errors, so neither skip (same identity, or leads nowhere) hides a site or an error.\n- **steps.reference-sites-bounded and bounds.expansion: pass.** The amended rule holds:\n  - first walks are free;\n  - targets that lead nowhere are skipped;\n  - repeated visits count `1 + children`.\n\n  Release-build probes:\n  - 16,000 inline sources: 130 ms;\n  - M x N fan-outs with references or inline sources: fail with the documents limit in 2-21 ms, as `validate_complete` does;\n  - a dormant set of 300 references: `Ready`;\n  - 4,000 differently overridden references to a 1 MB token document: 46 ms.\n\n  What remains is O(`max_documents` x size), for example re-copying a 1 MB target whose root holds a `$ref` until the limit, about 5 s. It is within the design invariant. Docs 10 and 11 and the CHANGELOG describe the rule accurately.\n- **Focused groups:** `source_reference_bounds` (9 tests) and `extensions_merge` pass, as do the existing groups that call `source_references`: `source_inspection`, `bounded_references`, `resolution_step_consistency`, `resolver_document_validation` and `resource_id_adversarial`.\n- **Note:** both skips now run before the depth check, so an item that would be identical to one already walked, or that leads nowhere, and is reached beyond `max_reference_depth` is skipped rather than reported. It produces no sites, so this is not a defect.\n- The final-boundary findings `source-references-overlay-rewalk` and `merge-extensions-recursive-vs-criterion` are repaired by this sprint, but they belong to the final review.",
+      "findingIds": [
+        "source-references-inline-walk-unbounded",
+        "source-references-dormant-definitions-rejected",
+        "source-references-overlay-copy-uncounted"
+      ],
+      "recordedAt": "2026-10-07T00:07:54Z"
+    },
+    "sprint-10": {
+      "reviewerId": "reviewer-s10-62e4b64f",
+      "snapshotId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "criterionIds": [
+        "steps.reference-sites-discovery-units",
+        "steps.reference-sites-bounded"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "2f29a301ec42b6c59d931d357cbbd17cd216b21f4d8d21d1c8a65322a13c3368"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "faa2f941a04bfb4b4f3d77ddc8c6fd4e9b9f2a02a360dc03c2c2e5470396b4bb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/10-source-inspection.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "aae72c9f5d4e4345d19af4d6163e9dfdc63cf6e56ad093008c486dde10435340"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "483dff48f162cb4c5ef0e0cd5275f5e20afd1aa60686cdd5467314cc44fffbe6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "2a008aa52d037a74ae675c18c6b98ec672c11c6d59e38668d54ec2f1e108f6d4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_parity.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "bf623f596da5081c927cc8fd0f5aa2ed1714b04f9beecf9d2d958de6e37a3c92"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "13e7d5c207b5644c267e52b962b9dbaa73e7854a4635ef6973b5fed777fc5199"
+        }
+      ],
+      "summaryMarkdown": "`Walker::visit` now checks, before expanding, one step per repeated resolver expansion or followed `$ref` and, separately, one source per repeated inline token source; definitions, resolution-order entries and resolver targets add nothing. Every repeated count is a subset of what discovery counts for the same document (discovery also counts first walks, loaded token sources and duplicate local references), so only dormant sets can make the walk stricter, as docs/10, docs/11 and the CHANGELOG now say.\n\nIndependent release probes (default limits, first brand count M that fails, `source_references` / `validate_complete`): 1 set x 2 sources 87/64; 3 sets x 2 + modifier 21/19; 5 sets x 4 + 2 modifiers 9/8; 10 sets x 5 + 3 modifiers 5/4; description override over a 3-set brand 30/26; `sets` override 87/29. `resolve` accepted every M up to 300. Before this sprint `source_references` failed first (25/64, 7/19, 4/8, 3/4, 9/26, 14/29).\n\nBounds still hold: the M=N=400 `$ref` and inline fan-outs fail with `LimitExceeded { documents }` in about 5 ms (as `validate_complete` does); with the limit raised the time grows linearly with M*N (46/182/745 ms); 8,000 overridden references to a 20,000-token document list in 99 ms; the 24-level doubling chain lists in 2 ms. Groups source_reference_parity (2), source_reference_bounds (9) and source_inspection (8) pass; the parity group checks every M from 2 to 80 that `validate_complete` accepts and pins the 16/15 boundary with the inline sources counted separately.\n\nObservation (within the limit x document-size bound, not a defect): definitions are no longer counted, so a hostile nested resolver with 20,000 empty sets or inline steps reached by 1,000 differently described references runs about 256 x K uncounted definition visits before failing: 24 s (470 KB) and 32 s (870 KB), against 3.5 s and 4.3 s for `validate_complete`; peak memory is about 2.3 GB, similar to `validate_complete`'s 2.7 GB. The giant 1.7 MB inline-resolver probe now takes 11.4 s at M=100 (Ready, `validate_complete` 8.8 s) and 28 s at M=1000 before the limit (`validate_complete` 9.9 s). No shape was found whose work grows faster than about limit x document size.",
+      "findingIds": [],
+      "recordedAt": "2026-10-07T00:30:03Z"
+    },
+    "final": {
+      "reviewerId": "reviewer-final-62e4b64f",
+      "snapshotId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "criterionIds": [
+        "corpus.vendored",
+        "corpus.harness",
+        "corpus.complete",
+        "api.nonexhaustive",
+        "api.errors",
+        "api.helpers",
+        "api.fingerprint",
+        "api.docs",
+        "bounds.pointers",
+        "bounds.alias-depth",
+        "bounds.expansion",
+        "pointers.syntax",
+        "ids.fragment",
+        "ids.portable",
+        "format.schema-root",
+        "format.children",
+        "format.root-token",
+        "format.metadata-types",
+        "types.order",
+        "types.token-ref",
+        "types.mismatch",
+        "refs.curly-positions",
+        "refs.member-types",
+        "ext.strict-default",
+        "ext.opt-in",
+        "merge.group-properties",
+        "merge.type-inheritance",
+        "merge.extends",
+        "merge.collision",
+        "merge.pointers",
+        "merge.compatibility",
+        "merge.extensions-recursive",
+        "meta.token",
+        "meta.deprecated-inheritance",
+        "meta.groups",
+        "incr.rollback",
+        "incr.group-edits",
+        "incr.pointer-deps",
+        "incr.snapshot-equality",
+        "incr.extends-detection",
+        "resdoc.members",
+        "resdoc.order-and-contexts",
+        "steps.overrides",
+        "steps.names",
+        "steps.reference-sites",
+        "steps.reference-sites-bounded",
+        "steps.reference-sites-discovery-units",
+        "inputs.case",
+        "inputs.scope",
+        "inputs.json",
+        "values.model",
+        "values.semantics",
+        "values.conversion",
+        "derive.optional",
+        "derive.hygiene",
+        "derive.attributes",
+        "derive.generics",
+        "derive.compile-fail",
+        "export.document",
+        "export.roundtrip",
+        "docs.tested",
+        "docs.updated",
+        "docs.changelog"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "7e75efdeb58a1ca0139825345762c1f937c18ffbccfab0e367bc8323c2f8e04b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/README.md",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.vendored"
+          ],
+          "sha256": "a6454bf54fe363746545c40450bfc5cce0cbc49f3adfe990525486b87d1ea8ab"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "corpus.harness",
+            "corpus.complete",
+            "api.nonexhaustive",
+            "api.helpers",
+            "ids.fragment",
+            "ext.opt-in",
+            "incr.rollback",
+            "inputs.scope"
+          ],
+          "sha256": "473fe6d5e0e520430801cc12015556846646ea9c959f27ceded24098f8ef52d9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/error.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.errors",
+            "api.nonexhaustive",
+            "inputs.json"
+          ],
+          "sha256": "40ba91888c36001a24ef1918501e7f352e668fe229f5a708f194e3531a60732b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/diagnostics/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.errors",
+            "api.nonexhaustive",
+            "api.docs"
+          ],
+          "sha256": "5a5d6133a53a77ef0a46f132940d3951c84ec78c151ac12b50c8581b6b0fa2f5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/selection.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.docs",
+            "api.nonexhaustive",
+            "inputs.case",
+            "inputs.json",
+            "steps.names"
+          ],
+          "sha256": "631c5fe7e82c18ede979a51304dca3171738e05530d9ee51c0540e6567b401f1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_occurrence.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.helpers",
+            "steps.reference-sites-bounded",
+            "steps.reference-sites"
+          ],
+          "sha256": "5a941c49d08815d1ede07ea88b8cb9f9b37147dd343142451c37623dc3e36a97"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/envelope.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.helpers",
+            "resdoc.members"
+          ],
+          "sha256": "cda2d89e42d0a4d6ae0bdc5fa79b8e76922babe1d56d24afc748a085d782e59f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.helpers",
+            "api.fingerprint",
+            "bounds.alias-depth",
+            "bounds.expansion",
+            "meta.token",
+            "meta.groups",
+            "merge.compatibility",
+            "incr.rollback",
+            "incr.group-edits",
+            "incr.pointer-deps",
+            "incr.snapshot-equality",
+            "incr.extends-detection",
+            "export.document",
+            "export.roundtrip"
+          ],
+          "sha256": "d83393c5558f92b173277e9652d530b3183e837a6487f4cd093adf0e5a185cc5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/affected_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "incr.snapshot-equality"
+          ],
+          "sha256": "24fd19b6574623a3f895ace7559786c1738659483c56c196058671fab68cd404"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth",
+            "types.order",
+            "types.token-ref",
+            "types.mismatch",
+            "refs.curly-positions",
+            "refs.member-types",
+            "merge.pointers",
+            "incr.pointer-deps",
+            "api.errors"
+          ],
+          "sha256": "ae68cbdd1d962c72ea52f381928eb710de61c8b7f979cd56f59244d3fe6a47a2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/json_pointer.rs",
+          "kind": "source",
+          "criterionIds": [
+            "pointers.syntax",
+            "bounds.pointers"
+          ],
+          "sha256": "35e7b38d5ae48ebf5847a42ee5c084f7b62f1f006419b8d265b7fc07f47bbd5c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resource.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ids.fragment",
+            "ids.portable"
+          ],
+          "sha256": "ff1fa151dedbe5ad48e4ff4047e9e6769690d6895f3b0dd361b78ef678e3322a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "kind": "source",
+          "criterionIds": [
+            "format.schema-root",
+            "format.children",
+            "format.root-token",
+            "format.metadata-types",
+            "bounds.expansion",
+            "merge.group-properties",
+            "merge.type-inheritance",
+            "merge.extends",
+            "merge.collision",
+            "merge.pointers",
+            "merge.compatibility",
+            "meta.deprecated-inheritance",
+            "meta.groups",
+            "incr.extends-detection",
+            "types.order",
+            "api.errors",
+            "merge.extensions-recursive"
+          ],
+          "sha256": "4bae58e55b45dba60c86cd0bcd8151366e974c096e2f148af0cede17356fcb37"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/reference_positions.rs",
+          "kind": "source",
+          "criterionIds": [
+            "refs.curly-positions",
+            "refs.member-types",
+            "ext.opt-in"
+          ],
+          "sha256": "83132b4c2aa19f648883f6c0318023b0f7797ea2fa58a782b6902da0f1a679c6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/value.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "33212b08699f3f17c1725847d86ee150f8dc7c74aa32031962734699cbeece85"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/options.rs",
+          "kind": "source",
+          "criterionIds": [
+            "ext.opt-in"
+          ],
+          "sha256": "679c7eac00b6bab0f6f3f0313b2ce2e8bc4ad40eec51fe2f7b57557df60a13b3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_discovery.rs",
+          "kind": "source",
+          "criterionIds": [
+            "bounds.expansion",
+            "inputs.case",
+            "inputs.scope",
+            "steps.overrides",
+            "steps.names",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "faa2f941a04bfb4b4f3d77ddc8c6fd4e9b9f2a02a360dc03c2c2e5470396b4bb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/resolver_definition.rs",
+          "kind": "source",
+          "criterionIds": [
+            "resdoc.members",
+            "resdoc.order-and-contexts",
+            "steps.overrides",
+            "steps.names"
+          ],
+          "sha256": "98fff7a944e6151536e1ff8d0437feaec5c4d43a0dd0500fb812fb29c37f8a05"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites",
+            "resdoc.members",
+            "steps.reference-sites-bounded",
+            "bounds.expansion",
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "2f29a301ec42b6c59d931d357cbbd17cd216b21f4d8d21d1c8a65322a13c3368"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/values.rs",
+          "kind": "source",
+          "criterionIds": [
+            "values.model",
+            "values.semantics",
+            "values.conversion"
+          ],
+          "sha256": "c3fb890d2d9d8f662bb332630f9057450678f5440b8ec60b3037d58517936cb1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/from_dtcg_value.rs",
+          "kind": "source",
+          "criterionIds": [
+            "values.conversion"
+          ],
+          "sha256": "b5a7d2c6f04d9ec77d6aa6e2e081dc0089ebfbd4f53e2b6c82682cdd6c9001d4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "derive.optional",
+            "derive.hygiene",
+            "derive.attributes",
+            "derive.generics",
+            "derive.compile-fail"
+          ],
+          "sha256": "cf24780c26a47f5a8e37b834eecf4f87de6c23eb8ef5a07ce747e3a283d99181"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "docs.tested"
+          ],
+          "sha256": "3a4acdc904706b9708fa3b20bd7c7f442a45384af0b24ebb941bdeba164e36a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "README.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated",
+            "docs.tested"
+          ],
+          "sha256": "31a734200863af93b1f7d05e79c6e8c24813705f82707453656c540c5090f648"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/12-conformance.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.updated",
+            "merge.extensions-recursive",
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "sha256": "c26307ff05009ab1d835ddaf09ed1aa9db2d804bf163f87a3091188cf42acbce"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "docs.changelog",
+            "steps.reference-sites-bounded",
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "2a008aa52d037a74ae675c18c6b98ec672c11c6d59e38668d54ec2f1e108f6d4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/official_test_suite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "corpus.vendored",
+            "corpus.harness",
+            "corpus.complete",
+            "format.schema-root"
+          ],
+          "sha256": "b99bf4339ba9ee86c5f77a71bf387a8dbd02200ce73e376645c8dff4357c30a5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/api_foundations.rs",
+          "kind": "test",
+          "criterionIds": [
+            "api.nonexhaustive",
+            "api.errors",
+            "api.helpers",
+            "api.fingerprint"
+          ],
+          "sha256": "2fb981bb8347115f55464ed28a3da57f3b545a8ac0c92347746d721d0f354bcb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_references.rs",
+          "kind": "test",
+          "criterionIds": [
+            "bounds.pointers",
+            "bounds.alias-depth",
+            "pointers.syntax"
+          ],
+          "sha256": "95daca50a7319be289c735d4a318d41a5ca33c52cd713af947c18d4572baa5ad"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/bounded_expansion.rs",
+          "kind": "test",
+          "criterionIds": [
+            "bounds.expansion"
+          ],
+          "sha256": "4cee4f684bf366a869d382fe555839463fec1d24a616ee6ad9b849ac2b504faf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resource_id_portability.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ids.fragment",
+            "ids.portable"
+          ],
+          "sha256": "f1afcf68263c748721c0ba644db2d3bcb747c44e58da518877dddbed1d1459f3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/format_structure.rs",
+          "kind": "test",
+          "criterionIds": [
+            "format.children",
+            "format.root-token",
+            "format.metadata-types"
+          ],
+          "sha256": "17b74d13f03d57c1a5bf3da63e81ec03471c6b424be3ca1590b4edec37c77067"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/type_determination.rs",
+          "kind": "test",
+          "criterionIds": [
+            "types.order",
+            "types.token-ref",
+            "types.mismatch"
+          ],
+          "sha256": "5e3a1965f4854e65643343b0a4db2014c86b89bf9e6a313ec156202322457d07"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/reference_positions.rs",
+          "kind": "test",
+          "criterionIds": [
+            "refs.curly-positions",
+            "refs.member-types"
+          ],
+          "sha256": "6379cba1d298fa4781e9c3065f97d0b12f21f8b9a7c858e3255652886e364a69"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/value_extensions.rs",
+          "kind": "test",
+          "criterionIds": [
+            "ext.strict-default",
+            "ext.opt-in"
+          ],
+          "sha256": "4ce4989fe631b550cdcdd0411b8495f6103a131453486b860f882a17e8913b61"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/merged_resolution.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.group-properties",
+            "merge.type-inheritance",
+            "merge.extends",
+            "merge.collision",
+            "merge.pointers",
+            "merge.compatibility"
+          ],
+          "sha256": "3b9fcd6b5e380434072295a8d3b9e8b4b2592f33e840f8184f2377d8f2ceb25a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/token_metadata.rs",
+          "kind": "test",
+          "criterionIds": [
+            "meta.token",
+            "meta.deprecated-inheritance",
+            "meta.groups"
+          ],
+          "sha256": "fd961c735804d71aea719f649233cad95384e66e5297839a4470dc37fc0e0bce"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/incremental_consistency.rs",
+          "kind": "test",
+          "criterionIds": [
+            "incr.rollback",
+            "incr.group-edits",
+            "incr.pointer-deps",
+            "incr.snapshot-equality",
+            "incr.extends-detection"
+          ],
+          "sha256": "adaa0725d7538982a75315ea6a9f9ffede29f17ecc4ff0238d74aaac7cf0a7fc"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolver_document_validation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "resdoc.members",
+            "resdoc.order-and-contexts"
+          ],
+          "sha256": "eb73dc86dfb5d8f9e7fa1e4ae785d77cce8bcf8dcf24b428aced1f9f40dfc0f4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/resolution_step_consistency.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.overrides",
+            "steps.names",
+            "steps.reference-sites"
+          ],
+          "sha256": "8794ff6c48cc7f87944eb434f292fcd79b691044cb8a33f4d4157029648a7365"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/input_selection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "inputs.case",
+            "inputs.scope",
+            "inputs.json"
+          ],
+          "sha256": "37bdf5859e30b10bb65e54fbc4897f5100a72a71cef8fdaf40f8fb4fe1f30f08"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/typed_values.rs",
+          "kind": "test",
+          "criterionIds": [
+            "values.model",
+            "values.semantics",
+            "values.conversion"
+          ],
+          "sha256": "7e96cf91d195cbdb2871b1bed22ac05bfe92e1f3b8e86ee5e798361170b05672"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/derive_hardening.rs",
+          "kind": "test",
+          "criterionIds": [
+            "derive.optional",
+            "derive.hygiene",
+            "derive.generics"
+          ],
+          "sha256": "6d077569cd96cf2d340302a5c890cca2821014a5c6671ccd6d2399a026626e64"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/tests/compile_fail.rs",
+          "kind": "test",
+          "criterionIds": [
+            "derive.attributes",
+            "derive.compile-fail"
+          ],
+          "sha256": "6b1ef16855d1c86ce05e1a79c124ee25045ebbb53c22b071dc4c98ca093cf369"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/document_export.rs",
+          "kind": "test",
+          "criterionIds": [
+            "export.document",
+            "export.roundtrip"
+          ],
+          "sha256": "00702eee5fbb8ee71dce77d26c3df328c94fe8589536859b12a37ef2f8d83015"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/lib.rs",
+          "kind": "test",
+          "criterionIds": [
+            "docs.tested"
+          ],
+          "sha256": "3a4acdc904706b9708fa3b20bd7c7f442a45384af0b24ebb941bdeba164e36a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "sha256": "13e7d5c207b5644c267e52b962b9dbaa73e7854a4635ef6973b5fed777fc5199"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_inspection.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "sha256": "4649872f38fd247b57a4c4ed148013c6d71b0c4483fdfc49c3c03f91b50143a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/10-source-inspection.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "docs.updated",
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "aae72c9f5d4e4345d19af4d6163e9dfdc63cf6e56ad093008c486dde10435340"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "steps.reference-sites-bounded",
+            "bounds.expansion",
+            "steps.reference-sites-discovery-units"
+          ],
+          "sha256": "483dff48f162cb4c5ef0e0cd5275f5e20afd1aa60686cdd5467314cc44fffbe6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/extensions_merge.rs",
+          "kind": "test",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "sha256": "f29c8ecfea0cdec24159f06c31663befbbc4c82c577bdda6ce96cc1db358b53a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/03-token-documents.md",
+          "kind": "source",
+          "criterionIds": [
+            "merge.extensions-recursive",
+            "merge.group-properties"
+          ],
+          "sha256": "a3774dd10390bafa46b8dcd5ea190f286ce4ac8fd1f9085f6c9fdb008bf42192"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_parity.rs",
+          "kind": "test",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units",
+            "steps.reference-sites-bounded"
+          ],
+          "sha256": "bf623f596da5081c927cc8fd0f5aa2ed1714b04f9beecf9d2d958de6e37a3c92"
+        }
+      ],
+      "summaryMarkdown": "All three final findings are resolved on HEAD 6a4b5f7. Since the revision-90 review the only product changes are sprint-10's (`source_references.rs` counting, `source_reference_parity`/`source_reference_bounds` tests, docs 10/11/14, CHANGELOG) plus the source-inspection memory sync. The snapshot equals the sprint-10 snapshot I reviewed, and `check --epic` passed at revision 98 (30 checks). M=N=400 `$ref`/inline fan-outs fail with the documents limit in about 5 ms, large-token-document and doubling-chain shapes list in 99 ms and 2 ms, and `source_references` now accepts at least what `validate_complete` accepts.\n\nAccepted, not a finding: uncounted definitions let a hostile nested resolver with 20,000 empty sets or inline steps, reached by 1,000 differently described references, run about limit x K definition visits before failing: 24 s and 32 s on 470 KB and 870 KB, against 3.5 s and 4.3 s for `validate_complete`, with similar peak memory (2.3 GB against 2.7 GB). This stays within design `bounded-work`'s invariant (no work super-linear in input size times limits) and is linear in document size at a fixed limit. `validate_complete` rejects the same documents with the same limit error, so a consumer that validates first (the Token Editor opens projects this way) never reaches it. It is far cheaper than the cubic walk before this epic's repair, and only a hostile document with thousands of empty definitions shows the ~7x constant factor.",
+      "findingIds": [
+        "source-references-overlay-rewalk",
+        "merge-extensions-recursive-vs-criterion",
+        "source-references-limit-stricter-than-validate-complete"
+      ],
+      "recordedAt": "2026-10-07T00:32:20Z"
     }
   },
   "checkpoints": {
@@ -1769,6 +3303,22 @@
       },
       "reviewHash": "c628ac6979b57f368379ee4789f174b99a3760cd4c58d61b5bedac8039afbf84",
       "recordedAt": "2026-10-06T22:42:48Z"
+    },
+    "sprint-9": {
+      "snapshotId": "1de0315e60d49d5b7e22d108228c17d060e1869e2498c170a6d234959c6b5704",
+      "commits": {
+        "dtcg": "f5d63bdd590558531a9f693214ee87501885f3f6"
+      },
+      "reviewHash": "8a1bf18352106426cb03b4024b1e0468af019b83f0643002717cd2f8338c8726",
+      "recordedAt": "2026-10-07T00:08:15Z"
+    },
+    "sprint-10": {
+      "snapshotId": "264cfb9eed8e3f92f3ed2b9c19cadf166c6a1184332db99eb8bf8c6cd3cdba15",
+      "commits": {
+        "dtcg": "897a9a9e2979da99723bfd6daab8b7a78e21d1c7"
+      },
+      "reviewHash": "81c2810445cf15a9fd40909b0f3cc189b459ab3b1d19745e1b649773043d54f6",
+      "recordedAt": "2026-10-07T00:30:26Z"
     }
   },
   "findings": [
@@ -2168,6 +3718,136 @@
         }
       ],
       "boundaryId": "sprint-8"
+    },
+    {
+      "id": "source-references-overlay-rewalk",
+      "criterionIds": [
+        "steps.reference-sites",
+        "bounds.expansion",
+        "steps.reference-sites-bounded"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "symbol": "inspect"
+        }
+      ],
+      "descriptionMarkdown": "**Resolved (verified at revision 90, HEAD 82c031d; rechecked at revision 98, HEAD 6a4b5f7 after sprint-10 changed only the counting units).** `Walker` in `source_references.rs` now dedupes sites by authored `$ref` origin (`sites`), shares scopes through `Rc<Scope>`, skips `leads_nowhere` targets and already-visited targets before copying, and counts every visit and child of a repeated walk of a location against `max_documents`.\n\nIndependent release-build probe with the original shape (root set with M sources `{\"$ref\":\"root.json#/$defs/r\",\"description\":\"d<i>\"}`, `$defs.r` a nested resolver whose set has N sources), default limits:\n- `$ref` sources, M=N=100/200/400 (7.5/15/30 KB): `LimitExceeded { kind: \"documents\", limit: 256 }` in 2.0/2.6/4.5 ms (was 134 ms/753 ms/4.87 s); `validate_complete` fails the same way.\n- inline sources, M=N=100/200/400: same error in 1.7/2.7/4.9 ms.\n- with `max_documents` raised to 1e8: Ready in 46/182/747 ms, i.e. linear in the M*N counted steps (4x per doubling, no longer cubic).\n- three overlays of `$defs.r` with one `{\"$ref\":\"a.json\"}` source: the site `/$defs/r/sets/b/sources/0/$ref` is listed once.\n- 4,000 + 4,000 differently described references to a 20,000-token document (external and `#/$defs`): Ready, 8,000 sites, 98 ms.\n- doubling chain of 24 resolvers with differently described references: Ready (48 sites) in 2 ms.\n- override semantics: a `sets` override lists `override.json` and does not request `orig.json` reachable only through the replaced set.\n\n`tests/source_reference_bounds.rs` (9 tests) pins one-entry-per-site, the M=N=400 limit failure under 2 s, the exact setter accounting, overrides, inline, dormant and large-token-document cases; it passes.",
+      "boundaryId": "final"
+    },
+    {
+      "id": "merge-extensions-recursive-vs-criterion",
+      "criterionIds": [
+        "merge.group-properties",
+        "merge.extensions-recursive"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/extensions_merge.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "symbol": "merge_extensions"
+        }
+      ],
+      "descriptionMarkdown": "**Resolved by spec amendment.** New criterion `merge.extensions-recursive` and decision `extensions-merge` state that group and root `$extensions` merge recursively and refine `merge.group-properties`; `merge_extensions` (`flatten.rs`) now documents the rule, docs 03/12 describe it, and `tests/extensions_merge.rs` (5 tests: member-by-member merge, non-object replacement, pointers into an earlier source's `$extensions`, token `$extensions` replaced whole, `$extends`) passes.",
+      "boundaryId": "final"
+    },
+    {
+      "id": "source-references-inline-walk-unbounded",
+      "criterionIds": [
+        "steps.reference-sites-bounded",
+        "bounds.expansion"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs"
+        }
+      ],
+      "descriptionMarkdown": "**Resolved.** Scopes are shared through `Rc<Scope>`, inline sources become walk items only when they are resolvers, and repeated walks of a location count their children toward `max_documents`.\n\nReprobed with the same documents (release build, default limits):\n- One set with N inline sources: N = 4,000 / 16,000 now take 28 ms / 137 ms. Before the repair they took 29 s and an allocation abort.\n- M x N inline fan-out: (50, 500) / (100, 1,000) / (120, 2,000) / (400, 400) now fail with `LimitExceeded { kind: \"documents\" }` in 5 / 10 / 21 / 5 ms. Before the repair they took 17 s, 134 s and more than 500 s.\n\nPinned by `inline_sources_are_walked_in_linear_time` and `overridden_references_to_a_large_inline_resolver_reach_the_limit_quickly`.",
+      "boundaryId": "sprint-9"
+    },
+    {
+      "id": "source-references-dormant-definitions-rejected",
+      "criterionIds": [
+        "steps.reference-sites-bounded"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/10-source-inspection.md"
+        }
+      ],
+      "descriptionMarkdown": "**Resolved.** First walks are free, so dormant definitions no longer consume `max_documents`. The probe with an unused set of 300 references now returns `Ready(301 sites)`, as do `validate_complete` and `resolve`. Pinned by `a_large_dormant_set_is_listed_as_discovery_accepts_it`. docs/10 states the remaining divergence: many differently overridden references to one large dormant resolver.",
+      "boundaryId": "sprint-9"
+    },
+    {
+      "id": "source-references-overlay-copy-uncounted",
+      "criterionIds": [
+        "steps.reference-sites-bounded",
+        "bounds.expansion"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Resolved.** `leads_nowhere` skips, before any copy, a target that is an object with no `$ref`, is not a resolver, and gets no `resolutionOrder` override. Non-object targets still reach `overlay` and fail. Every repeated visit now counts `1 + children`.\n\n**Reprobed (release build, default limits):**\n- Probe H, M differently overridden references to a 1 MB token document: 26 ms at M = 1,000 and 46 ms at M = 4,000. Before the repair these took 15.5 s and 64.9 s.\n- Probe I, a single 685 KB document with M = 4,000 local `#/$defs/big` references: 53 ms. Before the repair it took 24.3 s.\n- **Remaining copying path.** A large target whose root has a `$ref` member is still copied for each distinct override. Each such repeated visit now counts, so the copies stop at the limit: about 5 s for a 1 MB target at any M of 1,000 or more (probe J, which fails with the documents limit). That is O(`max_documents` x size), within the `bounded-work` invariant and comparable to discovery, which re-parses the target for each counted step.\n\n**Skip safety.** I extended the differential probe `s9diff` to 21 documents and compared it with HEAD `7af0288`; site lists and errors are identical. The new cases cover:\n- a token document holding a nested `$ref` member, which is never a source site;\n- a fragment target that is itself a reference object;\n- external and local reference chains;\n- array, string and number targets, which still fail with \"reference target must be an object\";\n- missing local and external pointers, which still fail with `InvalidPointer`;\n- a `resolutionOrder` override on a token document, which is still walked and still fails validation;\n- a `sources` override on a token document;\n- local references to `#/modifiers/...` and `#/resolutionOrder/...`;\n- external `#/sets/...` fragments.\n\nPinned by the new 2,000-reference test and the exact `max_documents` 38/39 boundary in `tests/source_reference_bounds.rs`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_bounds.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs"
+        }
+      ],
+      "boundaryId": "sprint-9"
+    },
+    {
+      "id": "source-references-limit-stricter-than-validate-complete",
+      "criterionIds": [
+        "steps.reference-sites-bounded",
+        "docs.changelog",
+        "steps.reference-sites-discovery-units"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/tests/source_reference_parity.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "symbol": "Walker::visit"
+        }
+      ],
+      "descriptionMarkdown": "**Resolved in sprint-10 (897a9a9).** `Walker::visit` counts repeated walks in discovery's units, checked before expanding: one step per repeated resolver expansion or followed `$ref`, separately one source per repeated inline token source; definitions, resolution-order entries and resolver targets add nothing. Every repeated count is a subset of what discovery counts, so only dormant sets can make the walk stricter, as docs/10, docs/11, the CHANGELOG and the source-inspection memory now state.\n\nRerun of the multi-brand table (first failing M, `source_references` / `validate_complete`): 87/64, 21/19, 9/8, 5/4, description override 30/26, `sets` override 87/29 (was 25/64, 7/19, 4/8, 3/4, 9/26, 14/29); `resolve` accepts all M up to 300. So a project the Token Editor opens through `validate_complete` is listed by Save As, and no TokenEditor migration is needed. `tests/source_reference_parity.rs` asserts listing for every M in 2..80 that `validate_complete` accepts (description and `sets` overrides, with inline sources) and pins the 16/15 boundary with sources counted separately; it passes in `check --epic` at revision 98.",
+      "boundaryId": "final"
     }
   ],
   "handoffMarkdown": "",

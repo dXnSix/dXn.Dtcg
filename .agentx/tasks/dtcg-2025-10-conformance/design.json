@@ -418,6 +418,71 @@
           "path": "README.md"
         }
       ]
+    },
+    {
+      "id": "extensions-merge",
+      "requirementIds": [
+        "merge"
+      ],
+      "descriptionMarkdown": "Group and root `$extensions` merge recursively in the merged structure (objects member by member, other values replaced), while every other group property merges per key and tokens are replaced whole. `merge_extensions` in `flatten.rs` implements it, and `$extends` applies the same rule when an extending group overrides the extended group's `$extensions`.",
+      "rationaleMarkdown": "Whole replacement per key would drop `$extensions` data that pointers declared by earlier sources read, contradicting `merge.pointers`. Recursive merging keeps those locations and still lets a later source win at every location it sets. The final epic review found that `merge.group-properties` read as whole replacement; this decision records the intended reading without changing that sealed criterion.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/flatten.rs",
+          "symbol": "merge_extensions"
+        }
+      ],
+      "memoryDecisionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/memory/decisions/runtime/resolution/2026-07-26-runtime-resolution-whole-token-overlay.md"
+        }
+      ]
+    },
+    {
+      "id": "source-reference-bounds",
+      "requirementIds": [
+        "steps",
+        "bounds"
+      ],
+      "descriptionMarkdown": "`source_references` deduplicates reference sites by where the `$ref` is written (resource and pointer). Walk scopes are shared rather than copied; a reference target that leads nowhere (an object with no `$ref` that is not a resolver, even after overrides) is skipped, and a target already walked with the same overrides and scope is skipped before it is copied. The first walk of each authored location (with its position) is free; each repeated visit of a location, plus the children it produces, counts against `max_documents`. Overlaid occurrences keep their identity for walking, so override semantics are unchanged.",
+      "rationaleMarkdown": "The final epic review measured super-linear time when many reference objects with harmless differences reach the same resolver (4.9 s for a 22 KB document) and duplicate sites; the sprint-9 review then found inline fan-outs still quadratic (scope copies per child) and that counting every followed reference rejected dormant sets discovery accepts. Free first walks keep the work linear and accept every such document, while counting only repeated walks bounds the cases where overrides force re-walking. The walk covers dormant definitions discovery never expands, so a document with many differently overridden references to one large resolver can exceed the limit here and not in `resolve`; the documentation states this. The second sprint-9 review found differently overridden references to one large token document still copied it per reference uncounted; such targets hold no site, so they are skipped, and repeated visits count themselves as well as their children.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "symbol": "inspect"
+        }
+      ],
+      "memoryDecisionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/memory/decisions/runtime/resolution/2026-07-26-runtime-resolution-io-free-string-catalog.md"
+        }
+      ]
+    },
+    {
+      "id": "source-reference-discovery-units",
+      "requirementIds": [
+        "steps",
+        "bounds"
+      ],
+      "descriptionMarkdown": "Refines `source-reference-bounds`: a repeated visit adds one step when it expands a resolver or follows a reference, and one source when it is an inline token source; the two counts are checked separately against `max_documents`, as discovery checks its steps and collected sources. Definitions, resolver targets reached through a reference, and token targets (which are skipped) add nothing.",
+      "rationaleMarkdown": "The second final review (`reviewer-final-62e4b64f`) measured that counting every visit and child of a repeated walk spent the limit 1.3-2.7 times faster than discovery, so a multi-brand project that RayX.TokenEditor opens with `validate_complete` could fail Save As, which calls `source_references`. Counting the same units discovery counts keeps the walk bounded (limit times document size, as discovery) without rejecting documents discovery accepts, except through dormant definitions discovery never expands.",
+      "sourceRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime/src/source_references.rs",
+          "symbol": "Walker::visit"
+        }
+      ],
+      "memoryDecisionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/memory/decisions/runtime/resolution/2026-07-26-runtime-resolution-io-free-string-catalog.md"
+        }
+      ]
     }
   ],
   "memoryDecisionsConsidered": [

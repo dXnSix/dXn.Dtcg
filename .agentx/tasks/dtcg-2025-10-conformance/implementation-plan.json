@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "epicId": "dtcg-2025-10-conformance",
-  "revision": 1,
+  "revision": 5,
   "title": "DTCG 2025.10 full conformance, robustness and missing functionality",
   "validationMode": "sprint",
   "repositories": [
@@ -824,6 +824,103 @@
         "minimumTests": 1
       },
       "timeoutSeconds": 3600
+    },
+    {
+      "id": "check-source-reference-bounds",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "steps.reference-sites-bounded",
+        "steps.reference-sites",
+        "bounds.expansion"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "source_reference_bounds"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "timeoutSeconds": 600,
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/source_reference_bounds.rs"
+      ]
+    },
+    {
+      "id": "check-extensions-merge",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "merge.extensions-recursive",
+        "merge.group-properties",
+        "merge.pointers"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "extensions_merge"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/extensions_merge.rs"
+      ]
+    },
+    {
+      "id": "check-source-reference-parity",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "steps.reference-sites-discovery-units",
+        "steps.reference-sites-bounded"
+      ],
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--test",
+        "source_reference_parity"
+      ],
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "timeoutSeconds": 600,
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/Cargo.toml",
+        "crates/dtcg_runtime_derive/src/**",
+        "crates/dtcg_runtime/tests/source_reference_parity.rs"
+      ]
     }
   ],
   "finalCheckIds": [
@@ -1591,6 +1688,110 @@
             {
               "repositoryId": "dtcg",
               "path": "README.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-9",
+      "title": "Final review repairs: bounded reference sites and recursive `$extensions` merge",
+      "dependsOn": [
+        "sprint-8"
+      ],
+      "checkIds": [
+        "check-source-reference-bounds",
+        "check-extensions-merge"
+      ],
+      "tasks": [
+        {
+          "id": "task-source-reference-bounds",
+          "title": "Deduplicate and bound `source_references`",
+          "descriptionMarkdown": "Repair final-review finding `source-references-overlay-rewalk` (design `source-reference-bounds`): deduplicate listed sites by authored location, and count every followed reference and expanded resolver against `max_documents`. New test group `tests/source_reference_bounds.rs` covers the M×N fan-out (deduplicated sites at a small size, the documents limit at M = N = 400 within a time bound), unchanged override behavior, and the limit setter. Update the `max_documents` documentation in docs/11 and docs/10 and the CHANGELOG.",
+          "criterionIds": [
+            "steps.reference-sites-bounded"
+          ],
+          "supportingCriterionIds": [
+            "steps.reference-sites",
+            "bounds.expansion"
+          ],
+          "designIds": [
+            "source-reference-bounds"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-source-reference-bounds"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_references.rs",
+              "symbol": "inspect"
+            }
+          ]
+        },
+        {
+          "id": "task-extensions-merge",
+          "title": "Pin the recursive `$extensions` merge",
+          "descriptionMarkdown": "Resolve final-review finding `merge-extensions-recursive-vs-criterion` (design `extensions-merge`): the implementation already merges `$extensions` recursively, as `merge.pointers` needs. Add the test group `tests/extensions_merge.rs` pinning the recursive merge for group and root `$extensions` across sources, replacement of non-object values, a pointer into an earlier source's `$extensions` surviving a later source, whole-token replacement of token `$extensions`, and `$extends` overrides; make the `merge_extensions` doc comment and docs/03 and docs/12 state the rule.",
+          "criterionIds": [
+            "merge.extensions-recursive"
+          ],
+          "supportingCriterionIds": [
+            "merge.group-properties",
+            "merge.pointers"
+          ],
+          "designIds": [
+            "extensions-merge"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-extensions-merge"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/flatten.rs",
+              "symbol": "merge_extensions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sprint-10",
+      "title": "Final review repair: count repeated reference-site walks in discovery units",
+      "dependsOn": [
+        "sprint-9"
+      ],
+      "checkIds": [
+        "check-source-reference-parity",
+        "check-source-reference-bounds"
+      ],
+      "tasks": [
+        {
+          "id": "task-source-reference-parity",
+          "title": "Count repeated `source_references` walks like discovery",
+          "descriptionMarkdown": "Repair final-review finding `source-references-limit-stricter-than-validate-complete` (design `source-reference-discovery-units`): count a repeated visit as one step when it expands a resolver or follows a reference and as one source when it is an inline token source, checking the two counts separately against `max_documents`. New test group `tests/source_reference_parity.rs`: multi-brand documents (description and `sets` overrides, with inline sources) are listed for every brand count `validate_complete` accepts, and the exact step boundary with separately counted sources. Update the `source_reference_bounds` expectations the new unit changes (limit-setter boundary, inline fan-out comment), docs/10, docs/11, docs/14 and the CHANGELOG.",
+          "criterionIds": [
+            "steps.reference-sites-discovery-units"
+          ],
+          "supportingCriterionIds": [
+            "steps.reference-sites-bounded"
+          ],
+          "designIds": [
+            "source-reference-discovery-units"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-source-reference-parity",
+            "check-source-reference-bounds"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dtcg_runtime/src/source_references.rs",
+              "symbol": "Walker::visit"
             }
           ]
         }
