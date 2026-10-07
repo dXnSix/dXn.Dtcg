@@ -206,7 +206,10 @@ See [Nested resolvers](06-resolvers-and-modifiers.md#nested-resolvers).
 
 - Groups merge member by member. Group `$type`, `$description`, `$deprecated` and `$extends` are
   replaced per key: a later source's value wins, and a property it omits keeps the earlier value.
-- Group `$extensions` objects merge recursively.
+- Group and root `$extensions` objects merge recursively: member by member at every depth, with a
+  later non-object value replacing the earlier one. This keeps pointers into an earlier source's
+  `$extensions` resolving (Resolver §6.3), and `$extends` follows the same rule. Token
+  `$extensions` are replaced with their token.
 - A token replaces any earlier token at its path whole; it keeps nothing of the earlier
   definition. Composite values are never merged.
 - A path that is a token in one source and a group in another is an error (`Token`).
@@ -244,6 +247,7 @@ These optional (MAY) features and neighbors of the specification are out of scop
 | `crates/dtcg_runtime/tests/type_determination.rs` | Effective types and reference type mismatches |
 | `crates/dtcg_runtime/tests/reference_positions.rs` | Where aliases may appear and which types they must target |
 | `crates/dtcg_runtime/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
+| `crates/dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge |
 | `crates/dtcg_runtime/tests/resolver_2025_10.rs`, `resolver_document_validation.rs` | Resolver version, allowed members, steps, overrides, set references |
 | `crates/dtcg_runtime/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
 | `crates/dtcg_runtime/tests/value_extensions.rs`, `rayx_export_types.rs` | Strict values and the opt-in RayX extensions |

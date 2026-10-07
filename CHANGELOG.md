@@ -99,7 +99,11 @@ for the conformance tiers and every implementation-defined choice.
   `ResolvedTokens::apply_affected` yields exactly the full resolution.
 - **Fingerprints** hash values with sorted object keys; equality ignores object member order.
 - **`source_references()`** walks reference objects that target resolvers through their override
-  members.
+  members and lists each authored site once however many reference objects reach it. Its work
+  is linear in the documents' size: the first walk of every location is free, targets without
+  source sites (token documents) are not walked, and walking a resolver or set again under
+  different overrides counts toward `max_documents` (failing with
+  `LimitExceeded { kind: "documents" }`).
 - **`#[non_exhaustive]`** on `DtcgError`, `ValueValidationError`, `DtcgDiagnosticCode`,
   `RuntimeLimits`, `ResolvedToken`, `ModifierAxis`, `DocumentRequest`, `ResolvedGroup`,
   `RuntimeOptions`, `ValueExtensions` and `TypedValue`.

@@ -67,6 +67,18 @@ are never requested. Until the target is loaded, sources written in the referenc
 [structure rules](06-resolvers-and-modifiers.md#resolver-structure) as for `resolve`, otherwise it
 fails with `InvalidDocument`.
 
+Each site is listed once, by where its `$ref` is written, however many reference objects reach it.
+The first walk of every authored location is free, so the work grows linearly with the documents,
+dormant sets and contexts included. A target that holds no source site, such as a token document,
+is not walked at all, and reference objects that reach the same target with the same overrides
+share one walk. A resolver or set reached again under different overrides (even a different
+`description`) is walked again, since overrides can change what it reaches, and every visit and
+step of such a repeated walk counts toward `max_documents`; exceeding it fails with
+`LimitExceeded { kind: "documents" }`. Because the walk also covers dormant definitions, which
+discovery never expands, a document that `resolve` accepts can exceed the limit here when many
+differently overridden reference objects reach one large resolver; raise `max_documents` for such
+documents.
+
 Each `SourceReference` has an `origin()` that points at the `$ref` string itself, and a
 `reference()`, the resolved `DocumentReference` (target id, fragment and the original text). Local
 references such as `#/sets/shared` are included; their target is the containing document.
@@ -340,5 +352,7 @@ assert!(modifier_contexts(&id, &json!({ "contexts": {} })).is_err());
   [Document loading](07-document-loading.md).
 - **Same limits.** `RuntimeLimits` applies, including the count of expansion steps. Preview
   occurrences count toward `max_documents` together with the root's sources.
+  `source_references` counts its repeated walks instead, as described
+  [above](#listing-reference-sites-source_references).
 - **Same errors.** Structural errors are `DtcgError`s. Previews also report value errors, since
   they resolve.

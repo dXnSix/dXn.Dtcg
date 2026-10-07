@@ -287,6 +287,12 @@ fn collision(path: &str, token: &ResourceId, group: &ResourceId) -> DtcgError {
 
 /// Merges `source` into `target`: objects member by member, recursively; any
 /// other value replaces the target.
+///
+/// Group and root `$extensions` merge this way across sources and through
+/// `$extends`, unlike other group properties, which replace per key: a pointer
+/// an earlier source declares into `#/…/$extensions/…` keeps resolving when a
+/// later source adds other members, while the later source still wins at every
+/// location it sets. Token `$extensions` are not merged; tokens replace whole.
 fn merge_extensions(target: &mut Value, source: &Value) {
     match (target.as_object_mut(), source.as_object()) {
         (Some(target), Some(source)) => {

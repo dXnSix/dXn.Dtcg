@@ -297,6 +297,8 @@ behavior change gets a new group.
 | `dtcg_runtime/tests/resource_id_adversarial.rs`, `resource_id_drive_prefix.rs`, `resource_id_portability.rs` | Resource id normalization and rejection: fragments, `:`, non-portable segments |
 | `dtcg_runtime/tests/incremental_resolution.rs`, `incremental_consistency.rs` | Affected resolution, rollback, and that every patched snapshot equals a full resolution |
 | `dtcg_runtime/tests/source_inspection.rs` | Inspection, previews, reference sites, shared limits, definition helpers |
+| `dtcg_runtime/tests/source_reference_bounds.rs` | `source_references` lists each site once, walks in linear time and counts repeated walks against `max_documents` |
+| `dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge across sources and `$extends` |
 | `dtcg_runtime/tests/derive_projection.rs` | Derive attributes through the runtime crate |
 | `dtcg_runtime/tests/diagnostics.rs` | Feature gating and redaction of diagnostics |
 | `dtcg_runtime_derive/tests/derive_projection.rs`, `derive_shapes.rs` | Narrow projection and derive shapes with stable component metadata |

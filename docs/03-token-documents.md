@@ -140,8 +140,12 @@ structure**, and then reads that structure as if it were a single document:
 
 - **Groups merge** member by member. A group that two sources define keeps the members of both.
 - **Group properties** (`$type`, `$description`, `$deprecated`, `$extends`) replace per key: a later
-  source's value wins, and a key a later source omits keeps the earlier value. Group `$extensions`
-  objects merge recursively.
+  source's value wins, and a key a later source omits keeps the earlier value.
+- **Group and root `$extensions` merge recursively.** Objects merge member by member at every
+  depth, and at any member path a later non-object value (or a non-object meeting an object)
+  replaces the earlier one: `{"vendor":{"a":1,"b":1}}` followed by `{"vendor":{"b":2}}` gives
+  `{"vendor":{"a":1,"b":2}}`. A pointer into an earlier source's `$extensions` therefore keeps
+  resolving when a later source adds other members. `$extends` applies the same rule.
 - **Tokens are replaced whole.** A later definition of a token path keeps nothing of the earlier
   one: not its value, own type, description, deprecation or extensions.
 - **A path is either a token or a group.** A path that is a token in one source and a group in

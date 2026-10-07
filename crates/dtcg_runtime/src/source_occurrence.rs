@@ -66,6 +66,16 @@ impl SourceOccurrence {
         let value = walk(&self.value, &parts)
             .cloned()
             .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
+        Ok(Self {
+            resource: self.resource.clone(),
+            value,
+            origin: self.selected_origin(&parts),
+            member_origins: BTreeMap::new(),
+        })
+    }
+
+    /// Where the value `select` returns for these pointer parts is written.
+    pub(crate) fn selected_origin(&self, parts: &[String]) -> SourceOrigin {
         let mut origin = self.origin.clone();
         for (index, name) in parts.iter().enumerate() {
             if index == 0 {
@@ -73,12 +83,7 @@ impl SourceOccurrence {
             }
             origin = origin.child(name);
         }
-        Ok(Self {
-            resource: self.resource.clone(),
-            value,
-            origin,
-            member_origins: BTreeMap::new(),
-        })
+        origin
     }
 
     pub(crate) fn overlay(mut self, reference: &Self) -> Result<Self, DtcgError> {
