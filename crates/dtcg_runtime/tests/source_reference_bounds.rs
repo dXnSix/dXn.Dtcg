@@ -115,18 +115,17 @@ fn a_large_fan_out_fails_with_the_documents_limit_quickly() {
 #[test]
 fn the_limit_setter_bounds_the_walk() {
     // The first reference object walks the nested resolver for free. Each of
-    // the other three walks it again under its own `description` override:
-    // seven repeated visits (the loaded target, the resolver, its set, its
-    // resolution step and its three local references, whose token targets
-    // lead nowhere) producing six steps, 13 each and 39 in total.
-    let at_limit = runtime(RuntimeLimits::default().with_max_documents(39), 4, 3);
+    // the other three walks it again under its own `description` override,
+    // counted in discovery's units: one resolver expansion and three followed
+    // local references, 4 each and 12 in total.
+    let at_limit = runtime(RuntimeLimits::default().with_max_documents(12), 4, 3);
     assert_eq!(sites(&at_limit).len(), 7);
-    let below = runtime(RuntimeLimits::default().with_max_documents(38), 4, 3);
+    let below = runtime(RuntimeLimits::default().with_max_documents(11), 4, 3);
     assert!(matches!(
         below.source_references(),
         Err(DtcgError::LimitExceeded {
             kind: "documents",
-            limit: 38
+            limit: 11
         })
     ));
 }
@@ -205,7 +204,9 @@ fn repeated_references_without_overrides_are_walked_once() {
 
 #[test]
 fn overridden_references_to_a_large_inline_resolver_reach_the_limit_quickly() {
-    let sources: Vec<Value> = (0..100)
+    // The second, overridden copy walks the 2,000 inline sources again, and
+    // repeated sources count like discovery's collected sources.
+    let sources: Vec<Value> = (0..300)
         .map(|i| json!({"$ref": "nested.json", "description": format!("copy {i}")}))
         .collect();
     let mut runtime = DtcgRuntime::with_limits(RuntimeLimits::default());

@@ -25,9 +25,13 @@ use crate::{
 /// Each authored site is listed once. The first walk of every authored
 /// location is free, so the work is linear in the documents' size. A location
 /// reached again through another reference object or resolver is walked again,
-/// since overrides may change what it reaches, and every step such a repeated
-/// walk takes counts toward `max_documents`. A reference target that holds no
-/// source site, such as a token document, is never copied.
+/// since overrides may change what it reaches. Such a repeated walk counts in
+/// discovery's units toward `max_documents`, with the same two separate
+/// counts: steps (each resolver it expands and reference it follows) and
+/// sources (each inline token source), so a document discovery accepts is
+/// never rejected here except through definitions discovery does not expand. A
+/// reference target that holds no source site, such as a token document, is
+/// never copied.
 pub(crate) fn inspect(
     catalog: &DocumentCatalog,
     root: &ResourceId,
@@ -41,6 +45,7 @@ pub(crate) fn inspect(
         visited: BTreeSet::new(),
         walked: BTreeSet::new(),
         repeated_steps: 0,
+        repeated_sources: 0,
         sites: BTreeSet::new(),
         references: Vec::new(),
     };
@@ -113,9 +118,12 @@ struct Walker<'a> {
     visited: BTreeSet<String>,
     /// Authored locations walked at least once, with their position.
     walked: BTreeSet<String>,
-    /// Steps taken by walks of an already walked location, counted against
-    /// `max_documents`.
+    /// Resolver expansions and followed references of walks of an already
+    /// walked location, counted against `max_documents`.
     repeated_steps: usize,
+    /// Inline token sources of walks of an already walked location, counted
+    /// separately against `max_documents`.
+    repeated_sources: usize,
     /// Where each listed `$ref` is written, so a site reached through several
     /// reference objects is listed once.
     sites: BTreeSet<(Option<ResourceId>, String)>,
@@ -142,17 +150,32 @@ impl Walker<'_> {
         let repeated = !self
             .walked
             .insert(format!("{:?}|{:?}", occurrence.origin, item.position));
-        let children = self.expand(item)?;
         if repeated {
-            self.repeated_steps += 1 + children.len();
-            if self.repeated_steps > self.limits.max_documents {
-                return Err(DtcgError::LimitExceeded {
-                    kind: "documents",
-                    limit: self.limits.max_documents,
-                });
+            // What discovery counts: steps (expanding a resolver, following a
+            // reference) and, separately, collected token sources.
+            let count = match item.position {
+                Position::Resolver if is_resolver(&occurrence.value) => {
+                    Some(&mut self.repeated_steps)
+                }
+                Position::Source if occurrence.value.get("$ref").is_some() => {
+                    Some(&mut self.repeated_steps)
+                }
+                Position::Source if !is_resolver(&occurrence.value) => {
+                    Some(&mut self.repeated_sources)
+                }
+                _ => None,
+            };
+            if let Some(count) = count {
+                *count += 1;
+                if *count > self.limits.max_documents {
+                    return Err(DtcgError::LimitExceeded {
+                        kind: "documents",
+                        limit: self.limits.max_documents,
+                    });
+                }
             }
         }
-        Ok(children)
+        self.expand(item)
     }
 
     fn expand(&mut self, item: Item) -> Result<Vec<Item>, DtcgError> {

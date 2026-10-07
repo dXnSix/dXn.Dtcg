@@ -298,6 +298,7 @@ behavior change gets a new group.
 | `dtcg_runtime/tests/incremental_resolution.rs`, `incremental_consistency.rs` | Affected resolution, rollback, and that every patched snapshot equals a full resolution |
 | `dtcg_runtime/tests/source_inspection.rs` | Inspection, previews, reference sites, shared limits, definition helpers |
 | `dtcg_runtime/tests/source_reference_bounds.rs` | `source_references` lists each site once, walks in linear time and counts repeated walks against `max_documents` |
+| `dtcg_runtime/tests/source_reference_parity.rs` | `source_references` counts repeated walks in discovery's units and lists what `validate_complete` accepts |
 | `dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge across sources and `$extends` |
 | `dtcg_runtime/tests/derive_projection.rs` | Derive attributes through the runtime crate |
 | `dtcg_runtime/tests/diagnostics.rs` | Feature gating and redaction of diagnostics |

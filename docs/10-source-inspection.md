@@ -72,12 +72,12 @@ The first walk of every authored location is free, so the work grows linearly wi
 dormant sets and contexts included. A target that holds no source site, such as a token document,
 is not walked at all, and reference objects that reach the same target with the same overrides
 share one walk. A resolver or set reached again under different overrides (even a different
-`description`) is walked again, since overrides can change what it reaches, and every visit and
-step of such a repeated walk counts toward `max_documents`; exceeding it fails with
-`LimitExceeded { kind: "documents" }`. Because the walk also covers dormant definitions, which
-discovery never expands, a document that `resolve` accepts can exceed the limit here when many
-differently overridden reference objects reach one large resolver; raise `max_documents` for such
-documents.
+`description`) is walked again, since overrides can change what it reaches. Such repeated walks
+count toward `max_documents` in discovery's units, with discovery's two separate counts: steps
+(each resolver expanded and each reference followed) and sources (each inline token source).
+Exceeding either fails with `LimitExceeded { kind: "documents" }`. A document that
+`validate_complete` accepts is therefore listed too, unless its repeated walks pass through dormant
+definitions, which discovery never expands; raise `max_documents` for such documents.
 
 Each `SourceReference` has an `origin()` that points at the `$ref` string itself, and a
 `reference()`, the resolved `DocumentReference` (target id, fragment and the original text). Local
