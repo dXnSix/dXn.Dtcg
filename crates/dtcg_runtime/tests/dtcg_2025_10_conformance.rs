@@ -380,8 +380,14 @@ fn group_extends_accepts_json_pointers_and_reports_exact_errors() {
     .resolve(&[])
     .unwrap_err();
     match missing {
-        DtcgError::Projection { path, message } => {
-            assert_eq!(path, "missing");
+        DtcgError::UnresolvedReference {
+            path,
+            target,
+            message,
+            ..
+        } => {
+            assert_eq!(path, "derived");
+            assert_eq!(target, "#/missing");
             assert_eq!(message, "extended group was not found");
         }
         other => panic!("expected a missing-extension error, got {other:?}"),

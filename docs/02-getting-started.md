@@ -85,16 +85,38 @@ Each `ResolvedToken` carries:
 | `token_type` | The effective DTCG type. Always `Some` for a resolved token. |
 | `authored_value` | The `$value` as written, aliases included |
 | `value` | The value after every alias and reference is resolved |
+| `description` | The token's own `$description`, if any |
+| `deprecated` | A `Deprecation`: the token's own `$deprecated`, or the nearest group's |
 | `extensions` | The token's `$extensions` object, or `Null` |
 | `source` | The resource id of the document that supplied the winning definition |
 
 The `button` tokens have no `$type` of their own. A token whose whole value is an alias takes the
-type of its target.
+type of its target. `token.typed(&runtime.options().extensions)` converts a value into a typed
+Rust model such as `values::Dimension`; see [Value types](05-value-types.md#reading-values-in-rust).
+
+Validation is strict DTCG 2025.10 by default. RayX applications, which use a dimension
+typography `lineHeight` and the `dev.rayx.blur` type, opt in to those extensions when they create
+the runtime:
+
+```rust
+use dtcg_runtime::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
+
+fn main() -> Result<(), DtcgError> {
+    let runtime = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        r#"{ "frost": { "$type": "dev.rayx.blur",
+             "$value": { "kind": "layer", "radius": { "value": 8, "unit": "px" } } } }"#,
+        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+    )?;
+    assert!(runtime.resolve(&[])?.is_ready());
+    Ok(())
+}
+```
 
 ## Step 2: Combine files with a resolver
 
 Real design systems split tokens across files and add variants. A *resolver* document lists the
-sources and the order to stack them in. Here the root is a resolver that references two token
+sources and the order to merge them in. Here the root is a resolver that references two token
 files, and the `theme` modifier switches a dark override in and out.
 
 ```rust
@@ -132,7 +154,6 @@ const FOUNDATION: &str = r##"{
 
 const DARK: &str = r##"{
   "color": {
-    "$type": "color",
     "background": { "$value": "{palette.gray900}" },
     "text": { "$value": "{palette.white}" }
   }
@@ -155,15 +176,19 @@ fn main() -> Result<(), DtcgError> {
     assert_eq!(background(&dark), 0.07);
 
     // The dark definition replaced the whole token, and records where it came from.
-    assert_eq!(dark.get("color.background").unwrap().source.as_str(), "tokens/dark.json");
+    let background = dark.get("color.background").unwrap();
+    assert_eq!(background.source.as_str(), "tokens/dark.json");
+    assert_eq!(background.token_type.as_deref(), Some("color"));
     Ok(())
 }
 ```
 
-Note that `dark.json` repeats `"$type": "color"` on its `color` group. An overriding token replaces
-the earlier token completely, type included, so it must carry its own type: on the token, on a
-group in the same file, or by being a whole-value alias. See
-[overlay semantics](06-resolvers-and-modifiers.md#overlay-semantics).
+All sources of a selection merge into one document: groups merge member by member, and a later
+token replaces an earlier token with the same path. That is why `dark.json` does not repeat
+`"$type": "color"`: its `color` group is the same group as in `foundation.json`, so the override
+inherits the type declared there. See
+[Token documents](03-token-documents.md#several-sources-one-merged-document) and
+[Resolvers and modifiers](06-resolvers-and-modifiers.md).
 
 ## Step 3: Load documents on demand
 
@@ -317,9 +342,41 @@ fn main() -> Result<(), DtcgError> {
 
     let tokens = runtime.resolve(&[("density", "compact")])?.ready().unwrap();
     assert_eq!(tokens.get("gap").unwrap().value["value"], 8);
+
+    // Names match case-insensitively; normalization returns the declared spelling.
+    let selection = runtime.normalize_selection(&[("Density", "COMPACT")])?.ready().unwrap();
+    assert_eq!(selection[1], ("density".to_owned(), "compact".to_owned()));
     Ok(())
 }
 ```
+
+A few more details:
+
+- Modifier and context names are matched exactly first, then case-insensitively, as Resolver §5.1
+  recommends. A name that matches several declared names case-insensitively is an error.
+- An input is valid when any resolver the selection reaches declares it, the root or a nested
+  resolver. Each resolver uses the inputs that name its own modifiers and its defaults for the rest.
+- Inputs that arrive as JSON, such as `{"theme": "dark"}` from a settings file or a URL handler,
+  convert with `selection_from_json`, and `selection_refs` borrows the owned pairs as the
+  `&[(&str, &str)]` every method takes:
+
+```rust
+use dtcg_runtime::{DtcgError, selection_from_json, selection_refs};
+
+fn main() -> Result<(), DtcgError> {
+    let inputs = selection_from_json(&serde_json::json!({ "theme": "dark", "density": "compact" }))?;
+    assert_eq!(selection_refs(&inputs), [("theme", "dark"), ("density", "compact")]);
+
+    // Anything but an object of strings is `DtcgError::InvalidInput`.
+    assert!(matches!(
+        selection_from_json(&serde_json::json!({ "theme": 1 })),
+        Err(DtcgError::InvalidInput { .. })
+    ));
+    Ok(())
+}
+```
+
+[Resolvers and modifiers](06-resolvers-and-modifiers.md) has the full selection rules.
 
 ## Step 5: Project tokens into structs
 
@@ -363,6 +420,8 @@ struct CardTokens {
     radius: Px,
     #[dtcg(nested, path = "title")]
     title: Typography,
+    /// Optional: `None` when the document does not define `card.border`.
+    border: Option<Px>,
 }
 
 const TOKENS: &str = r##"{
@@ -387,6 +446,7 @@ fn main() -> Result<(), DtcgError> {
             padding: Px(16.0),
             radius: Px(12.0),
             title: Typography { family: "Inter".into(), weight: 650.0 },
+            border: None,
         }
     );
     Ok(())
@@ -397,7 +457,11 @@ fn main() -> Result<(), DtcgError> {
   not case-converted, so use `rename` or `path` for camelCase tokens.
 - `#[dtcg(root = "card")]` prefixes every path in the struct.
 - `#[dtcg(nested, path = "title")]` projects another `DtcgTokens` struct below `card.title`.
+- An `Option<T>` field is `None` when its token is missing; any other field makes a missing token
+  an error.
 - `card.shadow` is not requested, and that is fine.
+- The typed models in `dtcg_runtime::values` (`Dimension`, `Color`, `Typography` and the rest)
+  implement `FromDtcgValue`, so they can be fields directly.
 
 `DtcgRuntime::project` resolves and projects in one call. If you project several structs from the
 same selection, resolve once and call `T::project(&tokens, runtime.registry())` for each.
@@ -436,8 +500,9 @@ fn main() {
 ```
 
 Resolution stops at the first error, here `spacing.md`. With that fixed, the next run would report
-the dangling alias in `gap` as ``projection `spacing.lg`: missing alias target``. The full list of
-errors is in [Errors, limits and diagnostics](11-errors-limits-and-diagnostics.md).
+the dangling alias in `gap` as `DtcgError::UnresolvedReference`:
+``token `gap` in `broken.json`: unresolved reference `spacing.lg`: missing alias target``. The full
+list of errors is in [Errors, limits and diagnostics](11-errors-limits-and-diagnostics.md).
 
 ## Where to go next
 

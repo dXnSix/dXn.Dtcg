@@ -1,0 +1,5 @@
+error: unknown `dtcg` struct attribute `roo`; expected one of root, id
+ --> tests/ui/struct_unknown_key.rs:4:8
+  |
+4 | #[dtcg(roo = "x")]
+  |        ^^^

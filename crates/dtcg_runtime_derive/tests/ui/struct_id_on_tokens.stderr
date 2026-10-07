@@ -1,0 +1,5 @@
+error: `id` is only supported by `#[derive(DtcgComponentTokens)]`
+ --> tests/ui/struct_id_on_tokens.rs:4:8
+  |
+4 | #[dtcg(id = "button")]
+  |        ^^

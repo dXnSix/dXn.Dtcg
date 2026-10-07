@@ -1,0 +1,5 @@
+error: `nested` is a field attribute and cannot be used on the struct
+ --> tests/ui/struct_nested_flag.rs:4:8
+  |
+4 | #[dtcg(nested)]
+  |        ^^^^^^

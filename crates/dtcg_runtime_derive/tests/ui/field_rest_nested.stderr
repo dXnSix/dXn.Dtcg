@@ -1,0 +1,5 @@
+error: `rest` cannot be combined with `nested`
+ --> tests/ui/field_rest_nested.rs:5:18
+  |
+5 |     #[dtcg(rest, nested)]
+  |                  ^^^^^^

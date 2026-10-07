@@ -7,7 +7,7 @@ fn aliases_observe_the_final_whole_token_overlay() {
       "version":"2025.10",
       "resolutionOrder":[{"$ref":"#/sets/base"},{"$ref":"#/modifiers/theme"}],
       "sets":{"base":{"sources":[{"$ref":"base.json"}]}},
-      "modifiers":{"theme":{"default":"dark","contexts":{"dark":[{"$ref":"dark.json"}]}}}
+      "modifiers":{"theme":{"default":"dark","contexts":{"dark":[{"$ref":"dark.json"}],"light":[]}}}
     }"##;
     let mut runtime = DtcgRuntime::from_json("root.json", root).unwrap();
     runtime

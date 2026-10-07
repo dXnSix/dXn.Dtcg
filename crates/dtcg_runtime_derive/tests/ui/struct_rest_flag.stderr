@@ -1,0 +1,5 @@
+error: `rest` is a field attribute and cannot be used on the struct
+ --> tests/ui/struct_rest_flag.rs:4:8
+  |
+4 | #[dtcg(rest)]
+  |        ^^^^

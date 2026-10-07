@@ -143,11 +143,12 @@ fn lazy_catalog_multi_level_cycles_and_limits_terminate_deterministically() {
     cycle.provide_json("nested.json", root).unwrap();
     assert!(cycle.resolve(&[]).is_err());
 
-    let limited = DtcgRuntime::with_limits(RuntimeLimits {
-        max_documents: 4,
-        max_reference_depth: 0,
-        max_alias_depth: 4,
-    });
+    let limited = DtcgRuntime::with_limits(
+        RuntimeLimits::default()
+            .with_max_documents(4)
+            .with_max_reference_depth(0)
+            .with_max_alias_depth(4),
+    );
     let mut limited = limited;
     limited.provide_json("root.json", root).unwrap();
     limited.set_root("root.json").unwrap();

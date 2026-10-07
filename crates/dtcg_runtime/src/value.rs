@@ -2,8 +2,11 @@ use std::fmt;
 
 use serde_json::{Map, Value};
 
+use crate::ValueExtensions;
+
 /// A final DTCG 2025.10 token-value validation failure.
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum ValueValidationError {
     UnsupportedType(String),
     InvalidValue(String),
@@ -26,9 +29,20 @@ impl fmt::Display for ValueValidationError {
 
 impl std::error::Error for ValueValidationError {}
 
-/// Validates a resolved value against one of the 13 types in DTCG 2025.10 or the RayX
-/// extension type `dev.rayx.blur`.
+/// Validates a resolved value against one of the 13 types in DTCG 2025.10,
+/// strictly: no value extension is accepted.
 pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValidationError> {
+    validate_value_with(token_type, value, &ValueExtensions::default())
+}
+
+/// Validates a resolved value against one of the 13 types in DTCG 2025.10 and
+/// the value shapes `extensions` enables: a `dimension` typography
+/// `lineHeight`, and the RayX extension type `dev.rayx.blur`.
+pub fn validate_value_with(
+    token_type: &str,
+    value: &Value,
+    extensions: &ValueExtensions,
+) -> Result<(), ValueValidationError> {
     let valid = match token_type {
         "color" => color(value),
         "dimension" => dimension(value),
@@ -42,8 +56,8 @@ pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValida
         "transition" => transition(value),
         "shadow" => shadow(value),
         "gradient" => gradient(value),
-        "typography" => typography(value),
-        BLUR_TYPE => blur(value),
+        "typography" => typography(value, extensions.line_height_dimension),
+        BLUR_TYPE if extensions.rayx_blur => blur(value),
         unsupported => {
             return Err(ValueValidationError::UnsupportedType(unsupported.into()));
         }
@@ -263,9 +277,10 @@ fn gradient(value: &Value) -> bool {
     })
 }
 
-/// DTCG 2025.10 typography. `lineHeight` is the spec's unitless multiplier or, as a RayX
-/// extension, a `dimension`: design-system line heights are px tokens that text styles alias.
-fn typography(value: &Value) -> bool {
+/// DTCG 2025.10 typography. `lineHeight` is the spec's unitless multiplier or, with the
+/// `line_height_dimension` extension, a `dimension`: RayX design-system line heights are px
+/// tokens that text styles alias.
+fn typography(value: &Value, line_height_dimension: bool) -> bool {
     exact_object(
         value,
         &[
@@ -282,11 +297,13 @@ fn typography(value: &Value) -> bool {
             && dimension(&object["fontSize"])
             && font_weight(&object["fontWeight"])
             && dimension(&object["letterSpacing"])
-            && (object["lineHeight"].is_number() || dimension(&object["lineHeight"]))
+            && (object["lineHeight"].is_number()
+                || (line_height_dimension && dimension(&object["lineHeight"])))
     })
 }
 
-/// RayX extension type for Figma layer/background blur effect styles.
+/// RayX extension type for Figma layer/background blur effect styles, accepted only
+/// with [`ValueExtensions::rayx_blur`].
 pub const BLUR_TYPE: &str = "dev.rayx.blur";
 
 /// `{ "kind": "layer" | "background", "radius": <dimension> }`.

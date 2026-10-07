@@ -8,12 +8,12 @@ introduction and quick examples, start with the [project README](../README.md).
 
 | # | Chapter | What it covers |
 |---|---|---|
-| 1 | [Overview](01-overview.md) | What the runtime does, DTCG concepts, the resolution pipeline, design principles, platform support, glossary |
+| 1 | [Overview](01-overview.md) | What the runtime does, DTCG concepts, the resolution pipeline, design principles, platform support, the opt-in RayX conveniences, glossary |
 | 2 | [Getting started](02-getting-started.md) | A tutorial: from one token file to themed, typed tokens loaded on demand |
-| 3 | [Token documents](03-token-documents.md) | Groups, token paths, names, reserved properties, type inheritance, `$root`, `$extends`, metadata, ordering |
-| 4 | [Aliases and references](04-aliases-and-references.md) | `{curly.brace}` aliases, JSON Pointer `$ref`s, type inheritance through aliases, cycles |
-| 5 | [Value types](05-value-types.md) | The 13 DTCG types, the exact validation rules, RayX extension types, reading values in Rust |
-| 6 | [Resolvers and modifiers](06-resolvers-and-modifiers.md) | Resolver documents, sets, modifiers, sources, overlay, selections, nested resolvers |
+| 3 | [Token documents](03-token-documents.md) | Structure rules, token paths, names, reserved properties, `$schema`, the merged document, type inheritance, `$root`, `$extends`, metadata and groups, ordering, export with `to_document` |
+| 4 | [Aliases and references](04-aliases-and-references.md) | `{curly.brace}` aliases and where they may appear, type determination and reference type checks, JSON Pointer `$ref`s and their syntax, cycles and limits |
+| 5 | [Value types](05-value-types.md) | The 13 DTCG types, the exact validation rules, strict defaults and the opt-in RayX extensions, the typed `values` module |
+| 6 | [Resolvers and modifiers](06-resolvers-and-modifiers.md) | Resolver documents, sets, modifiers, sources, merging sources, selections and inputs, nested resolvers |
 | 7 | [Document loading](07-document-loading.md) | The catalog, logical resource ids, the request/provide protocol, loading strategies, envelopes, path safety |
 | 8 | [Typed projection](08-typed-projection.md) | `#[derive(DtcgTokens)]`, attributes, `FromDtcgValue`, custom conversions, component tokens |
 | 9 | [Incremental resolution](09-incremental-resolution.md) | Fingerprints, catalog revisions, re-resolving only affected tokens |

@@ -1,0 +1,5 @@
+error: `nested` and `with` cannot be combined: a nested field projects a struct
+ --> tests/ui/field_nested_with.rs:5:20
+  |
+5 |     #[dtcg(nested, with = "convert")]
+  |                    ^^^^

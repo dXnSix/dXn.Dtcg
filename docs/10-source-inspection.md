@@ -22,7 +22,8 @@ are flattened and stacked. Each is a `SourceOccurrence`:
 
 | Method | Returns |
 |---|---|
-| `value()` | The source's authored JSON, before flattening: empty groups, duplicate definitions and metadata included, with the overrides of reference objects applied |
+| `resource()` | The document that holds the source, which local and relative references inside it resolve against. A supplied inline source reports the root's id. |
+| `value()` | The source's authored JSON, before merging: empty groups, duplicate definitions and metadata included, with the overrides of reference objects applied |
 | `origin()` | Where that JSON lives, as a `SourceOrigin` |
 | `member_origins()` | For each top-level member that a reference object replaced, the `SourceOrigin` of the object that supplied it. Members not listed belong to `origin()`. |
 
@@ -39,7 +40,8 @@ Origins point at exact locations, so an editor can jump to them or rewrite them.
 
 - A **dormant** source is in a set or context that the current selection does not apply: an
   unselected context, or a set nothing references.
-- A **shadowed** occurrence is one whose tokens are all overridden by later sources.
+- A **shadowed** occurrence is one whose tokens are all replaced by later sources in the
+  [merged structure](06-resolvers-and-modifiers.md#overlay-semantics).
 
 `resolve` gives no view of either. The APIs below expose both.
 
@@ -52,9 +54,30 @@ Origins point at exact locations, so an editor can jump to them or rewrite them.
 - in inline `resolutionOrder` steps, in nested resolvers, and in source arrays inside reference
   objects.
 
-It does **not** list token aliases, token-level `$ref`s, `$ref`s inside `$extensions` or other
-unknown members, or the `{"$ref": "#/sets/…"}` steps of `resolutionOrder`, which are structure, not
-sources.
+It does **not** list token aliases, token-level `$ref`s, `$ref`s inside `$extensions`, JSON under
+`$defs` that no source references, or the `{"$ref": "#/sets/…"}` steps of `resolutionOrder`, which
+are structure, not sources.
+
+A reference object is walked the way discovery applies it: as its target with the object's other
+members as [overrides](06-resolvers-and-modifiers.md#reference-objects-with-overrides). When the
+target is a resolver, the `sets` and `modifiers` of an override are walked and listed, and the
+definitions they replace are not visited, so documents reachable only through replaced definitions
+are never requested. Until the target is loaded, sources written in the reference object's own
+`sources` or `contexts` members are still listed. Every resolver it reaches must pass the same
+[structure rules](06-resolvers-and-modifiers.md#resolver-structure) as for `resolve`, otherwise it
+fails with `InvalidDocument`.
+
+Each site is listed once, by where its `$ref` is written, however many reference objects reach it.
+The first walk of every authored location is free, so the work grows linearly with the documents,
+dormant sets and contexts included. A target that holds no source site, such as a token document,
+is not walked at all, and reference objects that reach the same target with the same overrides
+share one walk. A resolver or set reached again under different overrides (even a different
+`description`) is walked again, since overrides can change what it reaches. Such repeated walks
+count toward `max_documents` in discovery's units, with discovery's two separate counts: steps
+(each resolver expanded and each reference followed) and sources (each inline token source).
+Exceeding either fails with `LimitExceeded { kind: "documents" }`. A document that
+`validate_complete` accepts is therefore listed too, unless its repeated walks pass through dormant
+definitions, which discovery never expands; raise `max_documents` for such documents.
 
 Each `SourceReference` has an `origin()` that points at the `$ref` string itself, and a
 `reference()`, the resolved `DocumentReference` (target id, fragment and the original text). Local
@@ -74,13 +97,15 @@ fn main() -> Result<(), DtcgError> {
           "sets": {
             "base": { "sources": [{ "$ref": "base.json" }, { "$ref": "#/sets/shared" }] },
             "shared": { "sources": [{ "$ref": "shared/palette.json#/colors" }] },
-            "legacy": { "sources": [{ "$ref": "legacy.json" }] }
+            "legacy": {
+              "sources": [{ "$ref": "legacy.json" }],
+              "$extensions": { "com.example": { "$ref": "not-a-source.json" } }
+            }
           },
           "modifiers": { "theme": { "default": "light", "contexts": {
             "light": [], "dark": [{ "$ref": "dark.json" }]
           } } },
-          "resolutionOrder": [{ "$ref": "#/sets/base" }, { "$ref": "#/modifiers/theme" }],
-          "$extensions": { "com.example": { "$ref": "not-a-source.json" } }
+          "resolutionOrder": [{ "$ref": "#/sets/base" }, { "$ref": "#/modifiers/theme" }]
         }"##,
     )?;
 
@@ -135,7 +160,13 @@ expands it into its terminal occurrences, in order, **in the root resolver's con
 
 - local references (`#/sets/…`, `#/$defs/…`) resolve against the root document;
 - relative paths resolve against the root's resource id;
-- the selection picks contexts in any resolver the source contains.
+- the selection picks contexts in any resolver the source contains, and in the root resolver.
+
+The selection follows the [input rules](06-resolvers-and-modifiers.md#selections): an input is
+valid when the supplied source, the root resolver or any resolver the root graph reaches declares
+it. The rest of the root graph is discovered only when an input names a modifier that neither the
+supplied source nor the root declares, so such an input can make the call return `Missing` for a
+nested resolver.
 
 Token values are not resolved, so a source with invalid values or dangling aliases still inspects
 fine. Structural problems, such as a malformed resolver or a forbidden reference, are errors.
@@ -198,15 +229,25 @@ edits a set or modifier definition, before saving it into the resolver.
 
 ## Previewing: `preview_source` and `preview_occurrence`
 
-- `preview_source(source, selection)` resolves the root for `selection`, then applies the
-  occurrences of `source` **last**, as if it were appended to the end of `resolutionOrder`, and
-  resolves aliases, types and validation as usual.
+- `preview_source(source, selection)` discovers the root's sources for `selection`, merges the
+  occurrences of `source` into the merged structure **last**, as if the source were appended to
+  the end of `resolutionOrder`, and resolves aliases, types and validation as usual. Like any later
+  source, a previewed token inherits its group's `$type` from earlier sources.
 - `preview_occurrence(occurrence, selection)` does the same with one occurrence from
   `inspect_source`. It is the way to look at a shadowed occurrence on its own, including one inside
   a nested resolver.
 
+Selections differ between the two:
+
+- `preview_source` accepts inputs that the root graph or the supplied source declares, so a draft
+  resolver can be previewed in any of its own contexts.
+- `preview_occurrence` applies the selection to the root graph only. An occurrence already
+  reflects the selection it was inspected with, so drop inputs that only a draft declares before
+  previewing: when the root graph declares modifiers, such an input is an `UnknownModifier` error.
+
 Neither touches the catalog or builds a synthetic resolver, so a preview can never affect normal
-resolution.
+resolution. A supplied inline source is not a document root, so a `$schema` member in it is an
+unknown reserved property.
 
 ```rust
 use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
@@ -217,7 +258,7 @@ fn main() -> Result<(), DtcgError> {
         "root.json",
         r##"{
           "version": "2025.10",
-          "sets": { "base": { "sources": [{ "gap": { "$type": "number", "$value": 8 } }] } },
+          "sets": { "base": { "sources": [{ "space": { "$type": "number", "gap": { "$value": 8 } } }] } },
           "resolutionOrder": [{ "$ref": "#/sets/base" }]
         }"##,
     )?;
@@ -233,33 +274,39 @@ fn main() -> Result<(), DtcgError> {
         "resolutionOrder": [{ "$ref": "#/modifiers/density" }]
     });
 
-    // Every context's documents are requested, relative to the root.
+    // Every context's documents are requested, relative to the root. The density files
+    // set only the value; `space.gap` keeps the `number` type of the root's group.
     let Resolution::Missing(requests) = runtime.validate_source(&draft)? else { unreachable!() };
     for request in &requests {
         let gap = if request.resource_id.as_str().ends_with("compact.json") { 4 } else { 16 };
         runtime.provide_requested_json(
             request,
-            format!(r#"{{ "gap": {{ "$type": "number", "$value": {gap} }} }}"#),
+            format!(r#"{{ "space": {{ "gap": {{ "$value": {gap} }} }} }}"#),
         )?;
     }
     assert!(runtime.validate_source(&draft)?.ready().is_some());
 
     let revision = runtime.catalog_revision();
     let preview = runtime.preview_source(&draft, &[])?.ready().unwrap();
-    assert_eq!(preview.get("gap").unwrap().value, 4); // the draft's default context, applied last
+    let gap = preview.get("space.gap").unwrap();
+    assert_eq!(gap.value, 4); // the draft's default context, merged last
+    assert_eq!(gap.token_type.as_deref(), Some("number"));
+
+    // A draft-only modifier can be selected, case-insensitively.
+    let spacious = runtime.preview_source(&draft, &[("Density", "SPACIOUS")])?.ready().unwrap();
+    assert_eq!(spacious.get("space.gap").unwrap().value, 16);
 
     // The catalog and the committed resolution are unchanged.
     assert_eq!(runtime.catalog_revision(), revision);
-    assert_eq!(runtime.resolve(&[])?.ready().unwrap().get("gap").unwrap().value, 8);
+    assert_eq!(runtime.resolve(&[])?.ready().unwrap().get("space.gap").unwrap().value, 8);
+
+    // An occurrence already reflects the selection it was inspected with.
+    let occurrences = runtime.inspect_source(&draft, &[("density", "spacious")])?.ready().unwrap();
+    let occurrence = runtime.preview_occurrence(&occurrences[0], &[])?.ready().unwrap();
+    assert_eq!(occurrence.get("space.gap").unwrap().value, 16);
     Ok(())
 }
 ```
-
-> **Selections are checked against the root too.** As with
-> [nested resolvers](06-resolvers-and-modifiers.md#nested-resolvers), the selection passed to
-> `inspect_source`, `preview_source` and `preview_occurrence` must name only modifiers the root
-> resolver declares. To preview a non-default context of a modifier that exists only in a draft,
-> give the draft that context as its `default`, or add the modifier to the root first.
 
 ## Resolver definition helpers
 
@@ -269,11 +316,13 @@ on resolver JSON directly:
 | Function | Checks | Returns |
 |---|---|---|
 | `set_sources(resource, &definition)` | `definition.sources` is an array | the sources as `&[Value]` |
-| `modifier_contexts(resource, &definition)` | the definition is an object; `contexts` is a non-empty object of arrays; `default`, if present, is a string naming a context | the contexts as `&Map<String, Value>` |
+| `modifier_contexts(resource, &definition)` | the definition is an object; `contexts` is an object of at least two arrays; `default`, if present, is a string naming a context | the contexts as `&Map<String, Value>` |
 
-Neither follows references or resolves anything. `modifier_contexts` does not require a `default`,
-which is optional in DTCG; an editor that wants every modifier to have one can enforce that itself.
-`resource` is used only in error messages.
+Neither follows references, checks the allowed members of the definition or resolves anything.
+`modifier_contexts` does not require a `default`, which is optional in DTCG; an editor that wants
+every modifier to have one can enforce that itself. `resource` is used only in error messages. Both
+apply the same rules the runtime applies to resolvers, so a definition they accept is accepted by
+`resolve` too, as long as its members are [allowed](06-resolvers-and-modifiers.md#resolver-structure).
 
 ```rust
 use dtcg_runtime::{ResourceId, modifier_contexts, set_sources};
@@ -287,17 +336,23 @@ assert!(set_sources(&id, &json!({ "sources": {} })).is_err());
 let theme = json!({ "default": "light", "contexts": { "light": [], "dark": [] } });
 let contexts = modifier_contexts(&id, &theme).unwrap();
 assert_eq!(contexts.keys().collect::<Vec<_>>(), ["light", "dark"]);
-assert!(modifier_contexts(&id, &json!({ "default": "sepia", "contexts": { "light": [] } })).is_err());
+assert!(modifier_contexts(&id, &json!({ "default": "sepia", "contexts": { "light": [], "dark": [] } })).is_err());
+assert!(modifier_contexts(&id, &json!({ "contexts": { "light": [] } })).is_err()); // one context
 assert!(modifier_contexts(&id, &json!({ "contexts": {} })).is_err());
 ```
 
 ## Behavior shared with `resolve`
 
-- **Same discovery.** References, fragments, overrides, nested resolvers and selections behave as in
+- **Same discovery.** References, fragments, step and reference overrides, resolver structure
+  rules, nested resolvers and selections behave as in
   [Resolvers and modifiers](06-resolvers-and-modifiers.md).
+- **Same merge.** Previews fold sources into one merged structure exactly as `resolve` does, with
+  the previewed occurrences last.
 - **Same document protocol.** Missing documents come back as `Resolution::Missing`; see
   [Document loading](07-document-loading.md).
-- **Same limits.** `RuntimeLimits` applies. Preview occurrences count toward `max_documents`
-  together with the root's sources.
+- **Same limits.** `RuntimeLimits` applies, including the count of expansion steps. Preview
+  occurrences count toward `max_documents` together with the root's sources.
+  `source_references` counts its repeated walks instead, as described
+  [above](#listing-reference-sites-source_references).
 - **Same errors.** Structural errors are `DtcgError`s. Previews also report value errors, since
   they resolve.

@@ -301,6 +301,11 @@
           "id": "merge.compatibility",
           "descriptionMarkdown": "`ResolvedTokens::iter()` order is unchanged: authored order, with each path at its last definition. `ResolvedToken::source` names the document of the winning token definition.\n\nThe existing test groups `alias_overlay`, `resolver_2025_10`, `dtcg_2025_10_conformance` and `source_inspection` keep passing, changed only where requirement `merge` intentionally alters an expectation. Previews (`preview_source`, `preview_occurrence`) merge the previewed occurrences last.",
           "verification": "automated"
+        },
+        {
+          "id": "merge.extensions-recursive",
+          "descriptionMarkdown": "Group and root `$extensions` objects merge recursively across sources: members merge member by member, and at any member path a later non-object value (or a non-object meeting an object) replaces the earlier one. This refines `merge.group-properties` for `$extensions`, because `merge.pointers` requires a pointer into `#/$extensions/…` declared by an earlier source to keep resolving when a later source adds other `$extensions` members. For example, `{\"vendor\":{\"a\":1,\"b\":1}}` followed by `{\"vendor\":{\"b\":2}}` yields `{\"vendor\":{\"a\":1,\"b\":2}}`. Tokens are still replaced whole, including their `$extensions`.",
+          "verification": "automated"
         }
       ]
     },
@@ -442,6 +447,16 @@
         {
           "id": "steps.reference-sites",
           "descriptionMarkdown": "`source_references()` lists every source `$ref` that discovery can use, including those inside the `sets`/`modifiers` override members of a reference object that targets a resolver. It never requests a document that is reachable only through a definition the override replaced.\n\nExample: for `{ \"$ref\": \"brand.resolver.json\", \"sets\": { \"base\": { \"sources\": [{ \"$ref\": \"override.json\" }] } } }`, the site for `override.json` is listed.",
+          "verification": "automated"
+        },
+        {
+          "id": "steps.reference-sites-bounded",
+          "descriptionMarkdown": "`source_references()` lists each authored `$ref` site once, however many reference objects reach it, and its work is linear in the size of the documents it reads, dormant sets and contexts included: the first walk of every authored location is free, a reference target holding no source site (an object that is neither a reference nor a resolver, such as a token document) is neither copied nor walked, reference objects that reach the same target with the same overrides share one walk, and every visit and step of a repeated walk (a location reached again under different overrides) counts toward `max_documents`, failing with `LimitExceeded { kind: \"documents\" }` when exceeded. A set with hundreds of plain `$ref` or inline sources, active or dormant, and thousands of differently overridden references to one large token document are listed without hitting the limit; a root whose set holds M reference objects to one nested resolver with N `$ref` or inline sources, differing only in a member such as `description`, fails with the documents limit at M = N = 400, as `validate_complete` does, without work quadratic in the document size.",
+          "verification": "automated"
+        },
+        {
+          "id": "steps.reference-sites-discovery-units",
+          "descriptionMarkdown": "Refines how `steps.reference-sites-bounded` counts repeated walks: a location `source_references()` reaches again under different overrides counts in discovery's units, with discovery's two separate counts against `max_documents`: steps (each resolver expanded and each reference followed) and sources (each inline token source), failing with `LimitExceeded { kind: \"documents\" }` when either is exceeded. Other visits of a repeated walk (definitions, resolver targets, token targets) do not count. As a result every document `validate_complete` accepts is listed unless its repeated walks pass through dormant definitions: a root `brand` modifier whose M contexts each reach one brand resolver with a different `description` or `sets` override is listed for every M that `validate_complete` accepts. The bounds of `steps.reference-sites-bounded` still hold (M = N = 400 fails with the documents limit, large inline fan-outs fail fast).",
           "verification": "automated"
         }
       ]

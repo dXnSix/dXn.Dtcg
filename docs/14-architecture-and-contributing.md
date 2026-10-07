@@ -23,35 +23,42 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 │   ├── dtcg_runtime/
 │   │   ├── src/                  the runtime (see the module map)
 │   │   ├── tests/                one integration-test group per feature
+│   │   │   └── fixtures/dtcg-test-suite/   the vendored official 2025.10 corpus (not packaged)
 │   │   └── benches/resolver.rs   timing baseline, written as a #[test]
 │   └── dtcg_runtime_derive/
 │       ├── src/lib.rs            the two derive macros
-│       └── tests/                derive shape and projection tests
-├── docs/                         this documentation
+│       └── tests/                derive shape, projection and hardening tests
+│           └── ui/               trybuild compile-fail cases with their .stderr snapshots
+├── docs/                         this documentation (compiled as doctests)
 ├── .github/workflows/ci.yml      CI
 ├── .agentx/                      AgentX repository memory: decisions and domain knowledge
 ├── AGENTS.md, CLAUDE.md          contributor guidance for coding agents
+├── CHANGELOG.md
 └── LICENSE-APACHE, LICENSE-MIT
 ```
 
 ## Module map
 
-All modules of `dtcg_runtime` are private; `lib.rs` re-exports the public items.
+All modules of `dtcg_runtime` are private except `values`; `lib.rs` re-exports the public items.
 
 | Module | Responsibility |
 |---|---|
-| `runtime.rs` | `DtcgRuntime`: owns the catalog, root, limits and registry; the public API |
+| `runtime.rs` | `DtcgRuntime`: owns the catalog, root, options and registry; the public API and its redacted `Debug` |
+| `options.rs` | `RuntimeOptions` and `ValueExtensions` |
 | `catalog.rs` | `DocumentCatalog`: id → `Arc<str>` map, JSON well-formedness check, atomic batches, revision |
-| `resource.rs` | `ResourceId` and `DocumentReference`: normalization and relative resolution |
-| `json_pointer.rs` | Parsing of `#/` JSON Pointers into unescaped segments |
-| `source_discovery.rs` | `Discovery`: expands resolvers into ordered terminal `SourceOccurrence`s, collects missing documents, enforces document and depth limits, detects resolver cycles |
-| `resolver_definition.rs` | Resolver structure: steps, local references, set and context source arrays, input validation; the public `set_sources` and `modifier_contexts` |
-| `selection.rs` | `ModifierAxis` listing and selection normalization |
-| `source_occurrence.rs` | `SourceOccurrence`: JSON nodes that carry their origin through `child`, `select` and `overlay` |
-| `source_origin.rs` | `SourceOrigin` |
+| `resource.rs` | `ResourceId` and `DocumentReference`: portable-id rules, normalization and relative resolution |
+| `json_pointer.rs` | The single RFC 6901 parser for resource fragments, value-level and token-level `$ref`s: percent-decoding, `~` unescaping, array indexes |
+| `resolver_definition.rs` | The single owner of resolver structure: allowed members, `resolutionOrder` and context-count rules, the effective definition of every step (with `$ref` overrides), declared modifiers; the public `set_sources` and `modifier_contexts` |
+| `selection.rs` | Resolver inputs: `ModifierAxis` listing, case-insensitive name matching, `selection_from_json`, `selection_refs` |
+| `source_discovery.rs` | `Discovery`: expands resolvers into ordered terminal `SourceOccurrence`s, chooses each modifier's context, records which inputs were used, collects missing documents, enforces the document and depth limits, detects resolver cycles |
+| `source_occurrence.rs`, `source_origin.rs` | `SourceOccurrence` (JSON nodes that carry their origin through `child`, `select` and `overlay`) and `SourceOrigin` |
 | `source_reference.rs`, `source_references.rs` | `SourceReference` and the walk over authored reference sites |
-| `resolver.rs` | Flattening, overlay order, alias and pointer resolution, effective types, fingerprints, affected resolution; also `Resolution`, `DocumentRequest`, `ResolvedToken(s)` and `RuntimeLimits` |
-| `value.rs` | `validate_value`, the per-type rules, `BLUR_TYPE` |
+| `flatten.rs` | Folds all active sources into one merged structure (per-key group properties, recursive `$extensions`, whole-token replacement, token/group collisions), validates token and group structure, expands `$extends`, flattens to dotted paths with inherited type and deprecation, fixes token order |
+| `token_resolution.rs` | Bounded resolution of aliases and JSON Pointers with one hop counter, value-node and value-depth budgets, type determination, value validation; the dependency collector for affected resolution |
+| `reference_positions.rs` | Where a curly-brace alias may appear inside a value, and which type it must target |
+| `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected` |
+| `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
+| `values.rs` | The public `values` module: typed models, `TypedValue`, `ResolvedToken::typed` and their `FromDtcgValue` implementations |
 | `dtcg_tokens.rs`, `dtcg_component_tokens.rs`, `from_dtcg_value.rs`, `type_registry.rs` | Projection traits, built-in conversions, `join_token_path` |
 | `envelope.rs` | `ResolverEnvelope` |
 | `local_reference.rs` | `LocalReferencePolicy` |
@@ -59,85 +66,104 @@ All modules of `dtcg_runtime` are private; `lib.rs` re-exports the public items.
 | `error.rs` | `DtcgError` |
 | `diagnostics/mod.rs` | `DtcgDiagnostic`, compiled only with the `diagnostics` feature |
 
-`dtcg_runtime_derive/src/lib.rs` parses the `#[dtcg(...)]` attributes with `syn` and emits a
-`DtcgTokens` implementation (and, for the component derive, `DtcgComponentTokens`). The generated
-code refers to `::dtcg_runtime::…` paths, which is why applications use the macros through
-`dtcg_runtime`.
+`dtcg_runtime_derive/src/lib.rs` parses the `#[dtcg(...)]` attributes strictly with `syn` and
+emits a `DtcgTokens` implementation (and, for the component derive, `DtcgComponentTokens`). The
+generated code refers to `::dtcg_runtime::…` and `::core::…` paths only, which is why applications
+use the macros through `dtcg_runtime` and why local aliases cannot change it.
 
 ## Pipeline internals
+
+A resolution runs four stages: **discover** the active sources, **fold** them into one merged
+structure, **flatten** it into tokens, and **resolve** each token within the limits.
 
 ### 1. Discovery (`source_discovery.rs`)
 
 `discover(catalog, root, limits, selection, include_inactive)` produces the ordered terminal
 sources:
 
-- `Discovery::new` rejects duplicate selection inputs.
 - `load` fetches a document from the catalog. If it is absent, it records a `DocumentRequest` in a
   `BTreeMap` keyed by id (so requests come out sorted and de-duplicated) and returns `None`.
-  Otherwise it parses the text and applies the fragment pointer.
+  Otherwise it parses the text and applies the fragment pointer through `json_pointer.rs`.
 - `expand` runs an explicit LIFO work queue of `(occurrence, depth, ancestors)`. Non-resolvers
-  become terminal sources. Resolvers are validated (`validate_resolver`) and expanded by
+  become terminal sources. Resolvers are validated by `resolver_definition.rs` and expanded by
   `resolver_sources`. `ancestors` holds the origins of the resolvers on the current path only, so
   a resolver repeated at different positions is allowed while a resolver nested inside itself is a
   `DocumentCycle`.
-- `resolver_sources` walks `resolutionOrder`. `resolution_step` turns `$ref` steps into their
-  definitions (with overlay) and checks inline steps. `set_documents` and `modifier_documents`
-  return the source arrays: the selected or default context, or every context when
-  `include_inactive` is set.
+- `resolver_sources` reads the effective steps (`effective_steps`), and `choose_contexts` matches
+  the selection against the resolver's declared modifiers (`selection::match_name`): it records
+  which inputs this resolver claimed, applies defaults for the rest, and fails for a missing,
+  unknown or duplicated context of its own modifiers. Set and modifier steps then return their
+  source arrays: the chosen context, or every context when `include_inactive` is set.
 - `append_source` handles one source: an inline source is kept; `#/sets/<name>` is expanded in
   place; another local pointer is selected from the scope document; an external reference is
   resolved against the resource that owns the `$ref` member, loaded and overlaid with the
-  reference object's other members.
-- Depth and document-count checks run throughout.
+  reference object's other members. References into `resolutionOrder` or `modifiers` are rejected
+  on the decoded pointer.
+- `check_depth`, `check_count` and `count_expansion` enforce `max_reference_depth` and the two
+  `max_documents` counts throughout.
 
-### 2. Flattening and overlay (`resolver.rs`)
+After discovery, `check_inputs` rejects any input that no reached resolver claimed. Previews and
+`inspect_source` pass the input use of the supplied source and of the root graph together.
 
-`flatten_group` walks each terminal source and records a `RawToken` per token path, in visit
-order:
+### 2. Folding and flattening (`flatten.rs`)
 
-- reserved-name and string-type checks;
-- `effective_group_type`: the group's own `$type`, else the `$extends` chain, else the inherited
-  type;
-- a `$value` token, or a token-level `$ref` token, ends the walk at that node;
-- `$extends` flattens the target group at the same prefix first, with a stack for cycle
-  detection;
-- then `$root`, then the children, with name validation.
+`flatten_sources(sources, limits)`:
 
-Each `RawToken` keeps an `Arc` of its source's JSON for document-pointer resolution.
-`keep_last_definitions` then fixes the order in one reverse pass with a `HashSet`, keeping each
-path at its last definition. This single pass replaced a per-override scan of the order that
-dominated edit latency in the Token Editor.
+- `Merger::fold` merges every terminal occurrence, in discovery order, into one JSON tree. Groups
+  merge member by member; group `$type`, `$description`, `$deprecated` and `$extends` replace per
+  key; `$extensions` objects merge recursively; a token replaces any earlier token whole; a token
+  meeting a group at the same path is a collision. Structure is validated as it is folded (reserved
+  properties, token rules, `$schema` only at a whole-document root), and the merger remembers which
+  source last defined each token and group.
+- `Flattener::flatten_group` walks the merged tree once with the inherited type and deprecation.
+  `$extends` expansions are resolved iteratively in dependency order and memoized by group path, so
+  a group may extend a group from another source or one produced by `$extends`; cycles are
+  detected on the way. `emit` records a `RawToken` per path and counts `max_tokens`; `charge`
+  counts the JSON nodes `$extends` copies; paths deeper than 128 segments fail with `path depth`.
+- The token order is fixed once: each path at its last definition, sorted by a sequence key.
+  `RawGroup`s become the `ResolvedGroup`s of the result.
 
-### 3. Resolution and validation (`resolver.rs`)
+Each `RawToken` keeps an `Arc` of the merged document, so every JSON Pointer reads the merged
+structure.
 
-`resolve_token` is a depth-first resolution with memoization in the `resolved` map:
+### 3. Resolution and validation (`token_resolution.rs`)
 
-- a `visiting` stack detects alias cycles and enforces `max_alias_depth`; a separate
-  `pointer_visiting` stack detects circular document pointers;
-- a token without a type gets the target's type when its value is a whole-token reference
-  (`whole_token_reference`);
-- `resolve_value` substitutes curly aliases, resolves `$ref` objects (`resolve_json_reference_target`
-  distinguishes token targets from document targets and applies sibling overrides), and recurses
-  through arrays and objects;
-- `validate_value` checks the result against the effective type.
+`Resolver::resolve_token` resolves each path in order with memoization:
 
-`fingerprint` hashes `(path, type, value, source)` for every token in order with SHA-256.
+- A `visiting` stack detects alias cycles. One hop counter covers aliases, token pointers and
+  document pointers and is checked against `max_alias_depth` before descending; memoized results
+  carry their hop count, node count and depth, so the outcome does not depend on authored order.
+- `resolve_value` substitutes curly aliases where `reference_positions.rs` allows them and checks
+  the target's type; `resolve_json_reference` distinguishes token targets (`…/$value`, `…/$type`)
+  from document pointers and applies sibling overrides. Every copy is charged against
+  `max_value_nodes` first, and every node's depth is checked against the fixed value depth of 128.
+- The effective type is the own `$type`, else the type of a whole-value reference's target, else
+  the group's; an own type that differs from the target's is a `reference type mismatch`.
+- `validate_value_with` checks the result with the runtime's `ValueExtensions`.
+
+`resolver.rs` then computes the fingerprint: SHA-256 over `(path, type, value, source)` for every
+token in order, hashing object members with sorted keys.
 
 ### 4. Affected resolution (`resolver.rs`)
 
-`resolve_affected` repeats discovery and flattening, builds a reverse dependency map with
-`collect_token_dependencies`, and walks it outwards from the changed paths. Only the tokens it
-reaches are resolved. If any source contains `$extends` (`contains_group_extension`), every token
-is affected. `DtcgRuntime::replace_json_and_resolve_affected` wraps this with the catalog
-replacement and the rollback.
+`DtcgRuntime::replace_json_and_resolve_affected` flattens the current selection
+(`flatten_selection`), replaces the document and calls `resolve_affected`. That repeats discovery
+and flattening, then seeds the affected set with the named paths and everything under them, every
+changed or new flattened definition (`same_definition`), and the removed paths. If any group uses
+`$extends`, or the previous state is unknown, every token is affected. `DependencyCollector`
+builds the reverse dependencies, marks readers of document pointers as affected, and the closure is
+walked outwards. Only affected tokens are resolved. The runtime restores the previous document
+unless the result is `Ready`. `ResolvedTokens::apply_affected` patches a snapshot so that it equals a
+full resolution.
 
-### 5. Inspection (`source_references.rs`, `source_discovery.rs`)
+### 5. Inspection and export
 
-`source_references::inspect` walks authored positions (`Resolver`, `Definition`, `Source`) across
-documents with a visited set, recording each source `$ref` it meets. It does not consult the
-selection. `discover_source` runs the normal discovery with a caller-supplied source appended in the
-root's scope. The previews call `resolve_sources` on the root's sources plus the previewed
-occurrences.
+`source_references::inspect` walks authored positions across documents with a visited set,
+recording each source `$ref` it meets; a reference object that targets a resolver is walked as its
+overlaid target. It does not consult the selection. `discover_source_with_inputs` runs the normal
+discovery with a caller-supplied source appended in the root's scope. The previews call
+`resolve_sources` on the root's sources plus the previewed occurrences.
+`ResolvedTokens::to_document` writes a resolution back as a nested token document.
 
 ## Invariants
 
@@ -146,12 +172,22 @@ keep them:
 
 - **I/O-free and UI-neutral.** No dependency on RayX, gpux or GPUI, and no file system, network or
   async runtime. Loading belongs to the caller through `Resolution::Missing`.
-- **Whole-token overlay.** A later definition replaces the whole token at its path. Never
-  deep-merge composite values, groups or Serde objects.
-- **Resolve after overlay.** Effective types and aliases resolve only after the complete overlay of
+- **Strict by default.** Default options validate DTCG 2025.10 exactly. Every value shape beyond
+  it is a `ValueExtensions` flag, off by default, with a doc comment naming its consumer and a
+  pinned test group (`tests/value_extensions.rs`, `tests/rayx_export_types.rs`).
+- **One merged structure.** All active sources fold into one structure before types, `$extends`,
+  deprecation and pointers are evaluated. Groups merge; tokens are replaced whole; composite values
+  are never merged.
+- **Resolve after merging.** Effective types and aliases resolve only after the complete merge of
   the active selection.
-- **Atomic mutations.** Invalid ids, references, JSON or requests leave the catalog unchanged.
-  Affected resolution restores the previous document unless it is `Ready`.
+- **One owner per rule.** Resolver structure lives in `resolver_definition.rs`, JSON Pointer syntax
+  in `json_pointer.rs`, alias positions in `reference_positions.rs`. Every API reads them from
+  there, so `resolve`, `validate_complete`, `modifiers`, `normalize_selection` and inspection
+  cannot disagree.
+- **Bounded work.** Every loop and recursion is bounded by a `RuntimeLimits` field or a fixed
+  bound; new code that follows references or copies values must charge the existing budgets.
+- **Atomic mutations.** Invalid ids, references, JSON, envelopes or requests leave the catalog
+  unchanged. Affected resolution restores the previous document unless it is `Ready`.
 - **One ordering pass.** Fix the token order once per resolution. Do not reintroduce per-override
   scans.
 - **Strict version.** Resolvers must declare exactly `2025.10`.
@@ -159,14 +195,14 @@ keep them:
   ordered duplicate occurrences and `ResolvedTokens::iter()` all depend on authored order.
 - **One path for previews.** Previews use the same discovery and resolution as `resolve`. Never
   build a synthetic resolver or mutate the catalog to preview.
-- **Redacted diagnostics.** Diagnostics never retain document text or JSON values, only ids,
-  paths and stable codes.
+- **Redacted diagnostics.** Diagnostics and `Debug` output never retain document text or JSON
+  values, only ids, paths and stable codes.
 - **Narrow projection.** Structs request only their fields, extra tokens are tolerated, and
   unprojected tokens stay available as alias targets. Consumer-owned types convert through
   `#[dtcg(with = "...")]` in the consumer; do not add consumer-specific `FromDtcgValue`
   implementations here.
-- **Documented extensions.** Every value shape beyond DTCG 2025.10 needs a doc comment naming its
-  consumer and a pinned test group, as `tests/rayx_export_types.rs` does for the RayX Figma export.
+- **Conformance ratchet.** The official corpus must keep passing. A deliberate deviation is listed
+  in `KNOWN_GAPS` and in [Conformance](12-conformance.md), never silently.
 
 ## Development workflow
 
@@ -205,22 +241,30 @@ for example `fix(resolver): …` or `docs(readme): …`.
 
 ### Documentation
 
-The README and the chapters in `docs/` are written against the current API, and every Rust example
-is a complete program. When you change public behavior, update the affected chapters. To check
-that the examples still compile and pass, include the Markdown files as doc comments in a scratch
-crate that depends on `dtcg_runtime` (with the `diagnostics` feature) and `serde_json`, then run
-`cargo test --doc`:
+The README and the chapters in `docs/` are written against the current API and compiled as
+doctests. The private `documentation` module at the end of `crates/dtcg_runtime/src/lib.rs`
+includes each file under `#[cfg(doctest)]`, one module per file:
 
 ```rust,ignore
-#![doc = include_str!("../../RayX.Dtcg/README.md")]
-#[doc = include_str!("../../RayX.Dtcg/docs/06-resolvers-and-modifiers.md")]
-pub mod resolvers {}
-// …one module per chapter
+#[cfg(doctest)]
+mod documentation {
+    #[doc = include_str!("../../../README.md")]
+    mod readme {}
+    #[doc = include_str!("../../../docs/06-resolvers-and-modifiers.md")]
+    mod resolvers_and_modifiers {}
+    // …one module per chapter
+}
 ```
 
 Every code block in the Markdown must therefore carry a language tag: `rust` (compiled and run),
-`rust,no_run` (compiled), `rust,ignore` (not compiled), or a non-Rust tag such as `json`, `toml`,
-`text` or `bash`.
+`rust,no_run` (compiled), `rust,ignore` (only for signature listings that cannot compile), or a
+non-Rust tag such as `json`, `toml`, `text` or `bash`. Doctests see the dev-dependencies, so the
+`diagnostics` feature and `serde_json` are available. When you change public behavior, update the
+affected chapters and check them, one chapter at a time:
+
+```bash
+cargo test -p dtcg_runtime --all-features --doc documentation::resolvers_and_modifiers
+```
 
 ## Test groups
 
@@ -229,20 +273,56 @@ behavior change gets a new group.
 
 | Group | Covers |
 |---|---|
+| `dtcg_runtime/tests/official_test_suite.rs` | The official DTCG 2025.10 corpus (250 fixtures, `KNOWN_GAPS` ratchet), upstream line endings, `$schema` handling |
 | `dtcg_runtime/tests/vertical_slice.rs` | End to end: missing documents, resolve, project |
+| `dtcg_runtime/tests/api_foundations.rs` | Limit setters, redacted `Debug`, `UnresolvedReference`, comparable and clonable errors, `Resolution` helpers |
 | `dtcg_runtime/tests/dtcg_2025_10_conformance.rs` | Format conformance: groups, `$root`, `$extends`, types, pointers, names, order, fingerprints |
+| `dtcg_runtime/tests/format_structure.rs` | Token and group structure rules |
+| `dtcg_runtime/tests/type_determination.rs` | Effective types and reference type mismatches |
+| `dtcg_runtime/tests/reference_positions.rs` | Allowed alias positions and their target types |
+| `dtcg_runtime/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
+| `dtcg_runtime/tests/token_metadata.rs` | `$description`, `$deprecated`, `$extensions`, `ResolvedGroup` |
+| `dtcg_runtime/tests/document_export.rs` | `to_document` and its round trip |
+| `dtcg_runtime/tests/typed_values.rs` | The `values` models and `TypedValue` |
+| `dtcg_runtime/tests/value_extensions.rs` | Strict defaults and the `ValueExtensions` flags through every constructor |
+| `dtcg_runtime/tests/rayx_export_types.rs` | The RayX value shapes |
 | `dtcg_runtime/tests/resolver_2025_10.rs` | Resolver version, inputs, inline steps, overrides, set references |
-| `dtcg_runtime/tests/alias_overlay.rs` | Aliases resolve against the final overlay |
+| `dtcg_runtime/tests/resolver_document_validation.rs` | Allowed resolver members, empty `resolutionOrder`, single-context modifiers |
+| `dtcg_runtime/tests/resolution_step_consistency.rs` | One effective step definition for every API |
+| `dtcg_runtime/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
+| `dtcg_runtime/tests/alias_overlay.rs` | Aliases resolve against the final merged token set |
+| `dtcg_runtime/tests/bounded_expansion.rs` | `max_tokens`, `max_documents` fan-out, `$extends` depth |
+| `dtcg_runtime/tests/bounded_references.rs` | Alias depth, value nodes, value depth, deep pointer chains on a small stack, percent-decoding |
 | `dtcg_runtime/tests/lazy_catalog.rs` | The missing-document protocol, batch atomicity, revisions, inactive contexts, cycles and limits |
-| `dtcg_runtime/tests/resource_id_adversarial.rs` | Resource id normalization and rejection |
-| `dtcg_runtime/tests/resource_id_drive_prefix.rs` | Rejection of `:` in ids and references: drive prefixes, URI schemes, NTFS streams |
-| `dtcg_runtime/tests/incremental_resolution.rs` | Affected resolution, rollback, the `$extends` fallback |
+| `dtcg_runtime/tests/resource_id_adversarial.rs`, `resource_id_drive_prefix.rs`, `resource_id_portability.rs` | Resource id normalization and rejection: fragments, `:`, non-portable segments |
+| `dtcg_runtime/tests/incremental_resolution.rs`, `incremental_consistency.rs` | Affected resolution, rollback, and that every patched snapshot equals a full resolution |
 | `dtcg_runtime/tests/source_inspection.rs` | Inspection, previews, reference sites, shared limits, definition helpers |
-| `dtcg_runtime/tests/derive_projection.rs` | Derive attributes: `root`, `rename`, `rest`, component ids |
-| `dtcg_runtime/tests/rayx_export_types.rs` | RayX value-shape extensions |
+| `dtcg_runtime/tests/source_reference_bounds.rs` | `source_references` lists each site once, walks in linear time and counts repeated walks against `max_documents` |
+| `dtcg_runtime/tests/source_reference_parity.rs` | `source_references` counts repeated walks in discovery's units and lists what `validate_complete` accepts |
+| `dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge across sources and `$extends` |
+| `dtcg_runtime/tests/derive_projection.rs` | Derive attributes through the runtime crate |
 | `dtcg_runtime/tests/diagnostics.rs` | Feature gating and redaction of diagnostics |
-| `dtcg_runtime_derive/tests/derive_projection.rs` | A narrow projection through the derive crate |
-| `dtcg_runtime_derive/tests/trybuild.rs` | Derive shapes with stable component metadata (despite the name, it does not use the `trybuild` crate) |
+| `dtcg_runtime_derive/tests/derive_projection.rs`, `derive_shapes.rs` | Narrow projection and derive shapes with stable component metadata |
+| `dtcg_runtime_derive/tests/derive_hardening.rs` | `Option` fields, hygienic generated code, raw identifiers, per-field generic bounds |
+| `dtcg_runtime_derive/tests/compile_fail.rs` | `trybuild` compile-fail cases in `tests/ui` |
+
+### The official corpus
+
+The corpus under `crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/` is byte-identical
+to upstream (pinned commit and update steps in that directory's `README.md`). Never edit fixture
+files. When a change makes a fixture fail on purpose, add its id to `KNOWN_GAPS` in
+`tests/official_test_suite.rs` and document the deviation in [Conformance](12-conformance.md);
+when a change fixes one, remove it. The test fails in both directions until the list matches.
+
+### Compile-fail snapshots
+
+Each `crates/dtcg_runtime_derive/tests/ui/*.rs` case must fail to compile with exactly the
+diagnostic in its `.stderr` file. After an intended change to a derive error message, regenerate
+the snapshots and review the diff:
+
+```bash
+TRYBUILD=overwrite cargo test -p dtcg_runtime_derive --test compile_fail
+```
 
 ## CI
 
@@ -251,7 +331,8 @@ behavior change gets a new group.
 
 1. `cargo fmt --check`
 2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
-3. `cargo test --workspace --all-features`
+3. `cargo test --workspace --all-features` (including the official corpus and the documentation
+   doctests)
 4. `cargo check --workspace --target wasm32-unknown-unknown`
 5. `cargo package --workspace`
 
@@ -264,8 +345,10 @@ dual-licensed MIT OR Apache-2.0.
   normal dependency on the derive crate must resolve from the registry.
 - The derive crate's dev-dependency on `dtcg_runtime` is path-only on purpose: publishing strips it,
   which breaks the runtime ↔ derive dependency cycle.
+- `dtcg_runtime` excludes `tests/fixtures/dtcg-test-suite/**` from the package, so the corpus
+  never ships.
 - Both crates use the repository `README.md` as their crates.io readme, so keep it accurate for
-  crates.io readers too.
+  crates.io readers too. Record user-visible changes in `CHANGELOG.md`.
 
 ## Working with RayX
 
@@ -274,4 +357,7 @@ dual-licensed MIT OR Apache-2.0.
 the matching RayX change. Keep the two commits paired, and validate RayX's affected crates and Test
 Suite specs. RayX's `rayx_theme` crate is the main consumer. It projects one generated theme model
 with `nested` fields and `with` converters for gpux types, and loads `.tokeneditor` projects through
-`from_envelope`.
+the envelope constructors. RayX and the RayX Token Editor rely on dimension line heights and
+`dev.rayx.blur`, which strict default options reject, so they must construct their runtimes with
+`RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`, for example through
+`from_envelope_with_options`.

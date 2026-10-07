@@ -1,122 +1,115 @@
+//! Resolver inputs (Resolver §5): modifier axes, input matching and
+//! normalization.
+
 use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::{DtcgError, ResourceId, error::invalid, resolver_definition::modifier_contexts};
+use crate::{
+    DtcgError, ResourceId, SourceOccurrence, SourceOrigin,
+    resolver_definition::{declared_modifiers, effective_steps, is_resolver, validate_resolver},
+};
 
 /// One resolver input: a modifier with its contexts in authored order and its
-/// optional default. Axes are listed in resolution order, then the remaining
-/// root modifiers by name.
+/// optional default. Axes are listed in `resolutionOrder` order, followed by
+/// the remaining root modifiers in authored order. A `$ref` step's sibling
+/// overrides (such as a `default`) are applied.
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub struct ModifierAxis {
     pub name: String,
     pub contexts: Vec<String>,
     pub default: Option<String>,
 }
 
+/// The modifier axes of the root document. A document without
+/// `resolutionOrder` is a token document and has no axes, even when it has a
+/// top-level group named `modifiers`.
 pub(crate) fn modifier_axes(
     resource: &ResourceId,
-    resolver: &Value,
+    document: &Value,
 ) -> Result<Vec<ModifierAxis>, DtcgError> {
-    let Some(object) = resolver.as_object() else {
+    if !is_resolver(document) {
         return Ok(Vec::new());
+    }
+    validate_resolver(resource, document)?;
+    let occurrence = SourceOccurrence {
+        resource: resource.clone(),
+        value: document.clone(),
+        origin: SourceOrigin {
+            resource: Some(resource.clone()),
+            pointer: String::new(),
+        },
+        member_origins: BTreeMap::new(),
     };
-    let root = object
-        .get("modifiers")
-        .and_then(Value::as_object)
-        .cloned()
-        .unwrap_or_default();
-    let mut axes = Vec::<ModifierAxis>::new();
-    let mut push = |name: &str, definition: &Value| -> Result<(), DtcgError> {
-        if axes.iter().any(|axis| axis.name == name) {
-            return Ok(());
-        }
-        let contexts = modifier_contexts(resource, definition)?;
-        axes.push(ModifierAxis {
-            name: name.into(),
-            contexts: contexts.keys().cloned().collect(),
-            default: definition
-                .get("default")
-                .and_then(Value::as_str)
-                .map(str::to_owned),
-        });
-        Ok(())
-    };
-    for step in object
-        .get("resolutionOrder")
-        .and_then(Value::as_array)
+    let steps = effective_steps(&occurrence)?;
+    Ok(declared_modifiers(&occurrence, &steps)?
         .into_iter()
-        .flatten()
-    {
-        let Some(step) = step.as_object() else {
-            continue;
-        };
-        if let Some(name) = step
-            .get("$ref")
-            .and_then(Value::as_str)
-            .and_then(|pointer| pointer.strip_prefix("#/modifiers/"))
-        {
-            let name = name.replace("~1", "/").replace("~0", "~");
-            let definition = root
-                .get(&name)
-                .ok_or_else(|| invalid(resource, &format!("unknown modifier `{name}`")))?;
-            push(&name, definition)?;
-        } else if step.get("type").and_then(Value::as_str) == Some("modifier")
-            && let Some(name) = step.get("name").and_then(Value::as_str)
-        {
-            push(name, &Value::Object(step.clone()))?;
-        }
-    }
-    for (name, definition) in &root {
-        push(name, definition)?;
-    }
-    Ok(axes)
+        .map(|modifier| ModifierAxis {
+            name: modifier.name,
+            contexts: modifier.contexts,
+            default: modifier.default,
+        })
+        .collect())
 }
 
-/// Completes and validates a selection against the axes: omitted axes take
-/// their default, every named modifier and context must exist, and the result
-/// is ordered by axis so equal selections compare equal.
-pub(crate) fn normalize(
-    axes: &[ModifierAxis],
-    selection: &[(&str, &str)],
-) -> Result<Vec<(String, String)>, DtcgError> {
-    let mut chosen = BTreeMap::<&str, &str>::new();
-    for (name, context) in selection {
-        let Some(axis) = axes.iter().find(|axis| axis.name == *name) else {
-            return Err(DtcgError::UnknownModifier {
-                modifier: (*name).into(),
-                known: axes.iter().map(|axis| axis.name.clone()).collect(),
-            });
-        };
-        if chosen.insert(name, context).is_some() {
-            return Err(context_error(axis, context, "modifier is selected twice"));
-        }
+/// The outcome of matching an input name against declared names.
+pub(crate) enum Match<'a> {
+    Found(&'a str),
+    Ambiguous(Vec<String>),
+    None,
+}
+
+/// Matches an input name to a declared name: an exact match wins; otherwise
+/// the `str::to_lowercase` forms are compared, and more than one candidate
+/// is ambiguous (Resolver §5.1 recommends case-insensitive inputs).
+pub(crate) fn match_name<'a>(input: &str, declared: &[&'a str]) -> Match<'a> {
+    if let Some(exact) = declared.iter().find(|name| **name == input) {
+        return Match::Found(exact);
     }
-    axes.iter()
-        .map(|axis| {
-            let context = match chosen.get(axis.name.as_str()) {
-                Some(context) => *context,
-                None => axis.default.as_deref().ok_or_else(|| {
-                    context_error(axis, "", "modifier has no default and was not selected")
-                })?,
-            };
-            if !axis.contexts.iter().any(|allowed| allowed == context) {
-                return Err(context_error(
-                    axis,
-                    context,
-                    "selected modifier context is unknown",
-                ));
-            }
-            Ok((axis.name.clone(), context.to_owned()))
+    let folded = input.to_lowercase();
+    let candidates = declared
+        .iter()
+        .filter(|name| name.to_lowercase() == folded)
+        .collect::<Vec<_>>();
+    match candidates.as_slice() {
+        [] => Match::None,
+        [single] => Match::Found(single),
+        many => Match::Ambiguous(many.iter().map(|name| (**name).to_owned()).collect()),
+    }
+}
+
+/// Reads resolver inputs from a JSON object such as `{"theme": "dark"}` into
+/// owned `(modifier, context)` pairs. Borrow them for the selection-taking
+/// methods with [`selection_refs`].
+///
+/// ```
+/// use dtcg_runtime::{selection_from_json, selection_refs};
+///
+/// let inputs = selection_from_json(&serde_json::json!({"theme": "dark"}))?;
+/// assert_eq!(selection_refs(&inputs), [("theme", "dark")]);
+/// # Ok::<(), dtcg_runtime::DtcgError>(())
+/// ```
+pub fn selection_from_json(inputs: &Value) -> Result<Vec<(String, String)>, DtcgError> {
+    let object = inputs.as_object().ok_or_else(|| DtcgError::InvalidInput {
+        message: "resolver inputs must be a JSON object".into(),
+    })?;
+    object
+        .iter()
+        .map(|(modifier, context)| {
+            let context = context.as_str().ok_or_else(|| DtcgError::InvalidInput {
+                message: format!("input `{modifier}` must be a string"),
+            })?;
+            Ok((modifier.clone(), context.to_owned()))
         })
         .collect()
 }
 
-fn context_error(axis: &ModifierAxis, context: &str, message: &str) -> DtcgError {
-    DtcgError::UnknownContext {
-        modifier: axis.name.clone(),
-        context: context.into(),
-        allowed: axis.contexts.clone(),
-        message: message.into(),
-    }
+/// Borrows owned `(modifier, context)` pairs as the `&[(&str, &str)]`
+/// selection every resolving method takes.
+pub fn selection_refs(selection: &[(String, String)]) -> Vec<(&str, &str)> {
+    selection
+        .iter()
+        .map(|(modifier, context)| (modifier.as_str(), context.as_str()))
+        .collect()
 }

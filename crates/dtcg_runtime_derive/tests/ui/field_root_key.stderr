@@ -1,0 +1,5 @@
+error: `root` is a struct attribute and cannot be used on a field
+ --> tests/ui/field_root_key.rs:5:12
+  |
+5 |     #[dtcg(root = "x")]
+  |            ^^^^

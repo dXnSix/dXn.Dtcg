@@ -1,5 +1,8 @@
 use crate::{DtcgError, ResolvedToken};
 
+/// Converts one resolved token into a Rust value. A value of the wrong shape
+/// fails with [`DtcgError::Projection`] naming the token path. The typed models
+/// of [`crate::values`] implement it, as do `String`, `f64`, `f32` and `bool`.
 pub trait FromDtcgValue: Sized + 'static {
     fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError>;
 }
@@ -27,8 +30,19 @@ impl FromDtcgValue for f64 {
 }
 
 impl FromDtcgValue for f32 {
+    /// Fails for a number outside the finite `f32` range instead of producing
+    /// an infinity.
     fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError> {
-        f64::from_dtcg(token).map(|value| value as f32)
+        let value = f64::from_dtcg(token)?;
+        let narrowed = value as f32;
+        if narrowed.is_finite() {
+            Ok(narrowed)
+        } else {
+            Err(DtcgError::Projection {
+                path: token.path.to_string(),
+                message: "expected numeric value within f32 range".into(),
+            })
+        }
     }
 }
 

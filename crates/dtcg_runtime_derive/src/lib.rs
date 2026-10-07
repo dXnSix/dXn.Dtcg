@@ -1,161 +1,372 @@
+//! Derive macros projecting resolved DTCG tokens into Rust structs.
+//!
+//! Attributes are parsed strictly: unknown keys, duplicated keys, field
+//! attributes on the struct and conflicting combinations are compile errors
+//! spanned at the offending attribute. Generated code names every item by its
+//! full path, so local aliases such as `type Result<T> = …` cannot change it.
+
 use proc_macro::TokenStream;
+use proc_macro2::{Span, TokenStream as TokenStream2, TokenTree};
 use quote::quote;
-use syn::{Attribute, Data, DeriveInput, Fields, GenericParam, LitStr, parse_macro_input};
+use syn::{
+    Attribute, Data, DeriveInput, Fields, GenericArgument, GenericParam, Ident, LitStr,
+    PathArguments, Type, ext::IdentExt, parse_macro_input, spanned::Spanned,
+};
 
 #[proc_macro_derive(DtcgTokens, attributes(dtcg))]
 pub fn derive_dtcg_tokens(input: TokenStream) -> TokenStream {
-    derive(input, false)
+    let input = parse_macro_input!(input as DeriveInput);
+    expand(input, false)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }
 
 #[proc_macro_derive(DtcgComponentTokens, attributes(dtcg))]
 pub fn derive_dtcg_component_tokens(input: TokenStream) -> TokenStream {
-    derive(input, true)
+    let input = parse_macro_input!(input as DeriveInput);
+    expand(input, true)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }
 
-fn derive(input: TokenStream, component: bool) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
+const FIELD_KEYS: &[&str] = &["path", "rename", "with", "nested", "rest"];
+const STRUCT_KEYS: &[&str] = &["root", "id"];
+
+fn expand(input: DeriveInput, component: bool) -> syn::Result<TokenStream2> {
+    let derive = if component {
+        "DtcgComponentTokens"
+    } else {
+        "DtcgTokens"
+    };
     let name = input.ident.clone();
-    let Data::Struct(data) = input.data else {
-        return syn::Error::new_spanned(name, "DtcgTokens only supports structs")
-            .to_compile_error()
-            .into();
+    let Data::Struct(data) = &input.data else {
+        return Err(syn::Error::new_spanned(
+            &name,
+            format!("{derive} only supports structs"),
+        ));
     };
-    let Fields::Named(fields) = data.fields else {
-        return syn::Error::new_spanned(name, "DtcgTokens requires named fields")
-            .to_compile_error()
-            .into();
+    let Fields::Named(fields) = &data.fields else {
+        return Err(syn::Error::new_spanned(
+            &name,
+            format!("{derive} requires named fields"),
+        ));
     };
-    let root = match attribute_value(&input.attrs, "root") {
-        Ok(value) => value.unwrap_or_default(),
-        Err(error) => return error.to_compile_error().into(),
-    };
-    let component_id = match attribute_value(&input.attrs, "id") {
-        Ok(value) => value.unwrap_or_else(|| name.to_string()),
-        Err(error) => return error.to_compile_error().into(),
-    };
-    let mut rest_field = None;
+    let attributes = struct_attributes(&input.attrs, component)?;
+    let root = attributes
+        .root
+        .map_or_else(String::new, |root| root.value());
+    let component_id = attributes
+        .id
+        .map_or_else(|| name.to_string(), |id| id.value());
+
+    let parameters = input
+        .generics
+        .params
+        .iter()
+        .filter_map(|parameter| match parameter {
+            GenericParam::Type(parameter) => Some(parameter.ident.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    let mut generics = input.generics.clone();
+    let mut rest_field: Option<Ident> = None;
     let mut initializers = Vec::new();
-    for field in fields.named {
-        let Some(ident) = field.ident else { continue };
-        let attributes = match field_attributes(&field.attrs) {
-            Ok(attributes) => attributes,
-            Err(error) => return error.to_compile_error().into(),
-        };
-        if attributes.rest {
+    for field in &fields.named {
+        let ident = field.ident.clone().expect("named field");
+        let attributes = field_attributes(&field.attrs)?;
+        let ty = &field.ty;
+        let generic = mentions_any(ty, &parameters);
+        if attributes.rest.is_some() {
             if rest_field.replace(ident.clone()).is_some() {
-                return syn::Error::new_spanned(
-                    ident,
-                    "DtcgTokens permits exactly one #[dtcg(rest)] field",
-                )
-                .to_compile_error()
-                .into();
+                return Err(syn::Error::new_spanned(
+                    &ident,
+                    format!("{derive} permits exactly one #[dtcg(rest)] field"),
+                ));
+            }
+            if generic {
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(syn::parse_quote!(#ty: ::core::default::Default));
             }
             initializers.push(quote! { #ident: ::core::default::Default::default() });
             continue;
         }
-        let ty = field.ty;
         let path = attributes
             .path
-            .unwrap_or_else(|| attributes.rename.unwrap_or_else(|| ident.to_string()));
-        if attributes.nested {
-            initializers.push(
-                quote! { #ident: <#ty as ::dtcg_runtime::DtcgTokens>::project_at(tokens, registry, &::dtcg_runtime::join_token_path(&base, #path))? },
-            );
+            .or(attributes.rename)
+            .map_or_else(|| ident.unraw().to_string(), |path| path.value());
+        if attributes.nested.is_some() {
+            if generic {
+                generics
+                    .make_where_clause()
+                    .predicates
+                    .push(syn::parse_quote!(#ty: ::dtcg_runtime::DtcgTokens));
+            }
+            initializers.push(quote! {
+                #ident: <#ty as ::dtcg_runtime::DtcgTokens>::project_at(
+                    tokens,
+                    registry,
+                    &::dtcg_runtime::join_token_path(&base, #path),
+                )?
+            });
             continue;
         }
-        let convert = match attributes.with {
-            Some(with) => {
-                let with: syn::Path = match syn::parse_str(&with) {
-                    Ok(with) => with,
-                    Err(error) => return error.to_compile_error().into(),
-                };
-                quote! { #with(token)? }
+        let optional = option_inner(ty);
+        let value_type = optional.unwrap_or(ty);
+        let convert = match &attributes.with {
+            Some(with) => quote! { #with(token)? },
+            None => {
+                if mentions_any(value_type, &parameters) {
+                    generics
+                        .make_where_clause()
+                        .predicates
+                        .push(syn::parse_quote!(#value_type: ::dtcg_runtime::FromDtcgValue));
+                }
+                quote! { registry.convert::<#value_type>(token)? }
             }
-            None => quote! { registry.convert::<#ty>(token)? },
         };
-        initializers.push(quote! { #ident: { let full_path = ::dtcg_runtime::join_token_path(&base, #path); let token = tokens.get(&full_path).ok_or_else(|| ::dtcg_runtime::DtcgError::Projection { path: full_path.clone(), message: "required token is missing".into() })?; #convert } });
+        let initializer = if optional.is_some() {
+            quote! {
+                #ident: {
+                    let full_path = ::dtcg_runtime::join_token_path(&base, #path);
+                    match tokens.get(&full_path) {
+                        ::core::option::Option::Some(token) => ::core::option::Option::Some(#convert),
+                        ::core::option::Option::None => ::core::option::Option::None,
+                    }
+                }
+            }
+        } else {
+            quote! {
+                #ident: {
+                    let full_path = ::dtcg_runtime::join_token_path(&base, #path);
+                    let token = tokens.get(&full_path).ok_or_else(|| ::dtcg_runtime::DtcgError::Projection {
+                        path: ::core::clone::Clone::clone(&full_path),
+                        message: ::core::convert::Into::into("required token is missing"),
+                    })?;
+                    #convert
+                }
+            }
+        };
+        initializers.push(initializer);
     }
-    let mut generics = input.generics;
-    for parameter in &mut generics.params {
-        if let GenericParam::Type(parameter) = parameter {
-            parameter
-                .bounds
-                .push(syn::parse_quote!(::dtcg_runtime::DtcgTokens));
-        }
-    }
+
     let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
-    let component_impl = component.then(|| quote! { impl #impl_generics ::dtcg_runtime::DtcgComponentTokens for #name #type_generics #where_clause { fn component_id() -> &'static str { #component_id } } });
-    quote! {
+    let component_impl = component.then(|| {
+        quote! {
+            impl #impl_generics ::dtcg_runtime::DtcgComponentTokens for #name #type_generics #where_clause {
+                fn component_id() -> &'static str {
+                    #component_id
+                }
+            }
+        }
+    });
+    Ok(quote! {
         impl #impl_generics ::dtcg_runtime::DtcgTokens for #name #type_generics #where_clause {
-            fn project_at(tokens: &::dtcg_runtime::ResolvedTokens, registry: &::dtcg_runtime::TypeRegistry, root: &str) -> Result<Self, ::dtcg_runtime::DtcgError> {
+            fn project_at(
+                tokens: &::dtcg_runtime::ResolvedTokens,
+                registry: &::dtcg_runtime::TypeRegistry,
+                root: &str,
+            ) -> ::core::result::Result<Self, ::dtcg_runtime::DtcgError> {
                 let base = ::dtcg_runtime::join_token_path(root, #root);
-                let _ = &base;
-                Ok(Self { #(#initializers),* })
+                let _ = (&base, tokens, registry);
+                ::core::result::Result::Ok(Self { #(#initializers),* })
             }
         }
         #component_impl
-    }.into()
+    })
+}
+
+#[derive(Default)]
+struct StructAttributes {
+    root: Option<LitStr>,
+    id: Option<LitStr>,
+}
+
+fn struct_attributes(attributes: &[Attribute], component: bool) -> syn::Result<StructAttributes> {
+    let mut result = StructAttributes::default();
+    for attribute in dtcg_attributes(attributes) {
+        attribute.parse_nested_meta(|meta| {
+            let key = key_name(&meta)?;
+            match key.as_str() {
+                "root" => set_once(&mut result.root, meta.value()?.parse()?, &meta, "root"),
+                "id" if component => set_once(&mut result.id, meta.value()?.parse()?, &meta, "id"),
+                "id" => {
+                    Err(meta.error("`id` is only supported by `#[derive(DtcgComponentTokens)]`"))
+                }
+                field if FIELD_KEYS.contains(&field) => Err(meta.error(format!(
+                    "`{field}` is a field attribute and cannot be used on the struct"
+                ))),
+                unknown => Err(meta.error(format!(
+                    "unknown `dtcg` struct attribute `{unknown}`; expected one of {}",
+                    STRUCT_KEYS.join(", ")
+                ))),
+            }
+        })?;
+    }
+    Ok(result)
 }
 
 #[derive(Default)]
 struct FieldAttributes {
-    path: Option<String>,
-    rename: Option<String>,
-    with: Option<String>,
-    nested: bool,
-    rest: bool,
+    path: Option<LitStr>,
+    rename: Option<LitStr>,
+    with: Option<syn::Path>,
+    nested: Option<Span>,
+    rest: Option<Span>,
 }
 
 fn field_attributes(attributes: &[Attribute]) -> syn::Result<FieldAttributes> {
     let mut result = FieldAttributes::default();
-    for attribute in attributes
-        .iter()
-        .filter(|attribute| attribute.path().is_ident("dtcg"))
-    {
+    let mut spans = Vec::<(String, Span)>::new();
+    for attribute in dtcg_attributes(attributes) {
         attribute.parse_nested_meta(|meta| {
-            if meta.path.is_ident("nested") {
-                result.nested = true;
-                return Ok(());
+            let key = key_name(&meta)?;
+            let span = meta.path.span();
+            match key.as_str() {
+                "path" => set_once(&mut result.path, meta.value()?.parse()?, &meta, "path")?,
+                "rename" => set_once(&mut result.rename, meta.value()?.parse()?, &meta, "rename")?,
+                "with" => {
+                    let literal: LitStr = meta.value()?.parse()?;
+                    let path = literal.parse::<syn::Path>().map_err(|_| {
+                        syn::Error::new(
+                            literal.span(),
+                            "`with` must name a conversion function, such as \"crate::convert\"",
+                        )
+                    })?;
+                    set_once(&mut result.with, path, &meta, "with")?
+                }
+                "nested" | "rest" => {
+                    if meta.input.peek(syn::Token![=]) {
+                        return Err(meta.error(format!("`{key}` takes no value")));
+                    }
+                    let flag = if key == "nested" {
+                        &mut result.nested
+                    } else {
+                        &mut result.rest
+                    };
+                    set_once(flag, span, &meta, &key)?
+                }
+                field if STRUCT_KEYS.contains(&field) => {
+                    return Err(meta.error(format!(
+                        "`{field}` is a struct attribute and cannot be used on a field"
+                    )));
+                }
+                unknown => {
+                    return Err(meta.error(format!(
+                        "unknown `dtcg` field attribute `{unknown}`; expected one of {}",
+                        FIELD_KEYS.join(", ")
+                    )));
+                }
             }
-            if meta.path.is_ident("rest") {
-                result.rest = true;
-                return Ok(());
-            }
-            let value = meta.value()?.parse::<LitStr>()?.value();
-            if meta.path.is_ident("path") {
-                result.path = Some(value);
-                Ok(())
-            } else if meta.path.is_ident("rename") {
-                result.rename = Some(value);
-                Ok(())
-            } else if meta.path.is_ident("with") {
-                result.with = Some(value);
-                Ok(())
-            } else {
-                Err(meta.error("unsupported dtcg field attribute"))
-            }
+            spans.push((key, span));
+            Ok(())
         })?;
+    }
+    let span_of = |key: &str| {
+        spans
+            .iter()
+            .find(|(name, _)| name == key)
+            .map(|(_, span)| *span)
+    };
+    if result.path.is_some() && result.rename.is_some() {
+        let later = spans
+            .iter()
+            .rev()
+            .find(|(key, _)| key == "path" || key == "rename")
+            .map_or_else(Span::call_site, |(_, span)| *span);
+        return Err(syn::Error::new(
+            later,
+            "`path` and `rename` cannot be combined: both set the token path",
+        ));
+    }
+    if result.nested.is_some() && result.with.is_some() {
+        let span = span_of("with").unwrap_or_else(Span::call_site);
+        return Err(syn::Error::new(
+            span,
+            "`nested` and `with` cannot be combined: a nested field projects a struct",
+        ));
+    }
+    if result.rest.is_some() {
+        for other in ["path", "rename", "with", "nested"] {
+            if let Some(span) = span_of(other) {
+                return Err(syn::Error::new(
+                    span,
+                    format!("`rest` cannot be combined with `{other}`"),
+                ));
+            }
+        }
     }
     Ok(result)
 }
 
-fn attribute_value(attributes: &[Attribute], name: &str) -> syn::Result<Option<String>> {
-    let mut result = None;
-    for attribute in attributes
+fn dtcg_attributes(attributes: &[Attribute]) -> impl Iterator<Item = &Attribute> {
+    attributes
         .iter()
         .filter(|attribute| attribute.path().is_ident("dtcg"))
-    {
-        attribute.parse_nested_meta(|meta| {
-            if meta.path.is_ident(name) {
-                result = Some(meta.value()?.parse::<LitStr>()?.value());
-                Ok(())
-            } else {
-                if meta.input.peek(syn::Token![=]) {
-                    let _ = meta.value()?.parse::<LitStr>()?;
-                }
-                Ok(())
-            }
-        })?;
+}
+
+fn key_name(meta: &syn::meta::ParseNestedMeta<'_>) -> syn::Result<String> {
+    meta.path
+        .get_ident()
+        .map(|ident| ident.unraw().to_string())
+        .ok_or_else(|| meta.error("expected a `dtcg` attribute name"))
+}
+
+fn set_once<T>(
+    slot: &mut Option<T>,
+    value: T,
+    meta: &syn::meta::ParseNestedMeta<'_>,
+    key: &str,
+) -> syn::Result<()> {
+    if slot.replace(value).is_some() {
+        return Err(meta.error(format!("duplicate `dtcg` attribute `{key}`")));
     }
-    Ok(result)
+    Ok(())
+}
+
+/// The `T` of a field typed `Option<T>`, `core::option::Option<T>` or
+/// `std::option::Option<T>` (with or without a leading `::`).
+fn option_inner(ty: &Type) -> Option<&Type> {
+    let Type::Path(path) = ty else {
+        return None;
+    };
+    if path.qself.is_some() {
+        return None;
+    }
+    let segments = path
+        .path
+        .segments
+        .iter()
+        .map(|segment| segment.ident.to_string())
+        .collect::<Vec<_>>();
+    let is_option = match segments.as_slice() {
+        [option] => option == "Option" && path.path.leading_colon.is_none(),
+        [krate, module, option] => {
+            (krate == "core" || krate == "std") && module == "option" && option == "Option"
+        }
+        _ => false,
+    };
+    if !is_option {
+        return None;
+    }
+    let PathArguments::AngleBracketed(arguments) = &path.path.segments.last()?.arguments else {
+        return None;
+    };
+    match arguments.args.iter().collect::<Vec<_>>().as_slice() {
+        [GenericArgument::Type(inner)] => Some(inner),
+        _ => None,
+    }
+}
+
+/// Whether `ty` mentions any of the struct's type parameters.
+fn mentions_any(ty: &Type, parameters: &[Ident]) -> bool {
+    fn visit(tokens: TokenStream2, parameters: &[Ident]) -> bool {
+        tokens.into_iter().any(|token| match token {
+            TokenTree::Ident(ident) => parameters.contains(&ident),
+            TokenTree::Group(group) => visit(group.stream(), parameters),
+            _ => false,
+        })
+    }
+    !parameters.is_empty() && visit(quote!(#ty), parameters)
 }

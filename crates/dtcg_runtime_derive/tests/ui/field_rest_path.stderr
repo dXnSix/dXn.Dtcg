@@ -1,0 +1,5 @@
+error: `rest` cannot be combined with `path`
+ --> tests/ui/field_rest_path.rs:5:18
+  |
+5 |     #[dtcg(rest, path = "x")]
+  |                  ^^^^

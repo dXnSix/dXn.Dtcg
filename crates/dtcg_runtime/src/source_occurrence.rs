@@ -2,7 +2,11 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::{DtcgError, ResourceId, SourceOrigin, error::invalid, json_pointer::pointer_parts};
+use crate::{
+    DtcgError, ResourceId, SourceOrigin,
+    error::invalid,
+    json_pointer::{pointer_parts, walk},
+};
 
 /// One ordered terminal source, before token shadowing and group inheritance.
 /// Its authored tree includes empty groups and shallow reference overrides.
@@ -15,6 +19,12 @@ pub struct SourceOccurrence {
 }
 
 impl SourceOccurrence {
+    /// The document that holds this source. An inline source supplied to
+    /// `DtcgRuntime::inspect_source` reports the root resolver's id.
+    pub fn resource(&self) -> &ResourceId {
+        &self.resource
+    }
+
     pub fn value(&self) -> &Value {
         &self.value
     }
@@ -53,14 +63,19 @@ impl SourceOccurrence {
 
     pub(crate) fn select(&self, reference: &str) -> Result<Self, DtcgError> {
         let parts = pointer_parts(reference)?;
-        let pointer = reference
-            .strip_prefix('#')
-            .expect("validated local pointer");
-        let value = self
-            .value
-            .pointer(pointer)
+        let value = walk(&self.value, &parts)
             .cloned()
-            .ok_or_else(|| DtcgError::InvalidPointer(pointer.into()))?;
+            .ok_or_else(|| DtcgError::InvalidPointer(reference.into()))?;
+        Ok(Self {
+            resource: self.resource.clone(),
+            value,
+            origin: self.selected_origin(&parts),
+            member_origins: BTreeMap::new(),
+        })
+    }
+
+    /// Where the value `select` returns for these pointer parts is written.
+    pub(crate) fn selected_origin(&self, parts: &[String]) -> SourceOrigin {
         let mut origin = self.origin.clone();
         for (index, name) in parts.iter().enumerate() {
             if index == 0 {
@@ -68,12 +83,7 @@ impl SourceOccurrence {
             }
             origin = origin.child(name);
         }
-        Ok(Self {
-            resource: self.resource.clone(),
-            value,
-            origin,
-            member_origins: BTreeMap::new(),
-        })
+        origin
     }
 
     pub(crate) fn overlay(mut self, reference: &Self) -> Result<Self, DtcgError> {

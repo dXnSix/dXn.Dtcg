@@ -10,6 +10,8 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+# The vendored official corpus is test-only data; keep the published crate small.
+exclude = ["tests/fixtures/dtcg-test-suite/**"]
 
 [features]
 diagnostics = []
