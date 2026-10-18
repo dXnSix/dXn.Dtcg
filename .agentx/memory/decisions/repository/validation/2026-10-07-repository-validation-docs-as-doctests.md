@@ -2,15 +2,16 @@
 agentx:
   kind: decision
   scope: decisions/repository/validation
-  status: current
+  status: superseded
   created: 2026-10-07T12:00:00+02:00
-  updated: 2026-10-07T12:00:00+02:00
+  updated: 2026-10-18T23:30:00+02:00
   topics:
     - docs
     - doctests
     - changelog
   supersedes: []
-  superseded_by: []
+  superseded_by:
+    - 2026-10-18-repository-validation-doctests-and-generated-changelog.md
 ---
 ## Decision: Compile the README and every docs chapter as doctests, and log behavior changes with consumer migrations
 

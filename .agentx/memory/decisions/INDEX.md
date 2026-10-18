@@ -4,7 +4,7 @@ agentx:
   scope: decisions
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-07T12:00:00+02:00
+  updated: 2026-10-18T23:30:00+02:00
   topics:
     - decisions
     - dtcg
@@ -29,4 +29,5 @@ Durable architecture choices for the DTCG runtime. Current source remains the fi
 - repository
   - [Crate-area taxonomy transplanted from RayX](repository/agentx-memory/2026-10-05-repository-agentx-memory-taxonomy-transplant.md)
   - [Vendor the official DTCG corpus unmodified and ratchet its known gaps](repository/validation/2026-10-07-repository-validation-corpus-ratchet.md)
-  - [Compile the README and every docs chapter as doctests, and log behavior changes with consumer migrations](repository/validation/2026-10-07-repository-validation-docs-as-doctests.md)
+  - [Compile the README and every docs chapter as doctests; release-plz writes the changelog and migrations travel in `Migration:` footers](repository/validation/2026-10-18-repository-validation-doctests-and-generated-changelog.md) (supersedes the [2026-10-07 doctests and hand-written changelog decision](repository/validation/2026-10-07-repository-validation-docs-as-doctests.md))
+  - [Release both crates as one git-tag unit with release-plz, stay on 1.x, and consume releases only by tag](repository/packaging/2026-10-18-repository-packaging-release-plz-git-tag-releases.md)
