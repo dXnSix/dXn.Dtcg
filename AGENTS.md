@@ -24,13 +24,31 @@ gets a new group.
 
 ## Consumers
 
-RayX (`../RayX`) depends on this repository by relative path (`../RayX.Dtcg/crates/...`) for local
-co-development. A change to a public API used by RayX needs the matching RayX change; keep the
-two commits paired and validate RayX's affected crates and Test Suite specs.
+Consumers, RayX (`../RayX`) first among them, depend on a release tag:
+`dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "vX.Y.Z" }`. A change RayX
+needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
+Test Suite specs.
 
 ## Commits
 
 Use Conventional Commits with meaningful scopes. Never add Claude co-author lines.
+
+## Releases
+
+release-plz releases both crates under one version and one tag `vX.Y.Z`; see
+[docs/releasing.md](docs/releasing.md).
+
+- Conventional Commits drive the version: `fix`/`perf` → patch, `feat` → minor; other types ride
+  along in the next release.
+- 1.x policy: never write `!` or a `BREAKING CHANGE:` footer. A breaking change is a `feat` (or
+  `fix`) whose body states the break, with a `Migration:` footer per affected consumer
+  (`Migration: RayX: …`). The policy ends when a second consumer appears.
+- `CHANGELOG.md` is written by release-plz; do not edit it in feature commits.
+- A release is the merge of release-plz's release pull request, after checking that it proposes a
+  `1.x` version and changes only `Cargo.toml`, `Cargo.lock` and `CHANGELOG.md`.
+- Push straight to `main`: `git fetch origin && git rebase origin/main`, then
+  `git push --force-with-lease origin main`. No feature branches or pull requests except release
+  pull requests.
 
 <!-- agentx:begin -->
 ## AgentX
