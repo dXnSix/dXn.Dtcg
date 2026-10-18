@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 10,
+  "revision": 11,
   "planRevision": 4,
   "specHashes": {
     "requirements": "5d9d7335a436fce30393d1657099e15536522a2075b4c3c8bbee0731235c0bce",
@@ -224,7 +224,16 @@
       "recordedAt": "2026-10-18T22:08:10Z"
     }
   },
-  "checkpoints": {},
+  "checkpoints": {
+    "s1-release-config": {
+      "snapshotId": "28c25ecf5095b13483c0798af53ad7498656610d66af405ddc74e5144119d3b8",
+      "commits": {
+        "dtcg": "e8598adeedbc6f6ca1f0a951e00c9ec178436afa"
+      },
+      "reviewHash": "a5504f9c7565ac5a4e5776417abc4e40d4e36e40edf5e3a939a6479f99083352",
+      "recordedAt": "2026-10-18T22:08:37Z"
+    }
+  },
   "findings": [],
   "handoffMarkdown": "",
   "protectedPaths": {
