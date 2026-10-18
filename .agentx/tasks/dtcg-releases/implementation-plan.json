@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 5,
+  "revision": 7,
   "title": "Versioned git-tag releases for RayX.Dtcg: release-plz, one v1.0.0 tag, release and changelog for both crates, install by tag",
   "validationMode": "sprint",
   "repositories": [
@@ -292,11 +292,11 @@
       "criterionIds": [
         "FIRST-1"
       ],
-      "descriptionMarkdown": "Read-only GitHub checks with `gh` and `git ls-remote`: the latest Release-plz run on `main` succeeded; the Release `v1.0.0` exists, not draft or prerelease, and its notes contain the 1.0.0 section (\"Official conformance corpus\"); `Cargo.toml` at `v1.0.0` says `1.0.0`; `refs/tags/v1.0.0` exists and no per-crate tag; no open `release-plz-*` pull request. GitHub state, so never reused.",
+      "descriptionMarkdown": "Read-only GitHub checks with `gh` and `git ls-remote`: the latest Release-plz run on `main` succeeded; the Release `v1.0.0` exists, not draft or prerelease, and its notes contain the 1.0.0 section (\"Official conformance corpus\"); `Cargo.toml` at `v1.0.0` says `1.0.0`; `refs/tags/v1.0.0` exists and no per-crate tag; no open `release-plz-*` pull request. GitHub state, so never reused. It also requires the Release title `v1.0.0` and `git_release_name = \"v{{ version }}\"` in `release-plz.toml` (review finding F-S3-1).",
       "argv": [
         "bash",
         "-c",
-        "set -euo pipefail\nrepo=rayx-ui/RayX.Dtcg\nrun=$(gh run list --repo \"$repo\" --workflow release-plz.yml --branch main --limit 1 --json conclusion,headSha --jq '.[0] | .conclusion + \" \" + .headSha')\necho \"latest Release-plz run on main: $run\"\ntest \"${run%% *}\" = success\nrelease=$(gh release view v1.0.0 --repo \"$repo\" --json tagName,isDraft,isPrerelease --jq '[.tagName, .isDraft, .isPrerelease] | map(tostring) | join(\" \")')\necho \"release: $release\"\ntest \"$release\" = \"v1.0.0 false false\"\ngh release view v1.0.0 --repo \"$repo\" --json body --jq .body | grep -Fq 'Official conformance corpus'\ngh api -H 'Accept: application/vnd.github.raw' \"repos/$repo/contents/Cargo.toml?ref=v1.0.0\" | grep -q '^version = \"1.0.0\"$'\ntags=$(git ls-remote --tags --refs \"https://github.com/$repo\" | awk '{print $2}')\necho \"$tags\"\necho \"$tags\" | grep -qx 'refs/tags/v1.0.0'\nif echo \"$tags\" | grep -q 'dtcg_runtime'; then echo \"unexpected per-crate tag\"; exit 1; fi\nopen=$(gh pr list --repo \"$repo\" --state open --json headRefName --jq '.[] | select(.headRefName | startswith(\"release-plz-\")) | .headRefName')\ntest -z \"$open\"\necho \"first release ok\"\n"
+        "set -euo pipefail\nrepo=rayx-ui/RayX.Dtcg\nrun=$(gh run list --repo \"$repo\" --workflow release-plz.yml --branch main --limit 1 --json conclusion,headSha --jq '.[0] | .conclusion + \" \" + .headSha')\necho \"latest Release-plz run on main: $run\"\ntest \"${run%% *}\" = success\nrelease=$(gh release view v1.0.0 --repo \"$repo\" --json name,tagName,isDraft,isPrerelease --jq '[.name, .tagName, .isDraft, .isPrerelease] | map(tostring) | join(\" \")')\necho \"release: $release\"\ntest \"$release\" = \"v1.0.0 v1.0.0 false false\"\n# Future Releases are titled like the tag too (review finding F-S3-1).\ngrep -qx 'git_release_name = \"v{{ version }}\"' release-plz.toml\ngh release view v1.0.0 --repo \"$repo\" --json body --jq .body | grep -Fq 'Official conformance corpus'\ngh api -H 'Accept: application/vnd.github.raw' \"repos/$repo/contents/Cargo.toml?ref=v1.0.0\" | grep -q '^version = \"1.0.0\"$'\ntags=$(git ls-remote --tags --refs \"https://github.com/$repo\" | awk '{print $2}')\necho \"$tags\"\necho \"$tags\" | grep -qx 'refs/tags/v1.0.0'\nif echo \"$tags\" | grep -q 'dtcg_runtime'; then echo \"unexpected per-crate tag\"; exit 1; fi\nopen=$(gh pr list --repo \"$repo\" --state open --json headRefName --jq '.[] | select(.headRefName | startswith(\"release-plz-\")) | .headRefName')\ntest -z \"$open\"\necho \"first release ok\"\n"
       ],
       "cwd": ".",
       "expected": {
@@ -316,7 +316,7 @@
       "argv": [
         "bash",
         "-c",
-        "set -euo pipefail\nd=$(mktemp -d)\ntrap 'rm -rf \"$d\"' EXIT\ncd \"$d\"\ncargo new --lib --vcs none --quiet dtcg_tag_consumer\ncd dtcg_tag_consumer\nprintf 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }\\n' >> Cargo.toml\nprintf 'pub use dtcg_runtime::DtcgRuntime;\\n' > src/lib.rs\ncargo check --quiet\ncargo tree --prefix none | sort -u | grep -F '?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime v1.0.0 (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime_derive v1.0.0 (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\necho \"tag consumer ok\"\n"
+        "set -euo pipefail\nd=$(mktemp -d)\ntrap 'rm -rf \"$d\"' EXIT\ncd \"$d\"\ncargo new --lib --vcs none --quiet dtcg_tag_consumer\ncd dtcg_tag_consumer\nprintf 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }\\n' >> Cargo.toml\nprintf 'pub use dtcg_runtime::DtcgRuntime;\\n' > src/lib.rs\ncargo check --quiet\ncargo tree --prefix none | sort -u | grep -F '?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime v1.0.0 (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime_derive v1.0.0 (proc-macro) (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\necho \"tag consumer ok\"\n"
       ],
       "cwd": ".",
       "environment": {
@@ -667,6 +667,10 @@
             {
               "repositoryId": "dtcg",
               "path": "CHANGELOG.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "release-plz.toml"
             }
           ]
         }
