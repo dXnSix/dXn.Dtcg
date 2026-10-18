@@ -245,7 +245,7 @@ on a server.
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", features = ["diagnostics"] }
+dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0", features = ["diagnostics"] }
 ```
 
 The feature adds two things.

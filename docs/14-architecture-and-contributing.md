@@ -30,10 +30,14 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 │       └── tests/                derive shape, projection and hardening tests
 │           └── ui/               trybuild compile-fail cases with their .stderr snapshots
 ├── docs/                         this documentation (compiled as doctests)
-├── .github/workflows/ci.yml      CI
+│   └── releasing.md              how releases are cut (maintainers; not a doctest chapter)
+├── .github/workflows/
+│   ├── ci.yml                    CI
+│   └── release-plz.yml           release pull requests, tags and GitHub Releases
+├── release-plz.toml              release-plz configuration and the changelog template
 ├── .agentx/                      AgentX repository memory: decisions and domain knowledge
 ├── AGENTS.md, CLAUDE.md          contributor guidance for coding agents
-├── CHANGELOG.md
+├── CHANGELOG.md                  written by release-plz
 └── LICENSE-APACHE, LICENSE-MIT
 ```
 
@@ -338,26 +342,33 @@ TRYBUILD=overwrite cargo test -p dtcg_runtime_derive --test compile_fail
 
 ## Releases
 
-Both crates share the workspace version (`[workspace.package]` in the root `Cargo.toml`) and are
-dual-licensed MIT OR Apache-2.0.
+A release is a git tag `vX.Y.Z` on `main` with a GitHub Release; nothing is published to crates.io.
+Both crates are dual-licensed MIT OR Apache-2.0 and share one version (`[workspace.package]` in the
+root `Cargo.toml`), one tag and one root `CHANGELOG.md`. release-plz (`release-plz.toml`,
+`.github/workflows/release-plz.yml`) derives the next version from
+[Conventional Commits](https://www.conventionalcommits.org/), keeps a release pull request with the
+version bump and the new changelog section open on `main`, and tags the release and creates the
+GitHub Release when that pull request is merged. `CHANGELOG.md` is written by release-plz;
+migrations for consumers go into `Migration:` footers on the commits. The crates stay on `1.x`: no
+commit is marked breaking.
 
-- **Publish order:** `dtcg_runtime_derive` first, then `dtcg_runtime`, because the runtime's
-  normal dependency on the derive crate must resolve from the registry.
-- The derive crate's dev-dependency on `dtcg_runtime` is path-only on purpose: publishing strips it,
-  which breaks the runtime ↔ derive dependency cycle.
-- `dtcg_runtime` excludes `tests/fixtures/dtcg-test-suite/**` from the package, so the corpus
-  never ships.
-- Both crates use the repository `README.md` as their crates.io readme, so keep it accurate for
-  crates.io readers too. Record user-visible changes in `CHANGELOG.md`.
+[Releasing](releasing.md) has the details: commit types and the 1.x policy, what to check before
+merging a release pull request, the `RELEASE_PLZ_TOKEN` secret, the tag ruleset and the by-hand
+fallback.
+
+The manifests stay packageable (`cargo package --workspace` runs in CI): the derive crate's
+dev-dependency on `dtcg_runtime` is path-only on purpose, which breaks the runtime ↔ derive
+dependency cycle in a packaged crate, and `dtcg_runtime` excludes
+`tests/fixtures/dtcg-test-suite/**` from the package, so the corpus never ships.
 
 ## Working with RayX
 
-[RayX](https://github.com/rayx-ui) depends on this repository through a relative path
-(`../RayX.Dtcg/crates/...`) for local co-development. A change to a public API that RayX uses needs
-the matching RayX change. Keep the two commits paired, and validate RayX's affected crates and Test
-Suite specs. RayX's `rayx_theme` crate is the main consumer. It projects one generated theme model
-with `nested` fields and `with` converters for gpux types, and loads `.tokeneditor` projects through
-the envelope constructors. RayX and the RayX Token Editor rely on dimension line heights and
-`dev.rayx.blur`, which strict default options reject, so they must construct their runtimes with
+[RayX](https://github.com/rayx-ui) depends on a release tag of this repository,
+`dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "vX.Y.Z" }`. A change RayX
+needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
+Test Suite specs. RayX's `rayx_theme` crate is the main consumer. It projects one generated theme
+model with `nested` fields and `with` converters for gpux types, and loads `.tokeneditor` projects
+through the envelope constructors. RayX and the RayX Token Editor rely on dimension line heights
+and `dev.rayx.blur`, which strict default options reject, so they must construct their runtimes with
 `RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`, for example through
 `from_envelope_with_options`.
