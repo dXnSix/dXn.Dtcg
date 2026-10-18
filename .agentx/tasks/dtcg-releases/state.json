@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-releases",
+  "revision": 10,
+  "planRevision": 4,
+  "specHashes": {
+    "requirements": "5d9d7335a436fce30393d1657099e15536522a2075b4c3c8bbee0731235c0bce",
+    "design": "7d5a7e14ab7cd2dc79b519b210235f35d63d13293c7ac8d6dc1f69723ccdb667",
+    "plan": "72ade390a1f6a82c76a38b5f4092b2e6134f73c67b0dda3a0d31f708e1cc3d9f"
+  },
+  "tasks": {
+    "t01-release-plz-config": {
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
+    },
+    "t02-version-changelog": {
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
+    },
+    "t03-release-preview": {
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
+    },
+    "t04-releasing-doc": {
+      "status": "pending"
+    },
+    "t05-install-by-tag": {
+      "status": "pending"
+    },
+    "t06-agent-guidance": {
+      "status": "pending"
+    },
+    "t07-owner-prerequisites": {
+      "status": "pending"
+    },
+    "t08-release-workflow": {
+      "status": "pending"
+    },
+    "t09-first-release": {
+      "status": "pending"
+    }
+  },
+  "validationBatches": {
+    "56064e6c889202585ff80ec6fa92e9cfa9b1dfb5d107edaf7134cd4297dff5e7": {
+      "snapshot": {
+        "specHash": "55ac21815493ddd59a12fd27214a00ed594ca8b596b170077d8a4700e215916f",
+        "repositories": {
+          "dtcg": "b5f31fa3f4da0281f2d6ef8d6acfa54a85ccafbb9721d965ca1438983096fdc7"
+        }
+      },
+      "recordedAt": "2026-10-18T22:03:04Z"
+    },
+    "28c25ecf5095b13483c0798af53ad7498656610d66af405ddc74e5144119d3b8": {
+      "snapshot": {
+        "specHash": "47fac491124edc75184020cfb0bfac2f066a1f247a573228385fcc78bc2c9be1",
+        "repositories": {
+          "dtcg": "b5f31fa3f4da0281f2d6ef8d6acfa54a85ccafbb9721d965ca1438983096fdc7"
+        }
+      },
+      "recordedAt": "2026-10-18T22:05:47Z"
+    }
+  },
+  "checkResults": {
+    "s1-release-config/check-release-config/final": {
+      "checkId": "check-release-config",
+      "boundaryId": "s1-release-config",
+      "phase": "final",
+      "batchId": "56064e6c889202585ff80ec6fa92e9cfa9b1dfb5d107edaf7134cd4297dff5e7",
+      "definitionHash": "fb9a8121be5470a0859b484e5a21f1fd101ff5566565bf8188842a6cc175383d",
+      "basisHash": "d121e4c11c37918daa1f267a8d590c633363b3aa81edce1617ff992b3da70872",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0239,
+      "recordedAt": "2026-10-18T22:03:03Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-7e336e84343f.log",
+      "logSha256": "a667d2b36c78e05043e79c38d0f0b15dad3e47fd7194b260f09ed4a03bc37662",
+      "inputsHash": "a1971a5900d8539a08c39afe44e70f6e7bc1c3bf2cd5c12e6d4ef4dccafd97fb"
+    },
+    "s1-release-config/check-version-changelog/final": {
+      "checkId": "check-version-changelog",
+      "boundaryId": "s1-release-config",
+      "phase": "final",
+      "batchId": "56064e6c889202585ff80ec6fa92e9cfa9b1dfb5d107edaf7134cd4297dff5e7",
+      "definitionHash": "38a1f0081262072d452c66025adb161304acf24ed18fab091a71ad14f12bfcbe",
+      "basisHash": "6b577ffcb90698f5af31756e0f393726cbdd1318c06da48a5129cccc1483fc49",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.045,
+      "recordedAt": "2026-10-18T22:03:03Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-88e48589a01d.log",
+      "logSha256": "105928a32edef6dec50c4777e7ca771fed2d7c46e8629f87ddc4f3b5b3bcf6b5",
+      "inputsHash": "69779b3e10f0c752b2e79f78f59dfc80e872c9dda46cbbca41b78de58ba1c955"
+    },
+    "s1-release-config/check-release-preview/final": {
+      "checkId": "check-release-preview",
+      "boundaryId": "s1-release-config",
+      "phase": "final",
+      "batchId": "28c25ecf5095b13483c0798af53ad7498656610d66af405ddc74e5144119d3b8",
+      "definitionHash": "0f0a83abb65b87ee0c58057b1ac2db2b7268fd08c6fa9b230e6aabc7d48d1279",
+      "basisHash": "fa09a4859b0110d9eb0808d5afe47e8a6dacb127cfcd46e6f2e8eb42a6a325f9",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 3.5677,
+      "recordedAt": "2026-10-18T22:05:47Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-f3dc7e80925d.log",
+      "logSha256": "8915ddf33c797c4d956c6c845d310e6c3e43b96454a5844e2668039fd4fb4c92",
+      "inputsHash": "2746e508b9aad5c3019ec5facc0db5f0256369d405b95dee1f8f1e04255891d3"
+    }
+  },
+  "reviews": {
+    "s1-release-config": {
+      "reviewerId": "dtcg-releases-s1-reviewer",
+      "snapshotId": "28c25ecf5095b13483c0798af53ad7498656610d66af405ddc74e5144119d3b8",
+      "criterionIds": [
+        "RPZ-1",
+        "RPZ-2",
+        "RPZ-3",
+        "RPZ-4",
+        "VER-1",
+        "VER-2"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "release-plz.toml",
+          "kind": "source",
+          "criterionIds": [
+            "RPZ-1",
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4"
+          ],
+          "sha256": "b1116cf3f060e89e7e5e4e4671a8f01ca5627550427a59eaab5be0e5ea69540a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "VER-1",
+            "RPZ-2"
+          ],
+          "sha256": "495f67099e1bf3ad2319f8d504d3f7cb36614e9394fb3f47cc36b29bb6c73b0f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.lock",
+          "kind": "source",
+          "criterionIds": [
+            "VER-1"
+          ],
+          "sha256": "3245e60016ebc5090526ce09816c03bbc7feebd0e8b6d5dcbd6361f5a6da6ae2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "VER-2",
+            "RPZ-2"
+          ],
+          "sha256": "5b4601c148891acc1b443167ebb6c3d69f326d5ed0585fab8cdd8dfd566ed67a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/tasks/dtcg-releases/implementation-plan.json",
+          "kind": "test",
+          "criterionIds": [
+            "RPZ-1",
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4",
+            "VER-1",
+            "VER-2"
+          ],
+          "sha256": "40b2975d0477349e8a1f254e2d5b70b2364a1ffc2aceda34d6f50fa80eecefac"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-f3dc7e80925d.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4"
+          ],
+          "sha256": "8915ddf33c797c4d956c6c845d310e6c3e43b96454a5844e2668039fd4fb4c92"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-7e336e84343f.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "RPZ-1"
+          ],
+          "sha256": "a667d2b36c78e05043e79c38d0f0b15dad3e47fd7194b260f09ed4a03bc37662"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-88e48589a01d.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "VER-1",
+            "VER-2"
+          ],
+          "sha256": "105928a32edef6dec50c4777e7ca771fed2d7c46e8629f87ddc4f3b5b3bcf6b5"
+        }
+      ],
+      "summaryMarkdown": "`release-plz.toml` matches RPZ-1 and RayX.CLI's template (only intended deltas: `git_release_enable = true`, `semver_check` off with the 1.x rationale, two `[[package]]` entries in version group `dtcg`, derive keeps the inherited `git_tag_name`, and the `commit.footers` Migration loop). Cargo.toml/Cargo.lock change only the four 0.1.0 -> 1.0.0 strings; nothing under `crates/` differs from `7d55b99`; the derive dev-dependency stays path-only. CHANGELOG.md diff is only the header and the heading. The recorded passing preview log shows the first-release dry run planning `v1.0.0` + git release and `no release method enabled` for the derive crate. An independent scratch run (temp copy, local stub forge) confirmed the template renders each `Migration:` footer (two footers tested) as a nested line under a scoped `feat` entry and keeps unscoped entries correct, with 1.1.0 proposed. Observation only: the header still states the crates follow SemVer although the 1.x policy ships breaks as minors; this is the owner's binding decision and RPZ-1's required header, so it is not a finding. Non-blocking recommendations (not defects): (1) the preview's docs-only scenario uses `git diff --quiet`, which ignores untracked files; `test -z \"$(git status --porcelain)\"` would prove the clean tree fully. (2) release-plz dates generated sections in UTC (a scratch run at ~00:10 +02:00 on 2026-10-19 produced `## [1.1.0] - 2026-10-18` above `## [1.0.0] - 2026-10-19`); when t09 sets or corrects the 1.0.0 date, use the UTC date of the release push (`date -u +%F`).",
+      "findingIds": [],
+      "recordedAt": "2026-10-18T22:08:10Z"
+    }
+  },
+  "checkpoints": {},
+  "findings": [],
+  "handoffMarkdown": "",
+  "protectedPaths": {
+    "dtcg": {
+      ".agentx/tasks/dtcg-runtime/**": "396de34bb6eb43430a0828deb412b20f38d3df886d46115bc25127dcaaf37dda",
+      ".agentx/tasks/dtcg-2025-10-conformance/**": "acb8e232e95101719fbe173ba18570c3492be9e42da5192a1f78bba7d5bb5e76",
+      "crates/**": "09c1687f41f2e1506e43edd37f16379a107b20d4f1a4198e2560073aac20d5ac",
+      ".github/workflows/ci.yml": "76bfb916d779d98c187cca999b9aef10d67b0265a4af2964b71c51c58480ba58",
+      "rust-toolchain.toml": "5b9b2241eaffbd0c55602f818498f0cd3fac28a1df900b116be4240472b96a39",
+      "LICENSE-APACHE": "1d39282f42adc0ef965c88cac88e9b39aa332f31fecfd8615eb0e359f84fa663",
+      "LICENSE-MIT": "c294d59965f77468ec952e70be797cad02f00bc160125f47aede58a2b9291af5"
+    }
+  }
+}

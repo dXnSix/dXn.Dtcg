@@ -1,0 +1,673 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-releases",
+  "revision": 4,
+  "title": "Versioned git-tag releases for RayX.Dtcg: release-plz, one v1.0.0 tag, release and changelog for both crates, install by tag",
+  "validationMode": "sprint",
+  "repositories": [
+    {
+      "id": "dtcg",
+      "path": ".",
+      "role": "execution"
+    },
+    {
+      "id": "rayx-cli",
+      "path": "../RayX.CLI",
+      "role": "reference"
+    }
+  ],
+  "boundaries": {
+    "repositoryIds": [
+      "dtcg"
+    ],
+    "forbiddenPaths": [
+      ".agentx/tasks/dtcg-runtime/**",
+      ".agentx/tasks/dtcg-2025-10-conformance/**",
+      "crates/**",
+      ".github/workflows/ci.yml",
+      "rust-toolchain.toml",
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ]
+  },
+  "checks": [
+    {
+      "id": "check-release-config",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "RPZ-1"
+      ],
+      "descriptionMarkdown": "Parses `release-plz.toml` (Python `tomllib`, or pip's vendored `tomli` on Python 3.9) and asserts RPZ-1: the `[workspace]` keys, `semver_check = false`, `release_commits = \"^(feat|fix|perf)\"` and sample headers (`feat`, `fix(x)`, `perf` release; `docs:`, `refactor(x):`, `chore(agentx):`, `build:` do not), a comment stating the 1.x policy, the two `[[package]]` entries and their version group, and the `[changelog]` header, body (`## [{{ version }}] - {{ timestamp`, `commit.footers` with `Migration`) and skip parsers.",
+      "argv": [
+        "python3",
+        "-c",
+        "import re\ntry:\n    import tomllib\nexcept ModuleNotFoundError:  # Python < 3.11 (macOS python3 is 3.9): pip vendors tomli\n    from pip._vendor import tomli as tomllib\nc = tomllib.load(open(\"release-plz.toml\", \"rb\"))\nw = c[\"workspace\"]\nfor key, want in {\"git_only\": True, \"publish\": False, \"git_tag_enable\": True, \"git_tag_name\": \"v{{ version }}\", \"git_release_enable\": True, \"changelog_update\": True}.items():\n    assert w.get(key) == want, (key, w.get(key))\nassert w.get(\"semver_check\") is False, \"semver_check stays off under the 1.x policy\"\nassert w.get(\"release_commits\") == \"^(feat|fix|perf)\", w.get(\"release_commits\")\ncommits = re.compile(w[\"release_commits\"])\nfor message in [\"feat: a\", \"fix(resolver): a\", \"perf: a\", \"feat(dtcg_runtime): a\"]:\n    assert commits.search(message), (\"should release\", message)\nfor message in [\"docs: a\", \"docs(readme): a\", \"refactor(resolver): a\", \"test: a\", \"ci: a\", \"build: a\", \"chore(agentx): a\", \"chore(release): a\"]:\n    assert not commits.search(message), (\"should not release\", message)\nassert \"1.x\" in open(\"release-plz.toml\", encoding=\"utf-8\").read(), \"a comment states the 1.x policy\"\npackages = {p[\"name\"]: p for p in c[\"package\"]}\nassert set(packages) == {\"dtcg_runtime\", \"dtcg_runtime_derive\"}, sorted(packages)\nruntime, derive = packages[\"dtcg_runtime\"], packages[\"dtcg_runtime_derive\"]\nassert runtime.get(\"changelog_path\") == \"./CHANGELOG.md\", runtime.get(\"changelog_path\")\nassert runtime.get(\"changelog_include\") == [\"dtcg_runtime_derive\"], runtime.get(\"changelog_include\")\nassert runtime.get(\"version_group\") and runtime.get(\"version_group\") == derive.get(\"version_group\")\nfor key in (\"git_tag_enable\", \"git_release_enable\", \"changelog_update\", \"release\", \"git_tag_name\"):\n    assert key not in runtime or runtime[key] is not False, (\"dtcg_runtime must keep\", key)\nfor key in (\"git_tag_enable\", \"git_release_enable\", \"changelog_update\"):\n    assert derive.get(key) is False, (\"dtcg_runtime_derive\", key)\nassert derive.get(\"release\", True) is True and \"git_tag_name\" not in derive\nlog = c[\"changelog\"]\nassert \"dtcg_runtime\" in log[\"header\"] and \"Keep a Changelog\" in log[\"header\"] and \"release-plz\" in log[\"header\"]\nassert \"Unreleased\" not in log[\"header\"]\nassert \"## [{{ version }}] - {{ timestamp\" in log[\"body\"]\nassert \"commit.footers\" in log[\"body\"] and \"Migration\" in log[\"body\"], \"the body renders Migration: footers\"\nskipped = {p[\"message\"] for p in log[\"commit_parsers\"] if p.get(\"skip\")}\nassert {\"^chore\\\\(agentx\\\\)\", \"^chore\\\\(release\\\\)\", \"^chore\\\\(deps\\\\)\"} <= skipped, skipped\nprint(\"release-plz config ok\")\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "release-plz config ok"
+      },
+      "inputs": [
+        "release-plz.toml"
+      ]
+    },
+    {
+      "id": "check-version-changelog",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "VER-1",
+        "VER-2"
+      ],
+      "descriptionMarkdown": "Asserts VER-1 and VER-2 from the manifests, `Cargo.lock` and `CHANGELOG.md`: version and requirements `1.0.0`, both lock entries `1.0.0`, the derive dev-dependency path-only, the changelog starting with the configured header, one `## [1.0.0] - YYYY-MM-DD` heading, and its body equal to the `[Unreleased]` body of `7d55b99` (`git show`). If `main` gained Unreleased content after planning, amend the base commit in this check.",
+      "argv": [
+        "python3",
+        "-c",
+        "import re, subprocess\ntry:\n    import tomllib\nexcept ModuleNotFoundError:  # Python < 3.11 (macOS python3 is 3.9): pip vendors tomli\n    from pip._vendor import tomli as tomllib\ncargo = tomllib.load(open(\"Cargo.toml\", \"rb\"))\nassert cargo[\"workspace\"][\"package\"][\"version\"] == \"1.0.0\", cargo[\"workspace\"][\"package\"][\"version\"]\ndeps = cargo[\"workspace\"][\"dependencies\"]\nassert deps[\"dtcg_runtime\"][\"version\"] == \"1.0.0\" and deps[\"dtcg_runtime_derive\"][\"version\"] == \"1.0.0\", deps\nderive = tomllib.load(open(\"crates/dtcg_runtime_derive/Cargo.toml\", \"rb\"))\nassert derive[\"dev-dependencies\"][\"dtcg_runtime\"] == {\"path\": \"../dtcg_runtime\"}\nlock = {p[\"name\"]: p[\"version\"] for p in tomllib.load(open(\"Cargo.lock\", \"rb\"))[\"package\"] if p[\"name\"].startswith(\"dtcg_runtime\")}\nassert lock == {\"dtcg_runtime\": \"1.0.0\", \"dtcg_runtime_derive\": \"1.0.0\"}, lock\ntext = open(\"CHANGELOG.md\", encoding=\"utf-8\").read()\nheader = tomllib.load(open(\"release-plz.toml\", \"rb\"))[\"changelog\"][\"header\"]\nassert text.startswith(header), \"CHANGELOG.md must start with release-plz.toml's [changelog] header\"\nheadings = re.findall(r\"(?m)^## .*$\", text)\nassert len(headings) == 1 and re.fullmatch(r\"## \\[1\\.0\\.0\\] - \\d{4}-\\d{2}-\\d{2}\", headings[0]), headings\nold = subprocess.run([\"git\", \"show\", \"7d55b99:CHANGELOG.md\"], capture_output=True, text=True, check=True).stdout\nassert old.split(\"## [Unreleased]\\n\", 1)[1].strip() == text.split(headings[0] + \"\\n\", 1)[1].strip(), \"the 1.0.0 section must be the former Unreleased content\"\nprint(\"version and changelog ok\")\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "version and changelog ok"
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "CHANGELOG.md",
+        "release-plz.toml",
+        "crates/dtcg_runtime_derive/Cargo.toml"
+      ]
+    },
+    {
+      "id": "check-release-preview",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "RPZ-2",
+        "RPZ-3",
+        "RPZ-4"
+      ],
+      "descriptionMarkdown": "The local release preview (RPZ-2, RPZ-3, RPZ-4). Needs release-plz 0.3.172 and cargo-semver-checks 0.51 on PATH (external tools, so never reused; cargo-semver-checks is required because CI has it, and the 1.x proof must hold with it present). It copies the working tree (uncommitted work included) with `rsync` into a temp directory, deletes the copy's tags, disables its push URL, adds a documented probe function to the copy's `dtcg_runtime` and commits a base; then: `release-plz release --dry-run` without a tag (first release), tag `v1.0.0`, and `release-plz update` after a docs-only commit (nothing), a derive fix (`1.0.1`, one root changelog) and a `feat` whose body states a break with a `Migration: RayX: …` footer (`1.1.0`, the `Migration:` line rendered), resetting to the base between scenarios; finally, under the configured `semver_check = false`, a `fix:` commit removing the probe must give `1.0.1` with no API check in the log (1.x policy). Log wording (`creation of tag 'v1.0.0'`, `no release method enabled`, `Checking API compatibility`, `API breaking changes`) comes from release-plz 0.3.172's source; if the real output differs only in wording, amend the assertion, never the behaviour it checks. The copy's `origin` points at a local stub HTTP server that answers 404: release-plz looks up the pull requests of HEAD on the forge even in a dry run (`should_release`), and GitHub answers a placeholder token with 401; with the stub (`--forge github`, GitHub Enterprise URL form) the lookup reads \"commit not pushed\", so the preview needs neither network access nor a token.",
+      "argv": [
+        "bash",
+        "-c",
+        "set -euo pipefail\ncommand -v release-plz >/dev/null || { echo \"release-plz (0.3.172, the release-plz/action@v0.5 default) is not on PATH\"; exit 2; }\ncommand -v cargo-semver-checks >/dev/null || { echo \"cargo-semver-checks (0.51, the release-plz/action@v0.5 default) is not on PATH\"; exit 2; }\nrelease-plz --version\ncargo semver-checks --version\npy() { python3 -c \"$(printf 'try:\\n    import tomllib\\nexcept ModuleNotFoundError:\\n    from pip._vendor import tomli as tomllib\\n%s\\n' \"$1\")\"; }\nver() { py 'print(tomllib.load(open(\"Cargo.toml\", \"rb\"))[\"workspace\"][\"package\"][\"version\"])'; }\nlockver() { py 'print(\" \".join(sorted(p[\"name\"] + \"@\" + p[\"version\"] for p in tomllib.load(open(\"Cargo.lock\", \"rb\"))[\"package\"] if p[\"name\"].startswith(\"dtcg_runtime\"))))'; }\nsrc=$PWD\ntmp=$(mktemp -d)\ntrap 'rm -rf \"$tmp\"' EXIT\nrsync -a --exclude /target --exclude /artifacts-temp \"$src/\" \"$tmp/r/\"\ncd \"$tmp/r\"\ntest \"$PWD\" != \"$src\"\ngit tag -l | xargs -r git tag -d >/dev/null\ngit config user.name release-preview\ngit config user.email release-preview@example.invalid\ngit config commit.gpgsign false\ngit config tag.gpgsign false\ngit remote set-url --push origin no-push.invalid\n# release-plz looks up the pull requests of HEAD on the forge (should_release), even in a dry run.\n# A local stub answers 404 (\"commit not pushed\": no PRs), so the preview needs no network and no token.\nstub_port=$(python3 -c 'import socket; s = socket.socket(); s.bind((\"127.0.0.1\", 0)); print(s.getsockname()[1])')\nmkdir \"$tmp/stub\"\npython3 -m http.server \"$stub_port\" --bind 127.0.0.1 --directory \"$tmp/stub\" >\"$tmp/stub.log\" 2>&1 &\nstub_pid=$!\ntrap 'kill \"$stub_pid\" 2>/dev/null; rm -rf \"$tmp\"' EXIT\nfor _ in $(seq 50); do python3 -c 'import socket, sys; socket.create_connection((\"127.0.0.1\", int(sys.argv[1])), 1)' \"$stub_port\" 2>/dev/null && break; sleep 0.2; done\ngit remote set-url origin \"http://127.0.0.1:$stub_port/rayx-ui/RayX.Dtcg\"\nprintf '\\n/// Probe for the semver scenario of the release preview.\\npub fn release_preview_probe() {}\\n' >> crates/dtcg_runtime/src/lib.rs\ngit add -A\ngit commit -qm \"chore: release preview base\"\nbase=$(git rev-parse HEAD)\nupdate() { release-plz update >\"$tmp/$1.log\" 2>&1 || { cat \"$tmp/$1.log\"; return 1; }; }\nrestore_base() { git reset -q --hard \"$base\"; git clean -qfd; }\n\necho \"== first release (no tag): release-plz release --dry-run\"\nrelease-plz release --dry-run --forge github --git-token release-preview-placeholder >\"$tmp/first.log\" 2>&1 || { cat \"$tmp/first.log\"; exit 1; }\ncat \"$tmp/first.log\"\ngrep -Fq \"creation of tag 'v1.0.0'\" \"$tmp/first.log\"\ngrep -Fq \"creation of git release\" \"$tmp/first.log\"\ngrep -Fq \"dtcg_runtime_derive 1.0.0: no release method enabled\" \"$tmp/first.log\"\nif grep -Fq \"dtcg_runtime_derive-v\" \"$tmp/first.log\"; then echo \"unexpected tag for dtcg_runtime_derive\"; exit 1; fi\ngit tag v1.0.0\n\necho \"== docs-only commit: no release\"\nprintf '\\n' >> docs/README.md\ngit commit -qam \"docs: release preview docs-only change\"\nupdate docs\ntest \"$(ver)\" = 1.0.0\ngit diff --quiet\nrestore_base\n\necho \"== derive fix: one version, one root changelog\"\nprintf '\\n// release preview\\n' >> crates/dtcg_runtime_derive/src/lib.rs\ngit commit -qam \"fix(dtcg_runtime_derive): release preview derive fix\"\nupdate derive\ntest \"$(ver)\" = 1.0.1\ntest \"$(lockver)\" = \"dtcg_runtime@1.0.1 dtcg_runtime_derive@1.0.1\"\ntest \"$(grep -m1 '^## ' CHANGELOG.md | cut -c1-10)\" = \"## [1.0.1]\"\ngrep -Eq '^## \\[1\\.0\\.1\\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$' CHANGELOG.md\ngrep -Fq 'release preview derive fix' CHANGELOG.md\ntest \"$(grep -c '^# Changelog' CHANGELOG.md)\" = 1\ntest ! -e crates/dtcg_runtime/CHANGELOG.md\ntest ! -e crates/dtcg_runtime_derive/CHANGELOG.md\ngrep -Fq 'dtcg_runtime = { path = \"../dtcg_runtime\" }' crates/dtcg_runtime_derive/Cargo.toml\ncargo metadata --offline --format-version 1 >/dev/null\nrestore_base\n\necho \"== feat that describes a break, with a Migration footer: minor (1.x policy)\"\nprintf '\\n// release preview\\n' >> crates/dtcg_runtime/src/runtime.rs\ngit commit -qam \"feat(dtcg_runtime): release preview change that breaks an API\" -m \"This body states the break; under the 1.x policy no ! and no BREAKING CHANGE footer are used.\" -m \"Migration: RayX: release preview migration note\"\nupdate feat\ntest \"$(ver)\" = 1.1.0\ntest \"$(lockver)\" = \"dtcg_runtime@1.1.0 dtcg_runtime_derive@1.1.0\"\ngrep -Fq 'Migration: RayX: release preview migration note' CHANGELOG.md\ncargo metadata --offline --format-version 1 >/dev/null\nrestore_base\n\necho \"== semver_check off: a fix that removes a public function stays on 1.x\"\ntest \"$(py 'print(tomllib.load(open(\"release-plz.toml\", \"rb\"))[\"workspace\"][\"semver_check\"])')\" = False\nsed -i.bak -e '/release_preview_probe/d' -e '/Probe for the semver scenario/d' crates/dtcg_runtime/src/lib.rs && rm crates/dtcg_runtime/src/lib.rs.bak\ngit commit -qam \"fix(dtcg_runtime): release preview removes a public function\"\nupdate semver\ntest \"$(ver)\" = 1.0.1\nif grep -Eq 'Checking API compatibility|API breaking changes' \"$tmp/semver.log\"; then cat \"$tmp/semver.log\"; echo \"an API check ran although semver_check = false\"; exit 1; fi\necho \"release preview ok\"\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "release preview ok"
+      },
+      "reuse": false,
+      "timeoutSeconds": 2400,
+      "inputs": [
+        "release-plz.toml",
+        "Cargo.toml",
+        "Cargo.lock",
+        "CHANGELOG.md",
+        "rust-toolchain.toml",
+        "crates/*/Cargo.toml",
+        "crates/*/src/**"
+      ]
+    },
+    {
+      "id": "check-release-docs",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "DOC-1",
+        "DOC-2",
+        "DOC-3"
+      ],
+      "descriptionMarkdown": "Asserts the documentation contract: the tag form in README and chapter 2 and no unpinned git form or \"not on crates.io yet\"; `docs/releasing.md` mentions its required topics (`release-plz.toml`, `RELEASE_PLZ_TOKEN`, `Migration:`, `1.x`, `2.0.0` (the release-PR version check), `semver_check`, `git tag v`, `ruleset`, `--force-with-lease`, `ci.yml`, `dtcg_runtime_derive`, the `vX.Y.Z` dependency form) and tags every code block; chapter 14 links `releasing.md`, mentions release-plz, and no longer has the publish order, the crates.io-readme note, the `../RayX.Dtcg/crates` path or the hand-written changelog rule. Content quality is the reviewer's job.",
+      "argv": [
+        "python3",
+        "-c",
+        "import re\nfrom pathlib import Path\npin = 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }'\nfor name in (\"README.md\", \"docs/02-getting-started.md\"):\n    text = Path(name).read_text(encoding=\"utf-8\")\n    assert pin in text, (name, \"tag form\")\n    assert 'git = \"https://github.com/rayx-ui/RayX.Dtcg\" }' not in text, (name, \"unpinned git dependency\")\n    assert \"not on crates.io yet\" not in text, name\nreleasing = Path(\"docs/releasing.md\").read_text(encoding=\"utf-8\")\nfor needle in (\"release-plz.toml\", \"RELEASE_PLZ_TOKEN\", \"Migration:\", \"1.x\", \"2.0.0\", \"semver_check\", \"git tag v\", \"ruleset\", \"--force-with-lease\", \"ci.yml\", \"dtcg_runtime_derive\", pin.replace(\"v1.0.0\", \"vX.Y.Z\")):\n    assert needle in releasing, (\"docs/releasing.md\", needle)\nfences = re.findall(r\"(?m)^```(.*)$\", releasing)\nassert len(fences) % 2 == 0 and all(f.strip() for f in fences[0::2]), (\"untagged code block\", fences)\nchapter = Path(\"docs/14-architecture-and-contributing.md\").read_text(encoding=\"utf-8\")\nassert \"releasing.md\" in chapter and \"release-plz\" in chapter\nfor stale in (\"Publish order\", \"crates.io readme\", \"../RayX.Dtcg/crates\", \"Record user-visible changes in `CHANGELOG.md`\"):\n    assert stale not in chapter, (\"docs/14 still says\", stale)\nprint(\"release docs ok\")\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "release docs ok"
+      },
+      "inputs": [
+        "README.md",
+        "docs/**"
+      ]
+    },
+    {
+      "id": "check-doc-doctests",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "DOC-2",
+        "DOC-3"
+      ],
+      "descriptionMarkdown": "The existing doctests of the three touched pages (README, chapter 2, chapter 14: 14 runnable examples, chapter 14's `rust,ignore` listing ignored), selected by their `documentation::` module filters. Proves the edited Markdown still compiles as doctests; not the whole doc-test suite.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dtcg_runtime",
+        "--all-features",
+        "--doc",
+        "--",
+        "documentation::readme",
+        "documentation::getting_started",
+        "documentation::architecture_and_contributing"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 14
+      },
+      "inputs": [
+        "README.md",
+        "docs/02-getting-started.md",
+        "docs/14-architecture-and-contributing.md",
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dtcg_runtime/Cargo.toml",
+        "crates/dtcg_runtime/src/**",
+        "crates/dtcg_runtime_derive/**"
+      ]
+    },
+    {
+      "id": "check-agent-guidance",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "DOC-4"
+      ],
+      "descriptionMarkdown": "`CLAUDE.md` equals `AGENTS.md`; its `## Releases` section names Conventional Commits, the `1.x` policy, `Migration:` footers, the release pull request, the fetch/rebase and `--force-with-lease` push, and `docs/releasing.md`; Consumers names the tag form and no longer the `../RayX.Dtcg/crates` path; the AgentX block is intact.",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nclaude = Path(\"CLAUDE.md\").read_text(encoding=\"utf-8\")\nassert claude == Path(\"AGENTS.md\").read_text(encoding=\"utf-8\"), \"CLAUDE.md and AGENTS.md must stay identical\"\nassert \"\\n## Releases\\n\" in claude, \"CLAUDE.md has no Releases section\"\nsection = claude.split(\"\\n## Releases\\n\", 1)[1].split(\"\\n## \", 1)[0]\nfor needle in (\"Conventional Commits\", \"1.x\", \"Migration:\", \"release pull request\", \"git fetch origin && git rebase origin/main\", \"--force-with-lease\", \"docs/releasing.md\"):\n    assert needle in section, (\"Releases section\", needle)\nassert \"../RayX.Dtcg/crates\" not in claude, \"Consumers still describes the relative path\"\nassert 'tag = \"v' in claude, \"Consumers names the tag form\"\nassert \"<!-- agentx:begin -->\" in claude and \"<!-- agentx:end -->\" in claude\nprint(\"agent guidance ok\")\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "agent guidance ok"
+      },
+      "inputs": [
+        "CLAUDE.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "check-workflow-yaml",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "WF-1"
+      ],
+      "descriptionMarkdown": "AgentX's workflow YAML checker (syntax and duplicate keys GitHub rejects) over both workflows. The script path is the installed AgentX skill's; adjust it to the local install when resolving the sprint.",
+      "argv": [
+        "ruby",
+        "/Users/dinko/.claude/skills/agentx/scripts/check_workflow_yaml.rb",
+        ".github/workflows/release-plz.yml",
+        ".github/workflows/ci.yml"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "workflow yaml ok"
+      },
+      "inputs": [
+        ".github/workflows/**"
+      ]
+    },
+    {
+      "id": "check-release-workflow",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "WF-1"
+      ],
+      "descriptionMarkdown": "Ruby (`YAML.safe_load`) structure assertions on `release-plz.yml` per WF-1: triggers (`push` to `main`, `workflow_dispatch`), the two jobs with guard, permissions and concurrency, `release-pr` with `needs: release` and `release` with no `needs`, checkout with `fetch-depth: 0` and the token, the toolchain step, `release-plz/action@v0.5` with the matching `command` and `GITHUB_TOKEN`, no cargo test/clippy/build/check steps, `RELEASE_PLZ_TOKEN` the only secret.",
+      "argv": [
+        "ruby",
+        "-e",
+        "require \"yaml\"\npath = \".github/workflows/release-plz.yml\"\ntext = File.read(path)\nw = YAML.safe_load(text)\non = w[\"on\"] || w[true]\nraise \"trigger\" unless on[\"push\"] == { \"branches\" => [\"main\"] } && on.key?(\"workflow_dispatch\") && on.keys.size == 2\njobs = w[\"jobs\"]\nraise \"jobs #{jobs.keys}\" unless jobs.keys.sort == [\"release\", \"release-pr\"]\nraise \"release-pr must need release\" unless Array(jobs[\"release-pr\"][\"needs\"]) == [\"release\"]\nraise \"release must not wait on another job\" if jobs[\"release\"].key?(\"needs\")\njobs.each do |name, job|\n  raise \"#{name}: guard\" unless job[\"if\"] == \"github.repository == 'rayx-ui/RayX.Dtcg'\"\n  raise \"#{name}: permissions\" unless job[\"permissions\"][\"contents\"] == \"write\"\n  raise \"#{name}: pull-requests\" if name == \"release-pr\" && job[\"permissions\"][\"pull-requests\"] != \"write\"\n  raise \"#{name}: concurrency\" unless job[\"concurrency\"]\n  steps = job[\"steps\"]\n  checkout = steps.find { |s| s[\"uses\"].to_s.start_with?(\"actions/checkout@\") }\n  raise \"#{name}: checkout\" unless checkout && checkout[\"with\"][\"fetch-depth\"] == 0 && checkout[\"with\"][\"token\"] == \"${{ secrets.RELEASE_PLZ_TOKEN }}\"\n  raise \"#{name}: toolchain\" unless steps.any? { |s| s[\"uses\"].to_s.start_with?(\"actions-rust-lang/setup-rust-toolchain@\") }\n  action = steps.find { |s| s[\"uses\"] == \"release-plz/action@v0.5\" }\n  raise \"#{name}: action\" unless action && action[\"with\"][\"command\"] == name && action[\"env\"][\"GITHUB_TOKEN\"] == \"${{ secrets.RELEASE_PLZ_TOKEN }}\"\n  raise \"#{name}: runs tests\" if steps.any? { |s| s[\"run\"].to_s =~ /cargo\\s+(test|clippy|build|check)/ }\nend\nraise \"secrets\" unless text.scan(/secrets\\.([A-Za-z_]+)/).flatten.uniq == [\"RELEASE_PLZ_TOKEN\"]\nputs \"release workflow ok\"\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "release workflow ok"
+      },
+      "inputs": [
+        ".github/workflows/**"
+      ]
+    },
+    {
+      "id": "check-tag-ruleset",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "OWN-2"
+      ],
+      "descriptionMarkdown": "Reads the repository's rulesets with `gh api` (read-only) and requires an active `tag` ruleset including `refs/tags/v*` whose rules contain `deletion` and `update` and which has no bypass actors (the owner's \"Release tags\" ruleset; it passed when the plan was amended). GitHub state, so never reused.",
+      "argv": [
+        "bash",
+        "-c",
+        "set -euo pipefail\nfound=0\nfor id in $(gh api repos/rayx-ui/RayX.Dtcg/rulesets --jq '.[] | select(.target == \"tag\") | .id'); do\n  line=$(gh api \"repos/rayx-ui/RayX.Dtcg/rulesets/$id\" --jq '[.enforcement, (.conditions.ref_name.include | join(\",\")), ([.rules[].type] | sort | join(\",\")), (\"bypass=\" + (.bypass_actors | length | tostring))] | join(\" \")')\n  echo \"tag ruleset $id: $line\"\n  case \"$line\" in\n    \"active refs/tags/v* \"*deletion*update*\" bypass=0\") found=1 ;;\n  esac\ndone\ntest \"$found\" = 1\necho \"tag ruleset ok\"\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "tag ruleset ok"
+      },
+      "reuse": false
+    },
+    {
+      "id": "check-release-secret",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "OWN-1"
+      ],
+      "descriptionMarkdown": "Lists the repository's Actions secret names with `gh secret list` (values are never readable) and requires `RELEASE_PLZ_TOKEN`. It passed when the plan was amended (updated 2026-10-18T21:09:25Z). GitHub state, so never reused.",
+      "argv": [
+        "bash",
+        "-c",
+        "set -euo pipefail\n# Names only: secret values are never readable.\ngh secret list --repo rayx-ui/RayX.Dtcg --json name,updatedAt --jq '.[] | select(.name == \"RELEASE_PLZ_TOKEN\") | .name + \" \" + .updatedAt' | grep '^RELEASE_PLZ_TOKEN '\necho \"release secret ok\"\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "release secret ok"
+      },
+      "reuse": false
+    },
+    {
+      "id": "check-first-release",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [
+        "FIRST-1"
+      ],
+      "descriptionMarkdown": "Read-only GitHub checks with `gh` and `git ls-remote`: the latest Release-plz run on `main` succeeded; the Release `v1.0.0` exists, not draft or prerelease, and its notes contain the 1.0.0 section (\"Official conformance corpus\"); `Cargo.toml` at `v1.0.0` says `1.0.0`; `refs/tags/v1.0.0` exists and no per-crate tag; no open `release-plz-*` pull request. GitHub state, so never reused.",
+      "argv": [
+        "bash",
+        "-c",
+        "set -euo pipefail\nrepo=rayx-ui/RayX.Dtcg\nrun=$(gh run list --repo \"$repo\" --workflow release-plz.yml --branch main --limit 1 --json conclusion,headSha --jq '.[0] | .conclusion + \" \" + .headSha')\necho \"latest Release-plz run on main: $run\"\ntest \"${run%% *}\" = success\nrelease=$(gh release view v1.0.0 --repo \"$repo\" --json tagName,isDraft,isPrerelease --jq '[.tagName, .isDraft, .isPrerelease] | map(tostring) | join(\" \")')\necho \"release: $release\"\ntest \"$release\" = \"v1.0.0 false false\"\ngh release view v1.0.0 --repo \"$repo\" --json body --jq .body | grep -Fq 'Official conformance corpus'\ngh api -H 'Accept: application/vnd.github.raw' \"repos/$repo/contents/Cargo.toml?ref=v1.0.0\" | grep -q '^version = \"1.0.0\"$'\ntags=$(git ls-remote --tags --refs \"https://github.com/$repo\" | awk '{print $2}')\necho \"$tags\"\necho \"$tags\" | grep -qx 'refs/tags/v1.0.0'\nif echo \"$tags\" | grep -q 'dtcg_runtime'; then echo \"unexpected per-crate tag\"; exit 1; fi\nopen=$(gh pr list --repo \"$repo\" --state open --json headRefName --jq '.[] | select(.headRefName | startswith(\"release-plz-\")) | .headRefName')\ntest -z \"$open\"\necho \"first release ok\"\n"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "first release ok"
+      },
+      "reuse": false
+    },
+    {
+      "id": "check-tag-consumer",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "criterionIds": [
+        "FIRST-2"
+      ],
+      "descriptionMarkdown": "Creates a scratch library crate in a new system temp directory (outside the repository and any workspace), adds the tag dependency, `cargo check`s it with toolchain 1.95.0 and requires `cargo tree` to show `dtcg_runtime v1.0.0` and `dtcg_runtime_derive v1.0.0` from `https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#`. Fetches from GitHub, so never reused.",
+      "argv": [
+        "bash",
+        "-c",
+        "set -euo pipefail\nd=$(mktemp -d)\ntrap 'rm -rf \"$d\"' EXIT\ncd \"$d\"\ncargo new --lib --vcs none --quiet dtcg_tag_consumer\ncd dtcg_tag_consumer\nprintf 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }\\n' >> Cargo.toml\nprintf 'pub use dtcg_runtime::DtcgRuntime;\\n' > src/lib.rs\ncargo check --quiet\ncargo tree --prefix none | sort -u | grep -F '?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime v1.0.0 (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\ncargo tree --prefix none | grep -Fq 'dtcg_runtime_derive v1.0.0 (https://github.com/rayx-ui/RayX.Dtcg?tag=v1.0.0#'\necho \"tag consumer ok\"\n"
+      ],
+      "cwd": ".",
+      "environment": {
+        "RUSTUP_TOOLCHAIN": "1.95.0"
+      },
+      "expected": {
+        "exitCode": 0,
+        "stdoutPattern": "tag consumer ok"
+      },
+      "reuse": false,
+      "timeoutSeconds": 1200
+    },
+    {
+      "id": "final-package",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "criterionIds": [
+        "VER-1"
+      ],
+      "descriptionMarkdown": "`cargo package --workspace` after the manifest change: both crates still package and their verification builds pass (crates.io-readiness, packaging rule). Runs on the committed tree.",
+      "argv": [
+        "cargo",
+        "package",
+        "--workspace"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0
+      },
+      "timeoutSeconds": 1800
+    }
+  ],
+  "finalCheckIds": [
+    "final-package"
+  ],
+  "sprints": [
+    {
+      "id": "s1-release-config",
+      "title": "release-plz configuration, version 1.0.0 and the 1.0.0 changelog, proven by a local release preview",
+      "dependsOn": [],
+      "memoryScopes": [
+        "repository",
+        "repository/packaging"
+      ],
+      "checkIds": [
+        "check-release-config",
+        "check-version-changelog",
+        "check-release-preview"
+      ],
+      "tasks": [
+        {
+          "id": "t01-release-plz-config",
+          "title": "release-plz.toml for one tag, one release and one root changelog",
+          "descriptionMarkdown": "Read `../RayX.CLI/release-plz.toml` (reference repository) and write `release-plz.toml` per RPZ-1: the CLI's `[workspace]` keys with `git_release_enable = true` (no dist here), the CLI's `release_commits = \"^(feat|fix|perf)\"`, `semver_check = false`, the two `[[package]]` entries with `version_group = \"dtcg\"`, and the CLI's `[changelog]` with a header naming `dtcg_runtime` and `dtcg_runtime_derive` (no `## [Unreleased]`) and, per entry, one indented `Migration: <value>` line for each footer whose `token` is `Migration` (git-cliff's `commit.footers`; d-changelog-from-commits). Comment the file like the CLI's (why git-only, why one version group, the tag form) and state the 1.x policy (d-stay-on-1x: why `semver_check` is off and `!` is never used). Commit, e.g. `build(release): configure release-plz for git-tag releases`.",
+          "criterionIds": [
+            "RPZ-1"
+          ],
+          "designIds": [
+            "d-release-plz-config",
+            "d-stay-on-1x",
+            "d-changelog-from-commits"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-release-config"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "release-plz.toml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "Cargo.toml"
+            }
+          ]
+        },
+        {
+          "id": "t02-version-changelog",
+          "title": "Version 1.0.0 and the 1.0.0 changelog section",
+          "descriptionMarkdown": "In the root `Cargo.toml` set `[workspace.package] version = \"1.0.0\"` and `version = \"1.0.0\"` on the `dtcg_runtime` and `dtcg_runtime_derive` entries of `[workspace.dependencies]`; refresh `Cargo.lock` (`cargo update --workspace --offline`). Touch nothing under `crates/`. In `CHANGELOG.md` replace the header with exactly the `[changelog] header` of `release-plz.toml` and the `## [Unreleased]` heading with `## [1.0.0] - <today>`, keeping everything below it byte-for-byte (VER-2). Commit, e.g. `chore(release): version 1.0.0`.",
+          "criterionIds": [
+            "VER-1",
+            "VER-2"
+          ],
+          "designIds": [
+            "d-version-and-changelog"
+          ],
+          "dependsOn": [
+            "t01-release-plz-config"
+          ],
+          "checkIds": [
+            "check-version-changelog"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "Cargo.toml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "Cargo.lock"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "CHANGELOG.md"
+            }
+          ]
+        },
+        {
+          "id": "t03-release-preview",
+          "title": "Prove the release behaviour locally under the 1.x policy",
+          "descriptionMarkdown": "Install the versions `release-plz/action@v0.5` uses (re-check its `action.yml` defaults first): `cargo install --locked release-plz@0.3.172` and `cargo install --locked cargo-semver-checks@0.51.0` (crates.io, user cargo bin, not committed). Run `check-release-preview` (it works on uncommitted changes too: it copies the working tree to a temp directory; never run its scenario commands in the repository). Fix configuration for wrong behaviour; amend only assertion wording that differs from release-plz's real output, and record each such difference as a finding. The scenarios prove the 1.x policy: a break-describing `feat` with a `Migration:` footer gives `1.1.0` with the footer rendered (if git-cliff does not parse the footer, fix the template or the footer form, not the assertion), and an API removal under `fix` gives `1.0.1` with cargo-semver-checks installed. Do not change the toolchain. Keep raw logs, if any, under `artifacts-temp/agentx/dtcg-releases/`.",
+          "criterionIds": [
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4"
+          ],
+          "designIds": [
+            "d-release-plz-config",
+            "d-stay-on-1x",
+            "d-changelog-from-commits"
+          ],
+          "dependsOn": [
+            "t01-release-plz-config",
+            "t02-version-changelog"
+          ],
+          "checkIds": [
+            "check-release-preview"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "release-plz.toml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "rust-toolchain.toml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s2-release-docs",
+      "title": "Release documentation, install by tag and contributor guidance",
+      "dependsOn": [
+        "s1-release-config"
+      ],
+      "memoryScopes": [
+        "repository",
+        "repository/validation"
+      ],
+      "checkIds": [
+        "check-release-docs",
+        "check-doc-doctests",
+        "check-agent-guidance"
+      ],
+      "tasks": [
+        {
+          "id": "t04-releasing-doc",
+          "title": "docs/releasing.md and chapter 14",
+          "descriptionMarkdown": "Write `docs/releasing.md` per DOC-1, modelled on `../RayX.CLI/docs/releasing.md` minus cargo-dist (release-plz creates the Release; no installers or attestations), with the 1.x policy (d-stay-on-1x) and the release-PR CI statement of CI-1. Rework chapter 14 per DOC-3 (Releases, the source-layout tree, Working with RayX; keep CI accurate). Leave `ci.yml` untouched (CI-1). Tag every code block. Commit, e.g. `docs(release): document git-tag releases with release-plz`.",
+          "criterionIds": [
+            "DOC-1",
+            "DOC-3",
+            "CI-1"
+          ],
+          "designIds": [
+            "d-release-docs",
+            "d-stay-on-1x",
+            "d-changelog-from-commits",
+            "d-release-workflow",
+            "d-consume-by-tag"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-release-docs",
+            "check-doc-doctests"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/releasing.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/14-architecture-and-contributing.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": ".github/workflows/ci.yml"
+            }
+          ]
+        },
+        {
+          "id": "t05-install-by-tag",
+          "title": "README and chapter 2 install by release tag",
+          "descriptionMarkdown": "Rework README `## Installation` and chapter 2's \"Add the dependency\" per DOC-2 with `dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }`, keeping the surrounding notes and the `toml` code-block tags. Optionally link `docs/releasing.md` from the README Development section. Commit, e.g. `docs(readme): depend on a release tag`.",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "designIds": [
+            "d-consume-by-tag"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-release-docs",
+            "check-doc-doctests"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "README.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/02-getting-started.md"
+            }
+          ]
+        },
+        {
+          "id": "t06-agent-guidance",
+          "title": "Releases and Consumers in CLAUDE.md and AGENTS.md",
+          "descriptionMarkdown": "Add the `## Releases` section and rewrite `## Consumers` per DOC-4 in `CLAUDE.md`, then copy the file to `AGENTS.md` so they stay identical (AgentX block untouched). Keep it short; details live in `docs/releasing.md`. Commit, e.g. `docs(agents): add release and push rules`. After the s2 checkpoint, push s1 and s2 to `main` per the push policy (no workflow yet, so nothing is released) so `ci.yml` checks them before s3.",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "designIds": [
+            "d-consume-by-tag",
+            "d-stay-on-1x",
+            "d-changelog-from-commits",
+            "d-release-workflow"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-agent-guidance"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "CLAUDE.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "AGENTS.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s3-first-release",
+      "title": "First release: verified prerequisites, the release-plz workflow and v1.0.0 (pre-approved push), used from a scratch consumer",
+      "dependsOn": [
+        "s1-release-config",
+        "s2-release-docs"
+      ],
+      "memoryScopes": [
+        "repository",
+        "repository/validation"
+      ],
+      "checkIds": [
+        "check-release-secret",
+        "check-tag-ruleset",
+        "check-workflow-yaml",
+        "check-release-workflow",
+        "check-first-release",
+        "check-tag-consumer"
+      ],
+      "tasks": [
+        {
+          "id": "t07-owner-prerequisites",
+          "title": "Verify RELEASE_PLZ_TOKEN and the v* tag ruleset",
+          "descriptionMarkdown": "The owner created both on 2026-10-18 (amendment 1 C). Verify only, read-only: `check-release-secret` (secret names) and `check-tag-ruleset` (the \"Release tags\" ruleset: active, `refs/tags/v*`, `update` and `deletion` restricted, no bypass). Never create, change or read the value of either. If one is missing or different, stop and report it to the owner. Note in `docs/releasing.md` (t04 already describes them) nothing new unless the verification differs.",
+          "criterionIds": [
+            "OWN-1",
+            "OWN-2"
+          ],
+          "designIds": [
+            "d-owner-prerequisites"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-release-secret",
+            "check-tag-ruleset"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/releasing.md"
+            }
+          ]
+        },
+        {
+          "id": "t08-release-workflow",
+          "title": "The release-plz workflow",
+          "descriptionMarkdown": "Write `.github/workflows/release-plz.yml` per WF-1 from `../RayX.CLI/.github/workflows/release-plz.yml`: this repository's guard, `ci.yml`'s `actions/checkout` major, a header comment that fits this repository (release-plz creates the Release; `ci.yml` tests pull requests and pushes). Commit, e.g. `ci(release): tag releases with release-plz`, but do not push it here: its push is the release (t09). Before that push, run this task's two static checks once by hand.",
+          "criterionIds": [
+            "WF-1"
+          ],
+          "designIds": [
+            "d-release-workflow"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-workflow-yaml",
+            "check-release-workflow"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": ".github/workflows/release-plz.yml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": ".github/workflows/ci.yml"
+            }
+          ]
+        },
+        {
+          "id": "t09-first-release",
+          "title": "Release v1.0.0 and use it from a scratch consumer",
+          "descriptionMarkdown": "Preconditions: `check-release-secret` and `check-tag-ruleset` pass, s1 and s2 are on `origin/main` with a green `ci.yml` run (`gh run list --workflow ci.yml --branch main`), and `Cargo.toml` still says `1.0.0`. If today differs from the `## [1.0.0]` date, correct it (`docs(changelog): date the 1.0.0 release`). The owner pre-approved this push (amendment 1 D): `git fetch origin && git rebase origin/main && git push --force-with-lease origin main`, then watch the Release-plz run (`gh run watch`) and verify FIRST-1 and FIRST-2. If the run fails at checkout or the tag push, inspect the log: a permission or authentication failure means the PAT's repository access does not include RayX.Dtcg; report that to the owner (fix: add the repository to the PAT) and do not retry blindly; after the owner's fix, re-run with `workflow_dispatch`. Use the by-hand fallback only with the owner's go-ahead and record why.",
+          "criterionIds": [
+            "FIRST-1",
+            "FIRST-2"
+          ],
+          "designIds": [
+            "d-release-workflow",
+            "d-consume-by-tag",
+            "d-version-and-changelog",
+            "d-owner-prerequisites"
+          ],
+          "dependsOn": [
+            "t07-owner-prerequisites",
+            "t08-release-workflow"
+          ],
+          "checkIds": [
+            "check-first-release",
+            "check-tag-consumer"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": ".github/workflows/release-plz.yml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "CHANGELOG.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
