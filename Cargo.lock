@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "dtcg_runtime"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "dtcg_runtime",
  "dtcg_runtime_derive",
@@ -60,7 +60,7 @@ dependencies = [
 
 [[package]]
 name = "dtcg_runtime_derive"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "dtcg_runtime",
  "proc-macro2",

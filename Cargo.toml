@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/dtcg_runtime", "crates/dtcg_runtime_derive"]
 
 [workspace.package]
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
@@ -11,8 +11,8 @@ repository = "https://github.com/rayx-ui/RayX.Dtcg"
 homepage = "https://github.com/rayx-ui/RayX.Dtcg"
 
 [workspace.dependencies]
-dtcg_runtime = { path = "crates/dtcg_runtime", version = "0.1.0" }
-dtcg_runtime_derive = { path = "crates/dtcg_runtime_derive", version = "0.1.0" }
+dtcg_runtime = { path = "crates/dtcg_runtime", version = "1.0.0" }
+dtcg_runtime_derive = { path = "crates/dtcg_runtime_derive", version = "1.0.0" }
 proc-macro2 = "1.0"
 quote = "1.0"
 serde = { version = "1.0.228", features = ["derive"] }
