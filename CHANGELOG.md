@@ -6,7 +6,7 @@ crates share one version and one release tag `vX.Y.Z`. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
 
-## [1.0.0] - 2026-10-19
+## [1.0.0] - 2026-10-18
 
 The runtime now conforms fully to the DTCG 2025.10 Format, Color and Resolver modules: all 250
 fixtures of the official conformance corpus pass. See [docs/12-conformance.md](docs/12-conformance.md)
