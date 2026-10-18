@@ -1,0 +1,90 @@
+# release-plz: keeps a release pull request with the version bump and the CHANGELOG.md section
+# open on `main`; merging it pushes the tag `vX.Y.Z` and creates the GitHub Release whose notes
+# are that section. See docs/releasing.md.
+#
+# 1.x policy: the owner is the only consumer, so the crates stay on 1.x. No commit is marked
+# breaking (no `!` after the type or scope, no `BREAKING CHANGE:` footer): release-plz cannot cap a
+# major bump, and it bumps the major for either of them or for an API break found by
+# cargo-semver-checks. A breaking change is a `feat` (or a `fix`) whose body states the break and
+# whose `Migration:` footers tell each consumer what to change; the changelog prints them. The
+# policy ends when a second consumer appears; then `!` and major bumps return.
+
+[workspace]
+# Versions come from git tags; nothing goes to crates.io, although the manifests stay packageable.
+git_only = true
+publish = false
+git_tag_enable = true
+git_tag_name = "v{{ version }}"
+# No cargo-dist here: release-plz creates the GitHub Release from the changelog section.
+git_release_enable = true
+changelog_update = true
+# 1.x policy (above): an API break found by cargo-semver-checks would force 2.0.0.
+semver_check = false
+# Only changes that reach users start a release; docs, tests, CI, build and agentx commits ride
+# along in the next one.
+release_commits = "^(feat|fix|perf)"
+
+# One release unit: both crates inherit `[workspace.package] version` and `dtcg_runtime`
+# re-exports the derive macros, so they share one version (the version group), one tag `vX.Y.Z`,
+# one GitHub Release and one root CHANGELOG.md, all owned by `dtcg_runtime`.
+[[package]]
+name = "dtcg_runtime"
+changelog_path = "./CHANGELOG.md"
+changelog_include = ["dtcg_runtime_derive"]
+version_group = "dtcg"
+
+[[package]]
+name = "dtcg_runtime_derive"
+version_group = "dtcg"
+# Released under `dtcg_runtime`'s tag and changelog. It keeps the inherited `git_tag_name`: in
+# git-only mode that template is how it finds its previous version (`v*` tags).
+git_tag_enable = false
+git_release_enable = false
+changelog_update = false
+
+[changelog]
+header = """# Changelog
+
+All notable changes to `dtcg_runtime` and `dtcg_runtime_derive` are documented in this file. Both
+crates share one version and one release tag `vX.Y.Z`. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the crates follow
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
+Conventional Commits by release-plz.
+
+"""
+# Each `Migration:` footer of a commit is printed as a nested line under its entry.
+body = """
+## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+{%- if commit.scope -%}
+- *({{ commit.scope }})* {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}
+{% else -%}
+- {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}
+{% endif -%}
+{% for footer in commit.footers -%}
+{% if footer.token == "Migration" %}{{ "  " }}- Migration: {{ footer.value }}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+{% endfor %}
+"""
+trim = true
+protect_breaking_commits = true
+tag_pattern = "v[0-9].*"
+sort_commits = "oldest"
+commit_parsers = [
+  # Housekeeping that is not a change to the crates.
+  { message = "^chore\\(agentx\\)", skip = true },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore\\(deps\\)", skip = true },
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Fixes" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Refactoring" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^(ci|build)", group = "Build and CI" },
+  { message = "^test", group = "Tests" },
+  { message = "^chore", group = "Maintenance" },
+]
