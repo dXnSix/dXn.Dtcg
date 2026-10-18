@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 11,
-  "planRevision": 4,
+  "revision": 24,
+  "planRevision": 5,
   "specHashes": {
     "requirements": "5d9d7335a436fce30393d1657099e15536522a2075b4c3c8bbee0731235c0bce",
     "design": "7d5a7e14ab7cd2dc79b519b210235f35d63d13293c7ac8d6dc1f69723ccdb667",
-    "plan": "72ade390a1f6a82c76a38b5f4092b2e6134f73c67b0dda3a0d31f708e1cc3d9f"
+    "plan": "bc29e2108954aa1f36516c3cd2ac6b7d71dfd694932213304488f686b7d9f6aa"
   },
   "tasks": {
     "t01-release-plz-config": {
@@ -28,13 +28,22 @@
       ]
     },
     "t04-releasing-doc": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     },
     "t05-install-by-tag": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     },
     "t06-agent-guidance": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     },
     "t07-owner-prerequisites": {
       "status": "pending"
@@ -64,6 +73,24 @@
         }
       },
       "recordedAt": "2026-10-18T22:05:47Z"
+    },
+    "67cdaf151243f0d0753188a8867dfa035c1aa30a4dd7baa438d326acd33b4e0b": {
+      "snapshot": {
+        "specHash": "47fac491124edc75184020cfb0bfac2f066a1f247a573228385fcc78bc2c9be1",
+        "repositories": {
+          "dtcg": "44aaa1cdba9309992c9fba75cc1af5f62577a1794cea6231b4b3c45617966e5d"
+        }
+      },
+      "recordedAt": "2026-10-18T22:10:13Z"
+    },
+    "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377": {
+      "snapshot": {
+        "specHash": "da027d0f4ed95e368018da86e68e88c8bf622bfa55d84faf260b8ac3d0342772",
+        "repositories": {
+          "dtcg": "c2ac519e83608a91989dcc873a63a5c3fbd8d1ca2be2c61ce22caea31d828aa7"
+        }
+      },
+      "recordedAt": "2026-10-18T22:13:27Z"
     }
   },
   "checkResults": {
@@ -117,6 +144,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-releases/s1-release-config-final-f3dc7e80925d.log",
       "logSha256": "8915ddf33c797c4d956c6c845d310e6c3e43b96454a5844e2668039fd4fb4c92",
       "inputsHash": "2746e508b9aad5c3019ec5facc0db5f0256369d405b95dee1f8f1e04255891d3"
+    },
+    "s2-release-docs/check-release-docs/final": {
+      "checkId": "check-release-docs",
+      "boundaryId": "s2-release-docs",
+      "phase": "final",
+      "batchId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "definitionHash": "027476b2ef45640dfd41aa894d859ea88d18c1cdaba091ccadd3e9618592a1a6",
+      "basisHash": "ae1c3455bcbe2191c038853f1fa13ebb0872e7cdfa5439f16b53aee058f8ff79",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0241,
+      "recordedAt": "2026-10-18T22:13:15Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-d0848568ab66.log",
+      "logSha256": "12ca4db42fc6ac121e3dd738b4659dcdb98fb77cf81aee78a9dd0c165081f101",
+      "inputsHash": "b7b2e1079efad7f6ad47cecc62711d4e5cbdb6785f0511078418c712c0828e43"
+    },
+    "s2-release-docs/check-doc-doctests/final": {
+      "checkId": "check-doc-doctests",
+      "boundaryId": "s2-release-docs",
+      "phase": "final",
+      "batchId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "definitionHash": "b6d50b6e122ad9b4801a30353f150da3c4f508642cd4201ec1feddf84d321c12",
+      "basisHash": "7a212d29903f8c4defcfd1f111b2bb616f851074de9ece0ebd5964f63a6b78df",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 18,
+      "durationSeconds": 0.8937,
+      "recordedAt": "2026-10-18T22:13:15Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-24d621c175a9.log",
+      "logSha256": "878fc5d5ba83371430d0ad752b853fdb28a50305bea7827707f0cdd42f8067b6",
+      "inputsHash": "28404b4032c97aea90d9f441795f041313dc71bbcbbc39226bc7fd3d505e18e5"
+    },
+    "s2-release-docs/check-agent-guidance/final": {
+      "checkId": "check-agent-guidance",
+      "boundaryId": "s2-release-docs",
+      "phase": "final",
+      "batchId": "67cdaf151243f0d0753188a8867dfa035c1aa30a4dd7baa438d326acd33b4e0b",
+      "definitionHash": "2ad6d9b75c729726111991917b003382fc0e3ced4078c5815180c7465cd0b02b",
+      "basisHash": "89037b3ba146a75374ee95a2bfcbfdb2116fc7f1b29551faa7c813f54918a5bf",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0405,
+      "recordedAt": "2026-10-18T22:10:13Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-4de8986e4a64.log",
+      "logSha256": "0ed430d31639953ac9ad016be1356eb95bf76f9d37fa9bdd9ad3b148d6d750b0",
+      "inputsHash": "b7d05f29a16db0c3e55dfb9af823a712bda478b3624ea970b1cb73afbef3f334"
     }
   },
   "reviews": {
@@ -222,6 +300,137 @@
       "summaryMarkdown": "`release-plz.toml` matches RPZ-1 and RayX.CLI's template (only intended deltas: `git_release_enable = true`, `semver_check` off with the 1.x rationale, two `[[package]]` entries in version group `dtcg`, derive keeps the inherited `git_tag_name`, and the `commit.footers` Migration loop). Cargo.toml/Cargo.lock change only the four 0.1.0 -> 1.0.0 strings; nothing under `crates/` differs from `7d55b99`; the derive dev-dependency stays path-only. CHANGELOG.md diff is only the header and the heading. The recorded passing preview log shows the first-release dry run planning `v1.0.0` + git release and `no release method enabled` for the derive crate. An independent scratch run (temp copy, local stub forge) confirmed the template renders each `Migration:` footer (two footers tested) as a nested line under a scoped `feat` entry and keeps unscoped entries correct, with 1.1.0 proposed. Observation only: the header still states the crates follow SemVer although the 1.x policy ships breaks as minors; this is the owner's binding decision and RPZ-1's required header, so it is not a finding. Non-blocking recommendations (not defects): (1) the preview's docs-only scenario uses `git diff --quiet`, which ignores untracked files; `test -z \"$(git status --porcelain)\"` would prove the clean tree fully. (2) release-plz dates generated sections in UTC (a scratch run at ~00:10 +02:00 on 2026-10-19 produced `## [1.1.0] - 2026-10-18` above `## [1.0.0] - 2026-10-19`); when t09 sets or corrects the 1.0.0 date, use the UTC date of the release push (`date -u +%F`).",
       "findingIds": [],
       "recordedAt": "2026-10-18T22:08:10Z"
+    },
+    "s2-release-docs": {
+      "reviewerId": "dtcg-releases-s2-reviewer",
+      "snapshotId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "criterionIds": [
+        "DOC-1",
+        "DOC-2",
+        "DOC-3",
+        "DOC-4",
+        "CI-1"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/releasing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "CI-1"
+          ],
+          "sha256": "3e973ce4cc5685fec11818eac9ae3545266a3cfe0e349073cc349e2e06a54b46"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "release-plz.toml",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "b1116cf3f060e89e7e5e4e4671a8f01ca5627550427a59eaab5be0e5ea69540a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "source",
+          "criterionIds": [
+            "CI-1"
+          ],
+          "sha256": "05993a2ee095c6aea21df44e92b4f1dbfcb47c7b9cfe07df6328610686ddf2f4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "README.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "3e483af8a4b2aebc68ab557a68218ca72ee120c3da4318d875496d7309e0127a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/02-getting-started.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "170997f1361ec1f0b0ded4b3612ac6b375ac8f7064300b7d31d01f488ab8b0ba"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "e2495836b28023238d8bfa59917b084d4e00776a2bf37f1b1ac75df38bc7b422"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/14-architecture-and-contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-3"
+          ],
+          "sha256": "39024e33f16c04912bf91a0678e6e383e28d425b36c1f7f9460488e4f739d926"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CLAUDE.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "sha256": "e7fd92a0cbc9a91399685b71a470969ebe0cd2211b081b3c1812ee6242bd0c7b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "AGENTS.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "sha256": "e7fd92a0cbc9a91399685b71a470969ebe0cd2211b081b3c1812ee6242bd0c7b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-d0848568ab66.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "DOC-1",
+            "DOC-2",
+            "DOC-3"
+          ],
+          "sha256": "12ca4db42fc6ac121e3dd738b4659dcdb98fb77cf81aee78a9dd0c165081f101"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-24d621c175a9.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "DOC-2",
+            "DOC-3"
+          ],
+          "sha256": "878fc5d5ba83371430d0ad752b853fdb28a50305bea7827707f0cdd42f8067b6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-4de8986e4a64.log",
+          "kind": "runtime",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "sha256": "0ed430d31639953ac9ad016be1356eb95bf76f9d37fa9bdd9ad3b148d6d750b0"
+        }
+      ],
+      "summaryMarkdown": "Repair verified: F-S2-1 is resolved. `docs/11-errors-limits-and-diagnostics.md:248` now pins `tag = \"v1.0.0\"`; the amended `check-release-docs` guards every git dependency line in README, CLAUDE.md and docs/*.md, and `check-doc-doctests` covers chapter 11 (18 passed). The by-hand fallback now names the owner and the `notes.md` step. Everything else holds against the real config. `docs/releasing.md` matches `release-plz.toml` (git-only, no publish, `v{{ version }}`, derive folded in via `version_group`/`changelog_include`, `release_commits`, `semver_check = false`, skipped chore scopes, `Migration` footers) and `Cargo.toml`. CI-1: `git diff 7d55b99 -- .github/workflows/ci.yml` is empty, and the release-PR CI statement matches ci.yml. Chapter 14 has no stale publish, readme or changelog rules. CLAUDE.md is byte-identical to AGENTS.md, with the AgentX block intact. Remaining note, not a finding: chapter 14 and CLAUDE.md say in the present tense that RayX depends on a tag, while RayX keeps its path until its own epic (the criterion wording asks for this).",
+      "findingIds": [
+        "F-S2-1"
+      ],
+      "recordedAt": "2026-10-18T22:14:15Z"
     }
   },
   "checkpoints": {
@@ -232,9 +441,38 @@
       },
       "reviewHash": "a5504f9c7565ac5a4e5776417abc4e40d4e36e40edf5e3a939a6479f99083352",
       "recordedAt": "2026-10-18T22:08:37Z"
+    },
+    "s2-release-docs": {
+      "snapshotId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "commits": {
+        "dtcg": "4ad530f56d76fd8ac5a50e3683ca0ba907b8c407"
+      },
+      "reviewHash": "5bb6a767c50548f431fc0d2227d7a0c32d8b5dad2d2120e3ffe49f85ef0ddcff",
+      "recordedAt": "2026-10-18T22:14:35Z"
     }
   },
-  "findings": [],
+  "findings": [
+    {
+      "id": "F-S2-1",
+      "boundaryId": "s2-release-docs",
+      "criterionIds": [
+        "DOC-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Stale unpinned git dependency in `docs/11-errors-limits-and-diagnostics.md:248`. Resolved: it now pins `tag = \"v1.0.0\"`, and `check-release-docs` guards every git dependency line in README, CLAUDE.md and docs/*.md.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/tasks/dtcg-releases/implementation-plan.json"
+        }
+      ]
+    }
+  ],
   "handoffMarkdown": "",
   "protectedPaths": {
     "dtcg": {

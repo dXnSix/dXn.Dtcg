@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 4,
+  "revision": 5,
   "title": "Versioned git-tag releases for RayX.Dtcg: release-plz, one v1.0.0 tag, release and changelog for both crates, install by tag",
   "validationMode": "sprint",
   "repositories": [
@@ -121,11 +121,11 @@
         "DOC-2",
         "DOC-3"
       ],
-      "descriptionMarkdown": "Asserts the documentation contract: the tag form in README and chapter 2 and no unpinned git form or \"not on crates.io yet\"; `docs/releasing.md` mentions its required topics (`release-plz.toml`, `RELEASE_PLZ_TOKEN`, `Migration:`, `1.x`, `2.0.0` (the release-PR version check), `semver_check`, `git tag v`, `ruleset`, `--force-with-lease`, `ci.yml`, `dtcg_runtime_derive`, the `vX.Y.Z` dependency form) and tags every code block; chapter 14 links `releasing.md`, mentions release-plz, and no longer has the publish order, the crates.io-readme note, the `../RayX.Dtcg/crates` path or the hand-written changelog rule. Content quality is the reviewer's job.",
+      "descriptionMarkdown": "Asserts the documentation contract: the tag form in README and chapter 2 and no unpinned git form or \"not on crates.io yet\"; `docs/releasing.md` mentions its required topics (`release-plz.toml`, `RELEASE_PLZ_TOKEN`, `Migration:`, `1.x`, `2.0.0` (the release-PR version check), `semver_check`, `git tag v`, `ruleset`, `--force-with-lease`, `ci.yml`, `dtcg_runtime_derive`, the `vX.Y.Z` dependency form) and tags every code block; chapter 14 links `releasing.md`, mentions release-plz, and no longer has the publish order, the crates.io-readme note, the `../RayX.Dtcg/crates` path or the hand-written changelog rule. Content quality is the reviewer's job. Every page that shows the git dependency (README, CLAUDE.md, every `docs/*.md`) must pin a `v*` tag (review finding F-S2-1).",
       "argv": [
         "python3",
         "-c",
-        "import re\nfrom pathlib import Path\npin = 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }'\nfor name in (\"README.md\", \"docs/02-getting-started.md\"):\n    text = Path(name).read_text(encoding=\"utf-8\")\n    assert pin in text, (name, \"tag form\")\n    assert 'git = \"https://github.com/rayx-ui/RayX.Dtcg\" }' not in text, (name, \"unpinned git dependency\")\n    assert \"not on crates.io yet\" not in text, name\nreleasing = Path(\"docs/releasing.md\").read_text(encoding=\"utf-8\")\nfor needle in (\"release-plz.toml\", \"RELEASE_PLZ_TOKEN\", \"Migration:\", \"1.x\", \"2.0.0\", \"semver_check\", \"git tag v\", \"ruleset\", \"--force-with-lease\", \"ci.yml\", \"dtcg_runtime_derive\", pin.replace(\"v1.0.0\", \"vX.Y.Z\")):\n    assert needle in releasing, (\"docs/releasing.md\", needle)\nfences = re.findall(r\"(?m)^```(.*)$\", releasing)\nassert len(fences) % 2 == 0 and all(f.strip() for f in fences[0::2]), (\"untagged code block\", fences)\nchapter = Path(\"docs/14-architecture-and-contributing.md\").read_text(encoding=\"utf-8\")\nassert \"releasing.md\" in chapter and \"release-plz\" in chapter\nfor stale in (\"Publish order\", \"crates.io readme\", \"../RayX.Dtcg/crates\", \"Record user-visible changes in `CHANGELOG.md`\"):\n    assert stale not in chapter, (\"docs/14 still says\", stale)\nprint(\"release docs ok\")\n"
+        "import re\nfrom pathlib import Path\npin = 'dtcg_runtime = { git = \"https://github.com/rayx-ui/RayX.Dtcg\", tag = \"v1.0.0\" }'\nfor name in (\"README.md\", \"docs/02-getting-started.md\"):\n    text = Path(name).read_text(encoding=\"utf-8\")\n    assert pin in text, (name, \"tag form\")\n    assert 'git = \"https://github.com/rayx-ui/RayX.Dtcg\" }' not in text, (name, \"unpinned git dependency\")\n    assert \"not on crates.io yet\" not in text, name\n# Every page that shows the git dependency pins a release tag (README, CLAUDE.md, every docs/*.md).\nfor path in [Path(\"README.md\"), Path(\"CLAUDE.md\"), *sorted(Path(\"docs\").glob(\"*.md\"))]:\n    for number, line in enumerate(path.read_text(encoding=\"utf-8\").splitlines(), 1):\n        if 'git = \"https://github.com/rayx-ui/RayX.Dtcg\"' in line:\n            assert 'tag = \"v' in line, (str(path), number, \"unpinned git dependency\", line)\nreleasing = Path(\"docs/releasing.md\").read_text(encoding=\"utf-8\")\nfor needle in (\"release-plz.toml\", \"RELEASE_PLZ_TOKEN\", \"Migration:\", \"1.x\", \"2.0.0\", \"semver_check\", \"git tag v\", \"ruleset\", \"--force-with-lease\", \"ci.yml\", \"dtcg_runtime_derive\", pin.replace(\"v1.0.0\", \"vX.Y.Z\")):\n    assert needle in releasing, (\"docs/releasing.md\", needle)\nfences = re.findall(r\"(?m)^```(.*)$\", releasing)\nassert len(fences) % 2 == 0 and all(f.strip() for f in fences[0::2]), (\"untagged code block\", fences)\nchapter = Path(\"docs/14-architecture-and-contributing.md\").read_text(encoding=\"utf-8\")\nassert \"releasing.md\" in chapter and \"release-plz\" in chapter\nfor stale in (\"Publish order\", \"crates.io readme\", \"../RayX.Dtcg/crates\", \"Record user-visible changes in `CHANGELOG.md`\"):\n    assert stale not in chapter, (\"docs/14 still says\", stale)\nprint(\"release docs ok\")\n"
       ],
       "cwd": ".",
       "expected": {
@@ -134,7 +134,8 @@
       },
       "inputs": [
         "README.md",
-        "docs/**"
+        "docs/**",
+        "CLAUDE.md"
       ]
     },
     {
@@ -145,7 +146,7 @@
         "DOC-2",
         "DOC-3"
       ],
-      "descriptionMarkdown": "The existing doctests of the three touched pages (README, chapter 2, chapter 14: 14 runnable examples, chapter 14's `rust,ignore` listing ignored), selected by their `documentation::` module filters. Proves the edited Markdown still compiles as doctests; not the whole doc-test suite.",
+      "descriptionMarkdown": "The existing doctests of the four touched pages (README, chapter 2, chapter 11, chapter 14: 18 runnable examples, chapter 14's `rust,ignore` listing ignored), selected by their `documentation::` module filters. Proves the edited Markdown still compiles as doctests; not the whole doc-test suite.",
       "argv": [
         "cargo",
         "test",
@@ -156,17 +157,19 @@
         "--",
         "documentation::readme",
         "documentation::getting_started",
-        "documentation::architecture_and_contributing"
+        "documentation::architecture_and_contributing",
+        "documentation::errors_limits_and_diagnostics"
       ],
       "cwd": ".",
       "expected": {
         "exitCode": 0,
-        "minimumTests": 14
+        "minimumTests": 18
       },
       "inputs": [
         "README.md",
         "docs/02-getting-started.md",
         "docs/14-architecture-and-contributing.md",
+        "docs/11-errors-limits-and-diagnostics.md",
         "Cargo.toml",
         "Cargo.lock",
         "crates/dtcg_runtime/Cargo.toml",
