@@ -68,18 +68,20 @@ no file-system or network access, so they build for any target that has the Rust
 
 ## Installation
 
-The crates are not on crates.io yet. Depend on the Git repository:
+Releases are git tags, not crates.io packages. Depend on a release tag; the latest one is on the
+repository's [Releases](https://github.com/rayx-ui/RayX.Dtcg/releases) page:
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg" }
+dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0" }
 # Optional: only needed to construct or name `serde_json::Value`s yourself.
 serde_json = "1"
 ```
 
-`dtcg_runtime` re-exports the derive macros, so you do not depend on `dtcg_runtime_derive`
-directly. The one optional feature, `diagnostics`, adds redacted error diagnostics and resolution
-counters for test harnesses.
+`Cargo.lock` records the exact commit of the tag; to update, change the tag by hand. Depend only on
+a release tag, never on a branch or a path. `dtcg_runtime` re-exports the derive macros, so you do
+not depend on `dtcg_runtime_derive` directly. The one optional feature, `diagnostics`, adds
+redacted error diagnostics and resolution counters for test harnesses.
 
 ## Examples
 
@@ -418,8 +420,8 @@ cargo test --workspace --all-features
 cargo package --workspace
 ```
 
-See [Architecture and contributing](docs/14-architecture-and-contributing.md) for the source layout,
-test groups and release process.
+See [Architecture and contributing](docs/14-architecture-and-contributing.md) for the source layout
+and test groups, and [Releasing](docs/releasing.md) for how releases are cut.
 
 ## License
 

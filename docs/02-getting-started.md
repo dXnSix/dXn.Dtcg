@@ -14,9 +14,12 @@ complete program you can paste into `src/main.rs`.
 
 ## Add the dependency
 
+Releases are git tags; pin one (the latest is on the
+[Releases](https://github.com/rayx-ui/RayX.Dtcg/releases) page):
+
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg" }
+dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0" }
 serde_json = "1"
 ```
 
