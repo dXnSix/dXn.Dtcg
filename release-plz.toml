@@ -15,6 +15,9 @@ git_only = true
 publish = false
 git_tag_enable = true
 git_tag_name = "v{{ version }}"
+# The GitHub Release is titled like the tag; release-plz's multi-package default would be
+# `dtcg_runtime-vX.Y.Z`.
+git_release_name = "v{{ version }}"
 # No cargo-dist here: release-plz creates the GitHub Release from the changelog section.
 git_release_enable = true
 changelog_update = true
