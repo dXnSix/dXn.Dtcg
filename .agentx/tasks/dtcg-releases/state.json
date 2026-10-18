@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 24,
+  "revision": 27,
   "planRevision": 5,
   "specHashes": {
     "requirements": "5d9d7335a436fce30393d1657099e15536522a2075b4c3c8bbee0731235c0bce",
@@ -46,13 +46,22 @@
       ]
     },
     "t07-owner-prerequisites": {
-      "status": "pending"
+      "status": "implemented",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     },
     "t08-release-workflow": {
-      "status": "pending"
+      "status": "implemented",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     },
     "t09-first-release": {
-      "status": "pending"
+      "status": "in_progress",
+      "workerIds": [
+        "dtcg-releases-coordinator"
+      ]
     }
   },
   "validationBatches": {
