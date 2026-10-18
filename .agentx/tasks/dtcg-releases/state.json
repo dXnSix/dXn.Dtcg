@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-releases",
-  "revision": 40,
+  "revision": 42,
   "planRevision": 7,
   "specHashes": {
     "requirements": "5d9d7335a436fce30393d1657099e15536522a2075b4c3c8bbee0731235c0bce",
@@ -117,7 +117,7 @@
           "dtcg": "8d2d3a4ec79eb8cb1eb311acdb1c34d4ab2aa529998ccc966270f1deef0dd88e"
         }
       },
-      "recordedAt": "2026-10-18T23:09:53Z"
+      "recordedAt": "2026-10-18T23:12:57Z"
     }
   },
   "checkResults": {
@@ -320,6 +320,222 @@
       "messageMarkdown": "Expectation matched",
       "logPath": "artifacts-temp/agentx/dtcg-releases/s3-first-release-final-11aa8a3261d2.log",
       "logSha256": "178673fafc62517ee5781eeabf6aa0ce538ac7e097d76108bf44d500d733cca6"
+    },
+    "final/check-release-config/final": {
+      "checkId": "check-release-config",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "fb9a8121be5470a0859b484e5a21f1fd101ff5566565bf8188842a6cc175383d",
+      "basisHash": "1c7e91641180595161c3b1abc8f13c0bb49ccc84e30c5de7691d0475e689f3be",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0402,
+      "recordedAt": "2026-10-18T23:12:41Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-705eda9bc621.log",
+      "logSha256": "a667d2b36c78e05043e79c38d0f0b15dad3e47fd7194b260f09ed4a03bc37662",
+      "inputsHash": "0777937e4951abb82b377ae583a5e3e1ff938617e2e3efe7bdd0e724d81eacf8"
+    },
+    "final/check-version-changelog/final": {
+      "checkId": "check-version-changelog",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "38a1f0081262072d452c66025adb161304acf24ed18fab091a71ad14f12bfcbe",
+      "basisHash": "1100ecb43b5a51adebe4b55ea8a48c6b08f65926d28ccaa26a5700a6868fc864",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0379,
+      "recordedAt": "2026-10-18T23:12:41Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-6042b53c28a6.log",
+      "logSha256": "105928a32edef6dec50c4777e7ca771fed2d7c46e8629f87ddc4f3b5b3bcf6b5",
+      "inputsHash": "5fea0e19bb34dc889393562bf57f9b71b25d7e8a5bf77199848d10d4d673be5f"
+    },
+    "final/check-release-preview/final": {
+      "checkId": "check-release-preview",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "0f0a83abb65b87ee0c58057b1ac2db2b7268fd08c6fa9b230e6aabc7d48d1279",
+      "basisHash": "a57f493e5504fb4e02e7371b70bea375c561417c51fae4fccdeb8c39c7530d31",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 4.0338,
+      "recordedAt": "2026-10-18T23:12:45Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-3ceaa123698d.log",
+      "logSha256": "9a5b790190250e16f7fc3ce5a032c79606d5e95e04386dbd97e9b25eb97b5fef",
+      "inputsHash": "7657c266b085aed7654fcc9e1f699ed8851834e394cecfaec56c5b69e13a0fc1"
+    },
+    "final/check-release-docs/final": {
+      "checkId": "check-release-docs",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "definitionHash": "027476b2ef45640dfd41aa894d859ea88d18c1cdaba091ccadd3e9618592a1a6",
+      "basisHash": "ae1c3455bcbe2191c038853f1fa13ebb0872e7cdfa5439f16b53aee058f8ff79",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0241,
+      "recordedAt": "2026-10-18T22:13:15Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-d0848568ab66.log",
+      "logSha256": "12ca4db42fc6ac121e3dd738b4659dcdb98fb77cf81aee78a9dd0c165081f101",
+      "inputsHash": "b7b2e1079efad7f6ad47cecc62711d4e5cbdb6785f0511078418c712c0828e43"
+    },
+    "final/check-doc-doctests/final": {
+      "checkId": "check-doc-doctests",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "0176ba932b9f922600d9bc902f1d0cd570bd0c4941dd70fbef82771c4662b377",
+      "definitionHash": "b6d50b6e122ad9b4801a30353f150da3c4f508642cd4201ec1feddf84d321c12",
+      "basisHash": "7a212d29903f8c4defcfd1f111b2bb616f851074de9ece0ebd5964f63a6b78df",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 18,
+      "durationSeconds": 0.8937,
+      "recordedAt": "2026-10-18T22:13:15Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-24d621c175a9.log",
+      "logSha256": "878fc5d5ba83371430d0ad752b853fdb28a50305bea7827707f0cdd42f8067b6",
+      "inputsHash": "28404b4032c97aea90d9f441795f041313dc71bbcbbc39226bc7fd3d505e18e5"
+    },
+    "final/check-agent-guidance/final": {
+      "checkId": "check-agent-guidance",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "67cdaf151243f0d0753188a8867dfa035c1aa30a4dd7baa438d326acd33b4e0b",
+      "definitionHash": "2ad6d9b75c729726111991917b003382fc0e3ced4078c5815180c7465cd0b02b",
+      "basisHash": "89037b3ba146a75374ee95a2bfcbfdb2116fc7f1b29551faa7c813f54918a5bf",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0405,
+      "recordedAt": "2026-10-18T22:10:13Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s2-release-docs-final-4de8986e4a64.log",
+      "logSha256": "0ed430d31639953ac9ad016be1356eb95bf76f9d37fa9bdd9ad3b148d6d750b0",
+      "inputsHash": "b7d05f29a16db0c3e55dfb9af823a712bda478b3624ea970b1cb73afbef3f334"
+    },
+    "final/check-workflow-yaml/final": {
+      "checkId": "check-workflow-yaml",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "481b0465e5fdce9b9da9f84ad90642198f07dcbe014f04d911b09aa7b1044e72",
+      "definitionHash": "92beb5b1db0a53868bd20838b69a2a6edef0f346b1f2dd037060e40f3c2e7132",
+      "basisHash": "d29522aff3081490eaedb1aa5624495632a63cc1fea029eb435c5d0183636b06",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.1293,
+      "recordedAt": "2026-10-18T23:06:03Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s3-first-release-final-c8eb6215e064.log",
+      "logSha256": "b5ef34948d119b8c9a2a83ea3fa7be28686336c326ed4fa8cbd531bc51a84a27",
+      "inputsHash": "d12f16e388e7801a0f01429d2551e646398e6e04c5aa8c119c1b6b15ee61a55f"
+    },
+    "final/check-release-workflow/final": {
+      "checkId": "check-release-workflow",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "481b0465e5fdce9b9da9f84ad90642198f07dcbe014f04d911b09aa7b1044e72",
+      "definitionHash": "6d3b28cfdfd0cac27bf729f269d1bf949eec21a1558a28f2bce220e8a74b48bd",
+      "basisHash": "b3f72ecdb55b52ae6f3bd07de2e42ec1a1c0e508beb20f6ba934e2a8813c7849",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0757,
+      "recordedAt": "2026-10-18T23:06:03Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/s3-first-release-final-119d1e390b77.log",
+      "logSha256": "fea2e09f549cfaa1b96260e6306cda558e5282ab5679b29dc820a58abbd57541",
+      "inputsHash": "d12f16e388e7801a0f01429d2551e646398e6e04c5aa8c119c1b6b15ee61a55f"
+    },
+    "final/check-tag-ruleset/final": {
+      "checkId": "check-tag-ruleset",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "4627cf0e73eb06c30a81bafbe70cd5eadbeb152838ff2280c9c6d29d09da318d",
+      "basisHash": "858b1d6de1ea5f481f92cf4b2323838cad18f962de74368fa840759f5b88ed32",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.8798,
+      "recordedAt": "2026-10-18T23:12:46Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-a5d04ea20da1.log",
+      "logSha256": "9c8a59c85e29c14a019f19367d83dc10e9b2838d21cd2f22b6af93dcf531390d"
+    },
+    "final/check-release-secret/final": {
+      "checkId": "check-release-secret",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "21c200b10cba8ae3097635dbd0c260bb9f863a7267d96ca63c73007ca8adad89",
+      "basisHash": "a84746c78cb7a0cd64d251db405ba67f1dd6375d8a13038623d2e0fba54ac885",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.3976,
+      "recordedAt": "2026-10-18T23:12:46Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-8494da1dec02.log",
+      "logSha256": "7bd954e718abcdb82c000fa6461020c62284892207d101f1707ba3503dde6743"
+    },
+    "final/check-first-release/final": {
+      "checkId": "check-first-release",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "1691867f4a00b9008da9746f5d763cd4d9e997df33adf8f8c60791cf24dceaa3",
+      "basisHash": "7e29ab6b6fb557b9efbe9c2667e13277e1a653cffb4fe53ad2c1baafeece014b",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 3.031,
+      "recordedAt": "2026-10-18T23:12:49Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-f32763c1b118.log",
+      "logSha256": "c6fe9f38685cb387df6025d054e078503e51d02064fc3e0930645adf8a51c0fb"
+    },
+    "final/check-tag-consumer/final": {
+      "checkId": "check-tag-consumer",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "6dcb96f564066c336d1d9eb41d2de5ee6e41fb94af636fe4e0c6fa937825abfd",
+      "basisHash": "bdeb46286b5bc62dbb96910ccb21c2592ea45311a5ad9acc205305f517dc287f",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 4.5699,
+      "recordedAt": "2026-10-18T23:12:54Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-b6f65a965da6.log",
+      "logSha256": "178673fafc62517ee5781eeabf6aa0ce538ac7e097d76108bf44d500d733cca6"
+    },
+    "final/final-package/final": {
+      "checkId": "final-package",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "definitionHash": "fbb5071062b014f2b6ee8818273f71be37922d855c33b3df57b7cf5dd7a21c98",
+      "basisHash": "c7179f6182037f6d7539d688336daadff7599a31f8fbe46d279dd12013ef6072",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 2.9871,
+      "recordedAt": "2026-10-18T23:12:57Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-releases/final-final-badb09b6c2f7.log",
+      "logSha256": "a44e7484db8101e3372e1ed2a20c0eca582cfe79227dbd57d143630cf3303add"
     }
   },
   "reviews": {
@@ -639,6 +855,207 @@
         "F-S3-1"
       ],
       "recordedAt": "2026-10-18T23:10:46Z"
+    },
+    "final": {
+      "reviewerId": "dtcg-releases-final-reviewer",
+      "snapshotId": "9ca2fe709ca808bd158941fa378bb7221968e9195900fb3814be195a938844bb",
+      "criterionIds": [
+        "RPZ-1",
+        "RPZ-2",
+        "RPZ-3",
+        "RPZ-4",
+        "VER-1",
+        "VER-2",
+        "DOC-1",
+        "DOC-2",
+        "DOC-3",
+        "DOC-4",
+        "CI-1",
+        "WF-1",
+        "OWN-1",
+        "OWN-2",
+        "FIRST-1",
+        "FIRST-2"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "release-plz.toml",
+          "kind": "source",
+          "criterionIds": [
+            "RPZ-1",
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4",
+            "FIRST-1"
+          ],
+          "sha256": "571a5b87304d4aba9df19185baf3f57fa768e4043d7d391976c156913c6cdac6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "VER-1",
+            "RPZ-2",
+            "FIRST-1",
+            "FIRST-2"
+          ],
+          "sha256": "495f67099e1bf3ad2319f8d504d3f7cb36614e9394fb3f47cc36b29bb6c73b0f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.lock",
+          "kind": "source",
+          "criterionIds": [
+            "VER-1"
+          ],
+          "sha256": "3245e60016ebc5090526ce09816c03bbc7feebd0e8b6d5dcbd6361f5a6da6ae2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dtcg_runtime_derive/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "VER-1",
+            "RPZ-2"
+          ],
+          "sha256": "283a9a9832faabe8606d1ce825b6097e8ae45ef8e2bc6197b347115ef8e175a0"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CHANGELOG.md",
+          "kind": "source",
+          "criterionIds": [
+            "VER-2",
+            "FIRST-1"
+          ],
+          "sha256": "b5a03c5e49ab668e513c81adaa0d6fab0503e972ca80bbd4181259d8a45378f2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/releasing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "CI-1",
+            "OWN-1",
+            "OWN-2"
+          ],
+          "sha256": "3e973ce4cc5685fec11818eac9ae3545266a3cfe0e349073cc349e2e06a54b46"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "README.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "3e483af8a4b2aebc68ab557a68218ca72ee120c3da4318d875496d7309e0127a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/02-getting-started.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "170997f1361ec1f0b0ded4b3612ac6b375ac8f7064300b7d31d01f488ab8b0ba"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-2"
+          ],
+          "sha256": "e2495836b28023238d8bfa59917b084d4e00776a2bf37f1b1ac75df38bc7b422"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/14-architecture-and-contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-3"
+          ],
+          "sha256": "39024e33f16c04912bf91a0678e6e383e28d425b36c1f7f9460488e4f739d926"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "CLAUDE.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "sha256": "e7fd92a0cbc9a91399685b71a470969ebe0cd2211b081b3c1812ee6242bd0c7b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "AGENTS.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-4"
+          ],
+          "sha256": "e7fd92a0cbc9a91399685b71a470969ebe0cd2211b081b3c1812ee6242bd0c7b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "source",
+          "criterionIds": [
+            "CI-1"
+          ],
+          "sha256": "05993a2ee095c6aea21df44e92b4f1dbfcb47c7b9cfe07df6328610686ddf2f4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/release-plz.yml",
+          "kind": "source",
+          "criterionIds": [
+            "WF-1",
+            "FIRST-1",
+            "FIRST-2",
+            "OWN-1"
+          ],
+          "sha256": "c7e4ca99c02814f3f01c2b927532b43d46b6f15415a0edfa7c1ed2368db455e7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/tasks/dtcg-releases/implementation-plan.json",
+          "kind": "test",
+          "criterionIds": [
+            "RPZ-1",
+            "RPZ-2",
+            "RPZ-3",
+            "RPZ-4",
+            "VER-1",
+            "VER-2",
+            "DOC-1",
+            "DOC-2",
+            "DOC-3",
+            "DOC-4",
+            "WF-1"
+          ],
+          "sha256": "368d737ad36249f644778bcdb55404b4c29a9e4eff2e57911724e69d601a122c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/tasks/dtcg-releases/implementation-plan.json",
+          "kind": "runtime",
+          "criterionIds": [
+            "OWN-1",
+            "OWN-2",
+            "FIRST-1",
+            "FIRST-2",
+            "CI-1"
+          ],
+          "sha256": "368d737ad36249f644778bcdb55404b4c29a9e4eff2e57911724e69d601a122c"
+        }
+      ],
+      "summaryMarkdown": "Integrated epic verified on `main` (HEAD 14319c5 = origin/main). Config, manifests, changelog, docs, agent guidance and workflow agree: one unit `vX.Y.Z`, git-only, `semver_check = false`, `release_commits = ^(feat|fix|perf)`, `git_release_name = v{{ version }}` (F-S3-1 stays fixed), Migration-footer template; releasing.md, chapter 14 Releases/layout/Working with RayX, README/ch2/ch11 tag pins (F-S2-1 stays fixed, widened check guards every git line) and CLAUDE.md == AGENTS.md all describe the same flow, 1.x check and push policy. Read-only facts: annotated `v1.0.0` -> 55ae9cc (Cargo.toml there 1.0.0), only tag, no per-crate tag; Release `v1.0.0` not draft/prerelease, body byte-equal to the 1.0.0 changelog section; run 39171612775 failed in the release-plz step (PAT access), 39174989504 released, 39175431968 on 14319c5 succeeded with `no commit matches release_commits` and `prs: []`; no release PR; ci.yml green on every pushed epic commit and `git diff 7d55b99` empty for ci.yml, crates/, toolchain, licenses; no `!`/`BREAKING CHANGE` in epic commits. Recorded final-batch evidence (preview with release-plz 0.3.172 + cargo-semver-checks 0.51 and local 404 stub forge, ruleset, secret names, first-release, tag consumer @55ae9cc2, doctests 18, cargo package) inspected via logs; not rerun.\n\nNotes (no defect): the tag sits on 55ae9cc (the post-PAT-fix push), not on the workflow commit 84ebf2f, with identical crate code CI already passed; the 1.0.0 date 2026-10-18 is the UTC day of the release (local day was 10-19). On promotion, `knowledge/repository/rules.md` line 1 (paired RayX commits) must be rewritten to the release-first rule of d-consume-by-tag, alongside the required supersession of the 2026-10-07 changelog half.",
+      "findingIds": [],
+      "recordedAt": "2026-10-18T23:16:08Z"
     }
   },
   "checkpoints": {
