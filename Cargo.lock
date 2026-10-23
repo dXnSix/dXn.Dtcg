@@ -48,7 +48,7 @@ dependencies = [
 
 [[package]]
 name = "dxn_dtcg"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "dxn_dtcg",
  "dxn_dtcg_derive",
@@ -60,7 +60,7 @@ dependencies = [
 
 [[package]]
 name = "dxn_dtcg_derive"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "dxn_dtcg",
  "proc-macro2",

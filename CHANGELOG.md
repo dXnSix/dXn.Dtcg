@@ -1,10 +1,16 @@
 # Changelog
 
-All notable changes to `dtcg_runtime` and `dtcg_runtime_derive` are documented in this file. Both
+All notable changes to `dxn_dtcg` and `dxn_dtcg_derive` are documented in this file. Both
 crates share one version and one release tag `vX.Y.Z`. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the crates follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
+
+## [1.1.0] - 2026-10-23
+
+### Features
+- *(repository)* rename the crates to dxn_dtcg and dxn_dtcg_derive
+  - Migration: RayX: depend on `dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0" }` instead of `dtcg_runtime`, and replace `dtcg_runtime::` and `dtcg_runtime_derive::` paths with `dxn_dtcg::` and `dxn_dtcg_derive::`.
 
 ## [1.0.0] - 2026-10-18
 
