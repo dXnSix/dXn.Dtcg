@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime/source-inspection
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-07T12:00:00+02:00
+  updated: 2026-10-23T22:00:00+02:00
   topics:
     - source-inspection
     - provenance
@@ -27,11 +27,11 @@ The `diagnostics` feature adds `DtcgDiagnostic`/`DtcgDiagnosticCode` (stable cat
 
 ## Backlinks
 
-- [Inspection entry points](../../../../../crates/dtcg_runtime/src/runtime.rs)
-- [Source discovery](../../../../../crates/dtcg_runtime/src/source_discovery.rs)
-- [Source references](../../../../../crates/dtcg_runtime/src/source_references.rs)
-- [Occurrences](../../../../../crates/dtcg_runtime/src/source_occurrence.rs)
-- [Diagnostics](../../../../../crates/dtcg_runtime/src/diagnostics/mod.rs)
-- [Inspection tests](../../../../../crates/dtcg_runtime/tests/source_inspection.rs)
-- [Reference-site bounds tests](../../../../../crates/dtcg_runtime/tests/source_reference_bounds.rs)
-- [Reference-site parity tests](../../../../../crates/dtcg_runtime/tests/source_reference_parity.rs)
+- [Inspection entry points](../../../../../crates/dxn_dtcg/src/runtime.rs)
+- [Source discovery](../../../../../crates/dxn_dtcg/src/source_discovery.rs)
+- [Source references](../../../../../crates/dxn_dtcg/src/source_references.rs)
+- [Occurrences](../../../../../crates/dxn_dtcg/src/source_occurrence.rs)
+- [Diagnostics](../../../../../crates/dxn_dtcg/src/diagnostics/mod.rs)
+- [Inspection tests](../../../../../crates/dxn_dtcg/tests/source_inspection.rs)
+- [Reference-site bounds tests](../../../../../crates/dxn_dtcg/tests/source_reference_bounds.rs)
+- [Reference-site parity tests](../../../../../crates/dxn_dtcg/tests/source_reference_parity.rs)

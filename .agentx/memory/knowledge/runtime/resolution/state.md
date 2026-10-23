@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime/resolution
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-07T09:00:00+02:00
+  updated: 2026-10-23T22:00:00+02:00
   topics:
     - resolution
     - catalog
@@ -34,12 +34,12 @@ Active sources fold, in discovery order, into one merged structure (`flatten.rs`
 
 ## Backlinks
 
-- [Resolver](../../../../../crates/dtcg_runtime/src/resolver.rs)
-- [Catalog](../../../../../crates/dtcg_runtime/src/catalog.rs)
-- [Resource ids](../../../../../crates/dtcg_runtime/src/resource.rs)
-- [Selection](../../../../../crates/dtcg_runtime/src/selection.rs)
-- [Envelope](../../../../../crates/dtcg_runtime/src/envelope.rs)
-- [Local reference policy](../../../../../crates/dtcg_runtime/src/local_reference.rs)
-- [Tests](../../../../../crates/dtcg_runtime/tests)
+- [Resolver](../../../../../crates/dxn_dtcg/src/resolver.rs)
+- [Catalog](../../../../../crates/dxn_dtcg/src/catalog.rs)
+- [Resource ids](../../../../../crates/dxn_dtcg/src/resource.rs)
+- [Selection](../../../../../crates/dxn_dtcg/src/selection.rs)
+- [Envelope](../../../../../crates/dxn_dtcg/src/envelope.rs)
+- [Local reference policy](../../../../../crates/dxn_dtcg/src/local_reference.rs)
+- [Tests](../../../../../crates/dxn_dtcg/tests)
 - 2026-07-26 current [I/O-free string catalog decision](../../../decisions/runtime/resolution/2026-07-26-runtime-resolution-io-free-string-catalog.md)
 - 2026-07-26 current [whole-token overlay decision](../../../decisions/runtime/resolution/2026-07-26-runtime-resolution-whole-token-overlay.md)

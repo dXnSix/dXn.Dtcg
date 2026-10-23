@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-05T18:00:00+02:00
+  updated: 2026-10-23T22:00:00+02:00
   topics:
     - runtime
     - dtcg-runtime
@@ -13,7 +13,7 @@ agentx:
 ---
 # Runtime Domain Index
 
-The two published crates: `dtcg_runtime` (resolution, values, inspection, diagnostics) and `dtcg_runtime_derive` (projection derives re-exported by `dtcg_runtime`).
+The two published crates: `dxn_dtcg` (resolution, values, inspection, diagnostics) and `dxn_dtcg_derive` (projection derives re-exported by `dxn_dtcg`).
 
 - [state](state.md) · [knowledge](knowledge.md) · [rules](rules.md) · [hypotheses](hypotheses.md)
 

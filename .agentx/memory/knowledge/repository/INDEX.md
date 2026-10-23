@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/repository
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-18T23:30:00+02:00
+  updated: 2026-10-23T22:00:00+02:00
   topics:
     - repository
     - packaging
@@ -15,7 +15,7 @@ agentx:
 ---
 # Repository Domain Index
 
-How RayX.Dtcg is maintained: workspace and releases, validation routing, RayX co-development, and AgentX memory governance.
+How dXn.Dtcg is maintained: workspace and releases, validation routing, RayX co-development, and AgentX memory governance.
 
 - [state](state.md) · [knowledge](knowledge.md) · [rules](rules.md) · [hypotheses](hypotheses.md)
 
