@@ -102,7 +102,7 @@ tokens, adopts the new order and groups, and recomputes the fingerprint. **The p
 equals a full `resolve`** of the edited documents, metadata included.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};
 
 fn number(value: Value) -> Value {
@@ -184,7 +184,7 @@ moved on (+2: the replacement and the restore). A failed edit can never leave th
 a broken document.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const GOOD: &str = r#"{
   "space": { "$type": "number", "base": { "$value": 8 }, "inset": { "$value": "{space.base}" } }

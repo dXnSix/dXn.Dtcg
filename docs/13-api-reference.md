@@ -1,7 +1,7 @@
 # 13. API reference
 
-Every public item of `dtcg_runtime`, grouped by purpose. All items are exported from the crate
-root, except the typed value models, which live in the public `dtcg_runtime::values` module.
+Every public item of `dxn_dtcg`, grouped by purpose. All items are exported from the crate
+root, except the typed value models, which live in the public `dxn_dtcg::values` module.
 Signatures are shown in simplified form, without `pub`.
 
 - [Runtime](#runtime): `DtcgRuntime`
@@ -159,7 +159,7 @@ its merged `$extensions`. No `$schema` is written. Resolving the document again 
 paths, types, values and metadata; an interleaved resolution order comes back grouped by group.
 
 ```rust
-use dtcg_runtime::DtcgRuntime;
+use dxn_dtcg::DtcgRuntime;
 
 let runtime = DtcgRuntime::from_json(
     "tokens.json",
@@ -326,7 +326,7 @@ All fields are public and default to `false`. See [Strict by default, RayX exten
 request](12-conformance.md#strict-by-default-rayx-extensions-on-request).
 
 ```rust
-use dtcg_runtime::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
 
 let options = RuntimeOptions::default()
     .with_limits(RuntimeLimits::default().with_max_tokens(10_000))
@@ -430,7 +430,7 @@ member order. Anything but a JSON object of strings is `DtcgError::InvalidInput`
 `selection_refs` borrows owned pairs as the selection every resolving method takes.
 
 ```rust
-use dtcg_runtime::{DtcgError, selection_from_json, selection_refs};
+use dxn_dtcg::{DtcgError, selection_from_json, selection_refs};
 use serde_json::json;
 
 let inputs = selection_from_json(&json!({ "theme": "dark", "density": "compact" })).unwrap();
@@ -511,7 +511,7 @@ Joins two dotted paths with `.`, ignoring empty parts: `("", "a") → "a"`, `("a
 ### Derive macros
 
 `#[derive(DtcgTokens)]` and `#[derive(DtcgComponentTokens)]`, re-exported from
-`dtcg_runtime_derive`. Both accept structs with named fields only.
+`dxn_dtcg_derive`. Both accept structs with named fields only.
 
 | Position | Attribute | Effect |
 |---|---|---|
@@ -558,7 +558,7 @@ fn validate_value_with(
 `lineHeight`, and the `dev.rayx.blur` type.
 
 ```rust
-use dtcg_runtime::{BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value, validate_value_with};
+use dxn_dtcg::{BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value, validate_value_with};
 use serde_json::json;
 
 let blur = json!({ "kind": "layer", "radius": { "value": 8, "unit": "px" } });
@@ -590,7 +590,7 @@ const BLUR_TYPE: &str = "dev.rayx.blur";
 
 ### The `values` module
 
-`dtcg_runtime::values` holds typed Rust models of resolved values. They are plain data with public
+`dxn_dtcg::values` holds typed Rust models of resolved values. They are plain data with public
 fields, parsed from JSON that validation already accepted, and they apply the consumer rules of the
 specification.
 
@@ -640,7 +640,7 @@ A resolved value converted by its DTCG type. `from_resolved` validates with `ext
 converts. `ResolvedToken::typed` is the usual way to get one:
 
 ```rust
-use dtcg_runtime::{
+use dxn_dtcg::{
     DtcgRuntime, ValueExtensions,
     values::{Dimension, DimensionUnit, TypedValue},
 };

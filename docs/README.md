@@ -1,6 +1,6 @@
-# RayX.Dtcg documentation
+# dXn.Dtcg documentation
 
-This is the technical documentation for `dtcg_runtime` and `dtcg_runtime_derive`, a Rust runtime
+This is the technical documentation for `dxn_dtcg` and `dxn_dtcg_derive`, a Rust runtime
 for [DTCG 2025.10](https://www.designtokens.org/) design-token documents. For a short
 introduction and quick examples, start with the [project README](../README.md).
 

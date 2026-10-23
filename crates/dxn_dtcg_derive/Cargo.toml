@@ -1,0 +1,25 @@
+[package]
+name = "dxn_dtcg_derive"
+description = "Derive macros projecting resolved DTCG design tokens into Rust structs."
+readme = "../../README.md"
+keywords = ["dtcg", "design-tokens", "derive"]
+categories = ["development-tools::procedural-macro-helpers"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+# Path-only, so publishing strips it and breaks the runtime <-> derive cycle.
+dxn_dtcg = { path = "../dxn_dtcg" }
+trybuild.workspace = true

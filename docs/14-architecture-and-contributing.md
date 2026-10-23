@@ -20,12 +20,12 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 ├── Cargo.toml                    workspace members, shared package metadata, dependency versions
 ├── rust-toolchain.toml           pinned toolchain (1.95.0) with clippy, rustfmt and the wasm32 target
 ├── crates/
-│   ├── dtcg_runtime/
+│   ├── dxn_dtcg/
 │   │   ├── src/                  the runtime (see the module map)
 │   │   ├── tests/                one integration-test group per feature
 │   │   │   └── fixtures/dtcg-test-suite/   the vendored official 2025.10 corpus (not packaged)
 │   │   └── benches/resolver.rs   timing baseline, written as a #[test]
-│   └── dtcg_runtime_derive/
+│   └── dxn_dtcg_derive/
 │       ├── src/lib.rs            the two derive macros
 │       └── tests/                derive shape, projection and hardening tests
 │           └── ui/               trybuild compile-fail cases with their .stderr snapshots
@@ -43,7 +43,7 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 
 ## Module map
 
-All modules of `dtcg_runtime` are private except `values`; `lib.rs` re-exports the public items.
+All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the public items.
 
 | Module | Responsibility |
 |---|---|
@@ -70,10 +70,10 @@ All modules of `dtcg_runtime` are private except `values`; `lib.rs` re-exports t
 | `error.rs` | `DtcgError` |
 | `diagnostics/mod.rs` | `DtcgDiagnostic`, compiled only with the `diagnostics` feature |
 
-`dtcg_runtime_derive/src/lib.rs` parses the `#[dtcg(...)]` attributes strictly with `syn` and
+`dxn_dtcg_derive/src/lib.rs` parses the `#[dtcg(...)]` attributes strictly with `syn` and
 emits a `DtcgTokens` implementation (and, for the component derive, `DtcgComponentTokens`). The
-generated code refers to `::dtcg_runtime::…` and `::core::…` paths only, which is why applications
-use the macros through `dtcg_runtime` and why local aliases cannot change it.
+generated code refers to `::dxn_dtcg::…` and `::core::…` paths only, which is why applications
+use the macros through `dxn_dtcg` and why local aliases cannot change it.
 
 ## Pipeline internals
 
@@ -216,7 +216,7 @@ rustfmt and the `wasm32-unknown-unknown` target on first use.
 While working on a change, run only the test group for the feature you are touching:
 
 ```bash
-cargo test -p dtcg_runtime --all-features --test lazy_catalog
+cargo test -p dxn_dtcg --all-features --test lazy_catalog
 ```
 
 Before committing, run the full validation:
@@ -237,7 +237,7 @@ cargo check --workspace --target wasm32-unknown-unknown
 The timing baseline prints cold, repeat, context-switch and invalidation timings:
 
 ```bash
-cargo test -p dtcg_runtime --bench resolver -- --nocapture
+cargo test -p dxn_dtcg --bench resolver -- --nocapture
 ```
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) with meaningful scopes,
@@ -246,7 +246,7 @@ for example `fix(resolver): …` or `docs(readme): …`.
 ### Documentation
 
 The README and the chapters in `docs/` are written against the current API and compiled as
-doctests. The private `documentation` module at the end of `crates/dtcg_runtime/src/lib.rs`
+doctests. The private `documentation` module at the end of `crates/dxn_dtcg/src/lib.rs`
 includes each file under `#[cfg(doctest)]`, one module per file:
 
 ```rust,ignore
@@ -267,7 +267,7 @@ non-Rust tag such as `json`, `toml`, `text` or `bash`. Doctests see the dev-depe
 affected chapters and check them, one chapter at a time:
 
 ```bash
-cargo test -p dtcg_runtime --all-features --doc documentation::resolvers_and_modifiers
+cargo test -p dxn_dtcg --all-features --doc documentation::resolvers_and_modifiers
 ```
 
 ## Test groups
@@ -277,42 +277,42 @@ behavior change gets a new group.
 
 | Group | Covers |
 |---|---|
-| `dtcg_runtime/tests/official_test_suite.rs` | The official DTCG 2025.10 corpus (250 fixtures, `KNOWN_GAPS` ratchet), upstream line endings, `$schema` handling |
-| `dtcg_runtime/tests/vertical_slice.rs` | End to end: missing documents, resolve, project |
-| `dtcg_runtime/tests/api_foundations.rs` | Limit setters, redacted `Debug`, `UnresolvedReference`, comparable and clonable errors, `Resolution` helpers |
-| `dtcg_runtime/tests/dtcg_2025_10_conformance.rs` | Format conformance: groups, `$root`, `$extends`, types, pointers, names, order, fingerprints |
-| `dtcg_runtime/tests/format_structure.rs` | Token and group structure rules |
-| `dtcg_runtime/tests/type_determination.rs` | Effective types and reference type mismatches |
-| `dtcg_runtime/tests/reference_positions.rs` | Allowed alias positions and their target types |
-| `dtcg_runtime/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
-| `dtcg_runtime/tests/token_metadata.rs` | `$description`, `$deprecated`, `$extensions`, `ResolvedGroup` |
-| `dtcg_runtime/tests/document_export.rs` | `to_document` and its round trip |
-| `dtcg_runtime/tests/typed_values.rs` | The `values` models and `TypedValue` |
-| `dtcg_runtime/tests/value_extensions.rs` | Strict defaults and the `ValueExtensions` flags through every constructor |
-| `dtcg_runtime/tests/rayx_export_types.rs` | The RayX value shapes |
-| `dtcg_runtime/tests/resolver_2025_10.rs` | Resolver version, inputs, inline steps, overrides, set references |
-| `dtcg_runtime/tests/resolver_document_validation.rs` | Allowed resolver members, empty `resolutionOrder`, single-context modifiers |
-| `dtcg_runtime/tests/resolution_step_consistency.rs` | One effective step definition for every API |
-| `dtcg_runtime/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
-| `dtcg_runtime/tests/alias_overlay.rs` | Aliases resolve against the final merged token set |
-| `dtcg_runtime/tests/bounded_expansion.rs` | `max_tokens`, `max_documents` fan-out, `$extends` depth |
-| `dtcg_runtime/tests/bounded_references.rs` | Alias depth, value nodes, value depth, deep pointer chains on a small stack, percent-decoding |
-| `dtcg_runtime/tests/lazy_catalog.rs` | The missing-document protocol, batch atomicity, revisions, inactive contexts, cycles and limits |
-| `dtcg_runtime/tests/resource_id_adversarial.rs`, `resource_id_drive_prefix.rs`, `resource_id_portability.rs` | Resource id normalization and rejection: fragments, `:`, non-portable segments |
-| `dtcg_runtime/tests/incremental_resolution.rs`, `incremental_consistency.rs` | Affected resolution, rollback, and that every patched snapshot equals a full resolution |
-| `dtcg_runtime/tests/source_inspection.rs` | Inspection, previews, reference sites, shared limits, definition helpers |
-| `dtcg_runtime/tests/source_reference_bounds.rs` | `source_references` lists each site once, walks in linear time and counts repeated walks against `max_documents` |
-| `dtcg_runtime/tests/source_reference_parity.rs` | `source_references` counts repeated walks in discovery's units and lists what `validate_complete` accepts |
-| `dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge across sources and `$extends` |
-| `dtcg_runtime/tests/derive_projection.rs` | Derive attributes through the runtime crate |
-| `dtcg_runtime/tests/diagnostics.rs` | Feature gating and redaction of diagnostics |
-| `dtcg_runtime_derive/tests/derive_projection.rs`, `derive_shapes.rs` | Narrow projection and derive shapes with stable component metadata |
-| `dtcg_runtime_derive/tests/derive_hardening.rs` | `Option` fields, hygienic generated code, raw identifiers, per-field generic bounds |
-| `dtcg_runtime_derive/tests/compile_fail.rs` | `trybuild` compile-fail cases in `tests/ui` |
+| `dxn_dtcg/tests/official_test_suite.rs` | The official DTCG 2025.10 corpus (250 fixtures, `KNOWN_GAPS` ratchet), upstream line endings, `$schema` handling |
+| `dxn_dtcg/tests/vertical_slice.rs` | End to end: missing documents, resolve, project |
+| `dxn_dtcg/tests/api_foundations.rs` | Limit setters, redacted `Debug`, `UnresolvedReference`, comparable and clonable errors, `Resolution` helpers |
+| `dxn_dtcg/tests/dtcg_2025_10_conformance.rs` | Format conformance: groups, `$root`, `$extends`, types, pointers, names, order, fingerprints |
+| `dxn_dtcg/tests/format_structure.rs` | Token and group structure rules |
+| `dxn_dtcg/tests/type_determination.rs` | Effective types and reference type mismatches |
+| `dxn_dtcg/tests/reference_positions.rs` | Allowed alias positions and their target types |
+| `dxn_dtcg/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
+| `dxn_dtcg/tests/token_metadata.rs` | `$description`, `$deprecated`, `$extensions`, `ResolvedGroup` |
+| `dxn_dtcg/tests/document_export.rs` | `to_document` and its round trip |
+| `dxn_dtcg/tests/typed_values.rs` | The `values` models and `TypedValue` |
+| `dxn_dtcg/tests/value_extensions.rs` | Strict defaults and the `ValueExtensions` flags through every constructor |
+| `dxn_dtcg/tests/rayx_export_types.rs` | The RayX value shapes |
+| `dxn_dtcg/tests/resolver_2025_10.rs` | Resolver version, inputs, inline steps, overrides, set references |
+| `dxn_dtcg/tests/resolver_document_validation.rs` | Allowed resolver members, empty `resolutionOrder`, single-context modifiers |
+| `dxn_dtcg/tests/resolution_step_consistency.rs` | One effective step definition for every API |
+| `dxn_dtcg/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
+| `dxn_dtcg/tests/alias_overlay.rs` | Aliases resolve against the final merged token set |
+| `dxn_dtcg/tests/bounded_expansion.rs` | `max_tokens`, `max_documents` fan-out, `$extends` depth |
+| `dxn_dtcg/tests/bounded_references.rs` | Alias depth, value nodes, value depth, deep pointer chains on a small stack, percent-decoding |
+| `dxn_dtcg/tests/lazy_catalog.rs` | The missing-document protocol, batch atomicity, revisions, inactive contexts, cycles and limits |
+| `dxn_dtcg/tests/resource_id_adversarial.rs`, `resource_id_drive_prefix.rs`, `resource_id_portability.rs` | Resource id normalization and rejection: fragments, `:`, non-portable segments |
+| `dxn_dtcg/tests/incremental_resolution.rs`, `incremental_consistency.rs` | Affected resolution, rollback, and that every patched snapshot equals a full resolution |
+| `dxn_dtcg/tests/source_inspection.rs` | Inspection, previews, reference sites, shared limits, definition helpers |
+| `dxn_dtcg/tests/source_reference_bounds.rs` | `source_references` lists each site once, walks in linear time and counts repeated walks against `max_documents` |
+| `dxn_dtcg/tests/source_reference_parity.rs` | `source_references` counts repeated walks in discovery's units and lists what `validate_complete` accepts |
+| `dxn_dtcg/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge across sources and `$extends` |
+| `dxn_dtcg/tests/derive_projection.rs` | Derive attributes through the runtime crate |
+| `dxn_dtcg/tests/diagnostics.rs` | Feature gating and redaction of diagnostics |
+| `dxn_dtcg_derive/tests/derive_projection.rs`, `derive_shapes.rs` | Narrow projection and derive shapes with stable component metadata |
+| `dxn_dtcg_derive/tests/derive_hardening.rs` | `Option` fields, hygienic generated code, raw identifiers, per-field generic bounds |
+| `dxn_dtcg_derive/tests/compile_fail.rs` | `trybuild` compile-fail cases in `tests/ui` |
 
 ### The official corpus
 
-The corpus under `crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/` is byte-identical
+The corpus under `crates/dxn_dtcg/tests/fixtures/dtcg-test-suite/2025.10/` is byte-identical
 to upstream (pinned commit and update steps in that directory's `README.md`). Never edit fixture
 files. When a change makes a fixture fail on purpose, add its id to `KNOWN_GAPS` in
 `tests/official_test_suite.rs` and document the deviation in [Conformance](12-conformance.md);
@@ -320,12 +320,12 @@ when a change fixes one, remove it. The test fails in both directions until the 
 
 ### Compile-fail snapshots
 
-Each `crates/dtcg_runtime_derive/tests/ui/*.rs` case must fail to compile with exactly the
+Each `crates/dxn_dtcg_derive/tests/ui/*.rs` case must fail to compile with exactly the
 diagnostic in its `.stderr` file. After an intended change to a derive error message, regenerate
 the snapshots and review the diff:
 
 ```bash
-TRYBUILD=overwrite cargo test -p dtcg_runtime_derive --test compile_fail
+TRYBUILD=overwrite cargo test -p dxn_dtcg_derive --test compile_fail
 ```
 
 ## CI
@@ -357,14 +357,14 @@ merging a release pull request, the `RELEASE_PLZ_TOKEN` secret, the tag ruleset 
 fallback.
 
 The manifests stay packageable (`cargo package --workspace` runs in CI): the derive crate's
-dev-dependency on `dtcg_runtime` is path-only on purpose, which breaks the runtime ↔ derive
-dependency cycle in a packaged crate, and `dtcg_runtime` excludes
+dev-dependency on `dxn_dtcg` is path-only on purpose, which breaks the runtime ↔ derive
+dependency cycle in a packaged crate, and `dxn_dtcg` excludes
 `tests/fixtures/dtcg-test-suite/**` from the package, so the corpus never ships.
 
 ## Working with RayX
 
 [RayX](https://github.com/rayx-ui) depends on a release tag of this repository,
-`dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "vX.Y.Z" }`. A change RayX
+`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`. A change RayX
 needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
 Test Suite specs. RayX's `rayx_theme` crate is the main consumer. It projects one generated theme
 model with `nested` fields and `with` converters for gpux types, and loads `.tokeneditor` projects

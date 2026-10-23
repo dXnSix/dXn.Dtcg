@@ -35,7 +35,7 @@ pub trait FromDtcgValue: Sized + 'static {
 
 - A `DtcgTokens` type is a **view** of part of the token set. The derive generates `project_at`.
 - A `FromDtcgValue` type converts **one token**. Field types use it unless told otherwise. The
-  typed value models in `dtcg_runtime::values` implement it, so most fields need no custom code.
+  typed value models in `dxn_dtcg::values` implement it, so most fields need no custom code.
 - `TypeRegistry` is the conversion context passed through projection. It is a unit struct that
   forwards to `FromDtcgValue` (`registry.convert::<T>(token)`); get one from `runtime.registry()`,
   or write `&TypeRegistry` directly.
@@ -50,7 +50,7 @@ field whose token is missing is an error, unless the field is an
 Resolve and project in one call:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens};
 
 #[derive(Debug, DtcgTokens)]
 struct Brand {
@@ -108,7 +108,7 @@ attribute (see [Errors](#errors)).
 field attribute. `nested` and `rest` are flags and take no value.
 
 The derives accept only structs with named fields. The generated code names every item by its
-full path (`::core::result::Result`, `::dtcg_runtime::DtcgError`, …), so local items such as
+full path (`::core::result::Result`, `::dxn_dtcg::DtcgError`, …), so local items such as
 `type Result<T> = …` or a struct named `Option` next to the derive do not affect it.
 
 ## How field paths are built
@@ -118,7 +118,7 @@ base path  = join(root passed to project_at, #[dtcg(root)])
 field path = join(base path, path | rename | field name)
 ```
 
-`join` puts a `.` between two non-empty parts and drops empty ones (`dtcg_runtime::join_token_path`
+`join` puts a `.` between two non-empty parts and drops empty ones (`dxn_dtcg::join_token_path`
 is the public helper). For example, `#[dtcg(root = "card")]` with a field
 `#[dtcg(path = "corner.radius")]`, projected at the top level, reads `card.corner.radius`;
 projected with `project_at(…, "theme")`, it reads `theme.card.corner.radius`.
@@ -147,7 +147,7 @@ with its own [value extensions](05-value-types.md). For converting any token by 
 `ResolvedToken::typed(&extensions)`.
 
 ```rust
-use dtcg_runtime::{
+use dxn_dtcg::{
     DtcgError, DtcgRuntime, DtcgTokens,
     values::{Color, ColorSpace, Dimension, DimensionUnit, Duration, FontWeight, Shadow},
 };
@@ -203,7 +203,7 @@ is `None` when its token does not exist and `Some(value)` when it does. `T` is c
 the wrong shape is still an error. `nested` fields cannot be optional.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, values::Dimension};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, values::Dimension};
 
 #[derive(Debug, DtcgTokens)]
 #[dtcg(root = "button")]
@@ -247,7 +247,7 @@ fn main() -> Result<(), DtcgError> {
 own, here a whole-millisecond count:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
 
 #[derive(Debug, PartialEq)]
 struct Ms(u64);
@@ -300,7 +300,7 @@ a compile error. Inside the function, `values::Color::from_dtcg(token)` can do t
 example reads the JSON directly to stay self-contained:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, ResolvedToken};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, ResolvedToken};
 
 // Stand-in for a type owned by another crate.
 mod renderer {
@@ -353,7 +353,7 @@ Because `project_at` takes the root as an argument, the **same struct can be pro
 roots**: one `ButtonVariant` type for every variant.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, TypeRegistry};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, TypeRegistry};
 
 #[derive(Debug, PartialEq, DtcgTokens)]
 struct ButtonVariant {
@@ -410,7 +410,7 @@ parameter: `FromDtcgValue` for leaf fields (on `T` for an `Option<T>` field), `D
 bound. A type parameter can therefore be a token struct, a value type or neither:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, values::Dimension};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, values::Dimension};
 
 #[derive(Debug, DtcgTokens)]
 struct Scale<V> {
@@ -449,7 +449,7 @@ fn main() -> Result<(), DtcgError> {
 implementation of `DtcgComponentTokens`, which gives the struct a stable component id:
 
 ```rust
-use dtcg_runtime::{DtcgComponentTokens, DtcgTokens};
+use dxn_dtcg::{DtcgComponentTokens, DtcgTokens};
 
 #[derive(DtcgComponentTokens)]
 #[dtcg(id = "button", root = "component.button")]
@@ -467,8 +467,8 @@ assert_eq!(ButtonTokens::component_id(), "button");
 assert_eq!(Tooltip::component_id(), "Tooltip"); // defaults to the struct name
 
 // Component token structs are ordinary projections too.
-fn project_any<T: DtcgComponentTokens>(tokens: &dtcg_runtime::ResolvedTokens) -> (&'static str, Option<T>) {
-    (T::component_id(), T::project(tokens, &dtcg_runtime::TypeRegistry).ok())
+fn project_any<T: DtcgComponentTokens>(tokens: &dxn_dtcg::ResolvedTokens) -> (&'static str, Option<T>) {
+    (T::component_id(), T::project(tokens, &dxn_dtcg::TypeRegistry).ok())
 }
 let _ = project_any::<Tooltip>;
 ```
@@ -518,7 +518,7 @@ give full access to the token set:
 ```rust
 use std::collections::BTreeMap;
 
-use dtcg_runtime::{
+use dxn_dtcg::{
     DtcgError, DtcgRuntime, DtcgTokens, ResolvedTokens, TypeRegistry, join_token_path,
 };
 

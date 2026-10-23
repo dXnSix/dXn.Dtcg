@@ -47,11 +47,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "dtcg_runtime"
+name = "dxn_dtcg"
 version = "1.0.0"
 dependencies = [
- "dtcg_runtime",
- "dtcg_runtime_derive",
+ "dxn_dtcg",
+ "dxn_dtcg_derive",
  "serde",
  "serde_json",
  "sha2",
@@ -59,10 +59,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dtcg_runtime_derive"
+name = "dxn_dtcg_derive"
 version = "1.0.0"
 dependencies = [
- "dtcg_runtime",
+ "dxn_dtcg",
  "proc-macro2",
  "quote",
  "syn 2.0.119",

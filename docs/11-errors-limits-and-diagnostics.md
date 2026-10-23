@@ -63,7 +63,7 @@ Selection errors are the same for every method that takes a selection: `resolve`
 Some `Display` outputs:
 
 ```rust
-use dtcg_runtime::{DtcgRuntime, ResourceId, selection_from_json};
+use dxn_dtcg::{DtcgRuntime, ResourceId, selection_from_json};
 use serde_json::json;
 
 let theme = DtcgRuntime::from_json(
@@ -127,7 +127,7 @@ language servers and CI annotations, can match on the variant to get a location.
 `DtcgError` is `#[non_exhaustive]`, the match ends with a wildcard arm:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, ResourceId};
+use dxn_dtcg::{DtcgError, DtcgRuntime, ResourceId};
 
 /// The resource and token path an error is about, where it has them.
 fn location(error: &DtcgError) -> (Option<&ResourceId>, Option<&str>) {
@@ -213,7 +213,7 @@ Limits are fixed when the runtime is created, through `with_limits` or the optio
 and `DtcgRuntime::limits()` returns them:
 
 ```rust
-use dtcg_runtime::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
 
 let limits = RuntimeLimits::default()
     .with_max_documents(2048)
@@ -245,7 +245,7 @@ on a server.
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0", features = ["diagnostics"] }
+dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0", features = ["diagnostics"] }
 ```
 
 The feature adds two things.
@@ -257,7 +257,7 @@ for test harnesses, telemetry and crash reports. It keeps the resource id, the p
 message, and never copies document text or JSON values.
 
 ```rust
-use dtcg_runtime::{DtcgDiagnostic, DtcgDiagnosticCode, DtcgRuntime};
+use dxn_dtcg::{DtcgDiagnostic, DtcgDiagnosticCode, DtcgRuntime};
 
 let runtime = DtcgRuntime::from_json(
     "tokens.json",

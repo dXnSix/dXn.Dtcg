@@ -1,7 +1,7 @@
-# RayX.Dtcg contributor guidance
+# dXn.Dtcg contributor guidance
 
-Rust runtime for DTCG 2025.10 design-token documents: `crates/dtcg_runtime` (resolution, typed
-values, diagnostics) and `crates/dtcg_runtime_derive` (projection derives). The crates are
+Rust runtime for DTCG 2025.10 design-token documents: `crates/dxn_dtcg` (resolution, typed
+values, diagnostics) and `crates/dxn_dtcg_derive` (projection derives). The crates are
 UI-neutral and must not depend on RayX or gpux.
 
 ## Validation
@@ -19,13 +19,13 @@ Test only what you changed: run the touched crate's focused tests while iteratin
 list above once before committing.
 
 Each feature has its own integration-test group in `crates/<crate>/tests/<feature>.rs`; select one
-with `cargo test -p dtcg_runtime --all-features --test <feature>`. A new feature or behavior change
+with `cargo test -p dxn_dtcg --all-features --test <feature>`. A new feature or behavior change
 gets a new group.
 
 ## Consumers
 
-Consumers, RayX (`../RayX`) first among them, depend on a release tag:
-`dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "vX.Y.Z" }`. A change RayX
+Consumers, RayX (`../../RayX/RayX.Old`) first among them, depend on a release tag:
+`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`. A change RayX
 needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
 Test Suite specs.
 

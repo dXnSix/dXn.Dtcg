@@ -2,7 +2,7 @@
 
 A resolver document says which token sources make up a design system, in what order to merge
 them, and which variants can be switched at run time. This chapter covers the resolver format as
-`dtcg_runtime` implements it (DTCG Resolver 2025.10), how sources are found and merged, and how
+`dxn_dtcg` implements it (DTCG Resolver 2025.10), how sources are found and merged, and how
 selections pick contexts.
 
 - [Resolver or token document?](#resolver-or-token-document)
@@ -82,7 +82,7 @@ The same rules apply to the root, to [nested resolvers](#nested-resolvers) and t
 discovery reaches it, which means on every call that involves it.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn structure_error(resolver: &str) -> String {
     let runtime = DtcgRuntime::from_json("r.json", resolver).unwrap();
@@ -190,7 +190,7 @@ Rules:
 - The same set may be referenced by more than one step. It is then applied at each position.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -263,7 +263,7 @@ property.
 This example uses every kind except nested resolvers:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const RESOLVER: &str = r##"{
   "version": "2025.10",
@@ -352,7 +352,7 @@ produces take the place of the reference. This lets one design system build on a
 resolvers are a runtime extension; Resolver 2025.10 does not define them.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const PRODUCT: &str = r##"{
   "version": "2025.10",
@@ -464,7 +464,7 @@ copied by `$extends` take the position of the extending group's `$extends` and n
 their `source`.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn resolver(override_source: &str) -> String {
     format!(
@@ -520,7 +520,7 @@ fn main() -> Result<(), DtcgError> {
 A selection is a slice of `(modifier, context)` pairs (Resolver §5):
 
 ```rust
-use dtcg_runtime::DtcgRuntime;
+use dxn_dtcg::DtcgRuntime;
 
 fn example(runtime: &DtcgRuntime) {
     let _ = runtime.resolve(&[]); // every modifier at its default
@@ -556,7 +556,7 @@ borrows them as the `&[(&str, &str)]` every method takes. Anything but an object
 with `DtcgError::InvalidInput`.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, selection_from_json, selection_refs};
+use dxn_dtcg::{DtcgError, DtcgRuntime, selection_from_json, selection_refs};
 use serde_json::json;
 
 fn main() -> Result<(), DtcgError> {
@@ -630,7 +630,7 @@ in declaration order (root first) with the declared spellings. Two selections th
 thing normalize to equal vectors, which makes the result a good cache key for resolved tokens.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 fn main() -> Result<(), DtcgError> {
     let mut runtime = DtcgRuntime::from_json(
@@ -694,7 +694,7 @@ everything, for example before going offline or bundling assets.
 product of their contexts is small:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, ModifierAxis};
+use dxn_dtcg::{DtcgError, DtcgRuntime, ModifierAxis};
 
 fn all_selections(axes: &[ModifierAxis]) -> Vec<Vec<(&str, &str)>> {
     let mut selections = vec![Vec::new()];

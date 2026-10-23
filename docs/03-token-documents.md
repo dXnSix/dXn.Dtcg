@@ -1,6 +1,6 @@
 # 3. Token documents
 
-This chapter describes the DTCG token format as `dtcg_runtime` reads it: how documents are
+This chapter describes the DTCG token format as `dxn_dtcg` reads it: how documents are
 structured, how token paths are formed, which reserved properties are allowed, how several sources
 combine into one document, how types are inherited, what `$root`, `$extends` and the metadata
 properties do, and how a resolved set is written back as a document.
@@ -114,7 +114,7 @@ the inline source passed to a [preview](10-source-inspection.md). Resolver docum
 `$schema` member; see [Resolvers and modifiers](06-resolvers-and-modifiers.md).
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -156,7 +156,7 @@ merged structure. In particular, a token that overrides another one inherits the
 that an earlier source declared, so an override does not need to repeat the type:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -203,7 +203,7 @@ An own `$type` that differs from the type of a whole-value reference's target fa
 covers the reference cases in detail.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -262,7 +262,7 @@ then apply on top. Nested groups merge member by member, tokens replace copied t
 name, and `$extensions` objects merge recursively.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -351,7 +351,7 @@ Group-level and document-level `$extensions` can also be read through JSON Point
 [references to arbitrary locations](04-aliases-and-references.md#references-to-arbitrary-locations)).
 
 ```rust
-use dtcg_runtime::{Deprecation, DtcgError, DtcgRuntime};
+use dxn_dtcg::{Deprecation, DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -399,7 +399,7 @@ token order to implementations; this runtime uses the authored order:
    later source moves to where the override is.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -445,7 +445,7 @@ nested document keeps each group's tokens together, a resolution order that inte
 (after a later source redefined a token) comes back grouped.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::json;
 
 fn main() -> Result<(), DtcgError> {

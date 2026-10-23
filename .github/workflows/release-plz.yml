@@ -19,7 +19,7 @@ on:
 jobs:
   release:
     name: release
-    if: github.repository == 'rayx-ui/RayX.Dtcg'
+    if: github.repository == 'dXnSix/dXn.Dtcg'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -46,7 +46,7 @@ jobs:
   release-pr:
     name: release-pr
     needs: release
-    if: github.repository == 'rayx-ui/RayX.Dtcg'
+    if: github.repository == 'dXnSix/dXn.Dtcg'
     runs-on: ubuntu-24.04
     permissions:
       contents: write

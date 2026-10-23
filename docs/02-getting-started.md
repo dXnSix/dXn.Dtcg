@@ -15,11 +15,11 @@ complete program you can paste into `src/main.rs`.
 ## Add the dependency
 
 Releases are git tags; pin one (the latest is on the
-[Releases](https://github.com/rayx-ui/RayX.Dtcg/releases) page):
+[Releases](https://github.com/dXnSix/dXn.Dtcg/releases) page):
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0" }
+dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0" }
 serde_json = "1"
 ```
 
@@ -34,7 +34,7 @@ name, and makes that document the *root*. `resolve` takes a selection, which is 
 a plain token document has no modifiers.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 const TOKENS: &str = r##"{
   "palette": {
@@ -102,7 +102,7 @@ typography `lineHeight` and the `dev.rayx.blur` type, opt in to those extensions
 the runtime:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json_with_options(
@@ -123,7 +123,7 @@ sources and the order to merge them in. Here the root is a resolver that referen
 files, and the `theme` modifier switches a dark override in and out.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const RESOLVER: &str = r##"{
   "version": "2025.10",
@@ -172,7 +172,7 @@ fn main() -> Result<(), DtcgError> {
     let light = runtime.resolve(&[])?.ready().unwrap(); // "theme" falls back to "light"
     let dark = runtime.resolve(&[("theme", "dark")])?.ready().unwrap();
 
-    let background = |tokens: &dtcg_runtime::ResolvedTokens| {
+    let background = |tokens: &dxn_dtcg::ResolvedTokens| {
         tokens.get("color.background").unwrap().value["components"][0].clone()
     };
     assert_eq!(background(&light), 1);
@@ -209,7 +209,7 @@ real application; [Document loading](07-document-loading.md) shows several loade
 ```rust
 use std::collections::HashMap;
 
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution, ResolvedTokens};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, ResolvedTokens};
 
 fn storage() -> HashMap<&'static str, &'static str> {
     HashMap::from([
@@ -294,7 +294,7 @@ This resolver uses *inline* sources, token documents written directly inside it,
 needs no other files.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const RESOLVER: &str = r##"{
   "version": "2025.10",
@@ -364,7 +364,7 @@ A few more details:
   `&[(&str, &str)]` every method takes:
 
 ```rust
-use dtcg_runtime::{DtcgError, selection_from_json, selection_refs};
+use dxn_dtcg::{DtcgError, selection_from_json, selection_refs};
 
 fn main() -> Result<(), DtcgError> {
     let inputs = selection_from_json(&serde_json::json!({ "theme": "dark", "density": "compact" }))?;
@@ -389,7 +389,7 @@ built-in conversions cover `String`, `f64`, `f32` and `bool`. For anything else,
 `#[dtcg(with = "...")]`.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
 
 #[derive(Debug, PartialEq)]
 struct Px(f32);
@@ -463,7 +463,7 @@ fn main() -> Result<(), DtcgError> {
 - An `Option<T>` field is `None` when its token is missing; any other field makes a missing token
   an error.
 - `card.shadow` is not requested, and that is fine.
-- The typed models in `dtcg_runtime::values` (`Dimension`, `Color`, `Typography` and the rest)
+- The typed models in `dxn_dtcg::values` (`Dimension`, `Color`, `Typography` and the rest)
   implement `FromDtcgValue`, so they can be fields directly.
 
 `DtcgRuntime::project` resolves and projects in one call. If you project several structs from the
@@ -478,7 +478,7 @@ There are two kinds of "not ready":
   resource and the token path.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() {
     let runtime = DtcgRuntime::from_json(

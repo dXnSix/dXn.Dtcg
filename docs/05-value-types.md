@@ -251,7 +251,7 @@ such a value fails validation and such an alias fails with
 
 A layer or background blur effect, as produced by the RayX Figma export. `kind` is `layer` or
 `background`, and `radius` is a dimension; `radius` may alias a `dimension` token. The type name is
-available as the constant `dtcg_runtime::BLUR_TYPE`. The type exists only with the RayX
+available as the constant `dxn_dtcg::BLUR_TYPE`. The type exists only with the RayX
 `rayx_blur` extension; a default runtime reports it as an
 [unsupported type](#unsupported-types). Other `dev.rayx.*` names are never recognized.
 
@@ -275,7 +275,7 @@ Extensions reach a runtime through `RuntimeOptions`, which also carries the
 - `DtcgRuntime::default()`, `from_json`, `from_envelope` and `with_limits` use strict values.
 
 ```rust
-use dtcg_runtime::{BLUR_TYPE, DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{BLUR_TYPE, DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
 
 const TOKENS: &str = r##"{
   "leading": { "$type": "dimension", "$value": { "value": 24, "unit": "px" } },
@@ -343,7 +343,7 @@ value before writing it. `validate_value` is strict DTCG 2025.10; `validate_valu
 given `ValueExtensions`:
 
 ```rust
-use dtcg_runtime::{
+use dxn_dtcg::{
     BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value, validate_value_with,
 };
 use serde_json::json;
@@ -377,7 +377,7 @@ the checks above, conversion code can rely on its shape.
 
 ### Typed values: the `values` module
 
-`dtcg_runtime::values` models every type as plain Rust data, and `ResolvedToken::typed(&extensions)`
+`dxn_dtcg::values` models every type as plain Rust data, and `ResolvedToken::typed(&extensions)`
 converts a resolved token by its effective type into a `TypedValue` enum with one variant per type.
 `TypedValue::from_resolved(type, &value, &extensions)` does the same for any value: it validates
 first and returns a `ValueValidationError` for a value that does not match. Pass the extensions the
@@ -401,10 +401,10 @@ runtime was created with, `runtime.options().extensions`, so the same shapes are
 | `dev.rayx.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}`; RayX extension |
 
 ```rust
-use dtcg_runtime::values::{
+use dxn_dtcg::values::{
     Color, ColorSpace, Component, DimensionUnit, FontWeight, LineHeight, Shadow, TypedValue,
 };
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -468,7 +468,7 @@ through [typed projection](08-typed-projection.md).
 ```rust
 use std::time::Duration;
 
-use dtcg_runtime::{DtcgError, DtcgRuntime, ResolvedToken};
+use dxn_dtcg::{DtcgError, DtcgRuntime, ResolvedToken};
 use serde_json::Value;
 
 fn projection_error(token: &ResolvedToken, message: &str) -> DtcgError {

@@ -1,6 +1,6 @@
-# RayX.Dtcg
+# dXn.Dtcg
 
-[![CI](https://github.com/rayx-ui/RayX.Dtcg/actions/workflows/ci.yml/badge.svg)](https://github.com/rayx-ui/RayX.Dtcg/actions/workflows/ci.yml)
+[![CI](https://github.com/dXnSix/dXn.Dtcg/actions/workflows/ci.yml/badge.svg)](https://github.com/dXnSix/dXn.Dtcg/actions/workflows/ci.yml)
 ![Rust 1.95+](https://img.shields.io/badge/rust-1.95%2B-blue)
 ![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)
 
@@ -11,7 +11,7 @@ result into ordinary Rust structs.
 
 Design systems ship their tokens as JSON: a palette, semantic aliases on top of it, and light,
 dark, brand or density variants. At run time an application needs one thing from all of that,
-the effective value of each token for the variant the user picked. `dtcg_runtime` computes it.
+the effective value of each token for the variant the user picked. `dxn_dtcg` computes it.
 It does no I/O of its own: it tells you which documents it needs, and you load them from disk,
 over HTTP, from an asset bundle or from memory. The same code therefore runs in a desktop app,
 on a server, in a build script or in the browser through WebAssembly.
@@ -69,26 +69,31 @@ no file-system or network access, so they build for any target that has the Rust
 ## Installation
 
 Releases are git tags, not crates.io packages. Depend on a release tag; the latest one is on the
-repository's [Releases](https://github.com/rayx-ui/RayX.Dtcg/releases) page:
+repository's [Releases](https://github.com/dXnSix/dXn.Dtcg/releases) page:
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "v1.0.0" }
+dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0" }
 # Optional: only needed to construct or name `serde_json::Value`s yourself.
 serde_json = "1"
 ```
 
 `Cargo.lock` records the exact commit of the tag; to update, change the tag by hand. Depend only on
-a release tag, never on a branch or a path. `dtcg_runtime` re-exports the derive macros, so you do
-not depend on `dtcg_runtime_derive` directly. The one optional feature, `diagnostics`, adds
+a release tag, never on a branch or a path. `dxn_dtcg` re-exports the derive macros, so you do
+not depend on `dxn_dtcg_derive` directly. The one optional feature, `diagnostics`, adds
 redacted error diagnostics and resolution counters for test harnesses.
+
+Releases up to `v1.0.0` were published as `dtcg_runtime` and `dtcg_runtime_derive` from
+`rayx-ui/RayX.Dtcg`. From `v1.1.0` they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`:
+rename the dependency and replace `dtcg_runtime::` paths with `dxn_dtcg::`; the API is otherwise
+unchanged.
 
 ## Examples
 
 ### Resolve a token document
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -130,7 +135,7 @@ be switched at run time. The active sources merge into one document: groups merg
 replace earlier tokens with the same path, and aliases resolve against that final result.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 const RESOLVER: &str = r##"{
   "version": "2025.10",
@@ -200,7 +205,7 @@ Only the documents of the selected contexts are requested.
 ```rust,no_run
 use std::{error::Error, fs, path::Path};
 
-use dtcg_runtime::{DtcgRuntime, LocalReferencePolicy, Resolution, ResolvedTokens};
+use dxn_dtcg::{DtcgRuntime, LocalReferencePolicy, Resolution, ResolvedTokens};
 
 fn load_theme(dir: &Path, selection: &[(&str, &str)]) -> Result<ResolvedTokens, Box<dyn Error>> {
     let mut runtime = DtcgRuntime::default();
@@ -230,7 +235,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 ### Project tokens into structs
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
+use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, FromDtcgValue, ResolvedToken};
 
 /// Logical pixels; `rem` converts at 16 px.
 #[derive(Debug, PartialEq)]
@@ -312,8 +317,8 @@ Without a struct of your own, `ResolvedToken::typed` converts any resolved token
 the `values` module:
 
 ```rust
-use dtcg_runtime::values::{DimensionUnit, TypedValue};
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::values::{DimensionUnit, TypedValue};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -354,8 +359,8 @@ JSON strings ──provide──► catalog (ResourceId → document text)
 
 | Crate | Purpose |
 |---|---|
-| [`dtcg_runtime`](crates/dtcg_runtime) | Catalog, resolver, value validation, typed projection, source inspection, diagnostics |
-| [`dtcg_runtime_derive`](crates/dtcg_runtime_derive) | `#[derive(DtcgTokens)]` and `#[derive(DtcgComponentTokens)]`, re-exported by `dtcg_runtime` |
+| [`dxn_dtcg`](crates/dxn_dtcg) | Catalog, resolver, value validation, typed projection, source inspection, diagnostics |
+| [`dxn_dtcg_derive`](crates/dxn_dtcg_derive) | `#[derive(DtcgTokens)]` and `#[derive(DtcgComponentTokens)]`, re-exported by `dxn_dtcg` |
 
 ## Documentation
 
@@ -389,7 +394,7 @@ Validation is strict DTCG 2025.10 by default. The two value extensions are opt-i
 never see them; RayX and the RayX Token Editor enable them when they create the runtime:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
 
 fn main() -> Result<(), DtcgError> {
     let json = r#"{ "frost": { "$type": "dev.rayx.blur",

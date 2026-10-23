@@ -1,8 +1,8 @@
-# Releasing `dtcg_runtime`
+# Releasing `dxn_dtcg`
 
 A release is a version tag `vX.Y.Z` on `main` plus a GitHub Release whose notes are that version's
-`CHANGELOG.md` section. Both crates, `dtcg_runtime` and `dtcg_runtime_derive`, share one version,
-one tag, one GitHub Release and one root `CHANGELOG.md`; `dtcg_runtime_derive` never gets a tag or
+`CHANGELOG.md` section. Both crates, `dxn_dtcg` and `dxn_dtcg_derive`, share one version,
+one tag, one GitHub Release and one root `CHANGELOG.md`; `dxn_dtcg_derive` never gets a tag or
 a Release of its own. Nothing is published to crates.io, although the manifests stay packageable
 (`cargo package --workspace` keeps passing).
 
@@ -36,6 +36,11 @@ The first release, `v1.0.0`, was tagged without a pull request: `Cargo.toml` alr
 and no `v*` tag existed, and in git-only mode release-plz treats a package without a matching tag
 as an initial release, so the `release` job tagged it on the first push that contained the
 workflow.
+
+`v1.1.0`, which renamed the crates from `dtcg_runtime`/`dtcg_runtime_derive` to
+`dxn_dtcg`/`dxn_dtcg_derive`, was cut with the [by-hand fallback](#by-hand-fallback): in git-only
+mode release-plz looks the packages up by their new names inside `v1.0.0`, finds nothing and
+cannot compute a next version. From `v1.1.0` on it finds them again.
 
 ## Commit types and the 1.x policy
 
@@ -102,11 +107,10 @@ request opened with it would get no CI. release-plz therefore checks out and pus
 fine-grained personal access token stored as the Actions secret `RELEASE_PLZ_TOKEN` (a repository
 secret, or an organization secret shared by the library repositories). The crates never read it.
 
-It is one PAT shared by the RayX libraries:
+It is one PAT shared by the dXn libraries:
 
-- resource owner `rayx-ui`;
-- repository access: the four library repositories (RayX.Dtcg, RayX.Reactive, RayX.SignalR, Gpux;
-  RayX.CLI uses the same token);
+- resource owner `dXnSix` (the account that owns the repositories);
+- repository access: the three library repositories (dXn.Dtcg, dXn.Reactive, dXn.SignalR);
 - repository permissions: **Contents** read and write, **Pull requests** read and write (Metadata
   read is added automatically);
 - an expiry of at most one year, with the date noted.
@@ -133,14 +137,14 @@ owner):
 
 ```bash
 # 1. Set X.Y.Z in [workspace.package] version and in both [workspace.dependencies]
-#    requirements (dtcg_runtime, dtcg_runtime_derive) of the root Cargo.toml, then:
+#    requirements (dxn_dtcg, dxn_dtcg_derive) of the root Cargo.toml, then:
 cargo update --workspace
 # 2. Add a `## [X.Y.Z] - YYYY-MM-DD` section to CHANGELOG.md, right below the header
 # 3. Commit and push it (see "Pushing to main"), then tag that commit and push the tag
 git tag vX.Y.Z
 git push origin vX.Y.Z
 # 4. Save that section's body to notes.md and create the GitHub Release with it
-gh release create vX.Y.Z --repo rayx-ui/RayX.Dtcg --title vX.Y.Z --notes-file notes.md
+gh release create vX.Y.Z --repo dXnSix/dXn.Dtcg --title vX.Y.Z --notes-file notes.md
 ```
 
 release-plz continues from the by-hand tag on its next run.
@@ -151,12 +155,12 @@ Consumers depend on a release tag, never on a branch, a path or crates.io:
 
 ```toml
 [dependencies]
-dtcg_runtime = { git = "https://github.com/rayx-ui/RayX.Dtcg", tag = "vX.Y.Z" }
+dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }
 ```
 
 `Cargo.lock` records the exact commit. Bump the tag by hand to take a new release; the latest one is
-on the repository's Releases page. `dtcg_runtime` re-exports the derive macros, and
-`dtcg_runtime_derive` resolves from the same tag. A change RayX needs is released here first; then
+on the repository's Releases page. `dxn_dtcg` re-exports the derive macros, and
+`dxn_dtcg_derive` resolves from the same tag. A change RayX needs is released here first; then
 RayX bumps its tag and validates its affected crates and Test Suite specs.
 
 ## Pushing to `main`

@@ -1,6 +1,6 @@
 # 7. Document loading
 
-`dtcg_runtime` performs no I/O. Documents enter the runtime as strings, under logical names, and
+`dxn_dtcg` performs no I/O. Documents enter the runtime as strings, under logical names, and
 the runtime tells you which ones it still needs. This chapter covers the catalog, resource ids and
 fragments, the request/provide protocol, loader patterns, limits, caching, path safety and Token
 Editor envelopes.
@@ -60,7 +60,7 @@ References are resolved against the **directory** of the document that contains 
 relative URLs work:
 
 ```rust
-use dtcg_runtime::{DtcgError, ResourceId};
+use dxn_dtcg::{DtcgError, ResourceId};
 
 fn main() -> Result<(), DtcgError> {
     let root = ResourceId::parse("themes/base/root.json")?;
@@ -119,7 +119,7 @@ fragment that addresses nothing fails with `InvalidPointer` when the document is
 [inspection APIs](10-source-inspection.md) report decoded, re-escaped pointers.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, ResourceId};
+use dxn_dtcg::{DtcgError, DtcgRuntime, ResourceId};
 
 fn resolver(fragment: &str) -> String {
     format!(
@@ -211,7 +211,7 @@ batch. `include_str!` is a good fit for applications and WebAssembly builds that
 design system:
 
 ```rust,ignore
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn embedded_runtime() -> Result<DtcgRuntime, DtcgError> {
     let mut runtime = DtcgRuntime::from_json(
@@ -238,7 +238,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use dtcg_runtime::{DocumentRequest, DtcgRuntime, LocalReferencePolicy, Resolution, ResolvedTokens};
+use dxn_dtcg::{DocumentRequest, DtcgRuntime, LocalReferencePolicy, Resolution, ResolvedTokens};
 
 struct FileLoader {
     base: PathBuf,
@@ -297,7 +297,7 @@ concurrently (for example with `futures::future::try_join_all`) saves round trip
 ```rust,no_run
 use std::error::Error;
 
-use dtcg_runtime::{DtcgRuntime, Resolution, ResolvedTokens};
+use dxn_dtcg::{DtcgRuntime, Resolution, ResolvedTokens};
 
 async fn fetch_text(url: &str) -> Result<String, Box<dyn Error>> {
     // Use your HTTP client here, for example `reqwest::get(url).await?.text().await?`.
@@ -338,7 +338,7 @@ To fetch everything any selection could need, for an offline cache or a bundle, 
 ```rust
 use std::collections::HashMap;
 
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 fn preload_all(runtime: &mut DtcgRuntime, files: &HashMap<&str, &str>) -> Result<(), DtcgError> {
     loop {
@@ -421,7 +421,7 @@ calls apply the same limits. The value and token limits, and the fixed depth bou
 [runtime limits](11-errors-limits-and-diagnostics.md#runtime-limits).
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
 
 fn main() -> Result<(), DtcgError> {
     let mut runtime = DtcgRuntime::with_limits(RuntimeLimits::default().with_max_documents(4));
@@ -464,7 +464,7 @@ together identify a resolution exactly:
 ```rust
 use std::{collections::HashMap, sync::Arc};
 
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution, ResolvedTokens};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, ResolvedTokens};
 
 #[derive(Default)]
 struct TokenCache {
@@ -551,7 +551,7 @@ resolver the root, **under the envelope's own resource id**, so relative referen
 the project file.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 fn main() -> Result<(), DtcgError> {
     let (runtime, envelope) = DtcgRuntime::from_envelope(
@@ -594,7 +594,7 @@ checks and replaces the resolver stored under `id`, which must already be in the
 the catalog unchanged.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn envelope(gap: u32) -> String {
     format!(

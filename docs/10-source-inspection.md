@@ -87,7 +87,7 @@ Since a referenced document can be a resolver with references of its own, the ca
 `Missing` until every referenced document, dormant ones included, is in the catalog.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 
 fn main() -> Result<(), DtcgError> {
     let mut runtime = DtcgRuntime::from_json(
@@ -172,7 +172,7 @@ Token values are not resolved, so a source with invalid values or dangling alias
 fine. Structural problems, such as a malformed resolver or a forbidden reference, are errors.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, ResourceId};
+use dxn_dtcg::{DtcgError, DtcgRuntime, ResourceId};
 use serde_json::json;
 
 fn main() -> Result<(), DtcgError> {
@@ -250,7 +250,7 @@ resolution. A supplied inline source is not a document root, so a `$schema` memb
 unknown reserved property.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime, Resolution};
+use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 use serde_json::json;
 
 fn main() -> Result<(), DtcgError> {
@@ -325,7 +325,7 @@ apply the same rules the runtime applies to resolvers, so a definition they acce
 `resolve` too, as long as its members are [allowed](06-resolvers-and-modifiers.md#resolver-structure).
 
 ```rust
-use dtcg_runtime::{ResourceId, modifier_contexts, set_sources};
+use dxn_dtcg::{ResourceId, modifier_contexts, set_sources};
 use serde_json::json;
 
 let id = ResourceId::parse("acme.resolver.json").unwrap();

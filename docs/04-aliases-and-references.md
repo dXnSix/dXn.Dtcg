@@ -1,7 +1,7 @@
 # 4. Aliases and references
 
 Tokens can take their values from other tokens. DTCG 2025.10 has two syntaxes for this, and
-`dtcg_runtime` supports both: curly-brace aliases as whole values and at the composite members the
+`dxn_dtcg` supports both: curly-brace aliases as whole values and at the composite members the
 format allows, and JSON Pointer references at any depth.
 
 - [The two syntaxes](#the-two-syntaxes)
@@ -37,7 +37,7 @@ A JSON string that **starts with `{` and ends with `}`** is an alias. The text b
 is a token path.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -148,7 +148,7 @@ target's value fits there: a shadow array element can alias a single-shadow toke
 token whose value is itself an array.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn resolve(json: &str) -> Result<(), DtcgError> {
     DtcgRuntime::from_json("tokens.json", json)?.resolve(&[]).map(|_| ())
@@ -214,7 +214,7 @@ Otherwise resolution fails with `TokenType`: ``reference type mismatch: expected
 `number` token holding `400` fails, even though `400` is a valid font weight.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -263,7 +263,7 @@ a value; their targets are not position-checked, because the resolved value as a
 validated against the token's type.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -325,7 +325,7 @@ fragments of source references such as `library.json#/brand`.
   names an element.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -386,7 +386,7 @@ example a value kept under `$extensions`. Such a token takes its type from its o
 group, because there is no target token to take one from.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -420,7 +420,7 @@ and each extra member is resolved and set on a copy of it. The copy replaces the
 a shallow merge: a member replaces the whole member of the same name.
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -470,7 +470,7 @@ alias therefore always sees the definition that won, even when the alias was wri
 file than the override:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -524,7 +524,7 @@ Editors use `authored_value` to show and preserve aliases. Renderers use `value`
 The runtime detects reference cycles and bounds every chain of references:
 
 ```rust
-use dtcg_runtime::{DtcgError, DtcgRuntime};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 
 fn main() {
     let runtime = DtcgRuntime::from_json(

@@ -16,7 +16,7 @@ publish = false
 git_tag_enable = true
 git_tag_name = "v{{ version }}"
 # The GitHub Release is titled like the tag; release-plz's multi-package default would be
-# `dtcg_runtime-vX.Y.Z`.
+# `dxn_dtcg-vX.Y.Z`.
 git_release_name = "v{{ version }}"
 # No cargo-dist here: release-plz creates the GitHub Release from the changelog section.
 git_release_enable = true
@@ -27,19 +27,19 @@ semver_check = false
 # along in the next one.
 release_commits = "^(feat|fix|perf)"
 
-# One release unit: both crates inherit `[workspace.package] version` and `dtcg_runtime`
+# One release unit: both crates inherit `[workspace.package] version` and `dxn_dtcg`
 # re-exports the derive macros, so they share one version (the version group), one tag `vX.Y.Z`,
-# one GitHub Release and one root CHANGELOG.md, all owned by `dtcg_runtime`.
+# one GitHub Release and one root CHANGELOG.md, all owned by `dxn_dtcg`.
 [[package]]
-name = "dtcg_runtime"
+name = "dxn_dtcg"
 changelog_path = "./CHANGELOG.md"
-changelog_include = ["dtcg_runtime_derive"]
+changelog_include = ["dxn_dtcg_derive"]
 version_group = "dtcg"
 
 [[package]]
-name = "dtcg_runtime_derive"
+name = "dxn_dtcg_derive"
 version_group = "dtcg"
-# Released under `dtcg_runtime`'s tag and changelog. It keeps the inherited `git_tag_name`: in
+# Released under `dxn_dtcg`'s tag and changelog. It keeps the inherited `git_tag_name`: in
 # git-only mode that template is how it finds its previous version (`v*` tags).
 git_tag_enable = false
 git_release_enable = false
@@ -48,7 +48,7 @@ changelog_update = false
 [changelog]
 header = """# Changelog
 
-All notable changes to `dtcg_runtime` and `dtcg_runtime_derive` are documented in this file. Both
+All notable changes to `dxn_dtcg` and `dxn_dtcg_derive` are documented in this file. Both
 crates share one version and one release tag `vX.Y.Z`. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the crates follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from

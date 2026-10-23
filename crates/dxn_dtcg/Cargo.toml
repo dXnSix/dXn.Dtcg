@@ -1,0 +1,29 @@
+[package]
+name = "dxn_dtcg"
+description = "Runtime for DTCG 2025.10 design-token documents: resolution, resolvers, aliases and typed projection."
+readme = "../../README.md"
+keywords = ["dtcg", "design-tokens", "tokens", "theme", "figma"]
+categories = ["parser-implementations", "gui"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# The vendored official corpus is test-only data; keep the published crate small.
+exclude = ["tests/fixtures/dtcg-test-suite/**"]
+
+[features]
+diagnostics = []
+
+[dependencies]
+dxn_dtcg_derive.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+dxn_dtcg = { path = ".", features = ["diagnostics"] }
+serde_json.workspace = true
+

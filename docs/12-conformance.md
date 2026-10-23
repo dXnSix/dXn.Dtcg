@@ -1,6 +1,6 @@
 # 12. DTCG 2025.10 conformance
 
-This chapter summarizes how `dtcg_runtime` relates to the DTCG 2025.10 Format, Color and Resolver
+This chapter summarizes how `dxn_dtcg` relates to the DTCG 2025.10 Format, Color and Resolver
 modules: how conformance is measured, what is supported, the choices the runtime makes where the
 specification leaves room or contradicts itself, the opt-in RayX extensions, and what it does not
 do. Each point links to the chapter with the details.
@@ -30,8 +30,8 @@ official corpus: 250 passed, 0 known gaps
 | Upstream | `design-tokens/community-group`, directory `test-suite/tests/2025.10/` |
 | Pinned commit | `882ebd6716abef9a46d8ef5fb12e82009d6cee2e` |
 | Fixtures | 220 format and 30 resolver fixtures, each a positive or negative evaluation test |
-| Vendored at | `crates/dtcg_runtime/tests/fixtures/dtcg-test-suite/2025.10/`, byte-identical to upstream, excluded from the published crate |
-| Harness | `crates/dtcg_runtime/tests/official_test_suite.rs` |
+| Vendored at | `crates/dxn_dtcg/tests/fixtures/dtcg-test-suite/2025.10/`, byte-identical to upstream, excluded from the published crate |
+| Harness | `crates/dxn_dtcg/tests/official_test_suite.rs` |
 
 The harness evaluates every manifest entry with the default `RuntimeOptions` (strict values):
 
@@ -50,7 +50,7 @@ to update it to a newer upstream commit.
 Run the harness with:
 
 ```bash
-cargo test -p dtcg_runtime --all-features --test official_test_suite -- --nocapture
+cargo test -p dxn_dtcg --all-features --test official_test_suite -- --nocapture
 ```
 
 ## Conformance tiers
@@ -84,7 +84,7 @@ Where sources disagree, the runtime follows them in this order:
 | Alias and pointer cycle detection | Supported | [Cycles](04-aliases-and-references.md#cycles-depth-and-errors) |
 | All 13 types, validated after resolution | Supported | [Value types](05-value-types.md) |
 | All 14 color spaces with their component ranges | Supported | [`color`](05-value-types.md#color) |
-| Typed Rust models of every type | `dtcg_runtime::values`, `ResolvedToken::typed` | [Value types](05-value-types.md#reading-values-in-rust) |
+| Typed Rust models of every type | `dxn_dtcg::values`, `ResolvedToken::typed` | [Value types](05-value-types.md#reading-values-in-rust) |
 
 ### Resolver module
 
@@ -115,7 +115,7 @@ which `validate_value_with` and the runtime options accept:
 `ValueExtensions::rayx()` turns both on. RayX and the RayX Token Editor opt in with it:
 
 ```rust
-use dtcg_runtime::{DtcgRuntime, RuntimeOptions, ValueExtensions};
+use dxn_dtcg::{DtcgRuntime, RuntimeOptions, ValueExtensions};
 
 let document = r#"{
   "body": { "$type": "typography", "$value": {
@@ -241,15 +241,15 @@ These optional (MAY) features and neighbors of the specification are out of scop
 
 | Test group | Covers |
 |---|---|
-| `crates/dtcg_runtime/tests/official_test_suite.rs` | The vendored official corpus with the `KNOWN_GAPS` ratchet, and `$schema` handling |
-| `crates/dtcg_runtime/tests/dtcg_2025_10_conformance.rs` | Groups, `$root`, `$extends`, effective types, all 13 value types, JSON Pointers, names, ordering, fingerprints |
-| `crates/dtcg_runtime/tests/format_structure.rs` | Token and group structure rules (Format §5–§6) |
-| `crates/dtcg_runtime/tests/type_determination.rs` | Effective types and reference type mismatches |
-| `crates/dtcg_runtime/tests/reference_positions.rs` | Where aliases may appear and which types they must target |
-| `crates/dtcg_runtime/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
-| `crates/dtcg_runtime/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge |
-| `crates/dtcg_runtime/tests/resolver_2025_10.rs`, `resolver_document_validation.rs` | Resolver version, allowed members, steps, overrides, set references |
-| `crates/dtcg_runtime/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
-| `crates/dtcg_runtime/tests/value_extensions.rs`, `rayx_export_types.rs` | Strict values and the opt-in RayX extensions |
+| `crates/dxn_dtcg/tests/official_test_suite.rs` | The vendored official corpus with the `KNOWN_GAPS` ratchet, and `$schema` handling |
+| `crates/dxn_dtcg/tests/dtcg_2025_10_conformance.rs` | Groups, `$root`, `$extends`, effective types, all 13 value types, JSON Pointers, names, ordering, fingerprints |
+| `crates/dxn_dtcg/tests/format_structure.rs` | Token and group structure rules (Format §5–§6) |
+| `crates/dxn_dtcg/tests/type_determination.rs` | Effective types and reference type mismatches |
+| `crates/dxn_dtcg/tests/reference_positions.rs` | Where aliases may appear and which types they must target |
+| `crates/dxn_dtcg/tests/merged_resolution.rs` | Merging sources, `$extends` across sources, pointers on the merged structure |
+| `crates/dxn_dtcg/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge |
+| `crates/dxn_dtcg/tests/resolver_2025_10.rs`, `resolver_document_validation.rs` | Resolver version, allowed members, steps, overrides, set references |
+| `crates/dxn_dtcg/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
+| `crates/dxn_dtcg/tests/value_extensions.rs`, `rayx_export_types.rs` | Strict values and the opt-in RayX extensions |
 
-Run one group with `cargo test -p dtcg_runtime --all-features --test <group>`.
+Run one group with `cargo test -p dxn_dtcg --all-features --test <group>`.

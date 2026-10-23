@@ -1,6 +1,6 @@
 # 1. Overview
 
-`dtcg_runtime` turns DTCG 2025.10 design-token documents into resolved, validated token values that
+`dxn_dtcg` turns DTCG 2025.10 design-token documents into resolved, validated token values that
 Rust programs can use directly. This chapter explains what that means, the concepts involved, how
 the runtime is organized, and the principles behind its design.
 
@@ -20,7 +20,7 @@ A design system describes its visual decisions (colors, spacing, type, radii, sh
 Version 2025.10 has two parts: the **format**, for token files, and **resolvers**, documents that
 say which token files to combine and how to switch between variants such as light and dark themes.
 
-Given a set of these documents and a choice of variant, `dtcg_runtime`:
+Given a set of these documents and a choice of variant, `dxn_dtcg`:
 
 1. finds every document the choice depends on, and asks the caller for any it does not have;
 2. merges the sources, in the order the resolver gives, into one token document: groups merge, and
@@ -29,7 +29,7 @@ Given a set of these documents and a choice of variant, `dtcg_runtime`:
 4. works out each token's type and checks its value against the DTCG rules for that type;
 5. returns the tokens as `ResolvedTokens`, with their metadata, in a deterministic order and with a
    content fingerprint;
-6. optionally converts values into typed Rust models (`dtcg_runtime::values`) or maps them onto
+6. optionally converts values into typed Rust models (`dxn_dtcg::values`) or maps them onto
    your own structs through `#[derive(DtcgTokens)]`.
 
 It does no I/O. It works on JSON *strings* that you provide under logical names, and when it needs a
@@ -108,7 +108,7 @@ See [Resolvers and modifiers](06-resolvers-and-modifiers.md).
 ## The resolution pipeline
 
 ```text
-          caller                                        dtcg_runtime
+          caller                                        dxn_dtcg
  ┌────────────────────────┐        ┌──────────────────────────────────────────────────────┐
  │ provide_json(id, text) │──────► │ DocumentCatalog: ResourceId → Arc<str>, revision      │
  └────────────────────────┘        └──────────────────────────────────────────────────────┘
@@ -194,11 +194,11 @@ projected token can alias an unprojected one. See [Typed projection](08-typed-pr
 
 | Crate | Kind | Contents |
 |---|---|---|
-| `dtcg_runtime` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, envelopes, diagnostics |
-| `dtcg_runtime_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` |
+| `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, envelopes, diagnostics |
+| `dxn_dtcg_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` |
 
-`dtcg_runtime` depends on the derive crate and re-exports both macros, so applications depend only
-on `dtcg_runtime`.
+`dxn_dtcg` depends on the derive crate and re-exports both macros, so applications depend only
+on `dxn_dtcg`.
 
 | Feature | Default | Adds |
 |---|---|---|
