@@ -2,6 +2,7 @@
 
 mod affected_resolution;
 mod catalog;
+mod color;
 #[cfg(feature = "diagnostics")]
 mod diagnostics;
 mod dtcg_component_tokens;

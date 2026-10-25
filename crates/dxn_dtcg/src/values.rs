@@ -70,6 +70,11 @@ impl ColorSpace {
         }
     }
 
+    /// The color space a DTCG `colorSpace` name denotes.
+    pub fn from_name(name: &str) -> Option<Self> {
+        Self::parse(name)
+    }
+
     fn parse(name: &str) -> Option<Self> {
         [
             Self::Srgb,
@@ -600,3 +605,230 @@ fn blur(value: &Value) -> Blur {
         radius: dimension(&object["radius"]),
     }
 }
+
+// The DTCG JSON forms of the models, and their serde implementations, which
+// read and write exactly those forms.
+
+/// A JSON number: integral values within ±2^53 as integers, so they compare
+/// equal to authored integers.
+fn json_number(value: f64) -> Value {
+    if value.fract() == 0.0 && value.abs() <= 9_007_199_254_740_992.0 {
+        #[expect(clippy::cast_possible_truncation, reason = "integral and within ±2^53")]
+        return Value::from(value as i64);
+    }
+    serde_json::Number::from_f64(value).map_or(Value::Null, Value::Number)
+}
+
+impl Color {
+    /// The DTCG JSON form of this color: `alpha` only when it is not 1.
+    pub fn to_json(&self) -> Value {
+        let mut members = Map::new();
+        members.insert("colorSpace".into(), self.color_space.name().into());
+        members.insert(
+            "components".into(),
+            Value::Array(
+                self.components
+                    .iter()
+                    .map(|component| match component {
+                        Component::Number(value) => json_number(*value),
+                        Component::None => "none".into(),
+                    })
+                    .collect(),
+            ),
+        );
+        if self.alpha != 1.0 {
+            members.insert("alpha".into(), json_number(self.alpha));
+        }
+        if let Some(hex) = &self.hex {
+            members.insert("hex".into(), hex.clone().into());
+        }
+        Value::Object(members)
+    }
+}
+
+impl Dimension {
+    /// The DTCG JSON form of this dimension.
+    pub fn to_json(&self) -> Value {
+        let unit = match self.unit {
+            DimensionUnit::Px => "px",
+            DimensionUnit::Rem => "rem",
+        };
+        serde_json::json!({ "value": json_number(self.value), "unit": unit })
+    }
+}
+
+impl Duration {
+    /// The DTCG JSON form of this duration.
+    pub fn to_json(&self) -> Value {
+        let unit = match self.unit {
+            DurationUnit::Ms => "ms",
+            DurationUnit::S => "s",
+        };
+        serde_json::json!({ "value": json_number(self.value), "unit": unit })
+    }
+}
+
+impl CubicBezier {
+    /// The DTCG JSON form of this curve.
+    pub fn to_json(&self) -> Value {
+        Value::Array(self.0.iter().copied().map(json_number).collect())
+    }
+}
+
+impl FontFamily {
+    /// The DTCG JSON form: a string for one name, else an array.
+    pub fn to_json(&self) -> Value {
+        match self.0.as_slice() {
+            [name] => name.clone().into(),
+            names => names.iter().cloned().map(Value::from).collect(),
+        }
+    }
+}
+
+impl FontWeight {
+    /// The DTCG JSON form: the numeric weight.
+    pub fn to_json(&self) -> Value {
+        json_number(self.0)
+    }
+}
+
+impl StrokeStyle {
+    /// The DTCG JSON form: a keyword, or a dash pattern object.
+    pub fn to_json(&self) -> Value {
+        match self {
+            Self::Style(style) => match style {
+                LineStyle::Solid => "solid",
+                LineStyle::Dashed => "dashed",
+                LineStyle::Dotted => "dotted",
+                LineStyle::Double => "double",
+                LineStyle::Groove => "groove",
+                LineStyle::Ridge => "ridge",
+                LineStyle::Outset => "outset",
+                LineStyle::Inset => "inset",
+            }
+            .into(),
+            Self::Dashes {
+                dash_array,
+                line_cap,
+            } => serde_json::json!({
+                "dashArray": dash_array.iter().map(Dimension::to_json).collect::<Vec<_>>(),
+                "lineCap": match line_cap {
+                    LineCap::Round => "round",
+                    LineCap::Butt => "butt",
+                    LineCap::Square => "square",
+                },
+            }),
+        }
+    }
+}
+
+impl Border {
+    /// The DTCG JSON form of this border.
+    pub fn to_json(&self) -> Value {
+        serde_json::json!({
+            "color": self.color.to_json(),
+            "width": self.width.to_json(),
+            "style": self.style.to_json(),
+        })
+    }
+}
+
+impl Transition {
+    /// The DTCG JSON form of this transition.
+    pub fn to_json(&self) -> Value {
+        serde_json::json!({
+            "duration": self.duration.to_json(),
+            "delay": self.delay.to_json(),
+            "timingFunction": self.timing_function.to_json(),
+        })
+    }
+}
+
+impl ShadowLayer {
+    /// The DTCG JSON form of one shadow: `inset` only when it is `true`.
+    pub fn to_json(&self) -> Value {
+        let mut layer = serde_json::json!({
+            "color": self.color.to_json(),
+            "offsetX": self.offset_x.to_json(),
+            "offsetY": self.offset_y.to_json(),
+            "blur": self.blur.to_json(),
+            "spread": self.spread.to_json(),
+        });
+        if self.inset {
+            layer["inset"] = true.into();
+        }
+        layer
+    }
+}
+
+impl Shadow {
+    /// The DTCG JSON form: one shadow object for one layer, else an array.
+    pub fn to_json(&self) -> Value {
+        match self.0.as_slice() {
+            [layer] => layer.to_json(),
+            layers => layers.iter().map(ShadowLayer::to_json).collect(),
+        }
+    }
+}
+
+impl Gradient {
+    /// The DTCG JSON form of this gradient.
+    pub fn to_json(&self) -> Value {
+        self.0
+            .iter()
+            .map(|stop| {
+                serde_json::json!({ "color": stop.color.to_json(), "position": json_number(stop.position) })
+            })
+            .collect()
+    }
+}
+
+impl Typography {
+    /// The DTCG JSON form of this typography.
+    pub fn to_json(&self) -> Value {
+        serde_json::json!({
+            "fontFamily": self.font_family.to_json(),
+            "fontSize": self.font_size.to_json(),
+            "fontWeight": self.font_weight.to_json(),
+            "letterSpacing": self.letter_spacing.to_json(),
+            "lineHeight": match self.line_height {
+                LineHeight::Multiplier(multiplier) => json_number(multiplier),
+                LineHeight::Dimension(dimension) => dimension.to_json(),
+            },
+        })
+    }
+}
+
+/// Implements `Serialize` and `Deserialize` with a model's DTCG JSON form;
+/// deserializing validates it as `token_type`, with every value extension.
+macro_rules! serde_with_json {
+    ($model:ty, $token_type:expr, $parse:expr) => {
+        impl serde::Serialize for $model {
+            fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                self.to_json().serialize(serializer)
+            }
+        }
+
+        impl<'de> serde::Deserialize<'de> for $model {
+            fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+                let value = Value::deserialize(deserializer)?;
+                validate_value_with($token_type, &value, &ValueExtensions::all())
+                    .map_err(serde::de::Error::custom)?;
+                Ok($parse(&value))
+            }
+        }
+    };
+}
+
+serde_with_json!(Color, "color", color);
+serde_with_json!(Dimension, "dimension", dimension);
+serde_with_json!(Duration, "duration", duration);
+serde_with_json!(CubicBezier, "cubicBezier", cubic_bezier);
+serde_with_json!(FontFamily, "fontFamily", font_family);
+serde_with_json!(FontWeight, "fontWeight", font_weight);
+serde_with_json!(StrokeStyle, "strokeStyle", stroke_style);
+serde_with_json!(Border, "border", border);
+serde_with_json!(Transition, "transition", transition);
+serde_with_json!(Shadow, "shadow", shadow);
+serde_with_json!(Gradient, "gradient", gradient);
+serde_with_json!(Typography, "typography", typography);
