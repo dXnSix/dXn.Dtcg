@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 133,
+  "revision": 135,
   "planRevision": 19,
   "specHashes": {
     "requirements": "ed421c2bde3657e4ee194f6704c1226b24553a6956a3c2131fec489b6c94d5f9",
@@ -303,7 +303,7 @@
           "dtcg": "a898d2b4ae655ec6b36244f9933a7d7ee7ca795c08dbfea7e515a6dfe89167e9"
         }
       },
-      "recordedAt": "2026-10-25T21:36:02Z"
+      "recordedAt": "2026-10-25T21:42:24Z"
     }
   },
   "checkResults": {
@@ -770,18 +770,18 @@
       "checkId": "check-expr-sandbox",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
-      "definitionHash": "461bc5dd398e5a9742434c88b2bc8d391bf40ce3e3957a5f5674b7bb348675ba",
-      "basisHash": "e69b6c86e79372f0275e141baf77fee1e1f0bbaebf63414ae51260565652197b",
+      "batchId": "7627cbd59854c1810f1ba1efc0c593f6150a63daeb3d2f83b78af0bde1de8677",
+      "definitionHash": "48afed2a90c1654516521627113cbcfb9126c93589ff35ed48ac7cc10d6ed381",
+      "basisHash": "b59014e26092dbff40f4373a91332f2047c047a7b191dedb437f03814d9ed823",
       "status": "passed",
       "exitCode": 0,
       "testCount": 22,
-      "durationSeconds": 1.1823,
-      "recordedAt": "2026-10-25T21:00:16Z",
+      "durationSeconds": 4.8237,
+      "recordedAt": "2026-10-25T21:12:25Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c4d0000f0472.log",
-      "logSha256": "4725dadc02e091f03e1280e3ae9cc2a6cbb52fefe71ec7a18e2c4633fcefc877",
-      "inputsHash": "47a451b7a0bbc710d95327774635098373f760adf62a6adc68f3fd4deff15689"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s9-full-platform-coverage-final-9f9e059be89e.log",
+      "logSha256": "4324df86338dc77254521d6db6a761562042a36461e37e48c4003f695aff4fcd",
+      "inputsHash": "903b81db9bb99cc45f61cebe6f38bbd02f830f4cf9f93add810867e121f03f24"
     },
     "final/check-expr-typescript/final": {
       "checkId": "check-expr-typescript",
@@ -821,33 +821,33 @@
       "checkId": "check-expr-wasm",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
-      "definitionHash": "21be5726d371ab0ed1f4fc9344de4fb15c6129cfa28a91db8c7b7e621f639c50",
-      "basisHash": "74e3b65f5d386ae24cb02e5a3aec60abcebd0683d8a42e793df7b35240c1b28c",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "definitionHash": "3d9b595bcc264e6f1c73b44c2933739b9591c2dafa837c3f045befbcf23c5f6e",
+      "basisHash": "753f4e3ae75653769217ff9b9786055009305b8509cece258a81c8d0f6e1e4ca",
       "status": "passed",
       "exitCode": 0,
       "testCount": 583,
-      "durationSeconds": 211.522,
-      "recordedAt": "2026-10-25T21:08:01Z",
+      "durationSeconds": 221.8712,
+      "recordedAt": "2026-10-25T21:42:12Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b6aafa166d49.log",
-      "logSha256": "594667ca690074319e0e47c2faa416bb54f1e4cddf0ed919f58666c075a18fac",
-      "inputsHash": "a3c9cf90ea7e5bd6f261c14acd5125f7332c35b8809e1600f1bf338da6162aa5"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-dd8666b5a3fa.log",
+      "logSha256": "08ce51751ba36fd694b1e27264e25318955fce3058ca428bb04e32565338d586",
+      "inputsHash": "244d3961e906993b8300a070691f9d0d9eca8443f3a258fd3fad1036f5f0991c"
     },
     "final/check-ci-workflow/final": {
       "checkId": "check-ci-workflow",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
-      "definitionHash": "71fa58be85d8759b9232027186445725e6fb3406c021133656b081cdf6ecb0e6",
-      "basisHash": "ed7ddc173126725c94a176f340683e2d5abb86feb927188acbf8270f097676e3",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "definitionHash": "ba67d0843ac66e97a6535c91f7701cb2cdd23ac1ccb6988f3f19694c91ebbecf",
+      "basisHash": "ad33ab34f31daca644113e05f6b059e172758a527e507b1264b9028b380f3754",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0256,
-      "recordedAt": "2026-10-25T21:03:55Z",
+      "durationSeconds": 0.0171,
+      "recordedAt": "2026-10-25T21:36:02Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-1a451a897039.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s9-full-platform-coverage-final-46c741293bb0.log",
       "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
       "inputsHash": "ff84ee3e0abb7137275b93623c5269d893ccd4a115b50b7892f58eb713355a3d"
     },
@@ -1042,65 +1042,65 @@
       "checkId": "final-fmt",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
       "definitionHash": "1a6f66da2f1dee6b1855e17f8c0e47a46511a4de45d9d028e5e4ec71a302c777",
-      "basisHash": "c66bc6b1b6d4faf6ed5a3eeddd08af524db19714250e8b32bb2496cef8a5f3a2",
+      "basisHash": "8f92aa66485ade943d5072d02113e3c2dbb3812d2b95afb04b3af1b940f2e54a",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.1837,
-      "recordedAt": "2026-10-25T21:04:14Z",
+      "durationSeconds": 0.265,
+      "recordedAt": "2026-10-25T21:42:13Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-eca29e070837.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-353d3895958b.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "final/final-clippy/final": {
       "checkId": "final-clippy",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
       "definitionHash": "531a67fae9bcea4038242b5b35ff1462a955c21158ff9ca84776cc471644789e",
-      "basisHash": "c6fc2773e586ce9ec8d4afb171936b144b238dd1fa54c343b1369e327bb7c49b",
+      "basisHash": "4756b51dcbd0695029e28cb1f4c4902aea862d70af7e828d02c27aa14d8bbe8e",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.1888,
-      "recordedAt": "2026-10-25T21:04:15Z",
+      "durationSeconds": 3.0645,
+      "recordedAt": "2026-10-25T21:42:16Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-13db3c8ee94b.log",
-      "logSha256": "a41051563a4cb5fc1b1bcdd9aa0ba28ca80f7736d629d90cc138218756e8e3a9"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-15420234d754.log",
+      "logSha256": "19bcbaf2d369d8374e25b62fdb4f0cbef9533ef15fb697742a5ab5e3913a13f5"
     },
     "final/final-wasm-default/final": {
       "checkId": "final-wasm-default",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
       "definitionHash": "b681bff9c4fb5aaf934ca616a1ec38ab144605c5e54e32b721f0d35090e32a3a",
-      "basisHash": "8932d34ccc67092dda5df7ff50418e0c993c6f2e5e7b231cf6a47d29d6ebc0cf",
+      "basisHash": "45510617cc419cedbcbc788d266a0f60a24630473f2e6274768f9e9b62bbc27b",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0844,
-      "recordedAt": "2026-10-25T21:04:15Z",
+      "durationSeconds": 0.0994,
+      "recordedAt": "2026-10-25T21:42:16Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-414335f1a203.log",
-      "logSha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-dea4cb1305ef.log",
+      "logSha256": "8c233a54790c4800d3dd585436af679aa838da259bfdb129412e2d51cdb75cdc"
     },
     "final/final-package/final": {
       "checkId": "final-package",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
       "definitionHash": "9234df311b3ef66915f2ac2efdc255ea93eff9f838e4d6e02c9e4e3e2ab0bc58",
-      "basisHash": "767809f4b0985799f624a55094f233d410bd7f2a69d8c8bc86966f706a090a1a",
+      "basisHash": "fc56702e73706cc675eb04f0f01fdd2b242802a5faf94e8bbebbf76c3531e018",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 7.8872,
-      "recordedAt": "2026-10-25T21:08:09Z",
+      "durationSeconds": 8.3288,
+      "recordedAt": "2026-10-25T21:42:24Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-daa93ea7165f.log",
-      "logSha256": "dd265c17cdf1c1f317a33190177f5fdf56a92816ec62b0e00ac31f62472c3e78"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d33994b457b6.log",
+      "logSha256": "ded21dae5f7ade11fe0a574c2c6546a865bcd2570980b8f0752d63d6026d1790"
     },
     "s6-final-repair/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
@@ -3198,6 +3198,677 @@
         "S9-F1"
       ],
       "recordedAt": "2026-10-25T21:36:54Z"
+    },
+    "final": {
+      "reviewerId": "reviewer-final-independent-3",
+      "snapshotId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "criterionIds": [
+        "EXP-1",
+        "EXP-2",
+        "EXP-3",
+        "EVAL-1",
+        "EVAL-2",
+        "EVAL-3",
+        "EVAL-4",
+        "EVAL-6",
+        "SBX-1",
+        "SBX-4",
+        "SBX-5",
+        "MOD-1",
+        "MOD-2",
+        "MOD-3",
+        "MOD-4",
+        "MOD-5",
+        "NAT-1",
+        "NAT-2",
+        "NAT-3",
+        "NAT-4",
+        "NAT-5",
+        "PLT-1",
+        "PLT-5",
+        "PLT-6",
+        "DOC-1"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expression_extension.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1",
+            "EXP-2"
+          ],
+          "sha256": "74f638f18f9f2dd5a3002fceb1c0edaa608668f7be735d5ea5f34e3b2449d2aa"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/options.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1"
+          ],
+          "sha256": "43994727f6b19addd71f3c033c30092e6862b1fcbdbcc74bcb7047865868f801"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/format.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-2"
+          ],
+          "sha256": "6e6baab9377e27f213fcb33888a02ccbf3dda1d499b577620300198642326a6d"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-3",
+            "MOD-1",
+            "MOD-2",
+            "MOD-3",
+            "MOD-4"
+          ],
+          "sha256": "1dc2d0a9eaa41b0df4ca2939b2e5d353efe471576d2aa1e1669b1c4a2f5be775"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-1",
+            "EVAL-2",
+            "EVAL-3"
+          ],
+          "sha256": "91394997d944d32d1b6531ad7f8d065741c2f7ba8da88fa55836266bcaf95589"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-1",
+            "EVAL-6",
+            "MOD-2"
+          ],
+          "sha256": "41e1db8f56f78502c18adcde37754a9a047c7aea0b38845aabb51f6478e0092c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-6",
+            "MOD-2"
+          ],
+          "sha256": "0eeaa92c162d103aa843ceae376d124af3243fc65dece972e562dec68eaccfa2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/catalog.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-2"
+          ],
+          "sha256": "a5022dd2d9045faa66a4cebda572e31e007657423c5895dfdd9a4c04eb42047b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-3",
+            "EVAL-4",
+            "MOD-1",
+            "MOD-3",
+            "MOD-4",
+            "MOD-5",
+            "NAT-3",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "c2375b553ea55973622639b1b5e91d8ca80128cca008285d943e92704bc25e7a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-4",
+            "MOD-3",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "c55b0c4d44f4e63f1e51bbc6b5530adbd7ef0aaf1de219030cac17bb26c922eb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-1",
+            "SBX-5"
+          ],
+          "sha256": "14005df06d99cd11f8faa232ebf2d25d72c470d1c0e58852c44295aed1e86e62"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/nesting.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "sha256": "5e18538f5195003e813bfac5fe28ca14be19be54db35371887e98008a491a303"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-5",
+            "SBX-5"
+          ],
+          "sha256": "e0c19c01c46f645add21b79f8c8e4ef4c0c20b7bb4abe6bdb8bb2ba7bad8e40b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/diagnostics/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-4"
+          ],
+          "sha256": "4a01da97bb8d71662d46a9e182620e9db99662b6b7f37145f305e5ffb85c44b7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/builtins.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-1",
+            "NAT-2"
+          ],
+          "sha256": "1a1375a94fdd78121ac3c7206d0b59f7770f861bb0eeded5ac8b557415562261"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/values.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2",
+            "NAT-3"
+          ],
+          "sha256": "4995ec959ce2de3db250859f4c29d8f36423a1a5670632837996839d37c73ebf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/native.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-3"
+          ],
+          "sha256": "38f39790d18e98beca56c8e1fb5f8c302a71e9b91db4e0e9f7a14b27270ed98f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg_derive/src/expression_module.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "850739d3c5801f5fced71985eaa30332c3606a24c411d20dfbf7824905a5930b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/declarations.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-5"
+          ],
+          "sha256": "7ea8372366766f3c78ab2d2f4a3282b682ee962351365ad1e049aecd3c9b4835"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-1",
+            "PLT-5"
+          ],
+          "sha256": "1244113317a0d73db8b0840246cdade4dc84369e176f14979ca841bb8d0be05c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-1"
+          ],
+          "sha256": "6f51fa676a1c93f089ac34f841d403fecfe122d8ae5dbcf515cdc95ebc8db5b2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-6"
+          ],
+          "sha256": "6a6144197690a740b018d26dab73bb5a8ccdd4ccf50a76f4127a26fc84f35455"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6",
+            "SBX-4"
+          ],
+          "sha256": "d2ecb793a0c7d43240422030f92baeeed3f539129d389fb754158fa1a0dc2fc8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/09-incremental-resolution.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6"
+          ],
+          "sha256": "bae0bcc08583542414390d437b51df3ae01d8d6ed2f4b39a916553490317d760"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/expressions.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "9641dacf351853e30abb2007e99f493f61ea281a3134d35d71893ccec1a8ab58"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_disabled.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-1"
+          ],
+          "sha256": "6f46ea5aff39b07fea0ff6f2728fbf28c591464f74ab5a25ae22109756844ab0"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_format.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-2"
+          ],
+          "sha256": "a75e027626e7731916bfedf56a0952e70e94e000ae8c9a6beaf4dc8cdd1af805"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-3",
+            "MOD-2"
+          ],
+          "sha256": "00f0ee4eebccf2cb0a4b94d45a1803a7ccb8a4c1323e4965bda912cd89b9df71"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_evaluation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-1",
+            "EVAL-2",
+            "EVAL-3"
+          ],
+          "sha256": "578afb02a05a8f0389c0da3e9592ca6b42dd5d11cd6daa309939e5fd3730021b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-4"
+          ],
+          "sha256": "ac69b691e166fcce7ef9bcac5ef7b944979556c2f68438a398c7b9399795ba25"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_diagnostic_names.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-4"
+          ],
+          "sha256": "9e4938a38ecb8f334497ed9a0767c32847945e26c4c47876b12d1bc04bf3fd18"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_apis.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-6"
+          ],
+          "sha256": "d78419b52c35d3553dc60527ec7ef8f181f59b4c6e5ef88c88e165efe53639d3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_module_state.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-6",
+            "SBX-4"
+          ],
+          "sha256": "90a04d8f8894300e291beccb375a9f20cf42acabfd81ce8abcb266bfbf25db3d"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-1",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "8f99fc19d9dee16ed6a8a5183e39be853974378393a5ffc6ba920d825aa543d2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_stack_top.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "73723346a3d53e84e1aefca16ada80564cde967c938290f101fd67c34fcae51e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-1",
+            "MOD-3",
+            "MOD-4"
+          ],
+          "sha256": "026b353151b8346884c3641c0c846bbd3fddfa25935b939ff3e5e6b28ff4fa44"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/fixtures/expressions/tinycolor.js",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-4"
+          ],
+          "sha256": "95838070da457477cbc5485f8aefa4d3de27560f7cd6f138323e4c8ade8be94b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native.rs",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-5",
+            "NAT-3"
+          ],
+          "sha256": "4134451ac53cf061752d5090fcadda3e6ea1c4f8ca08899d0cf0590d4513dac8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/value_serde.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-3"
+          ],
+          "sha256": "a9d0c98dc09dc269ab0a7d27a3c11b7b0486538d3a06169caa1245d833d412e4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_builtin.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-1"
+          ],
+          "sha256": "094337ec7e60dd6c38726e987e914522232a9d0f6fad7adcf13f506ee92028d1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "aa5efbb8d12673960b890ae952711a25aa41981ed04d33657745f1c9061cceb6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_color.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "3e094384c8dff530ef8855695bd307c2060aa2449cd0fa750987853c43675ab4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native_macro.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "387dd6bbeb7db4b2026484be1dc9c1d57ce98565ff84294041434af1a340f4fb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_declarations.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-5"
+          ],
+          "sha256": "25091bc98ced0ef0941ef0c3ac4b6c310c5f891c32415b00191875b3bde7f4c4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/Cargo.toml",
+          "kind": "runtime",
+          "criterionIds": [
+            "PLT-1"
+          ],
+          "sha256": "1244113317a0d73db8b0840246cdade4dc84369e176f14979ca841bb8d0be05c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "runtime",
+          "criterionIds": [
+            "PLT-6"
+          ],
+          "sha256": "6a6144197690a740b018d26dab73bb5a8ccdd4ccf50a76f4127a26fc84f35455"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md",
+          "kind": "test",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "d2ecb793a0c7d43240422030f92baeeed3f539129d389fb754158fa1a0dc2fc8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-6",
+            "NAT-3",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "c2375b553ea55973622639b1b5e91d8ca80128cca008285d943e92704bc25e7a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-4",
+            "SBX-5"
+          ],
+          "sha256": "c55b0c4d44f4e63f1e51bbc6b5530adbd7ef0aaf1de219030cac17bb26c922eb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-1",
+            "SBX-5"
+          ],
+          "sha256": "14005df06d99cd11f8faa232ebf2d25d72c470d1c0e58852c44295aed1e86e62"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "sha256": "cf7b2a09603dce2120ad04bd75e17ed530258b5e15f4c0b4134c3f0436f416e2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_shared_compilation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-6",
+            "SBX-4"
+          ],
+          "sha256": "ee44f9954a283e14671d2012f54b5f4fb14440a2c09358f8a61614fa19b7b1e1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native_finite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-1",
+            "NAT-3"
+          ],
+          "sha256": "3463df269a11e1bf10c01181425e467c14090f905f1fcb006c71bf2e2f79931b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_gamut_contrast.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "d119aaed5b77061434bbe7bb3777ac9cead0833a56d78117dc9b6764ae05d003"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/support/mod.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "7022c6acd74937f824580801d97cc01d21ba05622e11f1b1a8b8c1df2f06c936"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_evaluation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "578afb02a05a8f0389c0da3e9592ca6b42dd5d11cd6daa309939e5fd3730021b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "ac69b691e166fcce7ef9bcac5ef7b944979556c2f68438a398c7b9399795ba25"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "026b353151b8346884c3641c0c846bbd3fddfa25935b939ff3e5e6b28ff4fa44"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "4134451ac53cf061752d5090fcadda3e6ea1c4f8ca08899d0cf0590d4513dac8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_color.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-5"
+          ],
+          "sha256": "3e094384c8dff530ef8855695bd307c2060aa2449cd0fa750987853c43675ab4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-5",
+            "PLT-6"
+          ],
+          "sha256": "6a6144197690a740b018d26dab73bb5a8ccdd4ccf50a76f4127a26fc84f35455"
+        }
+      ],
+      "acknowledgedDispositions": [
+        "criterion:EVAL-5",
+        "criterion:PLT-2",
+        "criterion:PLT-3",
+        "criterion:PLT-4",
+        "criterion:SBX-2",
+        "criterion:SBX-3"
+      ],
+      "summaryMarkdown": "Passed. Every active criterion holds against source and tests, and every finding (E-F1 to E4-F2) is resolved.\n\n- **Delta 8927847..f597f16:** only `expressions_sandbox.rs` and AgentX metadata changed. E4-F1 is fixed by a platform-relative test: the deepest recursion that fits the default limit must overflow under a 16 KiB limit. E4-F2 is fixed by PLT-5/PLT-6, which supersede PLT-2/3/4 by owner disposition (the user's request for full coverage on every platform), and by a whole-line, per-job `check-ci-workflow`, which passes.\n- **Dispositions:** all six match recorded owner decisions, and their successors (SBX-5, SBX-4, EVAL-6, PLT-5, PLT-6) cover the superseded obligations.\n- **Earlier verification still stands:** no test stopped running natively; the native-only exclusions are minimal and justified; the support module is correct on both targets; overflow detection rests on the compiled-code check, the rejection tracker and the unbounded `isOverflow` walk.\n- **Repository rules hold:** no forbidden path touched; Conventional Commits without `!`, breaking footers or attribution; dependencies declared once; the default build compiles no C; `dxn.dtcg.*` ids; consumer-neutral wording.",
+      "findingIds": [
+        "E-F1",
+        "E-F3",
+        "E-F2",
+        "E-F4",
+        "E2-F1",
+        "E2-F2",
+        "E2-F3",
+        "E2-F4",
+        "E3-F1",
+        "E4-F1",
+        "E4-F2"
+      ],
+      "recordedAt": "2026-10-25T21:43:31Z"
     }
   },
   "checkpoints": {
@@ -4384,25 +5055,41 @@
       "id": "E4-F1",
       "boundaryId": "final",
       "severity": "minor",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
         "SBX-5"
       ],
-      "descriptionMarkdown": "**No test shows any longer that a configured stack limit takes effect.**\n\nExpected (SBX-5: the stack limit has a documented default 'configurable in `ExpressionOptions`'): a test fails if `with_stack_limit` were ignored.\n\nObserved: before 8927847, `expressions_sandbox` (the default-limit recursion test, around line 232) ran the same `f(40)` twice: it succeeded under the default limit and overflowed under `with_stack_limit(16 * 1024)`. Now the 16 KiB case runs `f(10000)`, which overflows under the 256 KiB default too, so the test passes even if the configured limit were never applied. The only other uses, `a_stack_limit_below_the_minimum_counts_as_the_minimum` with `with_stack_limit(0)`, run `1 + 1` and `f(100000)`, which also don't depend on the limit. The reason for the change (40 calls fit in 16 KiB on wasm32) is valid; the lost discrimination is not needed for it.\n\nRepair: make the comparison relative to the running platform. Find the largest depth that succeeds under the default limit, for example by a bounded binary search (frames are uniform, so about 12 evaluations); assert it is at least the documented example depth, and that the same depth fails as a stack overflow under `with_stack_limit(16 * 1024)`. Keep `f(10000)` if wanted. Run `expressions_sandbox` natively and on wasm32.",
-      "regressionRefs": []
+      "descriptionMarkdown": "**No test showed that a configured stack limit takes effect.** Resolved in 8754ae8: `runaway_recursion_is_a_stack_overflow_uncatchably` (`expressions_sandbox.rs`) binary-searches the deepest recursion between 40 (asserted to fit) and 20,000 that fits the default limit on the running platform. It then asserts that depth fails as a stack overflow under `with_stack_limit(16 * 1024)`. If `with_stack_limit` were ignored, the second evaluation would fit and the test would fail, on every platform, wasm32 included, whatever the frame size. 20,000 calls cannot fit 256 KiB (13 bytes a frame), so the search always discriminates, and it is deterministic per build. It costs about 9 evaluations, far below the step budget.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "runaway_recursion_is_a_stack_overflow_uncatchably"
+        }
+      ]
     },
     {
       "id": "E4-F2",
       "boundaryId": "final",
       "severity": "minor",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
-        "PLT-2",
-        "PLT-3",
-        "PLT-4"
+        "PLT-5",
+        "PLT-6"
       ],
-      "descriptionMarkdown": "**PLT-2, PLT-3 and PLT-4 still describe the deleted single wasm test group and a CI step that is gone, so their checks no longer verify their text.**\n\nExpected: the active criteria describe what the workflow and the checks verify. Revision 17 amended `check-expr-wasm` and `check-ci-workflow`, but not the criteria.\n\nObserved:\n- PLT-2 requires 'a wasm-bindgen test group run under Node'. PLT-4 says 'The same wasm32 test group also resolves...'. PLT-3 requires an Ubuntu job that 'runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the wasm test group'.\n- 8927847 deletes `tests/expressions_wasm.rs`. `ci.yml`'s `wasm32` job no longer runs that `cargo check`, and `check-ci-workflow` dropped its needle.\n- The implementation is a superset: the all-features wasm32 Clippy and `cargo test --workspace --tests --all-features --target wasm32-unknown-unknown` build the feature for wasm32, and the regular groups' scenarios (inputs, TypeScript, step and stack limits, host and native modules, colors) run under Node with the 1 MiB stack. The criteria wording is what is stale.\n\nRepair: amend PLT-2, PLT-3 and PLT-4 (citing the user's request for full coverage on every platform). Describe the whole suite running on wasm32 under Node with and without the feature, the three native runners, and the stated native-only exclusions (trybuild cases and panic-catching tests). Keep the requirements the checks still prove: the in-crate clock import, the default stack, steps, recursion, modules, natives and colors. Alternatively restore the `cargo check` step and its needle; amending the wording is still needed for the deleted group.",
-      "regressionRefs": []
+      "descriptionMarkdown": "**PLT-2/3/4 described the deleted wasm group and a removed CI step.** Resolved by the owner's dispositions, which quote the user's request of 2026-10-26: PLT-5 supersedes PLT-2 and PLT-4, and PLT-6 supersedes PLT-3.\n\n- PLT-5 keeps every requirement the old criteria proved (the LLVM clang and `llvm-ar` build, the in-crate clock import, the default wasm stack, inputs, TypeScript, the step and recursion failures, host modules, native modules, `dxn.dtcg/color`). It describes the whole suite on wasm32 under Node with and without the feature, and names the native-only exclusions (trybuild, panic-catching tests, doctests), matching the source gates.\n- PLT-6 matches `ci.yml`: the `native` job on three OSes with `fail-fast: false`, fmt, Clippy and tests both ways, the default wasm32 check and packaging; the `wasm32` job installs LLVM and the runner and runs Clippy and the suite both ways.\n- `check-ci-workflow` now asserts whole lines per job and prints `ci workflow ok` against f597f16; `check-expr-wasm` runs both wasm suites.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "symbol": "jobs.native"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "symbol": "jobs.wasm32"
+        }
+      ]
     },
     {
       "id": "S9-F1",
