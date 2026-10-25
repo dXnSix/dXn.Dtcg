@@ -223,3 +223,29 @@ fn literal_classes_nest_only_with_the_v_flag() {
         other => panic!("{other:?}"),
     }
 }
+
+#[test]
+fn a_stack_overflow_wrapped_however_deeply_is_still_one() {
+    // Each throwing callback of a `DisposableStack` wraps the error so far
+    // in one more `SuppressedError`; the overflow converts a deeply nested
+    // array, which QuickJS raises without the guard seeing it.
+    let nested = "let a = [1]; for (let i = 0; i < 100000; i++) a = [a];";
+    for callbacks in [100, 2_000, 12_000] {
+        for overflow_first in [true, false] {
+            let throwing =
+                format!("for (let i = 0; i < {callbacks}; i++) s.defer(() => {{ throw 1; }});");
+            let overflowing = "s.defer(() => String(a));";
+            let defers = if overflow_first {
+                format!("{overflowing} {throwing}")
+            } else {
+                format!("{throwing} {overflowing}")
+            };
+            assert_stack_overflow(&format!(
+                "(() => {{ {nested} try {{ const s = new DisposableStack(); {defers} s.dispose(); }} catch (e) {{ return 7; }} return 0; }})()"
+            ));
+            assert_stack_overflow(&format!(
+                "(() => {{ {nested} (async () => {{ const s = new DisposableStack(); {defers} s.dispose(); }})(); return 7; }})()"
+            ));
+        }
+    }
+}

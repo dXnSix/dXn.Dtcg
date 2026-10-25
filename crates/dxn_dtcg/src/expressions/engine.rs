@@ -353,6 +353,7 @@ pub(crate) struct Session {
     expressions: HashMap<String, Rc<CompiledExpression>>,
     deep_freeze: Persistent<Function<'static>>,
     drain: Persistent<Function<'static>>,
+    overflow: OverflowTest,
     object_prototype: Persistent<Object<'static>>,
     context: Context,
     _runtime: Runtime,
@@ -412,9 +413,11 @@ impl Session {
         // An async function turns an error into a rejected promise nothing
         // awaits (no jobs run): a stack overflow among them still trips.
         let tracker = Rc::clone(&guard);
+        let overflow: OverflowTest = Rc::default();
+        let test = Rc::clone(&overflow);
         runtime.set_host_promise_rejection_tracker(Some(Box::new(
-            move |_ctx, _promise, reason, handled| {
-                if !handled && is_stack_overflow(&reason) {
+            move |ctx, _promise, reason, handled| {
+                if !handled && is_stack_overflow(&test, &ctx, &reason) {
                     tracker.trip_stack();
                 }
             },
@@ -462,11 +465,12 @@ impl Session {
                     TRIP_GLOBAL,
                     Function::new(ctx.clone(), move || trip.trip_stack())?,
                 )?;
-                Module::declare(ctx.clone(), FREEZE_MODULE, FREEZE_SOURCE)?
-                    .eval()?
-                    .1
-                    .finish::<()>()?;
+                let (freeze_module, evaluated) =
+                    Module::declare(ctx.clone(), FREEZE_MODULE, FREEZE_SOURCE)?.eval()?;
+                evaluated.finish::<()>()?;
                 ctx.globals().remove(TRIP_GLOBAL)?;
+                let test: Function = freeze_module.get("isOverflow")?;
+                *overflow.borrow_mut() = Some(Persistent::save(&ctx, test));
                 let helpers: rquickjs::Array = ctx.eval(HARDEN)?;
                 let deep_freeze: Function = helpers.get(0)?;
                 let drain: Function = helpers.get(1)?;
@@ -481,6 +485,7 @@ impl Session {
         Ok(Self {
             expressions: HashMap::new(),
             deep_freeze,
+            overflow,
             drain,
             object_prototype,
             context,
@@ -796,7 +801,7 @@ impl Session {
     /// or not an allocation past the stack threshold noticed it.
     fn note_overflow(&self, error: &CaughtError<'_>) {
         if let CaughtError::Exception(exception) = error
-            && is_stack_overflow(exception.as_value())
+            && is_stack_overflow(&self.overflow, exception.ctx(), exception.as_value())
         {
             self.guard.trip_stack();
         }
@@ -1159,38 +1164,20 @@ fn number(value: f64, precision: Option<u32>) -> Option<Value> {
     Number::from_f64(value).map(Value::Number)
 }
 
+/// The internal module's `isOverflow`, once the session has set it up.
+type OverflowTest = Rc<RefCell<Option<Persistent<Function<'static>>>>>;
+
 /// Whether `value` is a stack overflow QuickJS reported, also one wrapped
-/// in a `SuppressedError` or an `AggregateError`, as the internal `check`
-/// unwraps them.
-fn is_stack_overflow(value: &JsValue<'_>) -> bool {
-    let mut pending = vec![value.clone()];
-    let mut seen = 0;
-    while let Some(value) = pending.pop() {
-        seen += 1;
-        if seen > 1_000 {
-            return false;
-        }
-        let Some(object) = value.as_object() else {
-            continue;
-        };
-        let name = object.get::<_, Option<String>>("name").ok().flatten();
-        let message = object.get::<_, Option<String>>("message").ok().flatten();
-        match (name.as_deref(), message.as_deref()) {
-            (Some("RangeError"), Some(STACK_OVERFLOW))
-            | (Some("SyntaxError"), Some(REGEXP_STACK_OVERFLOW)) => return true,
-            (Some("SuppressedError"), _) => {
-                pending.extend(object.get::<_, JsValue>("error"));
-                pending.extend(object.get::<_, JsValue>("suppressed"));
-            }
-            (Some("AggregateError"), _) => {
-                if let Ok(errors) = object.get::<_, rquickjs::Array>("errors") {
-                    pending.extend(errors.iter::<JsValue>().flatten());
-                }
-            }
-            _ => {}
-        }
-    }
-    false
+/// in `SuppressedError`s or `AggregateError`s, as the internal module's
+/// `isOverflow` decides (its walk runs under the step budget).
+fn is_stack_overflow<'js>(test: &OverflowTest, ctx: &Ctx<'js>, value: &JsValue<'js>) -> bool {
+    let Some(function) = test.borrow().clone() else {
+        return false;
+    };
+    function
+        .restore(ctx)
+        .and_then(|function| function.call::<_, bool>((value.clone(),)))
+        .unwrap_or(false)
 }
 
 /// Starts an evaluation in the current frame: the guard's stack base and
@@ -1237,22 +1224,23 @@ const own = (object, key) => {
   const descriptor = getOwnPropertyDescriptor(object, key);
   return descriptor !== undefined && "value" in descriptor ? descriptor.value : undefined;
 };
-// Every `catch`, `finally` and async function body of compiled code passes
-// what it caught here first: a stack overflow (of calls, or of the regular
-// expression compiler), also one wrapped in a `SuppressedError` or an
-// `AggregateError`, stops the evaluation instead of being handled.
-const check = (caught) => {
+// Whether a caught value is a stack overflow (of calls, or of the regular
+// expression compiler), also one wrapped in `SuppressedError`s or
+// `AggregateError`s however deeply: every wrapped value is visited once,
+// read through data properties only, so no getter of the code runs.
+const isOverflow = (caught) => {
   const pending = [caught];
-  for (let count = 0; pending.length > 0 && count < 10000; count++) {
+  const seen = new WeakSet();
+  while (pending.length > 0) {
     const value = pending.pop();
-    if (typeof value !== "object" || value === null) continue;
+    if (typeof value !== "object" || value === null || seen.has(value)) continue;
+    seen.add(value);
     const prototype = getPrototypeOf(value);
     if (prototype === rangeError || prototype === syntaxError) {
       const message = own(value, "message");
       if ((prototype === rangeError && message === "Maximum call stack size exceeded")
           || (prototype === syntaxError && message === "stack overflow")) {
-        trip();
-        return;
+        return true;
       }
     } else if (prototype === suppressedError) {
       pending.push(own(value, "error"), own(value, "suppressed"));
@@ -1261,6 +1249,12 @@ const check = (caught) => {
       if (isArray(errors)) for (let index = 0; index < errors.length; index++) pending.push(own(errors, index));
     }
   }
+  return false;
+};
+// Every `catch` and `finally` of compiled code passes what it caught here
+// first: a stack overflow stops the evaluation instead of being handled.
+const check = (caught) => {
+  if (isOverflow(caught)) trip();
 };
 const { defineProperty } = Object;
 const TypeErrorConstructor = TypeError;
@@ -1345,22 +1339,16 @@ const freezeAll = (...roots) => {
 const checked = (body, ...parameters) => {
   try { return body(...parameters); } catch (caught) { check(caught); throw caught; }
 };
+freeze(isOverflow);
 freeze(check);
 freeze(checked);
 freeze(freezeAll);
-export { check, checked, freezeAll };
+export { check, checked, freezeAll, isOverflow };
 "#;
 
 /// The global that hands the guard's stack trip to [`FREEZE_SOURCE`]
 /// during setup.
 const TRIP_GLOBAL: &str = "__dxn_dtcg_trip";
-
-/// The message of QuickJS's stack overflow `RangeError`.
-const STACK_OVERFLOW: &str = "Maximum call stack size exceeded";
-
-/// The message of the `SyntaxError` QuickJS's regular expression compiler
-/// throws when a pattern nests deeper than the stack allows.
-const REGEXP_STACK_OVERFLOW: &str = "stack overflow";
 
 /// The global that hands the bridge function to [`BRIDGE_SOURCE`] during
 /// setup.
