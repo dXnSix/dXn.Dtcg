@@ -34,3 +34,6 @@ thiserror.workspace = true
 dxn_dtcg = { path = ".", features = ["diagnostics"] }
 serde_json.workspace = true
 
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dev-dependencies]
+wasm-bindgen-test.workspace = true
+

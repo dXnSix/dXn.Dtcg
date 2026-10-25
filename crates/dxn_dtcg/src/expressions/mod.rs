@@ -41,6 +41,21 @@ pub(crate) use engine::{Failure, Session};
 pub(crate) use format::token_expression;
 pub(crate) use sandbox::Trip;
 
+/// QuickJS's clock on `wasm32-unknown-unknown`, which its shim otherwise
+/// imports from the host as `env.__rquickjs_host_now_us`. Expressions have
+/// no clock (`Date` is not installed), so it is always 0, and the module
+/// needs no QuickJS-specific host import.
+///
+/// The symbol belongs to the whole WebAssembly module, which links one copy
+/// of QuickJS: other code in the same module that uses `quickjs-jit`
+/// directly reads this clock too (`Date.now()` is 0), and cannot supply
+/// its own `env.__rquickjs_host_now_us`.
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+#[unsafe(no_mangle)]
+extern "C" fn __rquickjs_host_now_us() -> f64 {
+    0.0
+}
+
 /// How expressions evaluate: the sandbox's limits and the rounding of
 /// results. Construct it with [`ExpressionOptions::default`] and the
 /// chainable `with_*` setters, and enable it with
