@@ -1,6 +1,7 @@
 //! A module's values are frozen once its top-level code ran: tokens share
-//! a module within a resolution, so none can change what another sees, and
-//! affected resolution equals a full one.
+//! a module within a resolution, so none can change a frozen value another
+//! reads, and affected resolution equals a full one for them. State freezing
+//! cannot reach is shared within one resolution, as the owner decided.
 #![cfg(feature = "expressions")]
 
 use dxn_dtcg::{

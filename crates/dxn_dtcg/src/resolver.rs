@@ -372,7 +372,9 @@ impl ResolvedTokens {
     /// Applies an affected re-resolution of the same selection: removes the
     /// removed paths, replaces and adds the affected tokens, adopts the new
     /// order and groups, and refreshes the fingerprint. The result equals a
-    /// full resolution of the edited documents.
+    /// full resolution of the edited documents, except for expression
+    /// results that depend on writes to shared module state (see the
+    /// expressions chapter's module state).
     pub fn apply_affected(&mut self, affected: &AffectedResolution) {
         for path in affected.removed() {
             self.tokens.remove(path);

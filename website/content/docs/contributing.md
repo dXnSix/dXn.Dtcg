@@ -144,6 +144,10 @@ Each feature has its own integration-test file, selectable with `--test <name>`.
 | `expressions_apis` | Every resolving API, affected resolution, export round trips |
 | `expressions_modules`, `expressions_document_modules` | Host modules and ES module semantics; module declarations, the request/provide protocol for modules, catalog kinds, `validate_complete` |
 | `expressions_native`, `expressions_native_macro` | `NativeModule`, the bridge's errors and panics; `#[expression_module]` with its `trybuild` cases in `tests/expression_module_ui` |
+| `expressions_stack_top`, `expressions_async_overflow` | Stack limits from each evaluation's start; stack overflows uncatchable through every `catch`/`finally` form, modules, the regular expression compiler, async functions and wrapped errors |
+| `expressions_module_state`, `expressions_shared_compilation` | Frozen module values, taming, the freezing charge, shared module state, the internal module; shared expression modules named from their text |
+| `expressions_diagnostic_names`, `expressions_native_finite` | Redacted diagnostics keep standard error names; NaN and Infinity in native calls are `TypeError`s |
+| `color_gamut_contrast` | HSL/HWB clipping into sRGB, contrast on sRGB, near-gray round trips |
 | `expressions_builtin`, `expressions_color`, `expressions_declarations` | The `dxn.dtcg` and `dxn.dtcg/color` modules; the `.d.ts` output parses and matches the run-time exports |
 | `expressions_wasm` | Expressions on `wasm32-unknown-unknown` under Node ([below](#the-webassembly-group)) |
 | `dxn_dtcg_derive`: `derive_projection`, `derive_shapes`, `derive_hardening`, `compile_fail` | Derive behavior and `trybuild` compile-fail cases in `tests/ui` |

@@ -345,6 +345,13 @@ behavior change gets a new group.
 | `dxn_dtcg/tests/expressions_builtin.rs`, `expressions_color.rs` | The `dxn.dtcg` and `dxn.dtcg/color` modules |
 | `dxn_dtcg/tests/expressions_native_macro.rs` | `#[expression_module]`, with `trybuild` cases in `tests/expression_module_ui` |
 | `dxn_dtcg/tests/expressions_declarations.rs` | The `.d.ts` parses (oxc) and matches the run-time exports |
+| `dxn_dtcg/tests/expressions_stack_top.rs` | Stack limits measured from each evaluation's start; stack overflows uncatchable in every `catch`/`finally` form, in modules and in the regular expression compiler; positions around `try` |
+| `dxn_dtcg/tests/expressions_async_overflow.rs` | Stack overflows uncatchable through async functions and wrapped errors; async built-ins removed |
+| `dxn_dtcg/tests/expressions_module_state.rs` | Frozen module values, taming of objects others inherit from, the freezing charge, shared module state, the internal module |
+| `dxn_dtcg/tests/expressions_shared_compilation.rs` | Shared expression modules named from their text |
+| `dxn_dtcg/tests/expressions_diagnostic_names.rs` | Redacted diagnostics keep only standard error names |
+| `dxn_dtcg/tests/expressions_native_finite.rs` | NaN and Infinity in native calls are `TypeError`s |
+| `dxn_dtcg/tests/color_gamut_contrast.rs` | HSL/HWB clipping into sRGB, contrast on sRGB, near-gray round trips |
 | `dxn_dtcg/tests/expressions_wasm.rs` | Expressions on `wasm32-unknown-unknown` under Node (see below) |
 
 ### The official corpus

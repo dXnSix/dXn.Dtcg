@@ -43,7 +43,7 @@ With the `expressions` feature and `RuntimeOptions::with_expressions`, `Expressi
 | `stack_limit` | 256 KiB | `with_stack_limit` | Native stack JavaScript code uses below the resolving call; at least 16 KiB | `Expression` (stack overflow) |
 | `precision` | `Some(6)` | `with_precision` | Decimal places every non-integral number of a result is rounded to; `None` keeps results unrounded | none |
 
-One bound is fixed. The JavaScript and TypeScript compiler works recursively, so the text of every expression and module may nest about 120 brackets, 40 function bodies or 300 chained operators deep, and regular expression literals 20 groups; deeper text fails with `Expression` (`the source nests too deeply`) before the compiler sees it.
+One bound is fixed. The JavaScript and TypeScript compiler works recursively, so the text of every expression and module may nest about 120 brackets, 40 function bodies or 300 chained operators deep, and regular expression literals 20 groups; deeper text fails with `Expression` (`the source nests too deeply`) before the compiler sees it. Patterns built at run time nest at most 20 groups too; a deeper one throws a `SyntaxError` the code can catch, whatever stack is left.
 
 Expressions also charge the runtime limits: input references count toward `max_alias_depth`, inputs and results toward `max_value_nodes`, results toward the 128-level value depth. Module documents are a separate count against `max_documents`: one resolution loads at most that many, besides its JSON documents.
 

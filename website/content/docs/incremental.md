@@ -51,6 +51,8 @@ The result, an `AffectedResolution`, has `iter()` (the re-resolved tokens in the
 
 `ResolvedTokens::apply_affected` merges the result into the full resolution of the same selection from before the edit: it removes the removed paths, replaces and adds the re-resolved tokens, adopts the new order and groups, and recomputes the fingerprint. **The patched snapshot equals a full `resolve`** of the edited documents, metadata included.
 
+With [expressions](./expressions.md), affected re-resolution follows expression inputs and edited expression objects, but not the text of modules: after `replace_module`, or a change of host modules, resolve fully. A result that depends on writes to a module's state (from its functions or from expressions) is not guaranteed to match a full resolution ([module state](./expressions.md#the-sandbox-and-its-limits)).
+
 ```rust
 use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};

@@ -99,7 +99,8 @@ The result, an `AffectedResolution`, describes the new state:
 `ResolvedTokens::apply_affected` merges an affected result into the full resolution of the same
 selection from before the edit. It removes the removed paths, replaces and adds the re-resolved
 tokens, adopts the new order and groups, and recomputes the fingerprint. **The patched snapshot
-equals a full `resolve`** of the edited documents, metadata included.
+equals a full `resolve`** of the edited documents, metadata included, except for expression
+results that depend on writes to shared module state ([module state](15-expressions.md#the-sandbox-and-its-limits)).
 
 ```rust
 use dxn_dtcg::{DtcgError, DtcgRuntime};

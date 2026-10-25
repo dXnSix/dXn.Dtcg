@@ -8,15 +8,18 @@ use std::{collections::BTreeSet, fmt::Write, path::Path};
 use oxc::{
     allocator::Allocator,
     ast::ast::{
-        CatchClause, ExportAllDeclaration, ExportFromDeclaration, ImportDeclaration,
-        ImportExpression, TryStatement,
+        ArrowFunctionBody, CatchClause, ExportAllDeclaration, ExportFromDeclaration, Expression,
+        Function, ImportDeclaration, ImportExpression, MethodDefinition, MethodDefinitionKind,
+        ObjectProperty, PropertyDefinition, PropertyKey, TryStatement,
     },
     ast_visit::{Visit, walk},
     codegen::{Codegen, CodegenOptions},
     diagnostics::OxcDiagnostic,
     parser::{ParseOptions, Parser},
     semantic::SemanticBuilder,
+    span::GetSpan,
     span::SourceType,
+    syntax::scope::ScopeId,
     transformer::{TransformOptions, Transformer, TypeScriptOptions},
 };
 
@@ -71,7 +74,8 @@ impl Compiled {
     /// The JavaScript of a module imported as `own_specifier`, followed by
     /// code that deep-freezes its namespace and top-level bindings once its
     /// top-level code has run: tokens share a module's values within a
-    /// resolution, so none of them can change what another sees.
+    /// resolution, so none of them can change a value another reads (state
+    /// freezing cannot reach, such as a `Map`'s contents, stays shared).
     pub(crate) fn module_code(&self, own_specifier: &str) -> String {
         let local = |base: &str| {
             let mut name = base.to_owned();
@@ -246,8 +250,8 @@ fn compile_unguarded(source: &str, language: Language) -> Result<Compiled, Compi
         });
     }
     if language == Language::JavaScript {
-        let mut tries = TryScan::default();
-        tries.visit_program(&program);
+        let mut instrumented = Scan::default();
+        instrumented.visit_program(&program);
         let scoping = semantic.semantic.scoping();
         let root = scoping.root_scope_id();
         let mut top_level = Vec::new();
@@ -273,7 +277,28 @@ fn compile_unguarded(source: &str, language: Language) -> Result<Compiled, Compi
             .iter()
             .map(|comment| (comment.span.start as usize, comment.span.end as usize))
             .collect::<Vec<_>>();
-        let (code, insertions, check) = instrument(source, &tries.statements, &comments, &taken);
+        // Parameters the body redeclares with `var` or a function: the body
+        // moves into an arrow, which must receive them to share their
+        // bindings.
+        let passed = instrumented
+            .returns
+            .iter()
+            .map(|body| match *body {
+                ReturnBody::Block(_, _, Some(scope), (from, to)) => scoping
+                    .get_bindings(scope)
+                    .iter()
+                    .filter(|(_, symbol)| {
+                        let declared = scoping.symbol_span(**symbol);
+                        (from..to).contains(&declared.start)
+                            && !scoping.symbol_redeclarations(**symbol).is_empty()
+                    })
+                    .map(|(name, _)| name.as_str().to_owned())
+                    .collect(),
+                _ => Vec::new(),
+            })
+            .collect::<Vec<Vec<String>>>();
+        let (code, insertions, check) =
+            instrument(source, &instrumented, &passed, &comments, &taken);
         root_names.extend(check);
         return Ok(Compiled {
             code,
@@ -330,23 +355,75 @@ fn compile_unguarded(source: &str, language: Language) -> Result<Compiled, Compi
     })
 }
 
-/// A `try` statement's offsets: where it starts, its `catch` clause's
-/// start and end, and where its `finally` block starts.
+/// A `try` statement's offsets: its span, its `catch` clause's span, and
+/// where its `finally` block starts.
 struct Try {
     start: usize,
+    end: usize,
     catch: Option<(usize, usize)>,
     finally: Option<usize>,
 }
 
-#[derive(Default)]
-struct TryScan {
-    statements: Vec<Try>,
+/// The body of an iterator's `return` method: a block's span with its
+/// braces (with the function's scope and the span of its parameters), or
+/// an arrow's expression.
+enum ReturnBody {
+    Block(usize, usize, Option<ScopeId>, (u32, u32)),
+    Expression(usize, usize),
 }
 
-impl<'a> Visit<'a> for TryScan {
+/// The statements and methods [`instrument`] rewrites.
+#[derive(Default)]
+struct Scan {
+    tries: Vec<Try>,
+    returns: Vec<ReturnBody>,
+}
+
+impl Scan {
+    /// Records `value` when it is the plain function or arrow of a property
+    /// named `return`: what an iterator's closing calls.
+    fn return_method(&mut self, key: &PropertyKey<'_>, value: &Expression<'_>) {
+        if key.static_name().as_deref() != Some("return") {
+            return;
+        }
+        match value {
+            Expression::FunctionExpression(function) => self.function(function),
+            Expression::ArrowFunctionExpression(arrow) if !arrow.r#async => {
+                let span = arrow.body.span();
+                self.returns.push(match arrow.body {
+                    ArrowFunctionBody::FunctionBody(_) => ReturnBody::Block(
+                        span.start as usize,
+                        span.end as usize,
+                        arrow.scope_id.get(),
+                        (arrow.params.span.start, arrow.params.span.end),
+                    ),
+                    _ => ReturnBody::Expression(span.start as usize, span.end as usize),
+                });
+            }
+            _ => {}
+        }
+    }
+
+    fn function(&mut self, function: &Function<'_>) {
+        if !function.r#async
+            && !function.generator
+            && let Some(body) = &function.body
+        {
+            self.returns.push(ReturnBody::Block(
+                body.span.start as usize,
+                body.span.end as usize,
+                function.scope_id.get(),
+                (function.params.span.start, function.params.span.end),
+            ));
+        }
+    }
+}
+
+impl<'a> Visit<'a> for Scan {
     fn visit_try_statement(&mut self, it: &TryStatement<'a>) {
-        self.statements.push(Try {
+        self.tries.push(Try {
             start: it.span.start as usize,
+            end: it.span.end as usize,
             catch: it.handler.as_deref().map(|handler: &CatchClause<'a>| {
                 (handler.span.start as usize, handler.span.end as usize)
             }),
@@ -354,11 +431,55 @@ impl<'a> Visit<'a> for TryScan {
         });
         walk::walk_try_statement(self, it);
     }
+
+    fn visit_object_property(&mut self, it: &ObjectProperty<'a>) {
+        self.return_method(&it.key, &it.value);
+        walk::walk_object_property(self, it);
+    }
+
+    fn visit_method_definition(&mut self, it: &MethodDefinition<'a>) {
+        if it.kind == MethodDefinitionKind::Method
+            && it.key.static_name().as_deref() == Some("return")
+        {
+            self.function(&it.value);
+        }
+        walk::walk_method_definition(self, it);
+    }
+
+    fn visit_property_definition(&mut self, it: &PropertyDefinition<'a>) {
+        if let Some(value) = &it.value {
+            self.return_method(&it.key, value);
+        }
+        walk::walk_property_definition(self, it);
+    }
+}
+
+/// One text insertion: where, whether it opens or closes a construct, and
+/// the span of that construct, which orders insertions at one offset.
+struct Edit {
+    offset: usize,
+    opening: bool,
+    start: usize,
+    end: usize,
+    text: String,
+}
+
+impl Edit {
+    /// At one offset closing text comes first, innermost construct first;
+    /// then opening text, outermost construct first.
+    fn order(&self) -> (usize, bool, usize, usize) {
+        if self.opening {
+            (self.offset, true, self.start, usize::MAX - self.end)
+        } else {
+            (self.offset, false, usize::MAX - self.start, 0)
+        }
+    }
 }
 
 /// Makes stack overflows uncatchable. QuickJS reports one as an ordinary
-/// `RangeError` that `catch` could swallow, and a `finally` block that
-/// returns would discard, so every caught value first goes to the internal
+/// error, and the guard sees it only when QuickJS happens to allocate past
+/// the guard's threshold (small objects come from QuickJS's arenas), so
+/// what could handle or discard the error first passes it to the internal
 /// `check`, which stops the evaluation on a stack overflow:
 ///
 /// - `catch (e) { B }` becomes
@@ -368,18 +489,22 @@ impl<'a> Visit<'a> for TryScan {
 ///   the `finally` block runs: `try { A } finally { C }` becomes
 ///   `try { A } catch (x) { check(x); throw x; } finally { C }`, and
 ///   `try { A } catch (e) { B } finally { C }` becomes
-///   `try { try { A } catch (e) { B } } catch (x) { ... } finally { C }`.
+///   `try { try { A } catch (e) { B } } catch (x) { ... } finally { C }`;
+/// - the body of a plain `return` method or arrow (what closing an
+///   iterator calls, discarding what it throws) becomes
+///   `{ return checked(() => { ... }); }`, which checks before rethrowing.
 ///
 /// Only text is inserted, never removed or moved, and never a line break,
 /// so positions map back by columns. Returns the code, the insertions and
-/// the name `check` is imported as, if the source has a `try`.
+/// the name `check` is imported as, if the source needed it.
 fn instrument(
     source: &str,
-    tries: &[Try],
+    scan: &Scan,
+    passed: &[Vec<String>],
     comments: &[(usize, usize)],
     taken: &BTreeSet<String>,
 ) -> (String, Vec<(u32, u32, u32)>, Option<String>) {
-    if tries.is_empty() {
+    if scan.tries.is_empty() && scan.returns.is_empty() {
         return (source.to_owned(), Vec::new(), None);
     }
     let fresh = |base: &str| {
@@ -392,39 +517,83 @@ fn instrument(
         name
     };
     let check = fresh("__dxn_dtcg_check");
+    let checked = fresh("__dxn_dtcg_checked");
     let caught = fresh("__dxn_dtcg_caught");
-    // Insertions at one offset: closing text before opening text.
-    let mut edits: Vec<(usize, u8, String)> = Vec::new();
-    for statement in tries {
+    let rethrow = format!("catch ({caught}) {{ {check}({caught}); throw {caught}; }}");
+    let mut edits = Vec::new();
+    let mut edit = |offset: usize, opening: bool, (start, end): (usize, usize), text: String| {
+        edits.push(Edit {
+            offset,
+            opening,
+            start,
+            end,
+            text,
+        });
+    };
+    for statement in &scan.tries {
         if let Some((start, end)) = statement.catch {
-            edits.push((
+            edit(
                 start + "catch".len(),
-                1,
+                true,
+                (start, end),
                 format!(" ({caught}) {{ {check}({caught}); try {{ throw {caught}; }} catch"),
-            ));
-            edits.push((end, 0, " }".to_owned()));
+            );
+            edit(end, false, (start, end), " }".to_owned());
         }
         if let Some(block) = statement.finally {
             let keyword = finally_keyword(source, statement.start, block, comments);
-            let rethrow = format!("catch ({caught}) {{ {check}({caught}); throw {caught}; }} ");
+            let span = (statement.start, statement.end);
             if statement.catch.is_some() {
                 // The `try` and its `catch` move into an outer `try`.
-                edits.push((statement.start, 1, "try { ".to_owned()));
-                edits.push((keyword, 0, format!("}} {rethrow}")));
+                edit(statement.start, true, span, "try { ".to_owned());
+                edit(keyword, false, span, format!("}} {rethrow} "));
             } else {
-                edits.push((keyword, 0, rethrow));
+                edit(keyword, false, span, format!("{rethrow} "));
             }
         }
     }
-    edits.sort_by_key(|(offset, order, _)| (*offset, *order));
+    // A loop or built-in that closes an iterator because of a throw
+    // discards what its `return` method throws, so the method's body runs
+    // through `checked` (an arrow keeps its `this`, `arguments` and scope).
+    for (body, names) in scan.returns.iter().zip(passed) {
+        match *body {
+            // An empty body cannot throw.
+            ReturnBody::Block(start, end, ..) if end - start <= 2 => {}
+            ReturnBody::Block(start, end, ..) => {
+                let names = names.join(", ");
+                let arguments = if names.is_empty() {
+                    String::new()
+                } else {
+                    format!(", {names}")
+                };
+                edit(
+                    start + 1,
+                    true,
+                    (start, end),
+                    format!(" return {checked}(({names}) => {{"),
+                );
+                edit(end - 1, false, (start, end), format!("}}{arguments}); "));
+            }
+            ReturnBody::Expression(start, end) => {
+                edit(
+                    start,
+                    true,
+                    (start, end),
+                    format!("{{ return {checked}(() => ("),
+                );
+                edit(end, false, (start, end), ")); }".to_owned());
+            }
+        }
+    }
+    edits.sort_by_key(Edit::order);
     let mut code = String::with_capacity(source.len() + edits.len() * 48);
     let mut offsets = Vec::with_capacity(edits.len());
     let mut copied = 0;
-    for (offset, _, text) in &edits {
-        code.push_str(&source[copied..*offset]);
-        copied = *offset;
-        offsets.push((code.len(), text.len()));
-        code.push_str(text);
+    for edit in &edits {
+        code.push_str(&source[copied..edit.offset]);
+        copied = edit.offset;
+        offsets.push((code.len(), edit.text.len()));
+        code.push_str(&edit.text);
     }
     code.push_str(&source[copied..]);
     let insertions = offsets
@@ -436,7 +605,7 @@ fn instrument(
         .collect();
     let _ = write!(
         code,
-        "\n;import {{ check as {check} }} from {};\n",
+        "\n;import {{ check as {check}, checked as {checked} }} from {};\n",
         serde_json::Value::from(FREEZE_MODULE)
     );
     (code, insertions, Some(check))

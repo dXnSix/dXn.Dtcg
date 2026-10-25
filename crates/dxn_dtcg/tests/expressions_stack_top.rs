@@ -199,23 +199,25 @@ fn errors_keep_their_authored_positions_around_try_statements() {
 }
 
 #[test]
-fn the_regular_expression_compiler_cannot_handle_a_stack_overflow_either() {
+fn deeply_nested_patterns_fail_the_same_way_however_deep_the_evaluation_starts() {
+    // A pattern built at run time nests no deeper than a literal may, so
+    // the regular expression compiler never runs out of stack.
     for compile in [
         "new RegExp('(?:'.repeat(5000) + ')'.repeat(5000))",
         "'a'.match('(?:'.repeat(5000) + 'a' + ')'.repeat(5000))",
     ] {
-        let js =
-            format!("(() => {{ try {{ {compile}; return 1; }} catch (e) {{ return 2; }} }})()");
-        for early in [false, true] {
-            assert_stack_overflow(
-                through_aliases(&js, 8, early),
-                &format!("{compile} early={early}"),
-            );
-        }
-        assert_stack_overflow(
-            through_aliases(&format!("(() => {{ {compile}; return 1; }})()"), 0, false),
-            compile,
+        let js = format!(
+            "(() => {{ try {{ {compile}; return 1; }} catch (e) {{ return e.message.includes('nests too deeply') ? 2 : 3; }} }})()"
         );
+        for early in [false, true] {
+            for hops in [0, 8, 63] {
+                assert_eq!(
+                    through_aliases(&js, hops, early).unwrap(),
+                    json!(2),
+                    "{compile} early={early} hops={hops}"
+                );
+            }
+        }
     }
     // A pattern that fits compiles as usual.
     assert_eq!(

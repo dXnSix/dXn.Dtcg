@@ -159,7 +159,10 @@ fn invalid_arguments_throw_type_errors_with_one_prefix() {
             "dxn.dtcg.dimension: argument 1 must be a number",
         ),
         ("dtcg.ms(null)", "dxn.dtcg.ms: argument 1 must be a number"),
-        ("dtcg.s(NaN)", "dxn.dtcg.s: argument 1 must be a number"),
+        (
+            "dtcg.s(NaN)",
+            "dxn.dtcg.s: argument 1 must be a finite number",
+        ),
         (
             "dtcg.duration(1, 'min')",
             "dxn.dtcg.duration: unit `min` is not one of ms, s",

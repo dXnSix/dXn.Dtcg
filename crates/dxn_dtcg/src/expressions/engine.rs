@@ -17,6 +17,7 @@ use rquickjs::{
     Persistent, Runtime, Value as JsValue, context::intrinsic, function::Args, loader,
 };
 use serde_json::{Number, Value};
+use sha2::{Digest, Sha256};
 
 use super::{
     ExpressionOptions, builtins,
@@ -408,6 +409,16 @@ impl Session {
             .map_err(|error| failed(&guard, error.to_string()))?;
         runtime.set_max_stack_size(stack_limit);
         runtime.set_interrupt_handler(Some(guard.interrupt_handler()));
+        // An async function turns an error into a rejected promise nothing
+        // awaits (no jobs run): a stack overflow among them still trips.
+        let tracker = Rc::clone(&guard);
+        runtime.set_host_promise_rejection_tracker(Some(Box::new(
+            move |_ctx, _promise, reason, handled| {
+                if !handled && is_stack_overflow(&reason) {
+                    tracker.trip_stack();
+                }
+            },
+        )));
         let modules = Rc::new(RefCell::new(table));
         runtime.set_loader(
             TableResolver(Rc::clone(&modules)),
@@ -492,7 +503,6 @@ impl Session {
     /// what ran before it.
     pub(crate) fn evaluate(
         &mut self,
-        path: &str,
         expression: &Expression,
         inputs: &[Value],
         max_nodes: usize,
@@ -504,7 +514,7 @@ impl Session {
         let compiled = match self.expressions.get(&source) {
             Some(compiled) => Rc::clone(compiled),
             None => {
-                let compiled = self.compile_expression(path, &source, expression, span)?;
+                let compiled = self.compile_expression(&source, expression, span)?;
                 self.expressions.insert(source, Rc::clone(&compiled));
                 compiled
             }
@@ -785,16 +795,10 @@ impl Session {
     /// Records a stack overflow that reached the engine uncaught, whether
     /// or not an allocation past the stack threshold noticed it.
     fn note_overflow(&self, error: &CaughtError<'_>) {
-        if let CaughtError::Exception(exception) = error {
-            let name = exception.get::<_, Option<String>>("name").ok().flatten();
-            let message = exception.message();
-            if matches!(
-                (name.as_deref(), message.as_deref()),
-                (Some("RangeError"), Some(STACK_OVERFLOW))
-                    | (Some("SyntaxError"), Some(REGEXP_STACK_OVERFLOW))
-            ) {
-                self.guard.trip_stack();
-            }
+        if let CaughtError::Exception(exception) = error
+            && is_stack_overflow(exception.as_value())
+        {
+            self.guard.trip_stack();
         }
     }
 
@@ -831,7 +835,6 @@ impl Session {
     /// keeps its default export.
     fn compile_expression(
         &mut self,
-        path: &str,
         source: &str,
         expression: &Expression,
         span: Span,
@@ -844,7 +847,16 @@ impl Session {
         })?;
         let compiled = compile(source, expression.language)
             .map_err(|error| Failure::Message(authored_error(&error, span)))?;
-        let name = format!("dxn.dtcg/expression/{path}");
+        // Tokens with the same expression text share its module, so its name
+        // comes from the text, not from whichever token compiled it first.
+        let digest = Sha256::digest(source.as_bytes());
+        let name = format!(
+            "dxn.dtcg/expression/{}",
+            digest[..8]
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>()
+        );
         self.load_modules(&name, &compiled.imports)?;
         let function = self.context.with(|ctx| {
             begin(&self.guard, &ctx);
@@ -1147,6 +1159,40 @@ fn number(value: f64, precision: Option<u32>) -> Option<Value> {
     Number::from_f64(value).map(Value::Number)
 }
 
+/// Whether `value` is a stack overflow QuickJS reported, also one wrapped
+/// in a `SuppressedError` or an `AggregateError`, as the internal `check`
+/// unwraps them.
+fn is_stack_overflow(value: &JsValue<'_>) -> bool {
+    let mut pending = vec![value.clone()];
+    let mut seen = 0;
+    while let Some(value) = pending.pop() {
+        seen += 1;
+        if seen > 1_000 {
+            return false;
+        }
+        let Some(object) = value.as_object() else {
+            continue;
+        };
+        let name = object.get::<_, Option<String>>("name").ok().flatten();
+        let message = object.get::<_, Option<String>>("message").ok().flatten();
+        match (name.as_deref(), message.as_deref()) {
+            (Some("RangeError"), Some(STACK_OVERFLOW))
+            | (Some("SyntaxError"), Some(REGEXP_STACK_OVERFLOW)) => return true,
+            (Some("SuppressedError"), _) => {
+                pending.extend(object.get::<_, JsValue>("error"));
+                pending.extend(object.get::<_, JsValue>("suppressed"));
+            }
+            (Some("AggregateError"), _) => {
+                if let Ok(errors) = object.get::<_, rquickjs::Array>("errors") {
+                    pending.extend(errors.iter::<JsValue>().flatten());
+                }
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
 /// Starts an evaluation in the current frame: the guard's stack base and
 /// QuickJS's stack top mark the same place, so QuickJS's own stack limit
 /// and the guard's threshold measure the same depth. rquickjs moves the
@@ -1184,16 +1230,36 @@ const { ownKeys } = Reflect;
 const { get } = Reflect;
 const rangeError = RangeError.prototype;
 const syntaxError = SyntaxError.prototype;
-// Every `catch` and `finally` of compiled code passes what it caught here
-// first: a stack overflow (of calls, or of the regular expression
-// compiler) stops the evaluation instead of being handled.
+const suppressedError = typeof SuppressedError === "function" ? SuppressedError.prototype : null;
+const aggregateError = AggregateError.prototype;
+const isArray = Array.isArray;
+const own = (object, key) => {
+  const descriptor = getOwnPropertyDescriptor(object, key);
+  return descriptor !== undefined && "value" in descriptor ? descriptor.value : undefined;
+};
+// Every `catch`, `finally` and async function body of compiled code passes
+// what it caught here first: a stack overflow (of calls, or of the regular
+// expression compiler), also one wrapped in a `SuppressedError` or an
+// `AggregateError`, stops the evaluation instead of being handled.
 const check = (caught) => {
-  if (typeof caught !== "object" || caught === null) return;
-  const prototype = getPrototypeOf(caught);
-  const message = prototype === rangeError || prototype === syntaxError ? get(caught, "message") : undefined;
-  if ((prototype === rangeError && message === "Maximum call stack size exceeded")
-      || (prototype === syntaxError && message === "stack overflow")) {
-    trip();
+  const pending = [caught];
+  for (let count = 0; pending.length > 0 && count < 10000; count++) {
+    const value = pending.pop();
+    if (typeof value !== "object" || value === null) continue;
+    const prototype = getPrototypeOf(value);
+    if (prototype === rangeError || prototype === syntaxError) {
+      const message = own(value, "message");
+      if ((prototype === rangeError && message === "Maximum call stack size exceeded")
+          || (prototype === syntaxError && message === "stack overflow")) {
+        trip();
+        return;
+      }
+    } else if (prototype === suppressedError) {
+      pending.push(own(value, "error"), own(value, "suppressed"));
+    } else if (prototype === aggregateError) {
+      const errors = own(value, "errors");
+      if (isArray(errors)) for (let index = 0; index < errors.length; index++) pending.push(own(errors, index));
+    }
   }
 };
 const { defineProperty } = Object;
@@ -1274,9 +1340,15 @@ const freezeAll = (...roots) => {
     }
   }
 };
+// Runs the body of an iterator's `return` method, checking what it throws
+// before a closing loop or built-in discards it.
+const checked = (body, ...parameters) => {
+  try { return body(...parameters); } catch (caught) { check(caught); throw caught; }
+};
 freeze(check);
+freeze(checked);
 freeze(freezeAll);
-export { check, freezeAll };
+export { check, checked, freezeAll };
 "#;
 
 /// The global that hands the guard's stack trip to [`FREEZE_SOURCE`]
@@ -1306,7 +1378,17 @@ const freeze = (value) => {
   }
   return value;
 };
-const call = (specifier, name, args) => parse(native(specifier, name, stringify(args)));
+const { isFinite } = Number;
+const TypeErrorConstructor = TypeError;
+// JSON has no NaN or Infinity: they would arrive as `null`.
+const call = (specifier, name, args) => parse(native(specifier, name, stringify(args, function (key, value) {
+  if (typeof value === "number" && !isFinite(value)) {
+    throw new TypeErrorConstructor(this === args
+      ? specifier + "." + name + ": argument " + (Number(key) + 1) + " must be a finite number"
+      : specifier + "." + name + ": arguments must not contain NaN or Infinity");
+  }
+  return value;
+})));
 Object.freeze(native);
 export { call, freeze };
 "#;

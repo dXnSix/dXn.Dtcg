@@ -156,7 +156,7 @@ struct ResolvedTokens { /* tokens by path, resolution order, groups, fingerprint
 | `fn groups(&self) -> impl Iterator<Item = &ResolvedGroup>` | Every group that contains a resolved token, in path order |
 | `fn fingerprint(&self) -> &str` | Hex SHA-256 over path, type, canonical value (object keys sorted) and source of every token, in order. Metadata does not contribute. Empty for `ResolvedTokens::default()`. |
 | `fn to_document(&self) -> serde_json::Value` | The resolution as a nested DTCG token document (see below) |
-| `fn apply_affected(&mut self, affected: &AffectedResolution)` | Applies an affected re-resolution of the same selection: removes the removed paths, replaces and adds the re-resolved tokens, adopts the new order and groups, and refreshes the fingerprint. The result equals a full `resolve` of the edited documents. |
+| `fn apply_affected(&mut self, affected: &AffectedResolution)` | Applies an affected re-resolution of the same selection: removes the removed paths, replaces and adds the re-resolved tokens, adopts the new order and groups, and refreshes the fingerprint. The result equals a full `resolve` of the edited documents, except for expression results that depend on writes to shared [module state](15-expressions.md#the-sandbox-and-its-limits). |
 
 Equality ignores the member order of object values.
 
@@ -630,7 +630,7 @@ specification.
 | `fn lighten(&self, amount: f64) -> Color`, `fn darken(&self, amount: f64) -> Color` | OKLCH lightness shifted by `amount`, in the color's space |
 | `fn with_alpha(&self, alpha: f64) -> Color` | The color with `alpha` clamped to `[0, 1]` |
 | `fn to_hex(&self) -> String`, `fn Color::from_hex(hex: &str) -> Option<Color>` | 6-digit sRGB hex out and in |
-| `fn luminance(&self) -> f64`, `fn contrast(&self, other: &Color) -> f64` | WCAG 2.x relative luminance and contrast ratio |
+| `fn luminance(&self) -> f64`, `fn contrast(&self, other: &Color) -> f64` | WCAG 2.x relative luminance and contrast ratio (of the colors clipped into sRGB, 1 to 21) |
 | `fn in_gamut(&self, space: ColorSpace) -> bool`, `fn clamp_to_gamut(&self, space: ColorSpace) -> Color` | Gamut test (linear light; sRGB's gamut for HSL and HWB) and clipping |
 | `fn to_json(&self) -> serde_json::Value` | The DTCG JSON form |
 

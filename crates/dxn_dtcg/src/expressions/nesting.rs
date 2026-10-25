@@ -600,45 +600,60 @@ fn string_end(bytes: &[u8], start: usize) -> Option<usize> {
 
 /// The end of the regular expression literal starting at `start` (with its
 /// flags), or `None` when it is unterminated on its line. Fails when its
-/// groups and classes nest deeper than [`MAX_REGEX_NESTING`].
+/// groups and classes nest deeper than [`MAX_REGEX_NESTING`]; a class nests
+/// inside another only with the `v` flag, so both readings are tracked until
+/// the flags are known.
 fn regex_end(source: &str, start: usize) -> Result<Option<usize>, CompileError> {
     let bytes = source.as_bytes();
     let mut index = start + 1;
-    let (mut groups, mut classes) = (0_u32, 0_u32);
+    let mut groups = 0_u32;
+    // Classes as the `v` flag nests them, and without it (at most one).
+    let (mut nested, mut flat) = (0_u32, 0_u32);
+    let (mut deepest_nested, mut deepest_flat) = (0_u32, 0_u32);
     while index < bytes.len() {
         match bytes[index] {
             b'\\' => index += 2,
             b'\n' | b'\r' => return Ok(None),
             b'[' => {
-                classes += 1;
+                nested += 1;
+                flat = 1;
                 index += 1;
             }
             b']' => {
-                classes = classes.saturating_sub(1);
+                nested = nested.saturating_sub(1);
+                flat = 0;
                 index += 1;
             }
-            b'(' if classes == 0 => {
+            b'(' if flat == 0 => {
                 groups += 1;
                 index += 1;
             }
-            b')' if classes == 0 => {
+            b')' if flat == 0 => {
                 groups = groups.saturating_sub(1);
                 index += 1;
             }
-            b'/' if classes == 0 => {
+            b'/' if flat == 0 => {
                 index += 1;
+                let flags = index;
                 while index < bytes.len()
                     && (bytes[index].is_ascii_alphanumeric() || bytes[index] == b'_')
                 {
                     index += 1;
                 }
+                let deepest = if source[flags..index].contains('v') {
+                    deepest_nested
+                } else {
+                    deepest_flat
+                };
+                if deepest > MAX_REGEX_NESTING {
+                    return Err(too_deep(source, start));
+                }
                 return Ok(Some(index));
             }
             _ => index += 1,
         }
-        if groups + classes > MAX_REGEX_NESTING {
-            return Err(too_deep(source, start));
-        }
+        deepest_nested = deepest_nested.max(groups + nested);
+        deepest_flat = deepest_flat.max(groups + flat);
     }
     Ok(None)
 }

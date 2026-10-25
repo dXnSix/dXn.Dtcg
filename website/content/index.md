@@ -148,7 +148,7 @@ let affected = runtime
     .replace_json_and_resolve_affected("tokens.json", edited, &[], &[])?
     .ready()
     .expect("document is loaded");
-snapshot.apply_affected(&affected); // equals a full resolve
+snapshot.apply_affected(&affected); // equals a full resolve (see expressions for module state)
 ```
 
 See [Incremental resolution](./docs/incremental.md) and [Source inspection](./docs/inspection.md).

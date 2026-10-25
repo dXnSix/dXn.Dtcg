@@ -5,7 +5,8 @@
 //! Limits are enforced in Rust, never in JavaScript, and none can be caught
 //! by expression code. QuickJS reports a refused allocation and a stack
 //! overflow as ordinary exceptions a `catch` could swallow, so the allocator
-//! records them in [`Guard`] instead: once a limit trips, the interrupt
+//! (and, for stack overflows, the checks of compiled code and the promise
+//! rejection tracker) records them in [`Guard`] instead: once a limit trips, the interrupt
 //! handler stops the running evaluation at its next check (an exception
 //! QuickJS makes uncatchable), and the evaluation fails afterwards even if
 //! its code caught the original exception and returned.
@@ -27,9 +28,12 @@ pub(crate) struct Guard {
     memory_limit: usize,
     step_budget: usize,
     /// Stack bytes below [`Guard::stack_base`] past which an allocation
-    /// counts as a stack overflow: the QuickJS stack limit less one large
-    /// frame, because QuickJS throws its own overflow error (and allocates
-    /// it) within one frame of that limit.
+    /// counts as a stack overflow: the QuickJS stack limit less a quarter
+    /// of it (at most 64 KiB), so code that allocates that close to the
+    /// limit fails as an overflow a little early. QuickJS serves small
+    /// objects from its own arenas, so the error it throws at the limit
+    /// reaches this allocator only sometimes; the internal `check` of
+    /// compiled code and the promise rejection tracker see the rest.
     stack_threshold: usize,
     used: Cell<usize>,
     /// The stack address where the running evaluation started; 0 while no
@@ -53,7 +57,7 @@ impl Guard {
         Rc::new(Self {
             memory_limit,
             step_budget,
-            stack_threshold: stack_limit - (stack_limit / 8).min(16 * 1024),
+            stack_threshold: stack_limit - (stack_limit / 4).min(64 * 1024),
             used: Cell::new(0),
             stack_base: Cell::new(0),
             ticks: Cell::new(0),
@@ -272,6 +276,87 @@ pub(crate) const HARDEN: &str = r#"
   Object.defineProperty(globalThis, "Function", { value: blocked, writable: false, configurable: false });
   delete globalThis.eval;
   delete globalThis.queueMicrotask;
+  // A pattern built at run time nests at most as deeply as a literal may
+  // (20 groups and classes), so the regular expression compiler never runs
+  // out of stack: QuickJS would report that only after unwinding, where the
+  // guard cannot see it.
+  {
+    const OriginalRegExp = RegExp;
+    const sourceOf = Object.getOwnPropertyDescriptor(RegExp.prototype, "source").get;
+    const matchSymbol = Symbol.match;
+    const isRegExp = (value) => {
+      try { sourceOf.call(value); return value !== OriginalRegExp.prototype; } catch (e) { return false; }
+    };
+    // A class nests inside another only with the `v` flag.
+    const checkPattern = (pattern, flags) => {
+      const nests = typeof flags === "string" && flags.includes("v");
+      let groups = 0;
+      let classes = 0;
+      for (let index = 0; index < pattern.length; index++) {
+        const next = pattern[index];
+        if (next === "\\") index++;
+        else if (next === "[") classes = nests ? classes + 1 : 1;
+        else if (next === "]") classes = classes > 0 ? classes - 1 : 0;
+        else if (next === "(" && classes === 0) groups++;
+        else if (next === ")" && classes === 0) groups = groups > 0 ? groups - 1 : 0;
+        if (groups + classes > 20) {
+          throw new SyntaxError("Invalid regular expression: the pattern nests too deeply");
+        }
+      }
+    };
+    // The pattern text a `RegExp` call compiles, read once as the
+    // specification reads it.
+    const prepare = (pattern, flags) => {
+      if (isRegExp(pattern)) return [pattern, flags];
+      if (pattern !== null && typeof pattern === "object" && pattern[matchSymbol]) {
+        const source = pattern.source;
+        return [source === undefined ? "" : String(source), flags === undefined ? pattern.flags : flags];
+      }
+      const source = pattern === undefined ? "" : String(pattern);
+      return [source, flags];
+    };
+    const WrappedRegExp = function RegExp(pattern, flags) {
+      // `RegExp(re)` returns `re` itself, as the specification says.
+      if (new.target === undefined && isRegExp(pattern) && flags === undefined
+          && pattern.constructor === WrappedRegExp) {
+        return pattern;
+      }
+      const [source, sourceFlags] = prepare(pattern, flags);
+      // Read once: the original then sees plain strings.
+      const flagText = sourceFlags === undefined ? undefined : String(sourceFlags);
+      if (typeof source === "string") checkPattern(source, flagText === undefined ? "" : flagText);
+      return new.target === undefined
+        ? OriginalRegExp(source, flagText)
+        : Reflect.construct(OriginalRegExp, [source, flagText], new.target);
+    };
+    for (const key of Reflect.ownKeys(OriginalRegExp)) {
+      if (key === "length" || key === "name" || key === "prototype") continue;
+      Object.defineProperty(WrappedRegExp, key, Object.getOwnPropertyDescriptor(OriginalRegExp, key));
+    }
+    Object.defineProperty(WrappedRegExp, "prototype", { value: OriginalRegExp.prototype, writable: false, enumerable: false, configurable: false });
+    Object.defineProperty(OriginalRegExp.prototype, "constructor", { value: WrappedRegExp, writable: true, enumerable: false, configurable: true });
+    Object.defineProperty(globalThis, "RegExp", { value: WrappedRegExp, writable: true, enumerable: false, configurable: true });
+    delete OriginalRegExp.prototype.compile;
+    // Methods that compile a string pattern themselves.
+    for (const [name, symbol] of [["match", Symbol.match], ["matchAll", Symbol.matchAll], ["search", Symbol.search]]) {
+      const original = String.prototype[name];
+      const wrapped = {
+        [name](regexp) {
+          if (regexp !== undefined && regexp !== null && (typeof regexp === "object" || typeof regexp === "function")
+              && typeof regexp[symbol] === "function") {
+            return Reflect.apply(original, this, [regexp]);
+          }
+          const source = regexp === undefined ? undefined : String(regexp);
+          if (source !== undefined) checkPattern(source, "");
+          return Reflect.apply(original, this, [source]);
+        },
+      }[name];
+      Object.defineProperty(String.prototype, name, { value: wrapped, writable: true, enumerable: false, configurable: true });
+    }
+  }
+  // Asynchronous built-ins: async code is not available to expressions.
+  delete Array.fromAsync;
+  delete globalThis.AsyncDisposableStack;
   Object.defineProperty(Math, "random", { value: deny("Math.random"), writable: false, configurable: false });
   // The stack hooks are accessors on `Error` that write engine state.
   for (const name of ["prepareStackTrace", "stackTraceLimit"]) {

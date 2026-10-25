@@ -279,9 +279,9 @@ modules, by bare specifier. They follow standard ES module semantics: named and 
 imports, re-exports (`export { x } from`, `export * from`), live bindings, and cycles, which
 evaluate in ES module order. Only static imports exist: `import()` is rejected. Each module
 compiles and its top-level code runs at most once per resolution, however many tokens import it,
-and again in the next resolution, which starts fresh. Once its top-level code has run, everything
-the module's namespace and top-level bindings reach is deep-frozen (objects, arrays, functions,
-classes and their prototypes), so a token that tries to change a module's value gets a
+and again in the next resolution, which starts fresh. Once its top-level code has run, the
+objects, arrays, functions and classes (with their prototypes) the module's namespace and
+top-level bindings reach are deep-frozen, so a token that tries to change a module's value gets a
 `TypeError`; top-level code may build its values freely before that, but cannot change another
 module's frozen values. Objects others inherit from (a function's `prototype`, an object passed
 to `Object.create`) keep accepting assignments on the objects that inherit, as JavaScript's
@@ -435,14 +435,16 @@ assert_eq!(tokens.get("size").unwrap().value, 16.18);
   namespace that the host does not also register as a JavaScript module or a document declares.
 - `.function(name, closure)` exports a closure that is `Send + Sync + 'static` and takes up to
   eight arguments of types implementing `serde::de::DeserializeOwned`. It returns a
-  JSON-like value (numbers, strings, booleans, `()`, `serde_json::Value`, vectors, options, maps,
+  JSON-like value (numbers, strings, booleans, `()`, `serde_json::Value`, vectors, options,
+  `BTreeMap<String, T>`,
   and the [`values` models](05-value-types.md#color-conversions)), any other serializable value
   wrapped in `expressions::Json` (`|pair: Pair| Json(pair)`), or `Result<T, E>` with any
   serializable `T` and an `E` that implements `Display`.
 - Export names are JavaScript identifiers that are not reserved words (`new`, `default` and
   `delete` are not export names): `.function` and `.constant` panic on any other name.
 - Arguments arrive as JSON (a missing argument is `null`, so `Option<T>` parameters are optional).
-  One that does not deserialize throws a `TypeError`. An `Err`, or a panic, throws an `Error`
+  One that does not deserialize, or contains `NaN` or an infinity (which JSON cannot carry),
+  throws a `TypeError`. An `Err`, or a panic, throws an `Error`
   whose message starts with `<specifier>.<name>:`; expression code can catch it, and otherwise
   the token fails with `DtcgError::Expression`. A panic leaves the runtime usable.
 - `.constant(name, value)` exports the JSON form of a serializable value.
@@ -551,7 +553,7 @@ is reserved for them: hosts and documents cannot use it.
 | `lighten(color, amount)`, `darken(color, amount)` | OKLCH lightness shifted by `amount`, in the color's space |
 | `withAlpha(color, alpha)` | The color with `alpha` |
 | `toHex(color)`, `fromHex(hex)` | The 6-digit sRGB hex form (`#rrggbb`), and the sRGB color of one |
-| `contrast(color, other)` | The WCAG 2.x contrast ratio, from 1 to 21 |
+| `contrast(color, other)` | The WCAG 2.x contrast ratio of the colors clipped into sRGB, from 1 to 21 |
 | `inGamut(color, space)`, `clampToGamut(color, space)` | Whether the color lies in the gamut of `space` (an RGB or XYZ space, sRGB's for HSL and HWB), and the color clipped into it |
 
 Every result is a valid DTCG color. Invalid arguments (a unit outside the type's units, a
@@ -585,7 +587,8 @@ Expressions and modules run without ambient capabilities:
   not a JSON result.
 - `globalThis`, every built-in object and prototype reachable from it or from what syntax
   creates (iterators, generators, promises), and the error stack hooks are frozen, so no
-  expression can change what another sees. Assigning a member such as `constructor` or
+  expression can change them for another; what expressions can share is limited to module state
+  (below). Assigning a member such as `constructor` or
   `toString` on your own objects still works. Inputs and native module exports are frozen too.
 
 Each failure is a `DtcgError::Expression`, or a value when the expression catches it.
@@ -605,9 +608,17 @@ Work is bounded by `ExpressionOptions`, and expression code cannot catch the lim
   has its own budget, which does not depend on what ran before it; a budget below 1 counts as 1.
 - **Memory** is what the JavaScript engine of one resolution may allocate.
 - **Stack** is what JavaScript code may use below the resolving call, measured from where each
-  evaluation starts; at least 16 KiB. Compiled code passes every value a `catch` or `finally`
-  receives to an internal check first, so a stack overflow (of calls, or of the regular expression
-  compiler on a deeply nested pattern) stops the evaluation even when the code catches it. The
+  evaluation starts; at least 16 KiB. A stack overflow stops the evaluation even where code
+  catches it or the engine discards it: compiled code passes every value a `catch` or `finally`
+  receives, and whatever an iterator's `return` method throws while a loop or built-in closes the
+  iterator, to an internal check (which unwraps `SuppressedError` and `AggregateError`); an async
+  function's rejection is checked as it rejects; and the guard also stops code that allocates
+  within a quarter of the limit (at most 64 KiB), so such code may fail as an overflow a little
+  early. One exception remains: JavaScript discards whatever an iterator's `return` method throws
+  while a loop or built-in closes the iterator after a throw, and a `return` method not written
+  as one in source (installed with `Object.defineProperty`, a function defined elsewhere, a
+  prototype assignment, a bound built-in) is not checked, so a stack overflow inside it is
+  discarded too, and whether one occurs can depend on the remaining stack. The
   limit must leave room on the stack of the thread that resolves: one near that stack's size
   lets QuickJS overflow it before its own check, which aborts the process. Unoptimized QuickJS uses several times more stack per call, so a debug build allows much
   shallower recursion under the same limit. Build the engine optimized in every profile, as this
@@ -627,7 +638,10 @@ Work is bounded by `ExpressionOptions`, and expression code cannot catch the lim
   brackets, 40 nested function bodies or 300 chained operators, much more than real code uses,
   far less than overflows a 1 MiB stack. Deeper text fails with
   `DtcgError::Expression` ("the source nests too deeply"); regular expression literals nest at
-  most 20 groups.
+  most 20 groups and classes, and so do patterns built at run time (`new RegExp`, and strings
+  given to `match`, `matchAll` and `search`): a deeper one throws a `SyntaxError` ("the pattern
+  nests too deeply"), so the regular expression compiler never runs out of stack.
+  `RegExp.prototype.compile` is not available.
 
 After any limit, the same runtime resolves again normally. A resolution without expression
 tokens never starts the JavaScript engine at all.
@@ -683,7 +697,7 @@ Apple's clang has no WebAssembly target; Homebrew's `llvm` or a distribution's `
 ## Determinism
 
 Equal documents, selections and options give equal `ResolvedTokens` and equal fingerprints, in any
-evaluation order: each resolution starts a fresh, frozen engine, expressions cannot share state
+evaluation order unless results depend on writes to shared module state (below): each resolution starts a fresh, frozen engine, expressions cannot share state
 through globals or built-ins, and inputs are frozen. Rounding results to `precision` keeps them
 equal across platforms whose math libraries differ in the last bit. A module evaluates once per
 resolution and its tokens share it, so its values freeze once its top-level code has run (see

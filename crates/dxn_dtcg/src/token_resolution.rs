@@ -299,7 +299,7 @@ impl<'a> Resolver<'a> {
             .max_value_nodes
             .saturating_sub(self.copied_nodes);
         let result = session
-            .evaluate(path, &expression, &inputs, max_nodes)
+            .evaluate(&expression, &inputs, max_nodes)
             .map_err(&failed)?;
         let (nodes, result_depth) = (node_count(&result), value_depth(&result));
         check_depth(depth + result_depth - 1)?;

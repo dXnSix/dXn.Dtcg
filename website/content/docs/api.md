@@ -113,7 +113,7 @@ enum DocumentKind { Json, Module }   // non_exhaustive, Clone, Copy, Debug, Eq, 
 | `fn groups(&self) -> impl Iterator<Item = &ResolvedGroup>` | Those groups in path order |
 | `fn fingerprint(&self) -> &str` | Hex SHA-256 over path, type, canonical value and source of every token, in order; metadata does not contribute; empty for `default()` |
 | `fn to_document(&self) -> serde_json::Value` | The resolution as a nested DTCG token document ([export](./token-documents.md#export)) |
-| `fn apply_affected(&mut self, affected: &AffectedResolution)` | Patches the snapshot; the result equals a full `resolve` |
+| `fn apply_affected(&mut self, affected: &AffectedResolution)` | Patches the snapshot; the result equals a full `resolve`, except for expression results that depend on writes to shared [module state](./expressions.md#the-sandbox-and-its-limits) |
 
 ### ResolvedToken
 
@@ -212,7 +212,7 @@ Methods on `values::Color`, available without any feature ([Color conversions](.
 | `fn lighten(&self, amount: f64) -> Color` / `fn darken(&self, amount: f64) -> Color` | OKLCH lightness shifted, in the color's own space |
 | `fn with_alpha(&self, alpha: f64) -> Color` | The color with `alpha`, clamped to `[0, 1]` |
 | `fn to_hex(&self) -> String` / `fn from_hex(hex: &str) -> Option<Color>` | The `#rrggbb` sRGB form, and the sRGB color of one |
-| `fn luminance(&self) -> f64` / `fn contrast(&self, other: &Color) -> f64` | WCAG 2.x relative luminance and contrast ratio (1 to 21) |
+| `fn luminance(&self) -> f64` / `fn contrast(&self, other: &Color) -> f64` | WCAG 2.x relative luminance and contrast ratio (of the colors clipped into sRGB, 1 to 21) |
 | `fn in_gamut(&self, space: ColorSpace) -> bool` / `fn clamp_to_gamut(&self, space: ColorSpace) -> Color` | Gamut test (in linear light; sRGB's gamut for HSL and HWB) and clipping |
 | `fn to_json(&self) -> Value` | The DTCG JSON form; `alpha` only when it is not 1 |
 
