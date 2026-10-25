@@ -51,6 +51,13 @@ Expressions also charge the runtime limits: input references count toward `max_a
 `stack_limit` must stay well below the stack of the thread that resolves. A limit near that stack's size lets QuickJS overflow the real stack before its own check, which aborts the process. The default (256 KiB) fits the default 1 MiB stack of `wasm32-unknown-unknown`; raise it only for threads you give a larger stack.
 :::
 
+Unoptimized QuickJS uses several times more stack per call, so in a debug build the same `stack_limit` allows much shallower recursion. Build the engine optimized in every profile, in your workspace's `Cargo.toml`:
+
+```toml
+[profile.dev.package.quickjs-jit-sys]
+opt-level = 3
+```
+
 ### Setting limits
 
 Pass limits through `DtcgRuntime::with_limits`, or together with value extensions through `RuntimeOptions`. `DtcgRuntime::limits()` returns what the runtime uses.

@@ -216,7 +216,7 @@ catch any of these limits, and the runtime resolves normally afterwards.
 |---|---|---|---|
 | `step_budget` | 1,000 | QuickJS interrupt checks (about every 10,000 calls and loop iterations) of one evaluation: an expression call, a module's top-level code, or an import cycle's as a whole; at least 1 | `LimitExceeded { kind: "expression steps" }` |
 | `memory_limit` | 64 MiB | Bytes the engine of one resolution allocates | `LimitExceeded { kind: "expression memory" }` |
-| `stack_limit` | 256 KiB | Native stack JavaScript code uses below the resolving call; at least 16 KiB | `Expression` with a stack overflow message |
+| `stack_limit` | 256 KiB | Native stack JavaScript code uses below the resolving call; at least 16 KiB. Debug builds of QuickJS use far more stack per call: build it optimized with `[profile.dev.package.quickjs-jit-sys] opt-level = 3` | `Expression` with a stack overflow message |
 | (fixed) | about 120 brackets, 40 function bodies or 300 chained operators | How deeply the text of an expression or module nests, bounded before the compiler sees it | `Expression`: `the source nests too deeply` |
 
 Expression results also count toward `max_value_nodes` and the 128-level value depth, and

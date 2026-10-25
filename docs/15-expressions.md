@@ -279,7 +279,18 @@ modules, by bare specifier. They follow standard ES module semantics: named and 
 imports, re-exports (`export { x } from`, `export * from`), live bindings, and cycles, which
 evaluate in ES module order. Only static imports exist: `import()` is rejected. Each module
 compiles and its top-level code runs at most once per resolution, however many tokens import it,
-and again in the next resolution, which starts fresh. Hosts provide single-file ES modules; a
+and again in the next resolution, which starts fresh. Once its top-level code has run, everything
+the module's namespace and top-level bindings reach is deep-frozen (objects, arrays, functions,
+classes and their prototypes), so a token that tries to change a module's value gets a
+`TypeError`; top-level code may build its values freely before that, but cannot change another
+module's frozen values. Objects others inherit from (a function's `prototype`, an object passed
+to `Object.create`) keep accepting assignments on the objects that inherit, as JavaScript's
+built-ins do: `this.next = this.next.bind(this)` in a constructor still works. An object nothing
+inherits from yet when it freezes stays read-only for objects created from it later; define
+their properties (`Object.defineProperty`, object spread) instead of assigning them. Freezing is
+charged to the module's evaluation: about 5 steps of its `step_budget` and some memory per
+1,000 objects its values reach, so a module that exports a table of 100,000 objects needs a
+budget of about 550 steps. Hosts provide single-file ES modules; a
 library of several files is bundled beforehand.
 
 Module failures name the module: an unknown specifier, an import of a name the module does not
@@ -593,9 +604,24 @@ Work is bounded by `ExpressionOptions`, and expression code cannot catch the lim
   evaluation (an expression call, a module's top-level code, or an import cycle's as a whole)
   has its own budget, which does not depend on what ran before it; a budget below 1 counts as 1.
 - **Memory** is what the JavaScript engine of one resolution may allocate.
-- **Stack** is what JavaScript code may use below the resolving call; at least 16 KiB. The
+- **Stack** is what JavaScript code may use below the resolving call, measured from where each
+  evaluation starts; at least 16 KiB. Compiled code passes every value a `catch` or `finally`
+  receives to an internal check first, so a stack overflow (of calls, or of the regular expression
+  compiler on a deeply nested pattern) stops the evaluation even when the code catches it. The
   limit must leave room on the stack of the thread that resolves: one near that stack's size
-  lets QuickJS overflow it before its own check, which aborts the process.
+  lets QuickJS overflow it before its own check, which aborts the process. Unoptimized QuickJS uses several times more stack per call, so a debug build allows much
+  shallower recursion under the same limit. Build the engine optimized in every profile, as this
+  repository does, in your workspace's `Cargo.toml`:
+  `[profile.dev.package.quickjs-jit-sys] opt-level = 3`.
+- **Module state.** A module evaluates once per resolution and every token that imports it
+  shares it. Its namespace and top-level values are deep-frozen once its top-level code has run,
+  but freezing cannot reach all of its state, and that state is shared within the resolution
+  whichever code changes it, token expressions included: module-level variables its functions
+  reassign, variables a closure keeps, and the contents of the `Map`s, `Set`s, typed arrays,
+  `ArrayBuffer`s and `DataView`s it holds. Modules may hold and export such values; keep module
+  functions pure and do not write into a module's collections from expressions. Results that
+  depend on such writes are guaranteed neither independent of the order tokens evaluate in nor
+  equal between `apply_affected` and a full resolution.
 - **Nesting.** The JavaScript and TypeScript compiler works recursively on the caller's stack,
   so every source (an expression or a module) may nest only so deeply: about 120 nested
   brackets, 40 nested function bodies or 300 chained operators, much more than real code uses,
@@ -659,9 +685,12 @@ Apple's clang has no WebAssembly target; Homebrew's `llvm` or a distribution's `
 Equal documents, selections and options give equal `ResolvedTokens` and equal fingerprints, in any
 evaluation order: each resolution starts a fresh, frozen engine, expressions cannot share state
 through globals or built-ins, and inputs are frozen. Rounding results to `precision` keeps them
-equal across platforms whose math libraries differ in the last bit. Module-level variables are
-shared by the tokens that import the module within one resolution, so modules should keep no
-state that tokens change.
+equal across platforms whose math libraries differ in the last bit. A module evaluates once per
+resolution and its tokens share it, so its values freeze once its top-level code has run (see
+[modules](#modules)): no token can change a plain object, array, function or class another token
+reads. State freezing cannot reach is shared within the resolution, whoever writes it ([module
+state](#the-sandbox-and-its-limits)); results that depend on such writes can differ between
+evaluation orders and between affected and full resolution.
 
 ## What expressions do not do
 

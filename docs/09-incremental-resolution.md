@@ -229,7 +229,9 @@ Affected re-resolution relies on the caller for a few points:
 - **Module edits need a full resolve.** With [expressions](15-expressions.md), affected
   re-resolution follows expression inputs (editing an input's target re-evaluates the expression
   and its dependents) and edited expression objects, but not the text of modules: after
-  `replace_module`, or a change of host modules, resolve fully.
+  `replace_module`, or a change of host modules, resolve fully. A result that depends on writes
+  to a module's state (from its functions or from expressions) is not guaranteed to match a full
+  resolution ([module state](15-expressions.md#the-sandbox-and-its-limits)).
 
 ## What is and is not saved
 
