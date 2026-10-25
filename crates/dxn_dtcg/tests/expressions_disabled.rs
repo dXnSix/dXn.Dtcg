@@ -4,6 +4,7 @@
 
 use dxn_dtcg::{DtcgRuntime, EXPRESSION_EXTENSION, ResolvedTokens, RuntimeOptions};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn document(with_extension: bool) -> Value {
     let mut document = json!({
@@ -36,12 +37,12 @@ fn resolve(document: &Value, options: RuntimeOptions) -> ResolvedTokens {
         .unwrap()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_extension_key_is_in_the_library_namespace() {
     assert_eq!(EXPRESSION_EXTENSION, "dxn.dtcg.expressions");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn expression_tokens_resolve_their_snapshot_and_keep_the_extension() {
     let document = document(true);
     let tokens = resolve(&document, RuntimeOptions::default());
@@ -58,7 +59,7 @@ fn expression_tokens_resolve_their_snapshot_and_keep_the_extension() {
     assert!(tokens.iter().all(|token| token.snapshot.is_none()));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn malformed_expressions_and_module_declarations_are_not_errors() {
     // `accent` carries an invalid expression object and the root an invalid
     // `modules` declaration; both stay opaque.
@@ -70,7 +71,7 @@ fn malformed_expressions_and_module_declarations_are_not_errors() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn fingerprints_equal_those_of_the_documents_without_the_extension() {
     let with = resolve(&document(true), RuntimeOptions::default());
     let without = resolve(&document(false), RuntimeOptions::default());
@@ -81,7 +82,7 @@ fn fingerprints_equal_those_of_the_documents_without_the_extension() {
 }
 
 #[cfg(feature = "expressions")]
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_compiled_feature_evaluates_nothing_until_options_enable_it() {
     let options = RuntimeOptions::default();
     assert_eq!(options.expressions, None);

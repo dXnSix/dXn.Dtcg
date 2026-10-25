@@ -1,4 +1,5 @@
 use dxn_dtcg::{DtcgComponentTokens, DtcgTokens};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 #[derive(DtcgTokens)]
 #[dtcg(root = "palette")]
@@ -16,7 +17,7 @@ struct Button {
     fill: String,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn derives_named_projection_shapes_with_stable_component_metadata() {
     assert_eq!(Button::component_id(), "button");
     let _ = core::mem::size_of::<Palette>();

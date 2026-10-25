@@ -3,6 +3,7 @@ use dxn_dtcg::{
     RuntimeLimits,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn resolve_error(document: Value) -> DtcgError {
     DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -15,7 +16,7 @@ fn number(value: i64) -> Value {
     json!({"$type": "number", "$value": value})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn runtime_limits_use_chainable_setters_and_are_exposed() {
     let limits = RuntimeLimits::default()
         .with_max_documents(3)
@@ -30,7 +31,7 @@ fn runtime_limits_use_chainable_setters_and_are_exposed() {
     assert_eq!(DtcgRuntime::default().limits(), &RuntimeLimits::default());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn runtime_debug_output_names_documents_but_never_their_bodies() {
     let mut runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -51,7 +52,7 @@ fn runtime_debug_output_names_documents_but_never_their_bodies() {
     assert!(!debug.contains("another-hidden-marker"), "{debug}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn missing_alias_targets_are_unresolved_references_from_the_referring_token() {
     for (alias, target) in [("{missing}", "missing"), ("{group}", "group"), ("{}", "")] {
         let error = resolve_error(json!({
@@ -79,7 +80,7 @@ fn missing_alias_targets_are_unresolved_references_from_the_referring_token() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn missing_and_malformed_extends_targets_are_unresolved_references() {
     let missing = resolve_error(json!({"theme": {"$extends": "{base}", "a": number(1)}}));
     assert!(
@@ -105,7 +106,7 @@ fn missing_and_malformed_extends_targets_are_unresolved_references() {
     assert!(diagnostic.message().contains("{base}"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn errors_are_comparable_clonable_and_close_their_backticks() {
     let error = ResourceId::parse("/abs.json").unwrap_err();
     assert_eq!(error.clone(), error);
@@ -117,7 +118,7 @@ fn errors_are_comparable_clonable_and_close_their_backticks() {
     assert_ne!(error, DtcgError::InvalidResourceId("other.json".into()));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolution_helpers_map_and_inspect_both_states() {
     let ready: Resolution<i32> = Resolution::Ready(2);
     assert!(ready.is_ready());
@@ -150,7 +151,7 @@ fn resolution_helpers_map_and_inspect_both_states() {
     assert_eq!(ready, Resolution::Ready(1));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn source_occurrences_name_their_document() {
     let mut runtime = DtcgRuntime::from_json(
         "root.json",
@@ -173,7 +174,7 @@ fn source_occurrences_name_their_document() {
     assert_eq!(occurrences[0].resource().as_str(), "base.json");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn fingerprints_and_equality_ignore_object_member_order() {
     let resolve = |document: &str| {
         DtcgRuntime::from_json("tokens.json", document.to_owned())

@@ -1,4 +1,5 @@
 use dxn_dtcg::{DtcgRuntime, DtcgTokens};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 #[derive(Debug, DtcgTokens, PartialEq)]
 struct Palette {
@@ -6,7 +7,7 @@ struct Palette {
     primary: String,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn derives_a_narrow_projection() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",

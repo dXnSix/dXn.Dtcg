@@ -8,6 +8,7 @@ use dxn_dtcg::{
     ValueExtensions, expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn options() -> RuntimeOptions {
     RuntimeOptions::default().with_expressions(ExpressionOptions::default())
@@ -59,7 +60,7 @@ fn expression_message(result: Result<Value, DtcgError>) -> String {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_result_replaces_the_value_and_the_resolved_value_becomes_the_snapshot() {
     let tokens = resolve(&document(computed(
         "number",
@@ -75,7 +76,7 @@ fn the_result_replaces_the_value_and_the_resolved_value_becomes_the_snapshot() {
     assert_eq!(tokens.get("base").unwrap().snapshot, None);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_snapshot_is_still_resolved_and_validated() {
     let error = evaluate("number", json!("not a number"), "base").unwrap_err();
     assert!(matches!(error, DtcgError::TokenType { ref path, .. } if path == "computed"));
@@ -86,7 +87,7 @@ fn the_snapshot_is_still_resolved_and_validated() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_result_is_validated_against_the_effective_type() {
     let error = evaluate("dimension", json!({ "value": 4, "unit": "px" }), "base").unwrap_err();
     match error {
@@ -107,7 +108,7 @@ fn the_result_is_validated_against_the_effective_type() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_effective_type_comes_from_the_snapshot_as_without_expressions() {
     // No own type: the type of the token `$value` aliases.
     let document = json!({
@@ -126,7 +127,7 @@ fn the_effective_type_comes_from_the_snapshot_as_without_expressions() {
     assert_eq!(token.value, json!({ "value": 12, "unit": "px" }));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn results_validate_with_the_runtime_value_extensions() {
     let typography = |line_height: &str| {
         json!({
@@ -159,7 +160,7 @@ fn results_validate_with_the_runtime_value_extensions() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inputs_resolve_aliases_pointers_and_nested_literals() {
     let document = json!({
         "$extensions": { "vendor.palette": { "scale": [1, 2, 3] } },
@@ -179,7 +180,7 @@ fn inputs_resolve_aliases_pointers_and_nested_literals() {
     assert_eq!(tokens.get("computed").unwrap().value, json!(32));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_missing_input_target_is_an_unresolved_reference() {
     let error = resolve(&document(computed(
         "number",
@@ -196,7 +197,7 @@ fn a_missing_input_target_is_an_unresolved_reference() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn input_references_count_toward_the_alias_depth() {
     let document = json!({
         "a": { "$type": "number", "$value": 1 },
@@ -223,7 +224,7 @@ fn input_references_count_toward_the_alias_depth() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn input_references_count_toward_value_nodes_and_depth() {
     let list = (0..50).collect::<Vec<_>>();
     let document = json!({
@@ -269,7 +270,7 @@ fn input_references_count_toward_value_nodes_and_depth() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_cycle_through_inputs_is_an_alias_cycle() {
     let own = resolve(&document(computed(
         "number",
@@ -293,7 +294,7 @@ fn a_cycle_through_inputs_is_an_alias_cycle() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn references_to_an_expression_token_receive_its_evaluated_value() {
     let document = json!({
         "base": { "$type": "number", "$value": 4 },
@@ -316,7 +317,7 @@ fn references_to_an_expression_token_receive_its_evaluated_value() {
     assert_eq!(tokens.get("chained").unwrap().value, json!(9));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inputs_are_bound_by_name_as_json_values() {
     assert_eq!(
         evaluate(
@@ -340,7 +341,7 @@ fn inputs_are_bound_by_name_as_json_values() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn results_convert_to_json() {
     // Arrays, plain objects, strings and numbers.
     assert_eq!(
@@ -377,7 +378,7 @@ fn results_convert_to_json() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn integral_numbers_become_integers() {
     let value = evaluate("number", json!(0), "base * 0.5").unwrap();
     assert!(value.is_i64(), "{value:?}");
@@ -392,7 +393,7 @@ fn integral_numbers_become_integers() {
     assert_eq!(value, json!(0));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn values_that_are_not_json_are_rejected() {
     for (js, kind) in [
         ("undefined", "undefined"),
@@ -420,7 +421,7 @@ fn values_that_are_not_json_are_rejected() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn results_nest_at_most_128_levels_and_count_toward_value_nodes() {
     let nested = |levels: usize| {
         format!("(() => {{ let v = 1; for (let i = 1; i < {levels}; i++) v = [v]; return v; }})()")
@@ -475,7 +476,7 @@ fn results_nest_at_most_128_levels_and_count_toward_value_nodes() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn non_integral_numbers_round_to_the_configured_precision() {
     assert_eq!(
         evaluate("number", json!(0), "1 / 3").unwrap(),
@@ -513,7 +514,7 @@ fn non_integral_numbers_round_to_the_configured_precision() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn strings_in_results_are_literals() {
     assert_eq!(
         evaluate("fontFamily", json!("x"), "'{base}'").unwrap(),
@@ -525,7 +526,7 @@ fn strings_in_results_are_literals() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_expression_replaces_the_whole_value_and_groups_are_not_evaluated() {
     let document = json!({
         "group": {

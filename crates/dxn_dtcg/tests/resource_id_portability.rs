@@ -1,4 +1,5 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, ResourceId};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn assert_invalid(result: Result<impl std::fmt::Debug, DtcgError>, id: &str) {
     match result {
@@ -7,7 +8,7 @@ fn assert_invalid(result: Result<impl std::fmt::Debug, DtcgError>, id: &str) {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn ids_with_fragments_are_rejected_everywhere_an_id_is_named() {
     for id in ["tokens.json#/colors", "tokens.json#", "#/colors"] {
         assert_invalid(ResourceId::parse(id), id);
@@ -23,7 +24,7 @@ fn ids_with_fragments_are_rejected_everywhere_an_id_is_named() {
     assert!(runtime.contains_document("tokens.json").unwrap());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn references_keep_their_fragments() {
     let parent = ResourceId::parse("themes/root.json").unwrap();
     let reference = parent.resolve("palette.json#/colors/primary").unwrap();
@@ -35,7 +36,7 @@ fn references_keep_their_fragments() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn non_portable_segments_are_rejected() {
     let rejected = [
         "nul\0.json",
@@ -72,7 +73,7 @@ fn non_portable_segments_are_rejected() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn portable_ids_keep_working() {
     for (id, canonical) in [
         ("tokens.json", "tokens.json"),

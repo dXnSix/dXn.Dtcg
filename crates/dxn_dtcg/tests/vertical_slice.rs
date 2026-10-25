@@ -1,4 +1,5 @@
 use dxn_dtcg::{DocumentCatalog, DtcgRuntime, DtcgTokens, Resolution};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 #[derive(Debug, DtcgTokens, PartialEq)]
 struct AppTheme {
@@ -10,7 +11,7 @@ const ROOT: &str = r##"{"version":"2025.10","sets":{"base":{"sources":[{"$ref":"
 const BASE: &str = r#"{"spacing":{"sm":{"$type":"number","$value":4}},"color":{"button":{"$type":"fontFamily","$value":"blue"}},"component":{"fill":{"$value":"{color.button}"},"gap":{"$value":"{spacing.sm}"}}}"#;
 const DARK: &str = r#"{"color":{"button":{"$type":"fontFamily","$value":"black"}}}"#;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolves_after_missing_documents_are_provided_and_overlays_whole_tokens() {
     let catalog = DocumentCatalog::new();
     assert!(catalog.is_empty());

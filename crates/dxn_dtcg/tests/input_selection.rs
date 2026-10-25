@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, selection_from_json, selection_refs};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn number(name: &str, value: i64) -> Value {
     json!({name: {"$type": "number", "$value": value}})
@@ -35,7 +36,7 @@ fn composed() -> DtcgRuntime {
     runtime
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn names_match_case_insensitively_and_normalize_to_the_declared_spelling() {
     let runtime = composed();
     let exact = runtime
@@ -64,7 +65,7 @@ fn names_match_case_insensitively_and_normalize_to_the_declared_spelling() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn ambiguous_case_insensitive_names_are_rejected_unless_exact() {
     let runtime = DtcgRuntime::from_json(
         "root.json",
@@ -107,7 +108,7 @@ fn ambiguous_case_insensitive_names_are_rejected_unless_exact() {
     assert_eq!(exact.get("a").unwrap().value, json!(2));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inputs_are_valid_when_any_reached_resolver_declares_them() {
     let runtime = composed();
     // The nested resolver does not declare `theme`, and the root does not
@@ -143,7 +144,7 @@ fn inputs_are_valid_when_any_reached_resolver_declares_them() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn each_resolver_applies_its_own_inputs_and_defaults() {
     let runtime = composed();
     // Only the nested resolver declares `density`, which has no default.
@@ -166,7 +167,7 @@ fn each_resolver_applies_its_own_inputs_and_defaults() {
     assert_eq!(tokens.get("gap").unwrap().value, json!(4));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_previewed_draft_may_use_its_own_modifiers() {
     let runtime = composed();
     let draft = json!({
@@ -200,7 +201,7 @@ fn a_previewed_draft_may_use_its_own_modifiers() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_graph_without_modifiers_ignores_inputs() {
     let runtime = DtcgRuntime::from_json("tokens.json", number("a", 1).to_string()).unwrap();
     assert!(runtime.resolve(&[("anything", "goes")]).unwrap().is_ready());
@@ -218,7 +219,7 @@ fn a_graph_without_modifiers_ignores_inputs() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_inputs_become_owned_selections() {
     let runtime = composed();
     let inputs = selection_from_json(&json!({"theme": "dark", "density": "compact"})).unwrap();
@@ -252,7 +253,7 @@ fn json_inputs_become_owned_selections() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn normalize_selection_validates_like_resolve_across_the_graph() {
     let runtime = composed();
     assert_eq!(
@@ -300,7 +301,7 @@ fn normalize_selection_validates_like_resolve_across_the_graph() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inspect_source_accepts_inputs_of_nested_resolvers() {
     let runtime = composed();
     let source = number("extra", 1);
@@ -331,7 +332,7 @@ fn inspect_source_accepts_inputs_of_nested_resolvers() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn previewing_an_occurrence_applies_the_selection_to_the_root_graph_only() {
     let runtime = composed();
     let draft = json!({
@@ -357,7 +358,7 @@ fn previewing_an_occurrence_applies_the_selection_to_the_root_graph_only() {
     assert_eq!(preview.get("ink").unwrap().value, json!(9));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolve_and_normalize_report_the_same_selection_errors() {
     let runtime = composed();
     let check = |selection: &[(&str, &str)], expected: &dyn Fn(&DtcgError) -> bool| {

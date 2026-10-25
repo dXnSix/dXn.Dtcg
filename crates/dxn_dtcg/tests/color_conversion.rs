@@ -6,6 +6,7 @@ use dxn_dtcg::{
     values::{Color, ColorSpace, Component},
 };
 use serde_json::json;
+use wasm_bindgen_test::wasm_bindgen_test;
 
 const SPACES: [ColorSpace; 14] = [
     ColorSpace::Srgb,
@@ -301,7 +302,7 @@ fn assert_valid(color: &Color) {
         .unwrap_or_else(|error| panic!("{:?}: {error}", color.to_json()));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn conversions_match_css_color_4_reference_values() {
     for (input, expected) in REFERENCES {
         for (space, coordinates) in *expected {
@@ -339,7 +340,7 @@ const INTERIOR: [[f64; 3]; 4] = [
     [0.3, 0.6, 0.2],
 ];
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn in_gamut_round_trips_through_every_space_return_the_input() {
     for input in &INTERIOR {
         for through in SPACES {
@@ -359,7 +360,7 @@ fn in_gamut_round_trips_through_every_space_return_the_input() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn none_components_count_as_zero() {
     let color = Color {
         components: [Component::None, Component::Number(0.5), Component::None],
@@ -386,7 +387,7 @@ fn none_components_count_as_zero() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn results_are_valid_dtcg_colors() {
     // Out of the sRGB gamut, the conversion clips into it.
     let p3_red = Color::new(ColorSpace::DisplayP3, [1.0, 0.0, 0.0], 0.5);
@@ -407,7 +408,7 @@ fn results_are_valid_dtcg_colors() {
     assert_valid(&hue);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn mixing_defaults_to_oklch_with_the_shorter_hue() {
     for (a, b, expected) in [
         (
@@ -460,7 +461,7 @@ fn mixing_defaults_to_oklch_with_the_shorter_hue() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn lighten_and_darken_shift_oklch_lightness_in_the_colors_space() {
     let oklch = Color::new(ColorSpace::Oklch, [0.55, 0.1, 264.0], 1.0);
     assert!(close(
@@ -500,7 +501,7 @@ fn lighten_and_darken_shift_oklch_lightness_in_the_colors_space() {
     assert_valid(&accent.lighten(5.0));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn alpha_is_replaced_and_clamped() {
     assert_eq!(srgb([0.1, 0.2, 0.3]).with_alpha(0.25).alpha, 0.25);
     assert_eq!(srgb([0.1, 0.2, 0.3]).with_alpha(2.0).alpha, 1.0);
@@ -511,7 +512,7 @@ fn alpha_is_replaced_and_clamped() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn hex_converts_both_ways() {
     assert_eq!(srgb([1.0, 0.0, 0.0]).to_hex(), "#ff0000");
     assert_eq!(srgb([0.2, 0.4, 0.9]).to_hex(), "#3366e6");
@@ -539,7 +540,7 @@ fn hex_converts_both_ways() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn contrast_is_the_wcag_2_ratio() {
     for (a, b, expected) in [
         ([0.0, 0.0, 0.0], [1.0, 1.0, 1.0], 21.0),
@@ -552,7 +553,7 @@ fn contrast_is_the_wcag_2_ratio() {
     assert!((srgb([0.3, 0.3, 0.3]).contrast(&srgb([0.3, 0.3, 0.3])) - 1.0).abs() < 1e-12);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn gamut_tests_and_clamping_cover_the_rgb_spaces() {
     let p3 = Color::new(ColorSpace::DisplayP3, [0.0, 1.0, 0.0], 1.0);
     assert!(p3.in_gamut(ColorSpace::DisplayP3));
@@ -575,7 +576,7 @@ fn gamut_tests_and_clamping_cover_the_rgb_spaces() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn colors_serialize_as_dtcg_json() {
     let color = Color::new(ColorSpace::Oklch, [0.6, 0.15, 250.0], 1.0);
     assert_eq!(
@@ -598,7 +599,7 @@ fn colors_serialize_as_dtcg_json() {
     assert_eq!(ColorSpace::from_name("p3"), None);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_powerless_hue_takes_the_other_colors_hue_when_mixing() {
     // colorjs.io 0.7.1, `Color.mix(a, b, 0.5, { space, hue: "shorter" })`.
     for (space, a, b, expected) in [
@@ -656,7 +657,7 @@ fn a_powerless_hue_takes_the_other_colors_hue_when_mixing() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn conversions_write_powerless_hues_as_zero() {
     for gray in [[0.0; 3], [1.0; 3], [0.5; 3], [0.18; 3]] {
         for space in [
@@ -696,7 +697,7 @@ const BOUNDARY: [[f64; 3]; 10] = [
     [0.0, 0.5, 1.0],
 ];
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn round_trips_of_gamut_boundary_colors_return_the_input() {
     let p3_green = Color::new(ColorSpace::DisplayP3, [0.0, 1.0, 0.0], 1.0);
     let rec2020_green = Color::new(ColorSpace::Rec2020, [0.0, 1.0, 0.0], 1.0);
@@ -732,7 +733,7 @@ fn round_trips_of_gamut_boundary_colors_return_the_input() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn colors_on_a_shared_gamut_boundary_are_in_both_gamuts() {
     // A98 RGB shares sRGB's red and blue primaries; Rec. 2020 contains P3.
     for primary in [
@@ -757,7 +758,7 @@ fn colors_on_a_shared_gamut_boundary_are_in_both_gamuts() {
     assert!(!Color::new(ColorSpace::Rec2020, [0.0, 1.0, 0.0], 1.0).in_gamut(ColorSpace::DisplayP3));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn non_finite_inputs_give_valid_colors() {
     let accent = srgb([0.2, 0.4, 0.9]);
     assert_eq!(accent.lighten(f64::NAN), accent.convert(ColorSpace::Srgb));

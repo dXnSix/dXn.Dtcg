@@ -2,8 +2,9 @@
 //! colors keep their hue through cylindrical spaces.
 
 use dxn_dtcg::values::{Color, ColorSpace};
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn hsl_and_hwb_clip_into_srgb() {
     let red = Color::new(ColorSpace::DisplayP3, [1.0, 0.0, 0.0], 1.0);
     for space in [ColorSpace::Hsl, ColorSpace::Hwb] {
@@ -14,7 +15,7 @@ fn hsl_and_hwb_clip_into_srgb() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn contrast_stays_between_1_and_21() {
     let black = Color::new(ColorSpace::Srgb, [0.0; 3], 1.0);
     let bright = Color::new(ColorSpace::Oklab, [1.0, -0.3, 0.0], 1.0);
@@ -24,7 +25,7 @@ fn contrast_stays_between_1_and_21() {
     assert!((white.contrast(&black) - 21.0).abs() < 1e-9);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn near_gray_colors_round_trip_through_cylindrical_spaces() {
     for rgb in [
         [0.5, 0.5, 0.500_001],

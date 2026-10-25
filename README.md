@@ -67,10 +67,10 @@ clang (see [Expressions](docs/15-expressions.md#webassembly)).
 
 | Platform | Status |
 |---|---|
-| Linux x86_64 | Tested in CI: formatting, Clippy, tests, packaging |
-| Windows x86_64 | Tested in CI: formatting, Clippy, tests, packaging |
-| macOS arm64 | Tested in CI: formatting, Clippy, tests, packaging |
-| WebAssembly (`wasm32-unknown-unknown`) | Built in CI, and with the `expressions` feature also tested under Node; needs no host I/O, threads or system calls |
+| Linux x86_64 | Tested in CI: formatting, Clippy, tests (with and without `expressions`), packaging |
+| Windows x86_64 | Tested in CI: formatting, Clippy, tests (with and without `expressions`), packaging |
+| macOS arm64 | Tested in CI: formatting, Clippy, tests (with and without `expressions`), packaging |
+| WebAssembly (`wasm32-unknown-unknown`) | Tested in CI under Node: Clippy and the whole test suite, with and without the `expressions` feature; needs no host I/O, threads or system calls |
 | iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI |
 
 - **Rust**: 1.97 or newer, edition 2024. `no_std` is not supported.

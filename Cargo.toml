@@ -25,6 +25,8 @@ thiserror = "2.0.17"
 trybuild = "1.0"
 # Its `wasm-bindgen` pin must match the `wasm-bindgen-test-runner` CI installs.
 wasm-bindgen-test = "=0.3.79"
+# The version `wasm-bindgen-test` uses; tests read fixtures through Node's `fs` with it.
+wasm-bindgen = "=0.2.129"
 
 
 # QuickJS (feature `expressions`) compiled without optimization uses several

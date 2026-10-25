@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn options() -> RuntimeOptions {
     RuntimeOptions::default().with_expressions(ExpressionOptions::default())
@@ -52,7 +53,7 @@ fn assert_invalid(expression: Value, needle: &str) {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn accepts_js_and_ts_with_inputs() {
     let tokens = resolve(&token(
         json!({ "inputs": { "base": "{base}" }, "js": "base + 1" }),
@@ -67,7 +68,7 @@ fn accepts_js_and_ts_with_inputs() {
     assert_eq!(tokens.get("group.computed").unwrap().value, json!(12));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_object_and_its_members_have_their_types() {
     assert_invalid(json!("base * 2"), "must be an object");
     assert_invalid(json!({ "js": 1 }), "`js` must be a string");
@@ -90,7 +91,7 @@ fn the_object_and_its_members_have_their_types() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn exactly_one_of_js_or_ts() {
     assert_invalid(
         json!({ "js": "1", "ts": "1" }),
@@ -99,7 +100,7 @@ fn exactly_one_of_js_or_ts() {
     assert_invalid(json!({ "inputs": {} }), "needs `js` or `ts`");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn unknown_members_are_errors() {
     assert_invalid(
         json!({ "js": "1", "input": {} }),
@@ -111,7 +112,7 @@ fn unknown_members_are_errors() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn local_names_are_identifiers_that_are_not_reserved_words() {
     assert_invalid(
         json!({ "js": "1", "inputs": { "2x": 1 } }),
@@ -152,7 +153,7 @@ fn local_names_are_identifiers_that_are_not_reserved_words() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn local_names_are_unique_across_inputs_and_imports() {
     assert_invalid(
         json!({ "js": "1", "inputs": { "base": 1 }, "imports": { "lib": ["base"] } }),
@@ -168,7 +169,7 @@ fn local_names_are_unique_across_inputs_and_imports() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn imports_name_modules_by_bare_specifier() {
     assert_invalid(
         json!({ "js": "1", "imports": { "": ["a"] } }),
@@ -181,7 +182,7 @@ fn imports_name_modules_by_bare_specifier() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_valid_import_declaration_reaches_module_resolution() {
     // The object is valid; the module is simply unknown.
     assert_invalid(
@@ -190,7 +191,7 @@ fn a_valid_import_declaration_reaches_module_resolution() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn value_stays_required() {
     // Without `$value` (or a token-level `$ref`) the object is a group with
     // `$extensions`, not a token, as for any other extension data.
@@ -213,7 +214,7 @@ fn value_stays_required() {
     assert_eq!(computed.snapshot, Some(json!(4)));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_text_is_exactly_one_expression() {
     for source in [
         "1), (2",
@@ -238,7 +239,7 @@ fn the_text_is_exactly_one_expression() {
     assert_eq!(tokens.get("group.computed").unwrap().value, json!(8));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn local_names_follow_the_javascript_identifier_grammar() {
     for invalid in ["a\u{b2}", "\u{2028}", "a-", "a.b", "\u{200d}a"] {
         let mut inputs = serde_json::Map::new();

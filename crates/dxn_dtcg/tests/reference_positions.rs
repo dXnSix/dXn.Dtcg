@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn resolve(document: Value) -> Result<ResolvedTokens, DtcgError> {
     DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -41,7 +42,7 @@ fn with_token(token_type: &str, value: Value) -> Value {
     document
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn aliases_are_accepted_at_every_composite_member_and_element() {
     for (token_type, value) in [
         (
@@ -86,7 +87,7 @@ fn aliases_are_accepted_at_every_composite_member_and_element() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn aliases_inside_non_composite_positions_are_rejected() {
     for (token_type, value) in [
         (
@@ -141,7 +142,7 @@ fn aliases_inside_non_composite_positions_are_rejected() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn composite_member_aliases_must_target_the_member_type() {
     for (token_type, value, expected, found) in [
         (
@@ -206,7 +207,7 @@ fn composite_member_aliases_must_target_the_member_type() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn array_valued_targets_are_never_flattened_into_arrays() {
     for (token_type, value) in [("shadow", json!(["{shs}"])), ("gradient", json!(["{gr}"]))] {
         let error = resolve(with_token(token_type, value.clone())).unwrap_err();
@@ -218,7 +219,7 @@ fn array_valued_targets_are_never_flattened_into_arrays() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_pointer_objects_are_allowed_at_any_depth() {
     let tokens = resolve(
         with_token(
@@ -244,7 +245,7 @@ fn json_pointer_objects_are_allowed_at_any_depth() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_whole_value_alias_is_always_allowed() {
     for (token_type, alias) in [
         ("color", "{c}"),

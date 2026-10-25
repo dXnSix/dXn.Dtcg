@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn options() -> RuntimeOptions {
     RuntimeOptions::default().with_expressions(ExpressionOptions::default())
@@ -47,7 +48,7 @@ struct Sizes {
     alias: f64,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolve_and_project_evaluate_expressions() {
     let runtime = DtcgRuntime::from_json_with_options(
         "tokens.json",
@@ -87,7 +88,7 @@ fn resolver_runtime() -> DtcgRuntime {
     runtime
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn previews_evaluate_expressions() {
     let runtime = resolver_runtime();
     let draft = json!({ "size": { "base": { "$type": "number", "$value": 10 } } });
@@ -141,7 +142,7 @@ fn edit(document: Value, changed: &[&str]) -> Vec<String> {
         .collect()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn editing_an_input_target_re_evaluates_its_dependents() {
     let affected = edit(tokens_document(5), &[]);
     assert_eq!(
@@ -155,21 +156,21 @@ fn editing_an_input_target_re_evaluates_its_dependents() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn editing_an_expression_object_re_evaluates_it_and_its_dependents() {
     let mut document = tokens_document(4);
     document["size"]["huge"] = scaled("size.large", 3.0);
     assert_eq!(edit(document, &[]), ["size.huge", "size.alias"]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn editing_an_unrelated_token_re_evaluates_nothing_else() {
     let mut document = tokens_document(4);
     document["other"]["$value"] = json!(2);
     assert_eq!(edit(document, &[]), ["other"]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn exports_round_trip_with_expressions_on_and_off() {
     let runtime = DtcgRuntime::from_json_with_options(
         "tokens.json",

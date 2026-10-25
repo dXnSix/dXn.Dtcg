@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 /// A runtime whose root resolver stacks `sources`, each provided as its own
 /// document `s<index>.json`, in order.
@@ -34,7 +35,7 @@ fn paths(tokens: &ResolvedTokens) -> Vec<&str> {
     tokens.iter().map(|token| token.path.as_ref()).collect()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn group_properties_merge_per_key_and_tokens_replace_whole() {
     let tokens = resolve(&[
         json!({"g": {
@@ -69,7 +70,7 @@ fn group_properties_merge_per_key_and_tokens_replace_whole() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn later_tokens_inherit_group_types_declared_by_earlier_sources() {
     // The overlay example of docs/06-resolvers-and-modifiers.md.
     let base = json!({"size": {"$type": "number", "sm": {"$value": 4}, "lg": {"$value": 16}}});
@@ -81,7 +82,7 @@ fn later_tokens_inherit_group_types_declared_by_earlier_sources() {
     assert_eq!(tokens.get("size.sm").unwrap().value, json!(4));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn extends_reaches_groups_in_other_sources_and_groups_produced_by_extends() {
     let tokens = resolve(&[
         json!({
@@ -118,7 +119,7 @@ fn extends_reaches_groups_in_other_sources_and_groups_produced_by_extends() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_path_that_is_a_token_in_one_source_and_a_group_in_another_collides() {
     let token = json!({"p": {"$type": "number", "$value": 1}});
     let group = json!({"p": {"child": {"$type": "number", "$value": 2}}});
@@ -141,7 +142,7 @@ fn a_path_that_is_a_token_in_one_source_and_a_group_in_another_collides() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_pointers_read_the_merged_structure() {
     let tokens = resolve(&[
         json!({"$extensions": {"palette": {"red": 1, "blue": 2}}}),
@@ -163,7 +164,7 @@ fn json_pointers_read_the_merged_structure() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn order_and_sources_keep_their_documented_meaning() {
     let tokens = resolve(&[
         json!({"a": {"$type": "number", "x": {"$value": 1}, "y": {"$value": 2}}, "b": {"$type": "number", "z": {"$value": 3}}}),
@@ -195,7 +196,7 @@ fn order_and_sources_keep_their_documented_meaning() {
     assert_eq!(tokens.get("theme.p").unwrap().source.as_str(), "s1.json");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn previews_merge_the_previewed_source_last() {
     let runtime =
         layered(&[json!({"size": {"$type": "number", "sm": {"$value": 4}, "lg": {"$value": 16}}})]);
@@ -224,7 +225,7 @@ fn previews_merge_the_previewed_source_last() {
     assert_eq!(occurrence.get("size.lg").unwrap().value, json!(16));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nested_groups_may_extend_the_same_target_but_real_cycles_fail() {
     let tokens = resolve(&[json!({
         "base": {"$type": "number", "t": {"$value": 1}},

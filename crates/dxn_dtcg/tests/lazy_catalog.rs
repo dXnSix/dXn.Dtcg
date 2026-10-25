@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{DtcgRuntime, Resolution, RuntimeLimits};
 
@@ -11,7 +12,7 @@ const ROOT: &str = r##"{
   }}}
 }"##;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn lazy_resolution_returns_the_stable_active_missing_frontier_then_converges() {
     let mut runtime = DtcgRuntime::from_json("workspace/root.json", ROOT).unwrap();
 
@@ -55,7 +56,7 @@ fn lazy_resolution_returns_the_stable_active_missing_frontier_then_converges() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn lazy_catalog_batch_mutation_is_atomic_and_advances_one_revision() {
     let mut runtime = DtcgRuntime::from_json("root.json", "{}").unwrap();
     let initial_revision = runtime.catalog_revision();
@@ -84,7 +85,7 @@ fn lazy_catalog_batch_mutation_is_atomic_and_advances_one_revision() {
     assert_eq!(runtime.catalog_revision(), initial_revision + 3);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn lazy_resolution_excludes_inactive_contexts_unless_complete_validation_is_requested() {
     let runtime = DtcgRuntime::from_json("workspace/root.json", ROOT).unwrap();
 
@@ -114,7 +115,7 @@ fn lazy_resolution_excludes_inactive_contexts_unless_complete_validation_is_requ
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn lazy_catalog_multi_level_cycles_and_limits_terminate_deterministically() {
     let root = r##"{
       "version":"2025.10",

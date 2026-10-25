@@ -5,11 +5,13 @@
 //! runtime does not meet must equal `KNOWN_GAPS` exactly: fixing a gap without
 //! removing its id fails the test, and so does any new failure.
 
+mod support;
+
 use std::{
     collections::BTreeSet,
-    panic::{AssertUnwindSafe, catch_unwind},
     path::{Path, PathBuf},
 };
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
 use serde_json::{Value, json};
@@ -57,8 +59,7 @@ fn corpus_root() -> PathBuf {
 }
 
 fn read_json(path: &Path) -> Value {
-    let text = std::fs::read_to_string(path)
-        .unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+    let text = support::read_to_string(path);
     serde_json::from_str(&text).unwrap_or_else(|error| panic!("parse {}: {error}", path.display()))
 }
 
@@ -144,17 +145,16 @@ fn evaluate_resolver(runtime: DtcgRuntime) -> Result<(), Outcome> {
 }
 
 fn evaluate(fixture: &Fixture) -> Outcome {
-    let json = std::fs::read_to_string(&fixture.input)
-        .unwrap_or_else(|error| panic!("read {}: {error}", fixture.input.display()));
+    let json = support::read_to_string(&fixture.input);
     let suite = fixture.suite;
-    let result = catch_unwind(AssertUnwindSafe(move || {
+    let result = guarded(move || {
         let runtime = DtcgRuntime::from_json("fixture.json", json)
             .map_err(|error| Outcome::Rejected(error.to_string()))?;
         match suite {
             Suite::Format => evaluate_format(runtime),
             Suite::Resolver => evaluate_resolver(runtime),
         }
-    }));
+    });
     match result {
         Ok(Ok(())) => Outcome::Accepted,
         Ok(Err(outcome)) => outcome,
@@ -168,6 +168,19 @@ fn evaluate(fixture: &Fixture) -> Outcome {
     }
 }
 
+/// Runs `body`, reporting a panic as a value natively. Panics abort on
+/// wasm32, so a panic there fails the test run itself.
+fn guarded<T>(body: impl FnOnce() -> T) -> Result<T, Box<dyn std::any::Any + Send>> {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(body))
+    }
+    #[cfg(target_family = "wasm")]
+    {
+        Ok(body())
+    }
+}
+
 /// A positive fixture must be accepted; a negative fixture must fail with
 /// `Err`, never with `Missing` and never with a panic.
 fn meets_expectation(fixture: &Fixture, outcome: &Outcome) -> bool {
@@ -178,7 +191,7 @@ fn meets_expectation(fixture: &Fixture, outcome: &Outcome) -> bool {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn official_corpus_matches_the_known_gaps_exactly() {
     assert!(
         KNOWN_GAPS.windows(2).all(|pair| pair[0] < pair[1]),
@@ -243,12 +256,11 @@ fn official_corpus_matches_the_known_gaps_exactly() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn vendored_fixtures_keep_the_upstream_line_endings() {
     fn visit(directory: &Path, files: &mut Vec<PathBuf>) {
-        for entry in std::fs::read_dir(directory).unwrap() {
-            let path = entry.unwrap().path();
-            if path.is_dir() {
+        for (path, is_directory) in support::read_dir(directory) {
+            if is_directory {
                 visit(&path, files);
             } else {
                 files.push(path);
@@ -260,7 +272,7 @@ fn vendored_fixtures_keep_the_upstream_line_endings() {
     assert_eq!(files.len(), 3 + FORMAT_FIXTURES + RESOLVER_FIXTURES);
     let converted = files
         .iter()
-        .filter(|path| std::fs::read(path).unwrap().contains(&b'\r'))
+        .filter(|path| support::read(path).contains(&b'\r'))
         .collect::<Vec<_>>();
     assert!(
         converted.is_empty(),
@@ -268,7 +280,7 @@ fn vendored_fixtures_keep_the_upstream_line_endings() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_string_schema_is_accepted_and_ignored_at_a_document_root() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -302,7 +314,7 @@ fn a_string_schema_is_accepted_and_ignored_at_a_document_root() {
     assert_eq!(tokens.get("size").unwrap().value, json!(8));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn schema_is_rejected_off_the_document_root_or_when_not_a_string() {
     let error = |document: Value| {
         DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -331,7 +343,7 @@ fn schema_is_rejected_off_the_document_root_or_when_not_a_string() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn schema_in_fragment_and_inline_sources_is_not_a_document_root() {
     let mut fragment = DtcgRuntime::from_json(
         "root.json",

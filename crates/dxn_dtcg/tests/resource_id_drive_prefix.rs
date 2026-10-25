@@ -1,4 +1,5 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, ResourceId};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 const COLON_PATHS: [&str; 7] = [
     "C:/x.json",
@@ -17,14 +18,14 @@ fn assert_invalid_resource_id(result: Result<impl std::fmt::Debug, DtcgError>, e
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn parse_rejects_a_colon_in_any_segment() {
     for path in COLON_PATHS {
         assert_invalid_resource_id(ResourceId::parse(path), path);
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolve_rejects_a_colon_in_any_segment() {
     for parent in ["root.json", "themes/base/root.json"] {
         let parent = ResourceId::parse(parent).unwrap();
@@ -36,14 +37,14 @@ fn resolve_rejects_a_colon_in_any_segment() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn climbing_cannot_move_a_drive_segment_to_the_front() {
     let parent = ResourceId::parse("themes/root.json").unwrap();
     assert_invalid_resource_id(parent.resolve("../C:/x.json"), "../C:/x.json");
     assert_invalid_resource_id(parent.resolve("C:/../../x.json"), "C:/../../x.json");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn colons_remain_valid_in_fragments() {
     let parent = ResourceId::parse("themes/root.json").unwrap();
     let reference = parent.resolve("palette.json#/colors/a:b").unwrap();
@@ -52,7 +53,7 @@ fn colons_remain_valid_in_fragments() {
     assert_eq!(parent.resolve("#/c:d").unwrap().resource_id(), &parent);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolver_source_with_a_drive_prefix_fails_instead_of_requesting_the_document() {
     let runtime = DtcgRuntime::from_json(
         "root.json",
@@ -68,7 +69,7 @@ fn resolver_source_with_a_drive_prefix_fails_instead_of_requesting_the_document(
     assert_invalid_resource_id(runtime.validate_complete(), "C:/Windows/win.ini");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn modifier_context_with_a_drive_prefix_fails_instead_of_requesting_the_document() {
     let runtime = DtcgRuntime::from_json(
         "themes/root.json",

@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::{ExpressionModule, ExpressionOptions},
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 const TINYCOLOR: &str = include_str!("fixtures/expressions/tinycolor.js");
 
@@ -73,7 +74,7 @@ fn resolve_providing(
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn imported_document_modules_are_requested_until_the_import_graph_is_loaded() {
     let mut runtime = runtime(
         "themes/tokens.json",
@@ -117,7 +118,7 @@ fn imported_document_modules_are_requested_until_the_import_graph_is_loaded() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_documents_are_requested_as_json() {
     let resolver = json!({
         "version": "2025.10",
@@ -130,7 +131,7 @@ fn json_documents_are_requested_as_json() {
     assert_eq!(requests[0].kind, DocumentKind::Json);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_resolution_that_imports_no_document_module_requests_none() {
     let mut document = document(
         json!({ "brand": "lib/brand.js", "unused": "lib/unused.ts" }),
@@ -145,7 +146,7 @@ fn a_resolution_that_imports_no_document_module_requests_none() {
     assert!(runtime.resolve(&[]).unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_catalog_mutations_are_atomic() {
     let mut runtime = runtime(
         "tokens.json",
@@ -228,7 +229,7 @@ fn module_catalog_mutations_are_atomic() {
     assert!(!runtime.contains_document("tokens.json").unwrap());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_module_where_json_is_expected_and_json_where_a_module_is_expected_are_errors() {
     let resolver = json!({
         "version": "2025.10",
@@ -265,7 +266,7 @@ fn runtime_with_module_as_json() -> DtcgRuntime {
     runtime
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_language_follows_the_extension() {
     for (id, source, value) in [
         ("brand.js", "export const one = 1;", 1),
@@ -330,7 +331,7 @@ fn declaration_error(modules: Value) -> (String, String, String) {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_declarations_are_validated() {
     let (resource, _, message) = declaration_error(json!(["brand.js"]));
     assert_eq!(resource, "themes/tokens.json");
@@ -375,7 +376,7 @@ fn module_declarations_are_validated() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn references_canonicalize_like_other_document_references() {
     let mut runtime = runtime(
         "themes/dark/tokens.json",
@@ -394,7 +395,7 @@ fn references_canonicalize_like_other_document_references() {
     assert_eq!(rounds[0][0].0, "themes/shared/brand.js");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn later_sources_replace_earlier_declarations() {
     let resolver = json!({
         "version": "2025.10",
@@ -432,7 +433,7 @@ fn later_sources_replace_earlier_declarations() {
     assert_eq!(requested, ["second.js", "shared.js"]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_specifier_registered_by_the_host_and_declared_by_a_document_is_an_error() {
     let options =
         RuntimeOptions::default().with_expressions(ExpressionOptions::default().with_module(
@@ -466,7 +467,7 @@ fn a_specifier_registered_by_the_host_and_declared_by_a_document_is_an_error() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn document_module_errors_name_the_module_and_the_specifier() {
     let mut runtime = runtime(
         "tokens.json",
@@ -513,7 +514,7 @@ fn document_module_errors_name_the_module_and_the_specifier() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn host_modules_import_document_modules_and_relative_imports_stay_in_documents() {
     let options = RuntimeOptions::default().with_expressions(
         ExpressionOptions::default()
@@ -571,7 +572,7 @@ fn context_resolver() -> Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn validate_complete_requests_the_modules_of_every_context() {
     let mut runtime = runtime("root.resolver.json", &context_resolver(), options());
     runtime
@@ -667,7 +668,7 @@ fn validate_complete_requests_the_modules_of_every_context() {
     assert!(plain.validate_complete().unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn previews_request_document_modules() {
     let mut runtime = runtime("root.resolver.json", &context_resolver(), options());
     runtime
@@ -713,7 +714,7 @@ fn previews_request_document_modules() {
     assert_eq!(preview.get("computed").unwrap().value, json!(9));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_color_library_works_unmodified_as_a_document_module() {
     let accent = json!({ "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] });
     let document = json!({
@@ -734,7 +735,7 @@ fn a_color_library_works_unmodified_as_a_document_module() {
     assert_eq!(rounds.len(), 1);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_host_module_nothing_imports_requests_no_document_module() {
     let options = RuntimeOptions::default().with_expressions(
         ExpressionOptions::default()
@@ -762,7 +763,7 @@ fn a_host_module_nothing_imports_requests_no_document_module() {
     assert_eq!(tokens.get("computed").unwrap().value, json!(1));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn document_cycles_name_the_module_that_threw() {
     let mut runtime = runtime(
         "tokens.json",
@@ -823,7 +824,7 @@ fn document_cycles_name_the_module_that_threw() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_documents_are_bounded_by_max_documents_as_their_own_count() {
     let modules = [
         (

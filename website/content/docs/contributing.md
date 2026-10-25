@@ -149,33 +149,34 @@ Each feature has its own integration-test file, selectable with `--test <name>`.
 | `expressions_diagnostic_names`, `expressions_native_finite` | Redacted diagnostics keep standard error names; NaN and Infinity in native calls are `TypeError`s |
 | `color_gamut_contrast` | HSL/HWB clipping into sRGB, contrast on sRGB, near-gray round trips |
 | `expressions_builtin`, `expressions_color`, `expressions_declarations` | The `dxn.dtcg` and `dxn.dtcg/color` modules; the `.d.ts` output parses and matches the run-time exports |
-| `expressions_wasm` | Expressions on `wasm32-unknown-unknown` under Node ([below](#the-webassembly-group)) |
 | `dxn_dtcg_derive`: `derive_projection`, `derive_shapes`, `derive_hardening`, `compile_fail` | Derive behavior and `trybuild` compile-fail cases in `tests/ui` |
 
 The vendored corpus under `tests/fixtures/dtcg-test-suite/2025.10/` is byte-identical to upstream (pinned commit and update steps are in its `README.md`). Never edit fixtures. When a change fixes a known gap, remove it from `KNOWN_GAPS`; when it breaks a fixture on purpose, add it and document the deviation. After an intended change to a derive error message, regenerate the snapshots and review the diff with `TRYBUILD=overwrite cargo test -p dxn_dtcg_derive --test compile_fail`. The `#[expression_module]` cases live in `crates/dxn_dtcg/tests/expression_module_ui/`; regenerate them with `TRYBUILD=overwrite cargo test -p dxn_dtcg --features expressions --test expressions_native_macro`.
 
-Every `expressions_*` group except `expressions_disabled` compiles only with the feature, and `expressions_wasm` only for `wasm32-unknown-unknown`; select a native one with `cargo test -p dxn_dtcg --all-features --test expressions_sandbox`.
+Every `expressions_*` group except `expressions_disabled` compiles only with the feature; select one with `cargo test -p dxn_dtcg --all-features --test expressions_sandbox`.
 
-### The WebAssembly group
+### Tests on WebAssembly
 
-`expressions_wasm.rs` runs on `wasm32-unknown-unknown` under Node, through `wasm-bindgen-test-runner`, with the default 1 MiB stack. It needs Node, an LLVM clang with the WebAssembly target and `llvm-ar` (Apple's clang has no WebAssembly target; Homebrew's `llvm` works), and the runner at the version of `wasm-bindgen` in `Cargo.lock` (0.2.129 at the time of writing):
+Every test group also runs on `wasm32-unknown-unknown` under Node, through `wasm-bindgen-test-runner`, with the default 1 MiB stack. Tests are marked `#[wasm_bindgen_test(unsupported = test)]`, which is a plain `#[test]` natively, and `tests/support/mod.rs` gives them what Node offers instead of `std`: files through Node's `fs` (the corpus), the wasm main stack for the stack tests, and `Date.now()` for timing. Only what cannot run there stays native-only: the `trybuild` compile-fail cases and the tests that catch a panic, because panics abort on wasm32. Doctests run natively (cross-target doctests need a nightly toolchain).
+
+Running them needs Node, an LLVM clang with the WebAssembly target and `llvm-ar` (Apple's clang has no WebAssembly target; Homebrew's `llvm` works), and the runner at the version of `wasm-bindgen` in `Cargo.lock` (0.2.129 at the time of writing):
 
 ```bash
 cargo install wasm-bindgen-cli --version 0.2.129 --locked
 CC_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/clang \
 AR_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/llvm-ar \
 CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner \
-cargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --test expressions_wasm
+cargo test --workspace --tests --all-features --target wasm32-unknown-unknown
 ```
 
-The workspace pins `wasm-bindgen-test`, whose `wasm-bindgen` must match the installed runner.
+Drop `--all-features` for the default build; add `--test <group>` for one group. The workspace pins `wasm-bindgen-test`, whose `wasm-bindgen` must match the installed runner.
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pull requests and pushes to `main` with the pinned toolchain. Two jobs:
+`.github/workflows/ci.yml` runs on pull requests and pushes to `main` with the pinned toolchain. Every platform runs the whole suite, with all features and with the default ones:
 
-- **`rust`**, on `ubuntu-latest`, `windows-latest` and `macos-latest`: `cargo fmt --check`, Clippy with `-D warnings`, `cargo test --workspace --all-features` (including the corpus, the documentation doctests and the expressions groups), `cargo check --workspace --target wasm32-unknown-unknown` (default features, so no C compiler) and `cargo package --workspace`. The `--all-features` steps compile QuickJS with GCC on Ubuntu, MSVC on Windows and Apple Clang on macOS.
-- **`wasm-expressions`**, on `ubuntu-latest`: installs `clang` and `llvm`, sets `CC_wasm32_unknown_unknown=clang`, `AR_wasm32_unknown_unknown=llvm-ar` and the `wasm-bindgen-test-runner` as the wasm32 runner, installs `wasm-bindgen-cli` at the locked `wasm-bindgen` version, then runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the `expressions_wasm` group.
+- **`native`**, on `ubuntu-latest`, `windows-latest` and `macos-latest` (each reports on its own): `cargo fmt --check`; Clippy with `-D warnings` with all features and with the default ones; `cargo test --workspace` with all features and with the default ones (including the corpus and the documentation doctests); `cargo check --workspace --target wasm32-unknown-unknown`; and `cargo package --workspace`. QuickJS compiles with GCC on Ubuntu, MSVC on Windows and Apple Clang on macOS.
+- **`wasm32`**, on `ubuntu-latest`: installs `clang` and `llvm` and `wasm-bindgen-cli` at the locked `wasm-bindgen` version, sets `CC_wasm32_unknown_unknown=clang`, `AR_wasm32_unknown_unknown=llvm-ar` and the `wasm-bindgen-test-runner` as the wasm32 runner, then runs Clippy with `-D warnings` for `wasm32-unknown-unknown` and `cargo test --workspace --tests --target wasm32-unknown-unknown` under Node, each with all features and with the default ones.
 
 The manifests stay packageable: the derive crate's dev-dependency on `dxn_dtcg` is path-only on purpose, which breaks the runtime and derive dependency cycle in a packaged crate, and `dxn_dtcg` excludes `tests/fixtures/dtcg-test-suite/**` from the package.
 

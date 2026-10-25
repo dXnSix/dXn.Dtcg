@@ -7,8 +7,9 @@ use dxn_dtcg::{
     DtcgRuntime, EXPRESSION_EXTENSION, Resolution, RuntimeOptions, expressions::ExpressionOptions,
 };
 use serde_json::json;
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn affected_resolution_matches_a_full_one_for_shared_expression_text() {
     // Same text, different inputs: an edit of `src` re-evaluates only `b`,
     // which then compiles the shared module first.

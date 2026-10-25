@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn resolve(document: Value) -> Result<ResolvedTokens, DtcgError> {
     DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -22,7 +23,7 @@ fn dimensions() -> Value {
     json!({"$type": "dimension", "small": {"$value": {"value": 4, "unit": "px"}}})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_whole_value_reference_takes_its_targets_type_before_the_group_type() {
     let tokens = resolve(json!({
         "dims": dimensions(),
@@ -45,7 +46,7 @@ fn a_whole_value_reference_takes_its_targets_type_before_the_group_type() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_own_type_comes_first_and_the_group_type_applies_otherwise() {
     let tokens = resolve(json!({
         "g": {
@@ -66,7 +67,7 @@ fn an_own_type_comes_first_and_the_group_type_applies_otherwise() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_group_type_after_extends_applies_to_untyped_tokens() {
     let tokens = resolve(json!({
         "base": {"$type": "number", "one": {"$value": 1}},
@@ -79,7 +80,7 @@ fn the_group_type_after_extends_applies_to_untyped_tokens() {
     assert_eq!(token_type(&tokens, "derived.alias"), "dimension");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_token_level_ref_outside_a_token_value_inherits_the_group_type() {
     let tokens = resolve(json!({
         "$extensions": {"x": 7},
@@ -93,7 +94,7 @@ fn a_token_level_ref_outside_a_token_value_inherits_the_group_type() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_value_pointer_whose_prefix_is_not_a_token_reads_the_document() {
     let tokens = resolve(json!({
         "$extensions": {"palette": {"$value": 3}},
@@ -110,7 +111,7 @@ fn a_value_pointer_whose_prefix_is_not_a_token_reads_the_document() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_own_type_that_differs_from_the_reference_target_type_is_a_mismatch() {
     for value in [
         json!({"$type": "fontWeight", "$value": "{weights.regular}"}),
@@ -138,7 +139,7 @@ fn an_own_type_that_differs_from_the_reference_target_type_is_a_mismatch() {
     assert_eq!(matching.get("heading").unwrap().value, json!(400));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn reference_types_follow_chains() {
     let tokens = resolve(json!({
         "a": {"$type": "duration", "$value": {"value": 100, "unit": "ms"}},

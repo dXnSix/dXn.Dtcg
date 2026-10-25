@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, ResourceId, RuntimeLimits};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn runtime(data: Value) -> DtcgRuntime {
     DtcgRuntime::from_json("workspace/root.json", data.to_string()).unwrap()
@@ -14,7 +15,7 @@ fn number(value: i32) -> Value {
     json!({"number":{"$type":"number","$value":value}})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inspection_preserves_local_set_occurrences_empty_groups_and_override_owners() {
     let mut data = resolver(vec![json!({"$ref":"#/sets/template"})]);
     data["sets"]["template"] = json!({"sources":[
@@ -72,7 +73,7 @@ fn inspection_preserves_local_set_occurrences_empty_groups_and_override_owners()
     assert_eq!(overridden[0].origin().pointer(), "/sources/0");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn repeated_resolver_documents_participate_at_every_authored_position() {
     let mut runtime = runtime(resolver(vec![
         json!({"$ref":"nested.json"}),
@@ -111,7 +112,7 @@ fn repeated_resolver_documents_participate_at_every_authored_position() {
     assert_eq!(sources[1].value()["number"]["$value"], 8);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nested_inline_resolvers_and_escaped_locations_are_not_document_cycles() {
     let inner = json!({"version":"2025.10", "sets":{"a/b~c":{"sources":[number(7)]}},
         "resolutionOrder":[{"$ref":"#/sets/a~1b~0c"}]});
@@ -148,7 +149,7 @@ fn nested_inline_resolvers_and_escaped_locations_are_not_document_cycles() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn source_discovery_acquires_dormant_contexts_without_resolving_values() {
     let mut runtime = runtime(resolver(vec![number(1)]));
     let source = json!({"version":"2025.10", "modifiers":{"mode":{"default":"light", "contexts":{
@@ -199,7 +200,7 @@ fn source_discovery_acquires_dormant_contexts_without_resolving_values() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn external_occurrence_preview_keeps_fragment_metadata_and_catalog_unchanged() {
     let mut runtime = runtime(resolver(vec![
         json!({"$ref":"first.json#/palette"}),
@@ -249,7 +250,7 @@ fn external_occurrence_preview_keeps_fragment_metadata_and_catalog_unchanged() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn source_and_preview_limits_are_shared_with_resolution() {
     let mut runtime = DtcgRuntime::with_limits(
         RuntimeLimits::default()
@@ -332,7 +333,7 @@ fn source_and_preview_limits_are_shared_with_resolution() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn reference_sites_include_dormant_and_overridden_sources_but_exclude_extensions_and_aliases() {
     let mut data = resolver(vec![json!({"$ref":"nested/wrapper.json#/embedded"})]);
     data["sets"]["dormant"] = json!({"sources":[{"$ref":"unused.json"}]});
@@ -384,7 +385,7 @@ fn reference_sites_include_dormant_and_overridden_sources_but_exclude_extensions
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn definition_accessors_validate_standard_shapes_without_editor_default_policy() {
     let id = ResourceId::parse("definition.json").unwrap();
     assert!(

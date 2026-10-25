@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeLimits};
 use serde_json::{Map, Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn is_limit(result: &Result<impl std::fmt::Debug, DtcgError>, expected: &str) -> bool {
     matches!(result, Err(DtcgError::LimitExceeded { kind, .. }) if *kind == expected)
@@ -23,7 +24,7 @@ fn doubling_extends(levels: usize) -> Value {
     Value::Object(document)
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn doubling_extends_fan_out_hits_the_token_limit() {
     let document = doubling_extends(30);
     assert!(document.to_string().len() < 2_000);
@@ -34,7 +35,7 @@ fn doubling_extends_fan_out_hits_the_token_limit() {
     assert!(is_limit(&preview.preview_source(&document, &[]), "tokens"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn max_tokens_counts_every_flattened_token() {
     let document = json!({
         "a": {"$type": "number", "$value": 1},
@@ -56,7 +57,7 @@ fn max_tokens_counts_every_flattened_token() {
     assert_eq!(RuntimeLimits::default().max_tokens, 100_000);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_linear_chain_of_four_hundred_extends_groups_resolves() {
     let mut document = Map::new();
     document.insert("g0".into(), json!({"$type": "number", "t0": {"$value": 0}}));
@@ -79,7 +80,7 @@ fn a_linear_chain_of_four_hundred_extends_groups_resolves() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nested_extends_copies_are_bounded_in_depth() {
     // Every `g<i>.a` extends `g<i-1>`, so `g<n>` flattens n levels deep.
     let mut document = Map::new();
@@ -113,7 +114,7 @@ fn set_fan_out() -> Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn empty_set_fan_out_counts_against_the_document_limit() {
     let document = set_fan_out();
     assert!(document.to_string().len() < 1_500);
@@ -126,7 +127,7 @@ fn empty_set_fan_out_counts_against_the_document_limit() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn expansion_steps_below_the_document_limit_still_resolve() {
     let runtime = DtcgRuntime::from_json(
         "root.json",

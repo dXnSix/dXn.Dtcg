@@ -6,6 +6,7 @@ use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
 };
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{
     DtcgError, DtcgRuntime, EXPRESSION_EXTENSION, RuntimeOptions,
@@ -106,7 +107,7 @@ fn text(js: &str) -> Value {
     .unwrap()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn functions_take_and_return_serde_types() {
     assert_eq!(number("native.double(21)").unwrap(), json!(42));
     assert_eq!(text("native.greet('dtcg')"), json!("hello dtcg"));
@@ -128,19 +129,22 @@ fn functions_take_and_return_serde_types() {
     assert_eq!(number("native.palette.steps.length").unwrap(), json!(3));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn errors_and_panics_become_catchable_javascript_errors() {
-    for (js, kind, message) in [
-        (
-            "native.divide(1, 0)",
-            "Error",
-            "brand/native.divide: division by zero",
-        ),
-        (
+    let mut cases = vec![(
+        "native.divide(1, 0)",
+        "Error",
+        "brand/native.divide: division by zero",
+    )];
+    // Panics abort on wasm32 instead of unwinding.
+    if cfg!(not(target_family = "wasm")) {
+        cases.push((
             "native.explode(1)",
             "Error",
             "brand/native.explode: panicked: boom",
-        ),
+        ));
+    }
+    cases.extend([
         (
             "native.double('x')",
             "TypeError",
@@ -156,7 +160,8 @@ fn errors_and_panics_become_catchable_javascript_errors() {
             "TypeError",
             "brand/native.scale: argument 1",
         ),
-    ] {
+    ]);
+    for (js, kind, message) in cases {
         let caught = text(&format!(
             "(() => {{ try {{ {js}; return 'no error'; }} catch (e) {{ return e.constructor.name + '|' + e.message; }} }})()"
         ));
@@ -179,6 +184,8 @@ fn errors_and_panics_become_catchable_javascript_errors() {
     }
 }
 
+// Panics abort on wasm32 instead of unwinding.
+#[cfg(not(target_family = "wasm"))]
 #[test]
 fn a_panic_leaves_the_runtime_usable() {
     let runtime = DtcgRuntime::from_json_with_options(
@@ -192,7 +199,7 @@ fn a_panic_leaves_the_runtime_usable() {
     assert_eq!(number("native.double(2)").unwrap(), json!(4));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn exports_are_frozen() {
     assert!(
         text(
@@ -207,7 +214,7 @@ fn exports_are_frozen() {
     assert_eq!(text("typeof native.double.prototype"), json!("undefined"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_bridge_is_internal() {
     match number("1") {
         Ok(_) => {}
@@ -226,7 +233,7 @@ fn the_bridge_is_internal() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn native_registrations_need_free_bare_specifiers() {
     for specifier in ["dxn.dtcg", "dxn.dtcg/color", "dxn.dtcg/math", "", "./brand"] {
         let error = evaluate(
@@ -253,7 +260,7 @@ fn native_registrations_need_free_bare_specifiers() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn options_stay_comparable_and_printable() {
     let module = brand();
     let first = ExpressionOptions::default().with_native_module(module.clone());
@@ -275,7 +282,7 @@ fn options_stay_comparable_and_printable() {
     send_sync::<NativeModule>();
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn each_module_evaluates_once_per_resolution() {
     let evaluations = Arc::new(AtomicUsize::new(0));
     let counter = Arc::clone(&evaluations);
@@ -317,7 +324,7 @@ fn each_module_evaluates_once_per_resolution() {
     assert_eq!(second.get("token0").unwrap().value, json!(20));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_wraps_any_serializable_result() {
     assert_eq!(
         text("JSON.stringify(native.swapJson({ a: 1, b: 2 }))"),
@@ -325,6 +332,8 @@ fn json_wraps_any_serializable_result() {
     );
 }
 
+// The builder rejects a name by panicking, which aborts on wasm32.
+#[cfg(not(target_family = "wasm"))]
 #[test]
 fn export_names_must_be_javascript_identifiers() {
     for name in ["new", "default", "delete", "1st", "two words", "", "a-b"] {
@@ -342,6 +351,10 @@ fn export_names_must_be_javascript_identifiers() {
             "{name}"
         );
     }
+}
+
+#[wasm_bindgen_test(unsupported = test)]
+fn identifiers_that_are_not_reserved_words_are_export_names() {
     NativeModule::new("brand")
         .function("type", || 1.0)
         .function("$scale", || 1.0)

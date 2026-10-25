@@ -1,5 +1,6 @@
 use dxn_dtcg::{AffectedResolution, DtcgError, DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn number(value: i64) -> Value {
     json!({"$type": "number", "$value": value})
@@ -62,7 +63,7 @@ fn layered(base: &Value, overrides: &Value) -> DtcgRuntime {
     runtime
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn deleting_an_aliased_token_is_rejected_and_rolled_back() {
     let initial = json!({"a": number(1), "b": {"$type": "number", "$value": "{a}"}});
     let mut runtime = single(&initial);
@@ -95,7 +96,7 @@ fn deleting_an_aliased_token_is_rejected_and_rolled_back() {
     assert_eq!(resolve(&runtime), before);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_single_document_edit_patches_to_the_full_resolution() {
     let initial = json!({
         "a": number(1),
@@ -143,7 +144,7 @@ fn every_single_document_edit_patches_to_the_full_resolution() {
     assert_eq!(affected.order(), ["e", "a", "b", "d"]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn overrides_in_another_document_patch_to_the_full_resolution() {
     let base = json!({"size": {"$type": "number", "sm": {"$value": 4}, "lg": {"$value": 16}}, "alias": {"$type": "number", "$value": "{size.lg}"}});
     let mut runtime = layered(&base, &json!({}));
@@ -165,7 +166,7 @@ fn overrides_in_another_document_patch_to_the_full_resolution() {
     assert_eq!(resolve(&runtime).get("size.lg").unwrap().value, json!(16));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn naming_a_group_selects_every_token_under_it() {
     let initial = json!({"g": {"$type": "number", "t": {"$value": 400}, "inner": {"u": {"$value": 500}}}, "other": number(1)});
     let mut runtime = single(&initial);
@@ -202,7 +203,7 @@ fn naming_a_group_selects_every_token_under_it() {
     assert_eq!(resolve(&runtime).get("theme.x").unwrap().value, json!(2));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn readers_of_document_pointers_are_always_affected() {
     let document = |value: i64| {
         json!({
@@ -217,7 +218,7 @@ fn readers_of_document_pointers_are_always_affected() {
     assert_eq!(resolve(&runtime).get("reader").unwrap().value, json!(2));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn only_real_group_extends_members_force_a_full_re_resolution() {
     let document = |value: i64| {
         json!({

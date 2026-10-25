@@ -9,6 +9,7 @@ use dxn_dtcg::{
     expressions::{ExpressionModule, ExpressionOptions},
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn expression(js: &str, imports: Value, inputs: Value) -> Value {
     json!({ "$type": "number", "$value": 0, "$extensions": { EXPRESSION_EXTENSION: {
@@ -45,7 +46,7 @@ fn after_attempt(module: &str, imports: Value, attempt: &str, read: &str) -> Vec
     resolve(&document, ExpressionModule::javascript(module)).unwrap()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn exported_values_cannot_change() {
     let imports = json!({ "lib/shared": ["box", "list", "Point", "scale"] });
     let module = "export const box = { n: 0, inner: { n: 0 } };\n\
@@ -70,7 +71,7 @@ fn exported_values_cannot_change() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn values_a_module_keeps_to_itself_cannot_change() {
     let module = "const cache = { hits: 0 };\n\
         export default { n: 0 };\n\
@@ -92,7 +93,7 @@ fn values_a_module_keeps_to_itself_cannot_change() {
     assert_eq!(seen, [json!(0), json!(0)]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn changing_a_frozen_value_throws_a_type_error() {
     let document = json!({
         "a": expression("(box.n += 1, box.n)", json!({ "lib/shared": ["box"] }), json!({})),
@@ -109,7 +110,7 @@ fn changing_a_frozen_value_throws_a_type_error() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn affected_resolution_equals_a_full_resolution() {
     let module = ExpressionModule::javascript("export const box = { n: 0 };");
     let js = "(() => { try { box.n += 1; } catch (e) {} return box.n + source; })()";
@@ -137,7 +138,7 @@ fn affected_resolution_equals_a_full_resolution() {
     assert_eq!(full.get("b").unwrap().value, json!(2));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn modules_still_work_normally() {
     // Top-level code may build its values before they freeze, TypeScript
     // types leave no bindings behind, and names the freezing code would use
@@ -158,7 +159,7 @@ fn modules_still_work_normally() {
     assert_eq!(resolve(&document, module).unwrap(), [json!(23), json!(4)]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn document_modules_are_frozen_too() {
     let document = json!({
         "$extensions": { EXPRESSION_EXTENSION: { "modules": { "brand": "brand.js" } } },
@@ -183,7 +184,7 @@ fn document_modules_are_frozen_too() {
     assert_eq!(tokens.get("b").unwrap().value, json!(0));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn objects_others_inherit_from_still_let_inheritors_assign() {
     let module = ExpressionModule::javascript(
         "export class Counter {\n\
@@ -203,7 +204,7 @@ fn objects_others_inherit_from_still_let_inheritors_assign() {
     assert_eq!(resolve(&document, module).unwrap(), [json!(3), json!(5)]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_object_nothing_inherits_from_yet_stays_read_only_for_inheritors() {
     // Freezing cannot know that tokens will inherit from `defaults`: an
     // inherited property cannot be assigned, only defined.
@@ -218,7 +219,7 @@ fn an_object_nothing_inherits_from_yet_stays_read_only_for_inheritors() {
     assert_eq!(resolve(&document, module).unwrap(), [json!(1), json!(5)]);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_internal_module_cannot_be_imported() {
     let document = json!({
         "a": expression("1", json!({ "dxn.dtcg/freeze": ["check"] }), json!({})),
@@ -250,7 +251,7 @@ fn the_internal_module_cannot_be_imported() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn freezing_is_charged_to_the_module_that_is_frozen() {
     // About five steps per thousand objects a module's values reach.
     let table = |rows: u32| {
@@ -290,7 +291,7 @@ fn freezing_is_charged_to_the_module_that_is_frozen() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn collections_a_module_holds_are_shared_within_a_resolution() {
     // The owner's decision: modules may hold and export collections, and
     // writes into them (from module functions or from expressions) are

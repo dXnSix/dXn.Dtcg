@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::{ExpressionModule, ExpressionOptions},
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 const TINYCOLOR: &str = include_str!("fixtures/expressions/tinycolor.js");
 
@@ -63,7 +64,7 @@ fn math() -> ExpressionOptions {
         )
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn tokens_import_named_exports_and_namespaces() {
     assert_eq!(
         number(
@@ -91,7 +92,7 @@ fn tokens_import_named_exports_and_namespaces() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn modules_import_modules_with_standard_semantics() {
     let options = ExpressionOptions::default()
         .with_module("lib/base", ExpressionModule::javascript("export const one = 1;\nexport const two = 2;"))
@@ -152,7 +153,7 @@ fn modules_import_modules_with_standard_semantics() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn only_static_imports_exist() {
     let options = ExpressionOptions::default().with_module(
         "lib/dynamic",
@@ -167,7 +168,7 @@ fn only_static_imports_exist() {
     assert!(message.contains("dynamic `import()`"), "{message}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_unknown_specifier_or_export_names_the_token_and_the_specifier() {
     let (resource, path, text) = message(number(
         json!({ "imports": { "left-pad": ["pad"] }, "js": "pad" }),
@@ -204,7 +205,7 @@ fn an_unknown_specifier_or_export_names_the_token_and_the_specifier() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn host_registrations_need_bare_specifiers_outside_the_reserved_namespace() {
     for specifier in ["dxn.dtcg", "dxn.dtcg/color", "dxn.dtcg/anything"] {
         let options = ExpressionOptions::default().with_module(
@@ -223,7 +224,7 @@ fn host_registrations_need_bare_specifiers_outside_the_reserved_namespace() {
     assert!(text.contains("bare specifier"), "{text}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_syntax_and_evaluation_errors_name_the_module() {
     let options = ExpressionOptions::default()
         .with_module(
@@ -267,7 +268,7 @@ fn module_syntax_and_evaluation_errors_name_the_module() {
     assert!(text.contains("at line 2, column "), "{text}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_top_level_code_has_its_own_step_budget() {
     let options = ExpressionOptions::default().with_module(
         "lib/spin",
@@ -294,7 +295,7 @@ fn module_top_level_code_has_its_own_step_budget() {
     assert!(text.contains("top-level `await`"), "{text}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_color_library_works_unmodified_as_a_host_module() {
     let options = ExpressionOptions::default()
         .with_module("tinycolor", ExpressionModule::javascript(TINYCOLOR));
@@ -362,7 +363,7 @@ fn cycle(a_extra: &str, b_extra: &str) -> ExpressionOptions {
         )
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_import_cycle_evaluates_in_es_module_order() {
     // Entered at `lib/a`, the cycle evaluates `lib/b` first, as ES modules do.
     let order = |options: ExpressionOptions| {
@@ -380,7 +381,7 @@ fn an_import_cycle_evaluates_in_es_module_order() {
     assert!(text.contains("at line 4, column"), "{text}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn module_errors_name_the_module_that_threw() {
     let throwing = |a: &str, b: &str| {
         number(
@@ -420,7 +421,7 @@ fn module_errors_name_the_module_that_threw() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn modules_outside_a_cycle_have_their_own_step_budget() {
     let work = |iterations: u32| format!("for (let i = 0; i < {iterations}; i++) {{}}");
     // About two interrupt polls an iteration: a budget of 1 allows 20,000.

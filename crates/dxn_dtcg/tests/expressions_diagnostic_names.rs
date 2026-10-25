@@ -8,6 +8,7 @@ use dxn_dtcg::{
     expressions::ExpressionOptions,
 };
 use serde_json::json;
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn diagnostic(js: &str) -> String {
     let document = json!({
@@ -27,7 +28,7 @@ fn diagnostic(js: &str) -> String {
     DtcgDiagnostic::from_error(&error).message().to_owned()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_custom_error_name_is_reported_as_error() {
     let message =
         diagnostic("(() => { const e = new Error('x'); e.name = secret + 'Error'; throw e; })()");
@@ -39,7 +40,7 @@ fn a_custom_error_name_is_reported_as_error() {
     assert!(!message.contains("Hunter2"), "{message}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn standard_error_names_are_kept() {
     for (js, name) in [
         ("null.a", "TypeError"),

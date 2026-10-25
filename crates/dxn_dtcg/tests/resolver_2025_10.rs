@@ -1,6 +1,7 @@
 use dxn_dtcg::{DtcgRuntime, Resolution};
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolver_requires_the_final_version() {
     for resolver in [
         r#"{"sets":{},"resolutionOrder":[]}"#,
@@ -11,7 +12,7 @@ fn resolver_requires_the_final_version() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolver_validates_modifier_inputs_and_accepts_inline_sources() {
     let resolver = r##"{
       "version":"2025.10",
@@ -47,7 +48,7 @@ fn resolver_validates_modifier_inputs_and_accepts_inline_sources() {
     assert_eq!(resolved.get("color").unwrap().value, "black");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inline_sets_and_local_reference_overrides_respect_array_order() {
     let resolver = r##"{
       "version":"2025.10",
@@ -76,7 +77,7 @@ fn inline_sets_and_local_reference_overrides_respect_array_order() {
     assert_eq!(resolved.get("value").unwrap().value, 3);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_overriding_set_moves_the_token_to_its_last_definition_in_resolution_order() {
     let resolver = r##"{
       "version":"2025.10",
@@ -104,7 +105,7 @@ fn an_overriding_set_moves_the_token_to_its_last_definition_in_resolution_order(
     assert_eq!(resolved.len(), 2);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn modifier_contexts_may_reference_sets() {
     let resolver = r##"{
       "version":"2025.10",
@@ -122,7 +123,7 @@ fn modifier_contexts_may_reference_sets() {
     assert_eq!(resolved.get("value").unwrap().value, 7);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn duplicate_inline_names_and_forbidden_references_are_rejected() {
     let duplicate = r#"{
       "version":"2025.10",
@@ -143,7 +144,7 @@ fn duplicate_inline_names_and_forbidden_references_are_rejected() {
     assert!(runtime.resolve(&[]).is_err());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn external_reference_objects_apply_shallow_local_overrides() {
     let resolver = r##"{
       "version":"2025.10",

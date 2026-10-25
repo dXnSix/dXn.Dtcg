@@ -7,6 +7,7 @@ use dxn_dtcg::{
     RuntimeOptions, expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn evaluate(language: &str, source: &str) -> Result<Value, DtcgError> {
     let mut expression = serde_json::Map::new();
@@ -53,7 +54,7 @@ fn message(language: &str, source: &str) -> String {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn type_annotations_assertions_and_satisfies_are_removed() {
     assert_eq!(
         evaluate(
@@ -78,7 +79,7 @@ fn type_annotations_assertions_and_satisfies_are_removed() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn generics_interfaces_and_type_aliases_are_removed() {
     let source = "(() => {
   interface Dimension { value: number; unit: 'px' | 'rem' }
@@ -94,7 +95,7 @@ fn generics_interfaces_and_type_aliases_are_removed() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn types_are_not_checked() {
     assert_eq!(
         evaluate(
@@ -106,7 +107,7 @@ fn types_are_not_checked() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn syntax_errors_name_their_authored_line_and_column() {
     let javascript = message("js", "({ value: base.value *, unit: 'px' })");
     assert!(javascript.contains("SyntaxError"), "{javascript}");
@@ -124,7 +125,7 @@ fn syntax_errors_name_their_authored_line_and_column() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn uncaught_exceptions_name_their_authored_line_and_column() {
     let javascript = message("js", "({\n  value: base.value,\n  unit: missing.unit })");
     assert!(
@@ -155,7 +156,7 @@ fn uncaught_exceptions_name_their_authored_line_and_column() {
     assert!((10..=36).contains(&column), "{typescript}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn expression_errors_map_to_the_expression_diagnostic_code() {
     let error = evaluate("ts", "base.value as").unwrap_err();
     let diagnostic = DtcgDiagnostic::from_error(&error);
@@ -168,7 +169,7 @@ fn expression_errors_map_to_the_expression_diagnostic_code() {
     assert!(diagnostic.message().contains("SyntaxError"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn early_errors_name_their_authored_line_and_column() {
     for (language, source, line) in [
         (
@@ -201,7 +202,7 @@ fn early_errors_name_their_authored_line_and_column() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn diagnostics_keep_the_error_kind_and_position_but_no_message_text() {
     for (source, expected) in [
         (

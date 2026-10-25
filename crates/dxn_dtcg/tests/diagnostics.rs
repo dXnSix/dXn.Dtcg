@@ -1,14 +1,15 @@
 #[cfg(feature = "diagnostics")]
 use dxn_dtcg::{DtcgDiagnostic, DtcgDiagnosticCode, DtcgError, ResourceId};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 #[cfg(not(feature = "diagnostics"))]
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn diagnostics_are_opt_in() {
     assert!(!cfg!(feature = "diagnostics"));
 }
 
 #[cfg(feature = "diagnostics")]
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn diagnostics_expose_logical_context_without_document_bodies() {
     let error = DtcgError::Token {
         resource: ResourceId::parse("tokens/private.json").unwrap(),

@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn number(value: i64) -> Value {
     json!({"value": {"$type": "number", "$value": value}})
@@ -17,7 +18,7 @@ fn theme(root_default: Option<&str>) -> Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_ref_step_override_defines_the_modifier_for_every_api() {
     for root_default in [None, Some("light")] {
         let runtime = DtcgRuntime::from_json("root.json", theme(root_default).to_string()).unwrap();
@@ -88,7 +89,7 @@ fn assert_invalid_everywhere(document: Value, expected: &str) {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn duplicate_and_unnamed_modifiers_are_rejected_everywhere() {
     assert_invalid_everywhere(
         json!({
@@ -110,7 +111,7 @@ fn duplicate_and_unnamed_modifiers_are_rejected_everywhere() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_token_document_with_a_modifiers_group_has_no_axes() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -129,7 +130,7 @@ fn a_token_document_with_a_modifiers_group_has_no_axes() {
     assert!(runtime.resolve(&[]).unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn reference_sites_follow_overrides_of_referenced_resolvers() {
     let mut runtime = DtcgRuntime::from_json(
         "root.json",

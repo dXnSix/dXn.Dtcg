@@ -1,3 +1,4 @@
+use wasm_bindgen_test::wasm_bindgen_test;
 // `LocalReferencePolicy`, the opt-in rule that a resolver may only reference relative local
 // documents: single references, and every `$ref` of a resolver's sets and modifier contexts.
 use dxn_dtcg::{DtcgError, LocalReferencePolicy, ResourceId};
@@ -22,7 +23,7 @@ fn rejection(reference: &str) -> String {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn relative_and_fragment_references_are_local() {
     for reference in [
         "base.json",
@@ -34,7 +35,7 @@ fn relative_and_fragment_references_are_local() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn empty_absolute_backslash_and_scheme_references_are_rejected() {
     assert_eq!(rejection(""), "reference is empty");
     assert_eq!(
@@ -55,7 +56,7 @@ fn empty_absolute_backslash_and_scheme_references_are_rejected() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolver_checks_cover_set_sources_and_modifier_contexts() {
     let local = json!({
         "sets": {"base": {"sources": [{"$ref": "base.json"}, {"inline": {}}]}},

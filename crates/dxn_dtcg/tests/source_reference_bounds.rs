@@ -1,4 +1,8 @@
-use std::time::{Duration, Instant};
+mod support;
+
+use std::time::Duration;
+use support::Stopwatch;
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, RuntimeLimits, SourceReference};
 use serde_json::{Value, json};
@@ -61,7 +65,7 @@ fn site_keys(sites: &[SourceReference]) -> Vec<(String, String)> {
         .collect()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_authored_site_is_listed_once() {
     let runtime = runtime(RuntimeLimits::default(), 4, 3);
     let sites = sites(&runtime);
@@ -82,10 +86,10 @@ fn every_authored_site_is_listed_once() {
     assert_eq!(sorted, expected);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_large_fan_out_fails_with_the_documents_limit_quickly() {
     let runtime = runtime(RuntimeLimits::default(), 400, 400);
-    let started = Instant::now();
+    let started = Stopwatch::start();
     let error = runtime.source_references().unwrap_err();
     let elapsed = started.elapsed();
     assert!(
@@ -112,7 +116,7 @@ fn a_large_fan_out_fails_with_the_documents_limit_quickly() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_limit_setter_bounds_the_walk() {
     // The first reference object walks the nested resolver for free. Each of
     // the other three walks it again under its own `description` override,
@@ -130,7 +134,7 @@ fn the_limit_setter_bounds_the_walk() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn overrides_still_decide_which_sites_are_walked() {
     let mut runtime = DtcgRuntime::with_limits(RuntimeLimits::default());
     runtime
@@ -166,10 +170,10 @@ fn inline_resolver(n: usize) -> Value {
         "resolutionOrder": [{"$ref": "#/sets/base"}]})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inline_sources_are_walked_in_linear_time() {
     let runtime = DtcgRuntime::from_json("root.json", inline_resolver(20_000).to_string()).unwrap();
-    let started = Instant::now();
+    let started = Stopwatch::start();
     assert!(sites(&runtime).is_empty());
     let elapsed = started.elapsed();
     assert!(
@@ -178,7 +182,7 @@ fn inline_sources_are_walked_in_linear_time() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn repeated_references_without_overrides_are_walked_once() {
     // Plain references to the same nested resolver reach the same walk, so
     // they cost nothing however large the nested resolver is.
@@ -196,13 +200,13 @@ fn repeated_references_without_overrides_are_walked_once() {
         .provide_json("nested.json", inline_resolver(5_000).to_string())
         .unwrap();
     runtime.set_root("root.json").unwrap();
-    let started = Instant::now();
+    let started = Stopwatch::start();
     assert_eq!(sites(&runtime).len(), 300);
     let elapsed = started.elapsed();
     assert!(elapsed < Duration::from_secs(5), "took {elapsed:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn overridden_references_to_a_large_inline_resolver_reach_the_limit_quickly() {
     // The second, overridden copy walks the 2,000 inline sources again, and
     // repeated sources count like discovery's collected sources.
@@ -222,7 +226,7 @@ fn overridden_references_to_a_large_inline_resolver_reach_the_limit_quickly() {
         .provide_json("nested.json", inline_resolver(2_000).to_string())
         .unwrap();
     runtime.set_root("root.json").unwrap();
-    let started = Instant::now();
+    let started = Stopwatch::start();
     assert!(matches!(
         runtime.source_references(),
         Err(DtcgError::LimitExceeded {
@@ -234,7 +238,7 @@ fn overridden_references_to_a_large_inline_resolver_reach_the_limit_quickly() {
     assert!(elapsed < Duration::from_secs(5), "took {elapsed:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_large_dormant_set_is_listed_as_discovery_accepts_it() {
     let sources: Vec<Value> = (0..300)
         .map(|j| json!({"$ref": format!("#/$defs/t{j}")}))
@@ -248,7 +252,7 @@ fn a_large_dormant_set_is_listed_as_discovery_accepts_it() {
     assert_eq!(sites(&runtime).len(), 301);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn many_overridden_references_to_one_large_token_document_are_cheap() {
     let big: serde_json::Map<String, Value> = (0..20_000)
         .map(|j| (format!("n{j}"), json!({"$type": "number", "$value": j})))
@@ -273,7 +277,7 @@ fn many_overridden_references_to_one_large_token_document_are_cheap() {
         .provide_json("big.json", Value::Object(big).to_string())
         .unwrap();
     runtime.set_root("root.json").unwrap();
-    let started = Instant::now();
+    let started = Stopwatch::start();
     assert_eq!(sites(&runtime).len(), 2_000);
     let elapsed = started.elapsed();
     assert!(elapsed < Duration::from_secs(5), "took {elapsed:?}");

@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, RuntimeLimits};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 /// A root `brand` modifier with `m` contexts, each reaching `brand.json` with
 /// its own override: a different `description`, or its own `sets`.
@@ -60,7 +61,7 @@ fn brands_with(limits: RuntimeLimits, m: usize, override_sets: bool) -> DtcgRunt
     runtime
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_document_validate_complete_accepts_is_listed() {
     for override_sets in [false, true] {
         let mut accepted = 0;
@@ -98,7 +99,7 @@ fn limit_exceeded(runtime: &DtcgRuntime, limit: usize) -> bool {
     )
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn repeated_walks_count_steps_and_inline_sources_separately() {
     // Three brands: the first walks `brand.json` for free, and each of the
     // other two walks it again under its own `description`. A repeated walk

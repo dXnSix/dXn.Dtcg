@@ -1,6 +1,7 @@
 use dxn_dtcg::ResourceId;
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn canonicalizes_relative_references_and_keeps_fragments_out_of_catalog_keys() {
     let parent = ResourceId::parse("themes/base/root.json").unwrap();
     let reference = parent
@@ -22,7 +23,7 @@ fn canonicalizes_relative_references_and_keeps_fragments_out_of_catalog_keys() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn rejects_invalid_logical_resource_references() {
     let parent = ResourceId::parse("themes/base/root.json").unwrap();
     for invalid in [

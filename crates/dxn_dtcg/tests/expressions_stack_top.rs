@@ -7,6 +7,7 @@ use dxn_dtcg::{
     DtcgError, DtcgRuntime, EXPRESSION_EXTENSION, RuntimeOptions, expressions::ExpressionOptions,
 };
 use serde_json::{Map, Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn expression(js: &str, inputs: Value) -> Value {
     json!({ "$type": "number", "$value": 0, "$extensions": { EXPRESSION_EXTENSION: { "inputs": inputs, "js": js } } })
@@ -55,7 +56,7 @@ fn assert_stack_overflow(result: Result<Value, DtcgError>, case: &str) {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn ordinary_code_runs_however_deep_the_evaluation_starts() {
     for early in [false, true] {
         for hops in [0, 8, 32, 63] {
@@ -73,7 +74,7 @@ fn ordinary_code_runs_however_deep_the_evaluation_starts() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn caught_recursion_fails_however_deep_the_evaluation_starts() {
     for early in [false, true] {
         for hops in [0, 8, 32, 63] {
@@ -85,7 +86,7 @@ fn caught_recursion_fails_however_deep_the_evaluation_starts() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn evaluations_nested_in_input_resolution_get_the_whole_stack() {
     // Each token's input is the previous expression token, so every
     // evaluation starts while the next one resolves its inputs.
@@ -106,7 +107,7 @@ fn evaluations_nested_in_input_resolution_get_the_whole_stack() {
     assert_stack_overflow(resolve(&Value::Object(tokens), "e39"), "nested inputs");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn engine_recursion_through_nested_arrays_is_not_catchable() {
     for conversion in ["String(a)", "a.join()", "`${a}`"] {
         let js = format!(
@@ -121,7 +122,7 @@ fn engine_recursion_through_nested_arrays_is_not_catchable() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn no_catch_or_finally_form_handles_a_stack_overflow() {
     let recursion = "const f = () => f() + 1;";
     for body in [
@@ -143,7 +144,7 @@ fn no_catch_or_finally_form_handles_a_stack_overflow() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_module_cannot_handle_a_stack_overflow_either() {
     let module = dxn_dtcg::expressions::ExpressionModule::javascript(
         "const f = () => f() + 1;\nlet depth = 0;\ntry { f(); } catch (e) { depth = 1; }\nexport const caught = depth;",
@@ -174,7 +175,7 @@ fn a_module_cannot_handle_a_stack_overflow_either() {
     assert_stack_overflow(result, "module top level");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn errors_keep_their_authored_positions_around_try_statements() {
     let column = |js: &str| match through_aliases(js, 0, false) {
         Err(DtcgError::Expression { message, .. }) => message
@@ -198,7 +199,7 @@ fn errors_keep_their_authored_positions_around_try_statements() {
     assert!((16..=45).contains(&inside), "{inside}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn deeply_nested_patterns_fail_the_same_way_however_deep_the_evaluation_starts() {
     // A pattern built at run time nests no deeper than a literal may, so
     // the regular expression compiler never runs out of stack.
@@ -231,7 +232,7 @@ fn deeply_nested_patterns_fail_the_same_way_however_deep_the_evaluation_starts()
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn columns_count_characters_after_non_ascii_text() {
     let js = "(() => { const s = 'éééééé'; null.a; })()";
     let expected = js[..js.find("null").unwrap()].chars().count() + 1;

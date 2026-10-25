@@ -1,3 +1,4 @@
+use wasm_bindgen_test::wasm_bindgen_test;
 // Value shapes beyond plain DTCG 2025.10: typography `lineHeight` as a `dimension` (design tools
 // commonly export line heights as px tokens aliased by text styles) and the `dxn.dtcg.blur`
 // extension type. Both are opt-in: these cases validate with `ValueExtensions::all()`;
@@ -19,7 +20,7 @@ fn typography(line_height: serde_json::Value) -> serde_json::Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn line_height_accepts_number_and_dimension() {
     validate_value("typography", &typography(json!(1.5))).expect("multiplier");
     validate_value(
@@ -34,7 +35,7 @@ fn line_height_accepts_number_and_dimension() {
     .expect("rem dimension");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn line_height_rejects_other_shapes() {
     for line_height in [
         json!("auto"),
@@ -50,7 +51,7 @@ fn line_height_rejects_other_shapes() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn blur_extension_type_accepts_layer_and_background_blurs() {
     validate_value(
         BLUR_TYPE,

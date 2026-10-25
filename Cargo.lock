@@ -192,6 +192,7 @@ dependencies = [
  "sha2",
  "thiserror",
  "trybuild",
+ "wasm-bindgen",
  "wasm-bindgen-test",
 ]
 
@@ -204,6 +205,7 @@ dependencies = [
  "quote",
  "syn 2.0.119",
  "trybuild",
+ "wasm-bindgen-test",
 ]
 
 [[package]]

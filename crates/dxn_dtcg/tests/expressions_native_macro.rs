@@ -9,6 +9,7 @@ use dxn_dtcg::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 #[derive(Deserialize, Serialize)]
 pub struct Pair {
@@ -112,7 +113,7 @@ fn evaluate(token_type: &str, snapshot: Value, js: &str) -> Value {
         .clone()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn public_functions_become_camel_case_exports() {
     let module = Brand::expression_module();
     assert_eq!(module.specifier(), "brand/macro");
@@ -195,7 +196,7 @@ fn public_functions_become_camel_case_exports() {
     assert_eq!(Brand::private_helper(), 1.0);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn declarations_carry_docs_and_mapped_signatures() {
     let declarations = ExpressionOptions::default()
         .with_native_module(Brand::expression_module())
@@ -228,6 +229,8 @@ fn declarations_carry_docs_and_mapped_signatures() {
     assert!(!module.contains("privateHelper"));
 }
 
+// Compile-fail cases need a native compiler.
+#[cfg(not(target_family = "wasm"))]
 #[test]
 fn misuse_is_a_compile_error() {
     trybuild::TestCases::new().compile_fail("tests/expression_module_ui/*.rs");

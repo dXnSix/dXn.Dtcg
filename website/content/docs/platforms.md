@@ -14,7 +14,7 @@ With the default features, `dxn_dtcg` is pure, safe Rust. The crates have no bui
 | Linux x86_64 | Tested in CI: formatting, Clippy with `-D warnings`, tests, `cargo package`; the `--all-features` steps compile QuickJS with the system C compiler |
 | Windows x86_64 | Tested in CI: the same steps, with MSVC compiling QuickJS |
 | macOS arm64 | Tested in CI: the same steps, with Apple Clang compiling QuickJS |
-| WebAssembly (`wasm32-unknown-unknown`) | Default features: `cargo check --workspace --target wasm32-unknown-unknown` in CI. With `expressions`: built with an LLVM clang and tested under Node in CI ([below](#webassembly-and-expressions)). Needs no host I/O, threads or system calls |
+| WebAssembly (`wasm32-unknown-unknown`) | Tested in CI under Node: Clippy and the whole test suite, with and without `expressions` (which builds with an LLVM clang, [below](#webassembly-and-expressions)). Needs no host I/O, threads or system calls |
 | iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI. With `expressions`, the target also needs a C compiler that QuickJS builds with |
 
 - **Rust** 1.97 or newer, edition 2024. `no_std` is not supported. The repository pins the toolchain to 1.97.0 in `rust-toolchain.toml`.
@@ -64,7 +64,7 @@ QuickJS's WebAssembly shim imports a clock from the host as `env.__rquickjs_host
 - The default expression `stack_limit` (256 KiB) fits the default 1 MiB WebAssembly stack.
 - Panics abort on `wasm32-unknown-unknown`, so a panicking native function stops the module instead of becoming a JavaScript error as it does natively.
 
-CI covers both builds. The main job checks the default build for `wasm32-unknown-unknown`. A second job, `wasm-expressions` on `ubuntu-latest`, installs `clang` and `llvm`, installs `wasm-bindgen-cli` at the `wasm-bindgen` version locked in `Cargo.lock`, runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown`, and runs the `expressions_wasm` test group under Node with `wasm-bindgen-test-runner`. [Contributing](./contributing.md#the-webassembly-group) shows how to run that group locally.
+CI runs the whole test suite on `wasm32-unknown-unknown` under Node with `wasm-bindgen-test-runner`, with all features and with the default ones, and lints that target with Clippy. The `wasm32` job installs `clang` and `llvm` and `wasm-bindgen-cli` at the `wasm-bindgen` version locked in `Cargo.lock`. [Contributing](./contributing.md#tests-on-webassembly) shows how to run the suite locally.
 
 ## Installing a release
 

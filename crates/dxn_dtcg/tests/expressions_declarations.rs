@@ -4,6 +4,7 @@
 #![cfg(feature = "expressions")]
 
 use std::collections::{BTreeMap, BTreeSet};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{
     DtcgRuntime, EXPRESSION_EXTENSION, RuntimeOptions,
@@ -115,7 +116,7 @@ fn exported(specifier: &str) -> BTreeSet<String> {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_declarations_parse_as_typescript() {
     let declarations = options().typescript_declarations();
     let modules = declared(&declarations);
@@ -148,7 +149,7 @@ fn the_declarations_parse_as_typescript() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_declared_export_exists_at_run_time() {
     let declarations = declared(&options().typescript_declarations());
     for (specifier, exports) in &declarations {
@@ -156,7 +157,7 @@ fn every_declared_export_exists_at_run_time() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn docs_and_signatures_come_from_the_registrations() {
     let declarations = options().typescript_declarations();
     for expected in [

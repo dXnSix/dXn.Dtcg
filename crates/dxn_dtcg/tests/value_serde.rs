@@ -7,6 +7,7 @@ use dxn_dtcg::values::{
 };
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn color() -> Value {
     json!({ "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] })
@@ -29,7 +30,7 @@ fn rejects<T: DeserializeOwned>(value: Value) {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_model_round_trips_its_dtcg_json() {
     round_trip::<Color>(color());
     round_trip::<Color>(
@@ -78,7 +79,7 @@ fn every_model_round_trips_its_dtcg_json() {
     }));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn invalid_json_is_rejected_as_its_dtcg_type() {
     rejects::<Color>(json!({ "colorSpace": "srgb", "components": [2, 0, 0] }));
     rejects::<Dimension>(json!({ "value": 4, "unit": "em" }));
@@ -94,7 +95,7 @@ fn invalid_json_is_rejected_as_its_dtcg_type() {
     rejects::<Typography>(json!({ "fontFamily": "Inter" }));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn font_weight_keywords_deserialize_to_their_number() {
     let weight: FontWeight = serde_json::from_value(json!("bold")).unwrap();
     assert_eq!(serde_json::to_value(weight).unwrap(), json!(700));

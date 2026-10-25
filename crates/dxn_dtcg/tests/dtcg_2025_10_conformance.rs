@@ -1,7 +1,8 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, validate_value};
 use serde_json::json;
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn groups_root_extensions_and_effective_types_follow_dtcg_2025_10() {
     let tokens = r#"{
       "base": {
@@ -36,7 +37,7 @@ fn groups_root_extensions_and_effective_types_follow_dtcg_2025_10() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn external_fragment_sources_preserve_canonical_provenance() {
     let root = r##"{
       "version":"2025.10",
@@ -59,7 +60,7 @@ fn external_fragment_sources_preserve_canonical_provenance() {
     assert_eq!(token.source.as_str(), "library.json");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn validates_all_final_types_after_resolution() {
     let color = json!({"colorSpace":"srgb","components":[0.1,0.2,0.3],"alpha":0.5,"hex":"#1A334D"});
     let dimension = json!({"value":-2.5,"unit":"px"});
@@ -128,7 +129,7 @@ fn validates_all_final_types_after_resolution() {
     assert!(validate_value("fontFamily", &json!([])).is_err());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn aliases_to_explicit_root_paths_inherit_the_target_type() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -164,7 +165,7 @@ fn aliases_to_explicit_root_paths_inherit_the_target_type() {
     assert!(invalid.resolve(&[]).is_err());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn rejects_invalid_names_and_fingerprints_include_the_resolved_type() {
     for invalid_name in ["bad.name", "bad{name", "bad}name", "$bad"] {
         let document = format!(r#"{{"{invalid_name}":{{"$type":"number","$value":1}}}}"#);
@@ -197,7 +198,7 @@ fn rejects_invalid_names_and_fingerprints_include_the_resolved_type() {
     assert_ne!(number.fingerprint(), weight.fingerprint());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolves_same_document_json_pointer_values_and_properties() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -246,7 +247,7 @@ fn resolves_same_document_json_pointer_values_and_properties() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn token_level_json_pointer_aliases_resolve_with_exact_failures_and_cycles() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -309,7 +310,7 @@ fn token_level_json_pointer_aliases_resolve_with_exact_failures_and_cycles() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn json_pointers_reach_arbitrary_locations_and_unescape_segments() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -354,7 +355,7 @@ fn json_pointers_reach_arbitrary_locations_and_unescape_segments() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn group_extends_accepts_json_pointers_and_reports_exact_errors() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",
@@ -414,7 +415,7 @@ fn group_extends_accepts_json_pointers_and_reports_exact_errors() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolved_iteration_preserves_final_authored_order_and_raw_aliases() {
     let resolver = r##"{
       "version":"2025.10",

@@ -1,4 +1,7 @@
 use std::{collections::BTreeMap, path::Path};
+use wasm_bindgen_test::wasm_bindgen_test;
+
+mod support;
 
 use dxn_dtcg::{DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
@@ -82,7 +85,7 @@ fn grouped_order(tokens: &ResolvedTokens) -> Vec<String> {
     paths
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_document_nests_tokens_with_explicit_types_and_their_metadata() {
     let tokens = layered(&[
         json!({
@@ -270,14 +273,14 @@ fn scenarios() -> Vec<(&'static str, ResolvedTokens)> {
     ]
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn merged_and_metadata_scenarios_round_trip() {
     for (label, tokens) in scenarios() {
         assert_round_trip(&tokens, label);
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_interleaved_resolution_order_comes_back_grouped() {
     let (_, tokens) = scenarios()
         .into_iter()
@@ -297,13 +300,12 @@ fn an_interleaved_resolution_order_comes_back_grouped() {
     assert_eq!(again_order, grouped_order(&tokens));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_positive_corpus_fixture_round_trips() {
     let root =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/dtcg-test-suite/2025.10/format");
     let manifest: Value =
-        serde_json::from_str(&std::fs::read_to_string(root.join("manifest.json")).unwrap())
-            .unwrap();
+        serde_json::from_str(&support::read_to_string(&root.join("manifest.json"))).unwrap();
     let mut count = 0;
     for test in manifest["tests"].as_array().unwrap() {
         if test["type"] != "PositiveEvaluationTest" {
@@ -311,7 +313,7 @@ fn every_positive_corpus_fixture_round_trips() {
         }
         let input = test["input"].as_str().unwrap();
         let document: Value =
-            serde_json::from_str(&std::fs::read_to_string(root.join(input)).unwrap()).unwrap();
+            serde_json::from_str(&support::read_to_string(&root.join(input))).unwrap();
         assert_round_trip(&single(&document), input);
         count += 1;
     }

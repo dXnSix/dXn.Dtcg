@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use wasm_bindgen_test::wasm_bindgen_test;
 
 use dxn_dtcg::{DtcgComponentTokens, DtcgRuntime, DtcgTokens};
 
@@ -18,7 +19,7 @@ struct ButtonView {
     fill: String,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn projects_renamed_root_fields_and_tolerates_unprojected_tokens() {
     let runtime = DtcgRuntime::from_json(
         "tokens.json",

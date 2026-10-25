@@ -7,6 +7,9 @@ use dxn_dtcg::{
     expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
+
+mod support;
 
 fn options_with(expressions: ExpressionOptions) -> RuntimeOptions {
     RuntimeOptions::default().with_expressions(expressions)
@@ -61,7 +64,7 @@ fn uncaught(js: &str) -> String {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn there_is_no_clock_and_no_randomness() {
     assert!(uncaught("Date.now()").contains("ReferenceError: Date is not defined"));
     assert_eq!(
@@ -72,7 +75,7 @@ fn there_is_no_clock_and_no_randomness() {
     assert!(caught("Math.random()").contains("Math.random is not available"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn there_is_no_code_from_strings() {
     assert!(uncaught("eval('1')").contains("eval is not defined"));
     for constructor in [
@@ -91,7 +94,7 @@ fn there_is_no_code_from_strings() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn promises_proxies_weak_references_timers_and_dynamic_imports_are_unavailable() {
     assert_eq!(
         text(
@@ -106,7 +109,7 @@ fn promises_proxies_weak_references_timers_and_dynamic_imports_are_unavailable()
     assert!(uncaught("(async () => 'x')()").contains("not a JSON value"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn globals_and_built_in_prototypes_are_frozen() {
     for write in [
         "globalThis.leak = 1",
@@ -132,20 +135,20 @@ fn globals_and_built_in_prototypes_are_frozen() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn inputs_are_frozen() {
     assert!(caught("base.value = 9").starts_with("TypeError"));
     assert!(uncaught("(base.unit = 'rem', 'x')").contains("TypeError"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_failure_is_an_expression_error_or_a_caught_value() {
     assert_eq!(caught("Date.now()"), "ReferenceError: Date is not defined");
     assert!(uncaught("null.x").starts_with("TypeError"));
     assert!(uncaught("(() => { throw 'plain'; })()").contains("uncaught exception: plain"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_infinite_loop_exceeds_the_step_budget_uncatchably() {
     for js in [
         "(() => { for (;;) {} })()",
@@ -165,7 +168,7 @@ fn an_infinite_loop_exceeds_the_step_budget_uncatchably() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_step_budget_is_configurable() {
     let work =
         "(() => { let n = 0; for (let i = 0; i < 2000000; i++) n += i; return String(n > 0); })()";
@@ -182,7 +185,7 @@ fn the_step_budget_is_configurable() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn exhausting_memory_exceeds_the_memory_limit_uncatchably() {
     for js in [
         "(() => { const all = []; for (;;) all.push(new Array(100000).fill(1)); })()",
@@ -214,7 +217,7 @@ fn exhausting_memory_exceeds_the_memory_limit_uncatchably() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn runaway_recursion_is_a_stack_overflow_uncatchably() {
     for js in [
         "(() => { const f = (n) => f(n + 1) + 1; return f(0); })()",
@@ -231,8 +234,11 @@ fn runaway_recursion_is_a_stack_overflow_uncatchably() {
         text(deep, ExpressionOptions::default()).unwrap(),
         json!("40")
     );
+    // A recursion that overflows a 16 KiB limit with any frame size.
+    let deeper =
+        "(() => { const f = (n) => n === 0 ? 0 : f(n - 1) + 1; return String(f(10000)); })()";
     let message = match text(
-        deep,
+        deeper,
         ExpressionOptions::default().with_stack_limit(16 * 1024),
     ) {
         Err(DtcgError::Expression { message, .. }) => message,
@@ -241,7 +247,7 @@ fn runaway_recursion_is_a_stack_overflow_uncatchably() {
     assert!(message.contains("stack overflow"), "{message}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_runtime_resolves_again_after_every_limit() {
     let base = json!({ "$type": "dimension", "$value": { "value": 4, "unit": "px" } });
     for js in [
@@ -296,7 +302,7 @@ fn many(order: &[usize]) -> Value {
     Value::Object(document)
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn expressions_cannot_share_state() {
     // `globalThis.counter = …` throws: every expression sees a pristine
     // global object, whatever ran before it.
@@ -319,7 +325,7 @@ fn expressions_cannot_share_state() {
     assert_eq!(tokens.get("second").unwrap().value, json!(2));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn resolution_repeats_and_is_independent_of_evaluation_order() {
     let probes = |order: &[usize]| {
         let mut document = many(order);
@@ -365,7 +371,7 @@ fn resolution_repeats_and_is_independent_of_evaluation_order() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_resolution_without_expression_tokens_never_starts_the_engine() {
     let tiny = options_with(ExpressionOptions::default().with_memory_limit(1));
     let plain = json!({
@@ -401,7 +407,7 @@ fn number(
         .map(|tokens| tokens.get("computed").unwrap().value.clone())
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn deeply_nested_source_text_fails_without_overflowing_the_stack() {
     let deep = 100_000;
     let cases = [
@@ -479,7 +485,7 @@ fn deeply_nested_source_text_fails_without_overflowing_the_stack() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn ordinary_nesting_evaluates() {
     let parens = format!("{}1{}", "(".repeat(100), ")".repeat(100));
     assert_eq!(
@@ -500,7 +506,7 @@ fn ordinary_nesting_evaluates() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn tamed_members_promises_iterators_and_stack_hooks_are_frozen() {
     for write in [
         "({}).toString.leak = 1",
@@ -553,7 +559,7 @@ fn tamed_members_promises_iterators_and_stack_hooks_are_frozen() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_write_through_shared_built_ins_never_reaches_another_expression() {
     let document = json!({
         "base": { "$type": "dimension", "$value": { "value": 4, "unit": "px" } },
@@ -571,7 +577,7 @@ fn a_write_through_shared_built_ins_never_reaches_another_expression() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_step_budget_does_not_depend_on_what_ran_before() {
     let options = || options_with(ExpressionOptions::default().with_step_budget(1));
     let looping = |iterations: u32| {
@@ -649,7 +655,7 @@ fn the_step_budget_does_not_depend_on_what_ran_before() {
     assert_eq!(tokens.get("token11").unwrap().value, json!(6_400));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_step_budget_below_one_counts_as_one() {
     let document = |order: &[&str]| {
         let mut document = serde_json::Map::new();
@@ -676,7 +682,7 @@ fn a_step_budget_below_one_counts_as_one() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_stack_limit_below_the_minimum_counts_as_the_minimum() {
     assert_eq!(
         number(
@@ -701,7 +707,7 @@ fn a_stack_limit_below_the_minimum_counts_as_the_minimum() {
 /// The deepest input of each construct that passes the nesting check
 /// compiles without overflowing a 1 MiB stack, the default stack of
 /// `wasm32-unknown-unknown`, even unoptimized.
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_deepest_accepted_sources_compile_on_a_one_mebibyte_stack() {
     type Construct = fn(usize) -> String;
     let constructs: Vec<(&str, Construct)> = vec![
@@ -752,31 +758,27 @@ fn the_deepest_accepted_sources_compile_on_a_one_mebibyte_stack() {
             )
         }),
     ];
-    let worker = std::thread::Builder::new()
-        .stack_size(1024 * 1024)
-        .spawn(move || {
-            for (language, construct) in constructs {
-                let rejected = |n: usize| {
-                    matches!(
-                        number(language, &construct(n), ExpressionOptions::default()),
-                        Err(DtcgError::Expression { ref message, .. }) if message.contains("nests too deeply")
-                    )
-                };
-                let (mut accepted, mut refused) = (1, 4_096);
-                assert!(rejected(refused), "{}", construct(4));
-                while refused - accepted > 1 {
-                    let middle = (accepted + refused) / 2;
-                    if rejected(middle) {
-                        refused = middle;
-                    } else {
-                        accepted = middle;
-                    }
+    support::on_1_mib_stack(move || {
+        for (language, construct) in constructs {
+            let rejected = |n: usize| {
+                matches!(
+                    number(language, &construct(n), ExpressionOptions::default()),
+                    Err(DtcgError::Expression { ref message, .. }) if message.contains("nests too deeply")
+                )
+            };
+            let (mut accepted, mut refused) = (1, 4_096);
+            assert!(rejected(refused), "{}", construct(4));
+            while refused - accepted > 1 {
+                let middle = (accepted + refused) / 2;
+                if rejected(middle) {
+                    refused = middle;
+                } else {
+                    accepted = middle;
                 }
-                // Compiling (and evaluating) the deepest accepted source
-                // returns, whatever its result.
-                let _ = number(language, &construct(accepted), ExpressionOptions::default());
             }
-        })
-        .unwrap();
-    worker.join().unwrap();
+            // Compiling (and evaluating) the deepest accepted source
+            // returns, whatever its result.
+            let _ = number(language, &construct(accepted), ExpressionOptions::default());
+        }
+    });
 }

@@ -352,7 +352,6 @@ behavior change gets a new group.
 | `dxn_dtcg/tests/expressions_diagnostic_names.rs` | Redacted diagnostics keep only standard error names |
 | `dxn_dtcg/tests/expressions_native_finite.rs` | NaN and Infinity in native calls are `TypeError`s |
 | `dxn_dtcg/tests/color_gamut_contrast.rs` | HSL/HWB clipping into sRGB, contrast on sRGB, near-gray round trips |
-| `dxn_dtcg/tests/expressions_wasm.rs` | Expressions on `wasm32-unknown-unknown` under Node (see below) |
 
 ### The official corpus
 
@@ -378,38 +377,43 @@ The `#[expression_module]` cases live in `crates/dxn_dtcg/tests/expression_modul
 TRYBUILD=overwrite cargo test -p dxn_dtcg --features expressions --test expressions_native_macro
 ```
 
-### The WebAssembly group
+### Tests on WebAssembly
 
-`expressions_wasm.rs` runs under `wasm-bindgen-test-runner` with Node. It needs an LLVM clang
-with the WebAssembly target and `llvm-ar` (Apple's clang has none; Homebrew's `llvm` works), and
-the runner at the version of `wasm-bindgen` in `Cargo.lock`:
+Every test group also runs on `wasm32-unknown-unknown` under Node: tests are marked
+`#[wasm_bindgen_test(unsupported = test)]`, a plain `#[test]` natively, and `tests/support/mod.rs`
+gives them what Node offers instead of `std` (files through Node's `fs`, the 1 MiB wasm stack for
+the stack tests, `Date.now()` for timing). Only what cannot run there is native-only: the
+`trybuild` compile-fail cases and the tests that catch a panic, because panics abort on wasm32.
+Doctests run natively (cross-target doctests need a nightly toolchain).
+
+Running them needs Node, an LLVM clang with the WebAssembly target and `llvm-ar` (Apple's clang has
+none; Homebrew's `llvm` works), and the runner at the version of `wasm-bindgen` in `Cargo.lock`:
 
 ```bash
 cargo install wasm-bindgen-cli --version 0.2.129 --locked
 CC_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/clang \
 AR_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/llvm-ar \
 CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner \
-cargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --test expressions_wasm
+cargo test --workspace --tests --all-features --target wasm32-unknown-unknown
 ```
+
+Drop `--all-features` for the default build; add `--test <group>` for one group.
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pull requests and on pushes to `main`, on `ubuntu-latest`,
-`windows-latest` and `macos-latest`, with the pinned toolchain:
+`.github/workflows/ci.yml` runs on pull requests and on pushes to `main` with the pinned
+toolchain. Every platform runs the whole suite, with all features and with the default ones:
 
-1. `cargo fmt --check`
-2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
-3. `cargo test --workspace --all-features` (including the official corpus and the documentation
-   doctests)
-4. `cargo check --workspace --target wasm32-unknown-unknown` (default features: no C compiler)
-5. `cargo package --workspace`
-
-The `--all-features` steps compile QuickJS with GCC on Ubuntu, MSVC on Windows and Apple Clang on
-macOS. A second job,
-`wasm-expressions` on `ubuntu-latest`, installs `clang` and `llvm`, installs `wasm-bindgen-cli` at
-the locked `wasm-bindgen` version, and runs
-`cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the
-`expressions_wasm` group.
+- **`native`**, on `ubuntu-latest`, `windows-latest` and `macos-latest` (each reports on its own):
+  `cargo fmt --check`; Clippy with `-D warnings` with all features and with the default ones;
+  `cargo test --workspace` with all features and with the default ones (including the official
+  corpus and the documentation doctests); `cargo check --workspace --target wasm32-unknown-unknown`;
+  and `cargo package --workspace`. QuickJS compiles with GCC on Ubuntu, MSVC on Windows and Apple
+  Clang on macOS.
+- **`wasm32`**, on `ubuntu-latest`: installs `clang` and `llvm` and `wasm-bindgen-cli` at the locked
+  `wasm-bindgen` version, then runs Clippy with `-D warnings` for `wasm32-unknown-unknown` and
+  `cargo test --workspace --tests --target wasm32-unknown-unknown` under Node, each with all
+  features and with the default ones.
 
 ## Releases
 

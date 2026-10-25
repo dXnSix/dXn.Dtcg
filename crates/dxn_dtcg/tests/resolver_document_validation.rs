@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn two_contexts() -> Value {
     json!({"light": [], "dark": []})
@@ -43,7 +44,7 @@ fn invalid_message(document: &Value) -> String {
     messages[0].clone()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_allowed_member_is_accepted() {
     let runtime = DtcgRuntime::from_json("root.json", resolver().to_string()).unwrap();
     assert!(runtime.resolve(&[]).unwrap().is_ready());
@@ -51,7 +52,7 @@ fn every_allowed_member_is_accepted() {
     assert_eq!(runtime.modifiers().unwrap().ready().unwrap().len(), 2);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn unknown_members_are_rejected_at_every_location() {
     let cases = [
         ("/extra", "the resolver root"),
@@ -79,7 +80,7 @@ fn unknown_members_are_rejected_at_every_location() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn reference_objects_keep_their_override_members() {
     let mut document = resolver();
     document["resolutionOrder"][1] =
@@ -88,7 +89,7 @@ fn reference_objects_keep_their_override_members() {
     assert!(runtime.resolve(&[]).unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_empty_resolution_order_and_single_context_modifiers_are_rejected() {
     let mut empty = resolver();
     empty["resolutionOrder"] = json!([]);
@@ -113,7 +114,7 @@ fn an_empty_resolution_order_and_single_context_modifiers_are_rejected() {
     assert!(runtime.resolve(&[("theme", "dark")]).unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nested_resolvers_follow_the_same_rules() {
     let mut nested = resolver();
     nested["sets"]["base"]["extra"] = json!(1);
@@ -136,7 +137,7 @@ fn nested_resolvers_follow_the_same_rules() {
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn source_references_apply_the_same_structure_rules() {
     let mut document = resolver();
     document["$extensions"] = json!({"example": {"$ref": "do-not-load.json"}});

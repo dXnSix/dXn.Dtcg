@@ -10,6 +10,7 @@ use dxn_dtcg::{
     DtcgError, DtcgRuntime, EXPRESSION_EXTENSION, RuntimeOptions, expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn evaluate(js: &str) -> Result<Value, DtcgError> {
     let document = json!({
@@ -43,7 +44,7 @@ fn assert_stack_overflow(js: &str) {
 
 const RECURSION: &str = "const f = () => f() + 1;";
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_async_function_cannot_swallow_a_stack_overflow() {
     for body in [
         "(async () => f())(); return 7;",
@@ -57,7 +58,7 @@ fn an_async_function_cannot_swallow_a_stack_overflow() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_wrapped_stack_overflow_is_still_one() {
     for body in [
         "const stack = new DisposableStack(); stack.defer(() => { throw new Error('later'); }); stack.defer(() => f()); try { stack.dispose(); } catch (e) { return 7; }",
@@ -68,7 +69,7 @@ fn a_wrapped_stack_overflow_is_still_one() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn async_code_still_runs_up_to_its_first_await() {
     assert_eq!(
         evaluate("(() => { let x = 0; (async () => { x = 1; })(); return x; })()").unwrap(),
@@ -76,7 +77,7 @@ fn async_code_still_runs_up_to_its_first_await() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn asynchronous_built_ins_are_removed() {
     assert_eq!(
         evaluate("typeof Array.fromAsync === 'undefined' && typeof AsyncDisposableStack === 'undefined' ? 1 : 0").unwrap(),
@@ -84,7 +85,7 @@ fn asynchronous_built_ins_are_removed() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn parameter_defaults_and_closed_iterators_cannot_swallow_one_either() {
     for body in [
         "(async (x = f()) => {})(); return 7;",
@@ -97,14 +98,14 @@ fn parameter_defaults_and_closed_iterators_cannot_swallow_one_either() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn an_uncaught_wrapped_stack_overflow_is_reported_as_one() {
     assert_stack_overflow(&format!(
         "(() => {{ {RECURSION} const stack = new DisposableStack(); stack.defer(() => {{ throw new Error('later'); }}); stack.defer(() => f()); stack.dispose(); return 7; }})()"
     ));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn async_functions_keep_their_meaning() {
     for js in [
         "(() => { (async function () { var g = 1; function g() {} })(); return 1; })()",
@@ -115,7 +116,7 @@ fn async_functions_keep_their_meaning() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn patterns_built_at_run_time_nest_no_deeper_than_literals() {
     let deep = "'(?:'.repeat(30) + 'a' + ')'.repeat(30)";
     for compile in [
@@ -160,7 +161,7 @@ fn at_depth(depth: u32, body: &str) -> String {
     )
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn engine_overflows_cannot_be_swallowed_at_any_depth() {
     let closing = "const it = { [Symbol.iterator]() { return { next: () => ({ value: [1, 1], done: false }), return() { String(a); return {}; } }; } };";
     for body in [
@@ -179,7 +180,7 @@ fn engine_overflows_cannot_be_swallowed_at_any_depth() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn iterator_return_methods_keep_their_meaning() {
     // The checked body keeps the method's `this`, `arguments`, hoisting and
     // return value.
@@ -203,7 +204,7 @@ fn iterator_return_methods_keep_their_meaning() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn literal_classes_nest_only_with_the_v_flag() {
     // Long enough that the nesting bound reads every token.
     let padding = format!(" + [{}].length * 0", "0, ".repeat(400));
@@ -224,7 +225,7 @@ fn literal_classes_nest_only_with_the_v_flag() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_stack_overflow_wrapped_however_deeply_is_still_one() {
     // Each throwing callback of a `DisposableStack` wraps the error so far
     // in one more `SuppressedError`; the overflow converts a deeply nested

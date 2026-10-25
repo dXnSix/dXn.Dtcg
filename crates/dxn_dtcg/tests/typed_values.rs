@@ -1,4 +1,7 @@
 use std::path::Path;
+use wasm_bindgen_test::wasm_bindgen_test;
+
+mod support;
 
 use dxn_dtcg::{
     DtcgError, DtcgRuntime, FromDtcgValue, ResolvedTokens, RuntimeOptions, TypeRegistry,
@@ -36,26 +39,24 @@ fn px(value: f64) -> Value {
     json!({"value": value, "unit": "px"})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn every_type_of_every_positive_corpus_fixture_converts() {
     let root =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/dtcg-test-suite/2025.10/format");
     let manifest: Value =
-        serde_json::from_str(&std::fs::read_to_string(root.join("manifest.json")).unwrap())
-            .unwrap();
+        serde_json::from_str(&support::read_to_string(&root.join("manifest.json"))).unwrap();
     let mut types = std::collections::BTreeSet::new();
     for test in manifest["tests"].as_array().unwrap() {
         if test["type"] != "PositiveEvaluationTest" {
             continue;
         }
         let input = root.join(test["input"].as_str().unwrap());
-        let tokens =
-            DtcgRuntime::from_json("fixture.json", std::fs::read_to_string(&input).unwrap())
-                .unwrap()
-                .resolve(&[])
-                .unwrap()
-                .ready()
-                .unwrap();
+        let tokens = DtcgRuntime::from_json("fixture.json", support::read_to_string(&input))
+            .unwrap()
+            .resolve(&[])
+            .unwrap()
+            .ready()
+            .unwrap();
         for token in tokens.iter() {
             let token_type = token.token_type.as_deref().unwrap();
             let value = token
@@ -88,7 +89,7 @@ fn every_type_of_every_positive_corpus_fixture_converts() {
     assert_eq!(types.len(), 13, "{types:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn colors_default_their_alpha_and_keep_none_components_and_hex() {
     let tokens = resolve(json!({
         "a": {"$type": "color", "$value": srgb([1.0, 0.5, 0.0])},
@@ -117,7 +118,7 @@ fn colors_default_their_alpha_and_keep_none_components_and_hex() {
     assert_eq!(b.hex.as_deref(), Some("#AbCdEf"));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn gradient_positions_are_clamped_and_values_keep_the_authored_numbers() {
     let tokens = resolve(json!({"g": {"$type": "gradient", "$value": [
         {"color": srgb([0.0, 0.0, 0.0]), "position": -99},
@@ -134,7 +135,7 @@ fn gradient_positions_are_clamped_and_values_keep_the_authored_numbers() {
     assert_eq!(tokens.get("g").unwrap().value[2]["position"], json!(42));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn font_weight_keywords_map_to_numbers() {
     for (keyword, weight) in [
         ("thin", 100.0),
@@ -170,7 +171,7 @@ fn font_weight_keywords_map_to_numbers() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn shadows_become_layers_with_inset_defaulting_to_false() {
     let layer = json!({"color": srgb([0.0, 0.0, 0.0]), "offsetX": px(0.0), "offsetY": px(1.0), "blur": px(2.0), "spread": px(0.0)});
     let mut inset = layer.clone();
@@ -200,7 +201,7 @@ fn shadows_become_layers_with_inset_defaulting_to_false() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn composite_and_unit_types_convert() {
     let tokens = resolve(json!({
         "d": {"$type": "dimension", "$value": {"value": 1.5, "unit": "rem"}},
@@ -277,7 +278,7 @@ fn composite_and_unit_types_convert() {
     assert_eq!(line_height, LineHeight::Multiplier(1.5));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_extension_types_need_their_flags() {
     let document = json!({
         "blur": {"$type": "dxn.dtcg.blur", "$value": {"kind": "background", "radius": px(8.0)}},
@@ -322,7 +323,7 @@ fn the_extension_types_need_their_flags() {
     assert!(heading.typed(&ValueExtensions::default()).is_err());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn model_types_project_through_from_dtcg_value() {
     let tokens = resolve(json!({
         "red": {"$type": "color", "$value": srgb([1.0, 0.0, 0.0])},

@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::{ExpressionOptions, NativeModule},
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn caught(js: &str) -> Value {
     let document = json!({ "computed": { "$type": "fontFamily", "$value": "x", "$extensions": { EXPRESSION_EXTENSION: {
@@ -35,7 +36,7 @@ fn caught(js: &str) -> Value {
     .clone()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn non_finite_numbers_are_type_errors() {
     let accent = "{ colorSpace: 'srgb', components: [0.2, 0.4, 0.9] }";
     for (js, message) in [

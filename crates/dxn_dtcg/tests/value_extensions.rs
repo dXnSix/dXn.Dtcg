@@ -3,6 +3,7 @@ use dxn_dtcg::{
     ValueExtensions, ValueValidationError, validate_value, validate_value_with,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn typography(line_height: Value) -> Value {
     json!({
@@ -36,7 +37,7 @@ fn resolve(runtime: &DtcgRuntime) -> Result<ResolvedTokens, DtcgError> {
         .map(|resolution| resolution.ready().expect("in-memory document"))
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn validation_is_strict_by_default() {
     assert_eq!(
         ValueExtensions::default(),
@@ -62,7 +63,7 @@ fn validation_is_strict_by_default() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn each_extension_flag_is_independent() {
     let line_height = ValueExtensions::default().with_line_height_dimension(true);
     validate_value_with(
@@ -85,7 +86,7 @@ fn each_extension_flag_is_independent() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_default_runtime_rejects_the_extension_shapes() {
     let runtime = DtcgRuntime::from_json("tokens.json", extension_document().to_string()).unwrap();
     let error = resolve(&runtime).unwrap_err();
@@ -115,7 +116,7 @@ fn a_default_runtime_rejects_the_extension_shapes() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_full_profile_accepts_the_extensions_through_every_constructor() {
     let options = RuntimeOptions::default().with_extensions(ValueExtensions::all());
     let expect_ready = |runtime: &DtcgRuntime| {
@@ -151,7 +152,7 @@ fn the_full_profile_accepts_the_extensions_through_every_constructor() {
     assert_eq!(limited.limits().max_tokens, 7);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_full_profile_keeps_every_other_rule_strict() {
     let options = RuntimeOptions::default().with_extensions(ValueExtensions::all());
     for (document, path) in [

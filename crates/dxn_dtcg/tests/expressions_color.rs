@@ -9,6 +9,7 @@ use dxn_dtcg::{
     values::{Color, ColorSpace},
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn evaluate(token_type: &str, snapshot: Value, js: &str) -> Value {
     let accent = json!({ "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] });
@@ -49,7 +50,7 @@ fn accent() -> Color {
     Color::new(ColorSpace::Srgb, [0.2, 0.4, 0.9], 1.0)
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn the_module_matches_the_rust_api() {
     assert_eq!(
         color("color.convert(accent, 'oklch')"),
@@ -109,7 +110,7 @@ fn the_module_matches_the_rust_api() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn conversions_match_css_color_4_reference_values() {
     // colorjs.io 0.7.1.
     let oklch = color("color.convert(accent, 'oklch')");
@@ -122,7 +123,7 @@ fn conversions_match_css_color_4_reference_values() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn invalid_arguments_throw_type_errors_with_one_prefix() {
     for (js, message) in [
         (

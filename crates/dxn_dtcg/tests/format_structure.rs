@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn resolve(document: Value) -> Result<dxn_dtcg::ResolvedTokens, DtcgError> {
     DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -27,7 +28,7 @@ fn number(value: i64) -> Value {
     json!({"$type": "number", "$value": value})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn tokens_must_not_have_children_or_a_root() {
     assert_token_error(
         json!({"g": {"$type": "number", "$value": 1, "child": number(2)}}),
@@ -49,7 +50,7 @@ fn tokens_must_not_have_children_or_a_root() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_token_must_not_have_both_value_and_ref() {
     assert_token_error(
         json!({
@@ -61,7 +62,7 @@ fn a_token_must_not_have_both_value_and_ref() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn root_members_must_be_tokens() {
     assert_token_error(
         json!({"g": {"$type": "number", "$root": {"x": number(1)}}}),
@@ -91,7 +92,7 @@ fn root_members_must_be_tokens() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_source_root_is_never_a_token() {
     assert_token_error(
         json!({"$type": "number", "$ref": "#/$extensions/x", "$extensions": {"x": 1}}),
@@ -105,7 +106,7 @@ fn a_source_root_is_never_a_token() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn names_must_not_be_empty() {
     assert_token_error(
         json!({"": number(1)}),
@@ -124,7 +125,7 @@ fn names_must_not_be_empty() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn metadata_members_must_have_their_types_on_tokens_groups_and_roots() {
     for (member, invalid, message) in [
         ("$description", json!(1), "`$description` must be a string"),
@@ -165,7 +166,7 @@ fn metadata_members_must_have_their_types_on_tokens_groups_and_roots() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn well_typed_metadata_is_accepted_everywhere() {
     let tokens = resolve(json!({
         "$description": "root",
@@ -182,7 +183,7 @@ fn well_typed_metadata_is_accepted_everywhere() {
     assert_eq!(tokens.len(), 2);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn extends_belongs_to_groups_and_targets_groups() {
     assert_token_error(
         json!({"t": {"$type": "number", "$value": 1, "$extends": "{missing}"}}),

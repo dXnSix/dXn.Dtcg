@@ -1,5 +1,8 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution, RuntimeLimits};
 use serde_json::{Map, Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
+
+mod support;
 
 fn runtime(document: &Value) -> DtcgRuntime {
     DtcgRuntime::from_json("tokens.json", document.to_string()).unwrap()
@@ -22,15 +25,9 @@ fn is_limit(result: &Result<impl std::fmt::Debug, DtcgError>, expected: &str) ->
     matches!(result, Err(DtcgError::LimitExceeded { kind, .. }) if *kind == expected)
 }
 
-/// Runs `body` on a thread with a 1 MiB stack, so unbounded recursion would
-/// overflow it.
+/// Runs `body` on a 1 MiB stack, so unbounded recursion would overflow it.
 fn on_small_stack<T: Send + 'static>(body: impl FnOnce() -> T + Send + 'static) -> T {
-    std::thread::Builder::new()
-        .stack_size(1024 * 1024)
-        .spawn(body)
-        .unwrap()
-        .join()
-        .unwrap()
+    support::on_1_mib_stack(body)
 }
 
 /// `$extensions` members `p0 = 1` and `p<i> = { "$ref": "#/$extensions/p<i-1>" }`.
@@ -49,14 +46,14 @@ fn pointer_chain(length: usize) -> Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_hundred_thousand_document_pointer_hops_hit_the_alias_depth_without_overflowing() {
     let document = pointer_chain(100_000);
     let result = on_small_stack(move || resolve(&document));
     assert!(is_limit(&result, "alias depth"), "{result:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn dependency_collection_counts_document_pointer_hops() {
     let document = pointer_chain(100_000);
     let result = on_small_stack(move || {
@@ -71,7 +68,7 @@ fn dependency_collection_counts_document_pointer_hops() {
     assert!(is_limit(&result, "alias depth"), "{result:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_hundred_thousand_alias_hops_hit_the_alias_depth_without_overflowing() {
     let mut document = Map::new();
     for index in (1..100_000).rev() {
@@ -86,7 +83,7 @@ fn a_hundred_thousand_alias_hops_hit_the_alias_depth_without_overflowing() {
     assert!(is_limit(&result, "alias depth"), "{result:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn duplicated_pointer_fan_out_is_stopped_by_the_value_node_limit() {
     let mut extensions = Map::new();
     extensions.insert("l0".into(), json!(1));
@@ -120,7 +117,7 @@ fn duplicated_pointer_fan_out_is_stopped_by_the_value_node_limit() {
     assert!(enough.resolve(&[]).unwrap().is_ready());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn equal_pointer_text_in_different_sources_is_not_a_cycle_in_either_order() {
     // Sources resolve as one merged structure, so `#/$extensions/x` names
     // the later source's value; the pointer is never mistaken for a cycle
@@ -148,7 +145,7 @@ fn equal_pointer_text_in_different_sources_is_not_a_cycle_in_either_order() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_sibling_override_may_point_at_its_own_target() {
     let document = json!({
         "$extensions": {"size": {"value": 4, "unit": "px"}},
@@ -177,7 +174,7 @@ fn a_sibling_override_may_point_at_its_own_target() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn alias_depth_zero_resolves_literal_tokens_and_rejects_the_first_alias() {
     let literal = limited(
         RuntimeLimits::default().with_max_alias_depth(0),
@@ -230,7 +227,7 @@ fn chain_hops(links: usize) -> usize {
         .sum()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn alias_depth_counts_every_reference_hop_in_any_authored_order() {
     for links in [1, 2, 3, 5, 8] {
         let hops = chain_hops(links);
@@ -256,7 +253,7 @@ fn alias_depth_counts_every_reference_hop_in_any_authored_order() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn plain_alias_chains_of_n_hops_resolve_and_n_plus_one_fail() {
     let chain = |hops: usize, reverse: bool| {
         let mut entries = vec![("t0".to_owned(), json!({"$type": "number", "$value": 0}))];
@@ -288,7 +285,7 @@ fn plain_alias_chains_of_n_hops_resolve_and_n_plus_one_fail() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn array_indexes_follow_rfc_6901_in_token_and_document_pointers() {
     let document = |pointer: &str| {
         json!({
@@ -318,7 +315,7 @@ fn array_indexes_follow_rfc_6901_in_token_and_document_pointers() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn percent_encoded_pointers_and_fragments_are_decoded() {
     let tokens = resolve(&json!({
         "$extensions": {"brand colors": 7, "a/b": 8, "c~d": 9},
@@ -369,7 +366,7 @@ fn percent_encoded_pointers_and_fragments_are_decoded() {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn malformed_corpus_pointers_stay_rejected() {
     for pointer in [
         "#/colors//primary/$value",
@@ -411,7 +408,7 @@ fn nested_pointer_chain(hops: usize, levels: usize) -> Value {
     })
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nesting_that_adds_up_across_references_hits_the_value_depth_on_a_small_stack() {
     let document = nested_pointer_chain(20, 120);
     let resolved = {
@@ -448,7 +445,7 @@ fn nesting_that_adds_up_across_references_hits_the_value_depth_on_a_small_stack(
     assert!(is_limit(&result, "value depth"), "{result:?}");
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn nesting_within_the_value_depth_is_resolved() {
     // Two hops of 40 levels each nest 81 levels deep: resolution succeeds and
     // only the number type rejects the array.
@@ -459,7 +456,7 @@ fn nesting_within_the_value_depth_is_resolved() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn percent_encoded_references_into_resolution_order_or_modifiers_stay_forbidden() {
     for (reference, inline_modifier) in [
         ("#/%72esolutionOrder/0", false),
@@ -489,7 +486,7 @@ fn percent_encoded_references_into_resolution_order_or_modifiers_stay_forbidden(
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn token_pointer_copies_are_charged_before_they_are_made() {
     let document = json!({
         "a": {"$type": "cubicBezier", "$value": [0, 0, 1, 1]},

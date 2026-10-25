@@ -7,6 +7,7 @@ use dxn_dtcg::{
     expressions::ExpressionOptions,
 };
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn evaluate_with(
     token_type: &str,
@@ -52,7 +53,7 @@ fn text(js: &str) -> Value {
 const DIMENSION: fn() -> Value = || json!({ "value": 0, "unit": "px" });
 const DURATION: fn() -> Value = || json!({ "value": 0, "unit": "ms" });
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn constructors_return_valid_dtcg_values() {
     assert_eq!(
         evaluate("dimension", DIMENSION(), "dtcg.px(4)"),
@@ -97,7 +98,7 @@ fn constructors_return_valid_dtcg_values() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn conversions_rounding_and_clamping() {
     assert_eq!(number("dtcg.toPx(dtcg.rem(1.5), 16)"), json!(24));
     assert_eq!(
@@ -118,7 +119,7 @@ fn conversions_rounding_and_clamping() {
     assert_eq!(number("dtcg.clamp(5, 0, 10)"), json!(5));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn is_valid_validates_with_the_runtime_value_extensions() {
     assert_eq!(
         text("String(dtcg.isValid('dimension', dtcg.px(4)))"),
@@ -145,7 +146,7 @@ fn is_valid_validates_with_the_runtime_value_extensions() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn invalid_arguments_throw_type_errors_with_one_prefix() {
     for (js, message) in [
         ("dtcg.px('4')", "dxn.dtcg.px: argument 1 must be a number"),

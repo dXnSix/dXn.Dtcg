@@ -1,7 +1,8 @@
 use dxn_dtcg::{DtcgRuntime, Resolution};
 use serde_json::{Map, Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn affected_resolution_visits_only_changed_tokens_and_their_dependency_closure() {
     let initial = resolver_document(0);
     let mut runtime = DtcgRuntime::from_json("large.resolver.json", initial).unwrap();
@@ -39,7 +40,7 @@ fn affected_resolution_visits_only_changed_tokens_and_their_dependency_closure()
     assert_eq!(current.get("token00002").unwrap().value, json!(42));
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn failed_affected_resolution_restores_the_previous_document() {
     let initial = resolver_document(7);
     let mut runtime = DtcgRuntime::from_json("large.resolver.json", initial).unwrap();
@@ -69,7 +70,7 @@ fn failed_affected_resolution_restores_the_previous_document() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn group_extensions_fall_back_to_the_complete_projection_without_stale_tokens() {
     let initial = extended_resolver_document(1);
     let mut runtime = DtcgRuntime::from_json("extended.resolver.json", initial).unwrap();

@@ -22,4 +22,9 @@ syn.workspace = true
 [dev-dependencies]
 # Path-only, so publishing strips it and breaks the runtime <-> derive cycle.
 dxn_dtcg = { path = "../dxn_dtcg" }
+# Every test also runs on wasm32 under Node through `wasm-bindgen-test`.
+wasm-bindgen-test.workspace = true
+
+# Compile-fail cases need a native compiler.
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 trybuild.workspace = true

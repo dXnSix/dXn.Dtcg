@@ -1,5 +1,6 @@
 use dxn_dtcg::{Deprecation, DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn resolve(document: Value) -> ResolvedTokens {
     DtcgRuntime::from_json("tokens.json", document.to_string())
@@ -35,7 +36,7 @@ fn deprecation(tokens: &ResolvedTokens, path: &str) -> Deprecation {
     tokens.get(path).unwrap().deprecated.clone()
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn tokens_expose_their_own_description_deprecation_and_extensions() {
     let tokens = resolve(json!({
         "g": {
@@ -69,7 +70,7 @@ fn tokens_expose_their_own_description_deprecation_and_extensions() {
     assert!(!deprecation(&tokens, "g.kept").is_deprecated());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn group_deprecation_is_inherited_until_a_nearer_value_overrides_it() {
     let tokens = resolve(json!({
         "legacy": {
@@ -101,7 +102,7 @@ fn group_deprecation_is_inherited_until_a_nearer_value_overrides_it() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn deprecation_is_evaluated_on_the_merged_structure_and_through_extends() {
     let tokens = layered(&[
         json!({"old": {"$type": "number", "a": {"$value": 1}}}),
@@ -132,7 +133,7 @@ fn deprecation_is_evaluated_on_the_merged_structure_and_through_extends() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn groups_with_resolved_tokens_are_listed_in_path_order() {
     let tokens = resolve(json!({
         "$description": "root",
@@ -167,7 +168,7 @@ fn groups_with_resolved_tokens_are_listed_in_path_order() {
     assert!(tokens.group("missing").is_none());
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn metadata_does_not_change_the_fingerprint() {
     let plain = resolve(json!({"g": {"$type": "number", "t": {"$value": 1}}}));
     let annotated = resolve(json!({"g": {

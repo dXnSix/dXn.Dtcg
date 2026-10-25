@@ -4,7 +4,7 @@ agentx:
   scope: decisions/runtime/resolution
   status: current
   created: 2026-10-26T03:00:00+02:00
-  updated: 2026-10-26T03:00:00+02:00
+  updated: 2026-10-26T04:00:00+02:00
   topics:
     - expressions
     - wasm32
@@ -19,7 +19,7 @@ agentx:
 
 ### Alternatives considered: Requiring hosts to provide the import; patching quickjs-jit.
 
-### Reasoning: Expressions have no clock, so the crate defines `__rquickjs_host_now_us` (returning 0) under `cfg(all(target_arch = "wasm32", target_os = "unknown"))` and the module needs no host import. CI builds with an LLVM clang and runs the `expressions_wasm` group under `wasm-bindgen-test-runner`.
+### Reasoning: Expressions have no clock, so the crate defines `__rquickjs_host_now_us` (returning 0) under `cfg(all(target_arch = "wasm32", target_os = "unknown"))` and the module needs no host import. CI builds with an LLVM clang and runs the whole test suite on wasm32 under `wasm-bindgen-test-runner`.
 
 ### Trade-offs accepted: The symbol is defined for the whole WebAssembly module: other `quickjs-jit` users in it read a clock of 0 and cannot define their own (documented).
 

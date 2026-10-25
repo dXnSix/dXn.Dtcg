@@ -1,4 +1,5 @@
 use dxn_dtcg::{DtcgError, DtcgRuntime, DtcgTokens, Resolution, ResolvedToken};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 fn runtime() -> DtcgRuntime {
     DtcgRuntime::from_json(
@@ -38,7 +39,7 @@ struct Optional {
     nothing: ::std::option::Option<String>,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn option_fields_are_none_when_missing_and_converted_when_present() {
     assert_eq!(
         project::<Optional>().unwrap(),
@@ -66,7 +67,7 @@ struct Required {
     value: String,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn present_but_unconvertible_and_missing_required_tokens_fail() {
     assert!(matches!(
         project::<WrongOptional>(),
@@ -98,7 +99,7 @@ mod hygiene {
     }
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn generated_code_is_hygienic_and_unraws_field_names() {
     assert_eq!(
         project::<hygiene::Shadowed>().unwrap(),
@@ -132,7 +133,7 @@ struct Holder<T, R> {
     rest: R,
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn generic_leaf_and_nested_fields_get_their_own_bounds() {
     let leaf = runtime()
         .project::<Holder<String, Vec<u8>>>(&[])

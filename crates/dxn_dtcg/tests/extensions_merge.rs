@@ -1,5 +1,6 @@
 use dxn_dtcg::{DtcgRuntime, ResolvedTokens};
 use serde_json::{Value, json};
+use wasm_bindgen_test::wasm_bindgen_test;
 
 /// Resolves a resolver whose one set holds `sources` inline, in order.
 fn resolve(sources: Vec<Value>) -> ResolvedTokens {
@@ -17,7 +18,7 @@ fn number(value: i64) -> Value {
     json!({"$type": "number", "$value": value})
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn group_and_root_extensions_merge_member_by_member() {
     let tokens = resolve(vec![
         json!({
@@ -39,7 +40,7 @@ fn group_and_root_extensions_merge_member_by_member() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_later_non_object_replaces_the_earlier_value() {
     let tokens = resolve(vec![
         json!({"g": {
@@ -55,7 +56,7 @@ fn a_later_non_object_replaces_the_earlier_value() {
     );
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn a_pointer_into_an_earlier_source_survives_a_later_source() {
     let tokens = resolve(vec![
         json!({
@@ -77,7 +78,7 @@ fn a_pointer_into_an_earlier_source_survives_a_later_source() {
     assert_eq!(tokens.get("g.columns").unwrap().value, 12);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn token_extensions_are_replaced_with_the_token() {
     let tokens = resolve(vec![
         json!({"g": {
@@ -96,7 +97,7 @@ fn token_extensions_are_replaced_with_the_token() {
     assert_eq!(tokens.get("g.dropped").unwrap().extensions, Value::Null);
 }
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn extends_merges_extensions_the_same_way() {
     let tokens = resolve(vec![json!({
         "base": {"$extensions": {"v": {"a": 1, "b": 1}, "keep": 1}, "t": number(1)},

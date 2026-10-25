@@ -1,7 +1,8 @@
 use dxn_dtcg::{DtcgRuntime, Resolution};
 use serde_json::json;
+use wasm_bindgen_test::wasm_bindgen_test;
 
-#[test]
+#[wasm_bindgen_test(unsupported = test)]
 fn aliases_observe_the_final_whole_token_overlay() {
     let root = r##"{
       "version":"2025.10",
