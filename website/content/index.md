@@ -14,7 +14,7 @@ install: |-
 facts:
   - { label: Spec, value: "DTCG 2025.10" }
   - { label: Official fixtures, value: "250 of 250 pass" }
-  - { label: Rust, value: "1.95+" }
+  - { label: Rust, value: "1.97+" }
   - { label: I/O, value: "none, no unsafe" }
   - { label: Targets, value: "native and wasm32" }
   - { label: License, value: "MIT OR Apache-2.0" }

@@ -18,7 +18,7 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 ```text
 .
 ├── Cargo.toml                    workspace members, shared package metadata, dependency versions
-├── rust-toolchain.toml           pinned toolchain (1.95.0) with clippy, rustfmt and the wasm32 target
+├── rust-toolchain.toml           pinned toolchain (1.97.0) with clippy, rustfmt and the wasm32 target
 ├── crates/
 │   ├── dxn_dtcg/
 │   │   ├── src/                  the runtime (see the module map)
@@ -210,7 +210,7 @@ keep them:
 
 ## Development workflow
 
-The toolchain is pinned in `rust-toolchain.toml`; `rustup` installs Rust 1.95.0 with Clippy,
+The toolchain is pinned in `rust-toolchain.toml`; `rustup` installs Rust 1.97.0 with Clippy,
 rustfmt and the `wasm32-unknown-unknown` target on first use.
 
 While working on a change, run only the test group for the feature you are touching:

@@ -12,7 +12,7 @@ This page is for people changing the crates: how the source is organized, how th
 ```text
 .
 ├── Cargo.toml                    workspace members, shared package metadata, dependency versions
-├── rust-toolchain.toml           pinned toolchain (1.95.0) with clippy, rustfmt and the wasm32 target
+├── rust-toolchain.toml           pinned toolchain (1.97.0) with clippy, rustfmt and the wasm32 target
 ├── crates/
 │   ├── dxn_dtcg/
 │   │   ├── src/                  the runtime (see the module map)
@@ -82,7 +82,7 @@ These come from the design decisions in `.agentx/memory/decisions/`. Changes mus
 
 ## Development workflow
 
-The toolchain is pinned in `rust-toolchain.toml`; `rustup` installs Rust 1.95.0 with Clippy, rustfmt and the `wasm32-unknown-unknown` target. While working, run only the group you touch:
+The toolchain is pinned in `rust-toolchain.toml`; `rustup` installs Rust 1.97.0 with Clippy, rustfmt and the `wasm32-unknown-unknown` target. While working, run only the group you touch:
 
 ```bash
 cargo test -p dxn_dtcg --all-features --test lazy_catalog

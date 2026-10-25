@@ -1,7 +1,7 @@
 # dXn.Dtcg
 
 [![CI](https://github.com/dXnSix/dXn.Dtcg/actions/workflows/ci.yml/badge.svg)](https://github.com/dXnSix/dXn.Dtcg/actions/workflows/ci.yml)
-![Rust 1.95+](https://img.shields.io/badge/rust-1.95%2B-blue)
+![Rust 1.97+](https://img.shields.io/badge/rust-1.97%2B-blue)
 ![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)
 
 **Documentation:** https://dxnsix.github.io/dXn.Dtcg/
@@ -64,7 +64,7 @@ no file-system or network access, so they build for any target that has the Rust
 | WebAssembly (`wasm32-unknown-unknown`) | Built in CI; needs no host I/O, threads or system calls |
 | macOS, iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI |
 
-- **Rust**: 1.95 or newer, edition 2024. `no_std` is not supported.
+- **Rust**: 1.97 or newer, edition 2024. `no_std` is not supported.
 - **Threads**: `DtcgRuntime` and `ResolvedTokens` are `Send + Sync`. Resolution borrows the runtime
   immutably, so several threads can resolve against one runtime at the same time.
 

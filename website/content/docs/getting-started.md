@@ -16,7 +16,7 @@ The crates are not on crates.io. Releases are git tags, so depend on one:
 dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0" }
 ```
 
-`dxn_dtcg` re-exports the derive macros, so you never depend on `dxn_dtcg_derive` yourself. Resolved values are `serde_json::Value`s; add `serde_json = "1"` only when you want to build or name them with `json!`. The newest tag is on the repository's [Releases](https://github.com/dXnSix/dXn.Dtcg/releases) page, and you move to a new release by changing the tag. The crate needs Rust 1.95 or newer (edition 2024).
+`dxn_dtcg` re-exports the derive macros, so you never depend on `dxn_dtcg_derive` yourself. Resolved values are `serde_json::Value`s; add `serde_json = "1"` only when you want to build or name them with `json!`. The newest tag is on the repository's [Releases](https://github.com/dXnSix/dXn.Dtcg/releases) page, and you move to a new release by changing the tag. The crate needs Rust 1.97 or newer (edition 2024).
 
 ## Resolve one document
 

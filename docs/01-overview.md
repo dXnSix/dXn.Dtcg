@@ -221,7 +221,7 @@ The crates:
 - contain no `unsafe` code, build scripts, platform-conditional code or FFI;
 - need `std` (`Arc`, `BTreeMap`, `HashSet`); `no_std` is not supported;
 - start no threads and need no async runtime, clock, randomness or environment access;
-- need Rust **1.95** or newer and use edition 2024. The repository pins the toolchain in
+- need Rust **1.97** or newer and use edition 2024. The repository pins the toolchain in
   `rust-toolchain.toml`.
 
 `DtcgRuntime`, `ResolvedTokens`, `ResolvedToken` and `DtcgError` are `Send + Sync`. All resolution

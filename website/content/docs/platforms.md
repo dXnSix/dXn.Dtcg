@@ -16,7 +16,7 @@ order: 190
 | WebAssembly (`wasm32-unknown-unknown`) | `cargo check --workspace --target wasm32-unknown-unknown` in CI; needs no host I/O, threads or system calls |
 | macOS, iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI |
 
-- **Rust** 1.95 or newer, edition 2024. `no_std` is not supported. The repository pins the toolchain to 1.95.0 in `rust-toolchain.toml`.
+- **Rust** 1.97 or newer, edition 2024. `no_std` is not supported. The repository pins the toolchain to 1.97.0 in `rust-toolchain.toml`.
 - **No threads started**, no clock, randomness or environment access.
 - **Thread safety.** `DtcgRuntime`, `ResolvedTokens`, `ResolvedToken` and `DtcgError` are `Send + Sync`. Resolution borrows the runtime immutably, so several threads can resolve against one runtime at once. Mutating methods take `&mut self`; to update while others read, use a lock or a copy-on-write handle (see the [cookbook](./cookbook.md#share-one-runtime-across-threads)).
 
