@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 5,
+  "revision": 9,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -744,6 +744,107 @@
         "crates/dxn_dtcg_derive/src/**",
         "crates/dxn_dtcg/tests/value_serde.rs"
       ]
+    },
+    {
+      "id": "check-expr-stack-top",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "SBX-2",
+        "SBX-3",
+        "SBX-4"
+      ],
+      "descriptionMarkdown": "Stack limits measured from each evaluation's start; stack overflows uncatchable however deep resolution is.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_stack_top"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_stack_top.rs"
+      ]
+    },
+    {
+      "id": "check-expr-module-state",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "EVAL-5",
+        "EVAL-6",
+        "SBX-3",
+        "SBX-4"
+      ],
+      "descriptionMarkdown": "Module values frozen after their top-level code; affected resolution equals a full one.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_module_state"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_module_state.rs"
+      ]
+    },
+    {
+      "id": "check-expr-diagnostic-names",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "EVAL-4"
+      ],
+      "descriptionMarkdown": "Redacted diagnostics keep only standard error names.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_diagnostic_names"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_diagnostic_names.rs"
+      ]
     }
   ],
   "finalCheckIds": [
@@ -1346,6 +1447,173 @@
             {
               "repositoryId": "dtcg",
               "path": "website/content/index.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s6-final-repair",
+      "title": "Final-review repairs: stack top, module state, diagnostic names, docs",
+      "dependsOn": [
+        "s5-finish"
+      ],
+      "memoryScopes": [
+        "runtime"
+      ],
+      "checkIds": [
+        "check-expr-stack-top",
+        "check-expr-module-state",
+        "check-expr-diagnostic-names",
+        "check-expr-modules",
+        "check-expr-wasm",
+        "check-expr-doctests",
+        "check-docs-index",
+        "check-expr-sandbox",
+        "check-expr-apis"
+      ],
+      "tasks": [
+        {
+          "id": "t17-stack-top",
+          "title": "Align QuickJS's stack top with each evaluation",
+          "descriptionMarkdown": "Final-review finding E-F3: rquickjs updates QuickJS's stack top only with its `parallel` feature, so the stack limit was measured from where the session was created while the guard measured from each evaluation. Call `JS_UpdateStackTop` at session setup and with `Guard::begin` at the start of every evaluation (expression module, expression call, module component). The guard noticed an overflow only when QuickJS allocated past the threshold while throwing, which depends on what it allocated before (one more module flipped the result), so a stack overflow could still be caught: compiled code now passes every value a `catch` or `finally` receives to the internal `check` (insertions only, no line breaks, positions mapped back), which trips the guard on QuickJS's stack overflow `RangeError`; one that reaches the engine uncaught trips it too. New group `tests/expressions_stack_top.rs` (alias chains with and without an earlier expression token, evaluations nested in input resolution, engine recursion through nested arrays, every `catch`/`finally` form, module top-level code, positions around `try`), plus a wasm32 case in `expressions_wasm.rs`.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "SBX-2",
+            "SBX-3"
+          ],
+          "designIds": [
+            "d-engine-sessions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-stack-top",
+            "check-expr-wasm"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/sandbox.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/compile.rs"
+            }
+          ]
+        },
+        {
+          "id": "t18-module-state",
+          "title": "Freeze module values after their top-level code",
+          "descriptionMarkdown": "Final-review finding E-F1: tokens share a module within a resolution, so a module's exported or internal objects could carry state from one token to another. Every JavaScript/TypeScript module ends with generated code that deep-freezes its namespace and top-level bindings (objects, arrays, functions, classes and prototypes) through the internal module `dxn.dtcg/freeze`; generated local names avoid the module's own. The cycle tests in `expressions_modules.rs` observe ES order through a counter instead of a shared array. New group `tests/expressions_module_state.rs`, plus a wasm32 case. The docs state what freezing cannot reach (reassigned module-level `let`s, closure variables, `Map`/`Set`/typed-array contents) and that module functions must be pure.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "SBX-3",
+            "EVAL-5",
+            "MOD-1"
+          ],
+          "designIds": [
+            "d-modules",
+            "d-engine-sessions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-module-state",
+            "check-expr-modules",
+            "check-expr-wasm"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/compile.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            }
+          ]
+        },
+        {
+          "id": "t19-diagnostic-names",
+          "title": "Keep only standard error names in diagnostics",
+          "descriptionMarkdown": "Final-review finding E-F2: expression code sets an error's name, so the redacted diagnostic keeps only the standard JavaScript error names and reports `Error` for any other `...Error` name. New group `tests/expressions_diagnostic_names.rs`.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "EVAL-4"
+          ],
+          "designIds": [
+            "d-feature-options"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-diagnostic-names"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/diagnostics/mod.rs"
+            }
+          ]
+        },
+        {
+          "id": "t21-module-state-contract",
+          "title": "Shared module state as the owner decided",
+          "descriptionMarkdown": "Per the owner's decision on final-review finding E-F1 (option A, 2026-10-25): SBX-4 and EVAL-6 supersede SBX-3 and EVAL-5 with the exception for module state that module functions change. Keep modules evaluated once per resolution (MOD-5) and their top-level values deep-frozen (t18); chapter 15 and the website `expressions` page state, in their sandbox/limits and determinism sections, that such state is shared within one resolution, that module functions must be pure, and that results depending on it are guaranteed neither independent of evaluation order nor equal between `apply_affected` and a full resolution. Evidence: `expressions_module_state` (frozen values, affected equals full), `expressions_stack_top` (order independence of stack limits), `expressions_sandbox` (determinism, no engine without expression tokens) and `expressions_apis` (every API, affected resolution). Widened by the owner's decision on review finding S6-F2 (option A): the exception covers module state any code changes, token expressions included, including the contents of `Map`s, `Set`s, typed arrays, `ArrayBuffer`s and `DataView`s a module holds; modules may hold and export such collections.",
+          "criterionIds": [
+            "SBX-4",
+            "EVAL-6"
+          ],
+          "designIds": [
+            "d-modules",
+            "d-engine-sessions"
+          ],
+          "dependsOn": [
+            "t18-module-state"
+          ],
+          "checkIds": [
+            "check-expr-module-state",
+            "check-expr-stack-top",
+            "check-expr-sandbox",
+            "check-expr-apis"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/15-expressions.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "website/content/docs/expressions.md"
+            }
+          ]
+        },
+        {
+          "id": "t20-repair-docs",
+          "title": "Document the repairs",
+          "descriptionMarkdown": "Final-review finding E-F4 and the docs of t17/t18: recommend `[profile.dev.package.quickjs-jit-sys] opt-level = 3` in the expressions chapter, the website `expressions` and `limits` pages, chapter 11 and the `stack_limit` doc comment; describe module freezing and its limits in the chapter and the website page.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "DOC-1"
+          ],
+          "designIds": [
+            "d-docs-release"
+          ],
+          "dependsOn": [
+            "t17-stack-top",
+            "t18-module-state",
+            "t19-diagnostic-names"
+          ],
+          "checkIds": [
+            "check-expr-doctests",
+            "check-docs-index"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/15-expressions.md"
             }
           ]
         }
