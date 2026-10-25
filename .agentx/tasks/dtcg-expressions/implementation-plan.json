@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 3,
+  "revision": 4,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -1281,7 +1281,7 @@
         {
           "id": "t16-docs",
           "title": "Expressions chapter, API reference and website",
-          "descriptionMarkdown": "Per d-docs-release and DOC-1, after every other task is done: write `docs/15-expressions.md` (rust examples compile under the feature) and include it in `lib.rs` under `#[cfg(all(doctest, feature = \"expressions\"))]`; update the README, `docs/README.md` and the chapters DOC-1 lists (01, 05, 07, 11, 12, 13, 14); add `website/content/docs/expressions.md` (front matter like the other pages, placed in the navigation order) and update the mirroring website pages (`api`, `errors`, `loading`, `limits`, `conformance`, `platforms`, `value-types`, `contributing`) and the landing page's facts. Keep the consumer-free wording rules. Run the chapter doctests and the docs-index check; doctests of other chapters you changed must still pass (`--doc` filtered to them).",
+          "descriptionMarkdown": "Per d-docs-release and DOC-1, after every other task is done: write `docs/15-expressions.md` (rust examples compile under the feature) and include it in `lib.rs` under `#[cfg(all(doctest, feature = \"expressions\"))]`; update the README, `docs/README.md` and the chapters DOC-1 lists (01, 05, 07, 11, 12, 13, 14); add `website/content/docs/expressions.md` (front matter like the other pages, placed in the navigation order) and update the mirroring website pages (`api`, `errors`, `loading`, `limits`, `conformance`, `platforms`, `value-types`, `contributing`) and the landing page's facts. Keep the consumer-free wording rules. Run the chapter doctests and the docs-index check; doctests of other chapters you changed must still pass (`--doc` filtered to them).\n\nThe wasm32 section of `docs/15-expressions.md` and the website's `platforms` page state that the crate defines QuickJS's clock import `__rquickjs_host_now_us` (always 0) for the whole WebAssembly module: other code in the same module that uses `quickjs-jit` directly reads that clock (`Date.now()` is 0) and cannot supply its own `env.__rquickjs_host_now_us` (defining it again fails to link). (Review finding S2-F2.)",
           "criterionIds": [
             "DOC-1"
           ],

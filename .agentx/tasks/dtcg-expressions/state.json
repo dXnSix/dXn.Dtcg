@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 15,
-  "planRevision": 3,
+  "revision": 25,
+  "planRevision": 4,
   "specHashes": {
     "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "754b1d1b1a2f392b4f7df01fb78a88fdbc569e9f227bf720f17a66cfe9751c7a"
+    "plan": "7b1ac6b5adb5e7e0437eb6f137a61238c7db0e8b2e521b1e6ce848a8efba465f"
   },
   "tasks": {
     "t01-feature-format": {
@@ -40,10 +40,16 @@
       ]
     },
     "t06-wasm-core": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t07-ci": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t08-host-modules": {
       "status": "pending"
@@ -82,6 +88,24 @@
         }
       },
       "recordedAt": "2026-10-25T16:20:21Z"
+    },
+    "d9b725ad6fcab382b03f17dee5523bd72b91283526fe98a12a2606eec3f83a28": {
+      "snapshot": {
+        "specHash": "d5f52ac9a31b4650e7e0a25bc978e6ab7496cd3889b3fc424c965357c4633b24",
+        "repositories": {
+          "dtcg": "8c7f132ef92417d79f4adb32f45ee64e6797cca6a2bf08bbc2f2eb6f3d871e0a"
+        }
+      },
+      "recordedAt": "2026-10-25T16:25:11Z"
+    },
+    "3d4d835551669fd4ac94199b04bc4ec3e51b329417be0a64fa7cca386a2f0b87": {
+      "snapshot": {
+        "specHash": "d5f52ac9a31b4650e7e0a25bc978e6ab7496cd3889b3fc424c965357c4633b24",
+        "repositories": {
+          "dtcg": "942896a5530e336d2550181e91d31153b05e9856a2c3d4f752719396d012394e"
+        }
+      },
+      "recordedAt": "2026-10-25T16:32:43Z"
     }
   },
   "checkResults": {
@@ -220,6 +244,40 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-912e625a7ce8.log",
       "logSha256": "c296b57a4ce7180651d319cb0754006a3218fcb725521040f0c206d2ad76fa95",
       "inputsHash": "2a569db8d414f7a97ae3fd7937cfafb106b5052ae5f2b1a327217c012110e82a"
+    },
+    "s2-platforms/check-expr-wasm/final": {
+      "checkId": "check-expr-wasm",
+      "boundaryId": "s2-platforms",
+      "phase": "final",
+      "batchId": "3d4d835551669fd4ac94199b04bc4ec3e51b329417be0a64fa7cca386a2f0b87",
+      "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
+      "basisHash": "cf7565066eb866570974f2af669eed1226381a007c2b5284997da6d9c1b7db90",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 4.2349,
+      "recordedAt": "2026-10-25T16:32:43Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s2-platforms-final-50b4acd8c25d.log",
+      "logSha256": "147e6a65c3e034f7775cab87928172b1458121c5a4884dad1f7b77b196d089ee",
+      "inputsHash": "52954238bb89e49fdf937bd5d61ba6560e46849d9cadd14b6386332cd14f2c4d"
+    },
+    "s2-platforms/check-ci-workflow/final": {
+      "checkId": "check-ci-workflow",
+      "boundaryId": "s2-platforms",
+      "phase": "final",
+      "batchId": "d9b725ad6fcab382b03f17dee5523bd72b91283526fe98a12a2606eec3f83a28",
+      "definitionHash": "c479057c24b1d1730f0cd38dbb28ca8b02e620d61df43dcd1cd590f9e31f66dc",
+      "basisHash": "fab47cd739f8424e5c8eb5435e120179eb6e97ba9fd691c7ec6e0b469eeb0156",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0146,
+      "recordedAt": "2026-10-25T16:25:11Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s2-platforms-final-2baceb5d8eff.log",
+      "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
+      "inputsHash": "8e842c603d38549a81a0729b2812cfd323d6830522e87f77d3eecad62c111721"
     }
   },
   "reviews": {
@@ -462,6 +520,78 @@
         "S1-F9"
       ],
       "recordedAt": "2026-10-25T16:23:16Z"
+    },
+    "s2-platforms": {
+      "reviewerId": "reviewer-s2-platforms-independent",
+      "snapshotId": "6bfd03e6174d14f7b0a09a5ddd23ecef288503abc04982a1cb09eb056f9d70ce",
+      "criterionIds": [
+        "PLT-2",
+        "PLT-3"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-2"
+          ],
+          "sha256": "51258d2f9ceff28d3053edc8d9208b678c4fe124493f302cc879df1f31916ef4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-2"
+          ],
+          "sha256": "a87601afe4fb6c544e8b60cf9fc81a08b588756e129428a4b9534bcf5e14f8a7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-2",
+            "PLT-3"
+          ],
+          "sha256": "c212ca39f63d299e7c2be5c6c0e8115f27cf6a24ac188a6bd50d920c5f4bbd05"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_wasm.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-2"
+          ],
+          "sha256": "efffc6872e53ab2949a571d24e5d09f585378883e362ce5939d68ad726ea1c50"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-3"
+          ],
+          "sha256": "c60138650faa3357cbc67190aa0160644056c7ec0ae2755aa257209e7abee968"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml",
+          "kind": "runtime",
+          "criterionIds": [
+            "PLT-3"
+          ],
+          "sha256": "c60138650faa3357cbc67190aa0160644056c7ec0ae2755aa257209e7abee968"
+        }
+      ],
+      "summaryMarkdown": "PLT-2 and PLT-3 are met as worded. I reran `expressions_wasm` (4/4 under `wasm-bindgen-test-runner` 0.2.129, Node 24, Homebrew LLVM) after the S2-F1 repair. The test module's 52 imports are all wasm-bindgen's. `__stack_pointer` starts at 1 MiB (the default stack). The private in-crate clock matches the shim's `double(void)` and is no longer public API. A throwaway wasm probe ran the deepest source each nesting construct accepts on the default stack: all 18 return without trapping. CI keeps the matrix's `--all-features` clippy/test and the default wasm32 check. The new Ubuntu job installs `clang`/`llvm` (`/usr/bin/clang`, `/usr/bin/llvm-ar`), installs the locked `wasm-bindgen-cli` exactly, and runs the feature check and the group. S2-F2's consumer-facing documentation is now a recorded `t16-docs` obligation. Residual risk only GitHub can settle: Ubuntu's clang 18, and MSVC (`/std:c11 /experimental:c11atomics`, aarch64-calibrated nesting weights on an x86_64 1 MiB thread).",
+      "findingIds": [
+        "S2-F1",
+        "S2-F2"
+      ],
+      "recordedAt": "2026-10-25T16:34:55Z"
     }
   },
   "checkpoints": {
@@ -472,6 +602,14 @@
       },
       "reviewHash": "0972b6979370c3f9ddf698892d1e664556901650b2b306d7ce5c8401f8f1833e",
       "recordedAt": "2026-10-25T16:23:43Z"
+    },
+    "s2-platforms": {
+      "snapshotId": "6bfd03e6174d14f7b0a09a5ddd23ecef288503abc04982a1cb09eb056f9d70ce",
+      "commits": {
+        "dtcg": "d7dce1ada54d03358e95a4387e09cf24f7492034"
+      },
+      "reviewHash": "554f62fa48077127a1c4eabb632a8756d2b6e424ff0de8660cec322a9aff91c9",
+      "recordedAt": "2026-10-25T16:35:16Z"
     }
   },
   "findings": [
@@ -694,6 +832,49 @@
           "symbol": "a_step_budget_below_one_counts_as_one"
         }
       ]
+    },
+    {
+      "id": "S2-F1",
+      "criterionIds": [
+        "PLT-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Resolved. `__rquickjs_host_now_us` is no longer `pub`; it keeps `#[unsafe(no_mangle)]` and the wasm32-unknown-unknown cfg and sits after the `use` block. The wasm group passes (4/4), the test module's 52 imports are all wasm-bindgen's, and wasm32 rustdoc of `dxn_dtcg::expressions` no longer shows the item.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "symbol": "__rquickjs_host_now_us"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_wasm.rs"
+        }
+      ],
+      "boundaryId": "s2-platforms"
+    },
+    {
+      "id": "S2-F2",
+      "criterionIds": [
+        "PLT-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Resolved for this sprint. The clock's doc comment states the module-wide effect, and `t16-docs` now requires the wasm32 section of `docs/15-expressions.md` and the website's `platforms` page to state it for consumers: the crate defines `__rquickjs_host_now_us` as 0 for the whole module, other `quickjs-jit` users read that clock, and they cannot supply or redefine it. The s5 and final reviews check the published text.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "symbol": "__rquickjs_host_now_us"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": ".agentx/tasks/dtcg-expressions/implementation-plan.json",
+          "symbol": "t16-docs"
+        }
+      ],
+      "boundaryId": "s2-platforms"
     }
   ],
   "handoffMarkdown": "",
