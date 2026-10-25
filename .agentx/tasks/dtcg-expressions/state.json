@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 46,
+  "revision": 57,
   "planRevision": 5,
   "specHashes": {
     "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
@@ -94,10 +94,16 @@
       ]
     },
     "t15-wasm-complete": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t16-docs": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     }
   },
   "validationBatches": {
@@ -145,6 +151,24 @@
         }
       },
       "recordedAt": "2026-10-25T17:10:30Z"
+    },
+    "729cc52d3cceed00d96829a5b0c930537d44a77ffa9b7b12efc6e8abaf6be4bc": {
+      "snapshot": {
+        "specHash": "686d64bd4a7b7719b41af2cf3ba079732db6ea2167d75761804767653ddc5701",
+        "repositories": {
+          "dtcg": "8c97ef455f6e4f06c676c15e2e4261c12ada6ffbfac505064d953584a97c3d92"
+        }
+      },
+      "recordedAt": "2026-10-25T17:25:46Z"
+    },
+    "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e": {
+      "snapshot": {
+        "specHash": "686d64bd4a7b7719b41af2cf3ba079732db6ea2167d75761804767653ddc5701",
+        "repositories": {
+          "dtcg": "47c45e0fa090d65e5436dcb41db732bccc43aaf927bd1ec82c2c1a75547dc298"
+        }
+      },
+      "recordedAt": "2026-10-25T17:27:01Z"
     }
   },
   "checkResults": {
@@ -470,6 +494,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-a78457390c59.log",
       "logSha256": "91cc623b2216b3daf0dba7ce47f45083dcd0265379f9fcfc78ec830b852d4978",
       "inputsHash": "e92dc60d5e34b20c2c0b3e58a0ed09f9a48faff82373bc402ec606e012b26769"
+    },
+    "s5-finish/check-expr-wasm/final": {
+      "checkId": "check-expr-wasm",
+      "boundaryId": "s5-finish",
+      "phase": "final",
+      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
+      "basisHash": "dcbbed46be575dbc28ad5a220f41aa4a41190bccb258958f97f9e01949102966",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 7,
+      "durationSeconds": 4.1661,
+      "recordedAt": "2026-10-25T17:27:01Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s5-finish-final-9388adb9baa4.log",
+      "logSha256": "0007bb6752587c93b9cfbbc2bfb1daf78e7955d46417c6dcd593471c027b7abf",
+      "inputsHash": "e23fec8d27583b73cedda4177e33da490a84aa7b2dc6d4fcfde41565dbe8ee58"
+    },
+    "s5-finish/check-expr-doctests/final": {
+      "checkId": "check-expr-doctests",
+      "boundaryId": "s5-finish",
+      "phase": "final",
+      "batchId": "729cc52d3cceed00d96829a5b0c930537d44a77ffa9b7b12efc6e8abaf6be4bc",
+      "definitionHash": "139e730f78a9a3f034fa3c51bca315cdef5d35fdc1b2e20ee897a7fb1cebfabf",
+      "basisHash": "3a2f596bcc739b759acc9cb51361908b0540c1e6a1ef450d376a1ed7cea1be97",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 7,
+      "durationSeconds": 1.8302,
+      "recordedAt": "2026-10-25T17:25:46Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s5-finish-final-9f83ced96172.log",
+      "logSha256": "ba651f00a82ee1c069e4f3d8de9da4846ae953e69b313f6825fa31f0dc62bbbe",
+      "inputsHash": "68ada3de8d128b0805003d4043068236715b60b55d868a3f3d67553478da5dac"
+    },
+    "s5-finish/check-docs-index/final": {
+      "checkId": "check-docs-index",
+      "boundaryId": "s5-finish",
+      "phase": "final",
+      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "definitionHash": "e52e7289336bdd61962dc492eee50dc429cdee648d1062673f5e06c59471e60e",
+      "basisHash": "9660d5c301f3dca8501d352c68fcda62d81d8ea4745c17d21777ce34ce6e1452",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0173,
+      "recordedAt": "2026-10-25T17:27:01Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s5-finish-final-831fe13ab74b.log",
+      "logSha256": "e65830437d3bfb37b33333dda924825bbb9514f5fe391524952cacc44648b6c7",
+      "inputsHash": "5b36bddff9cb4179e6b7d2866315049cfbec90681ee6337bec8c2de1425fedbc"
     }
   },
   "reviews": {
@@ -1141,6 +1216,146 @@
         "S4-F8"
       ],
       "recordedAt": "2026-10-25T17:13:43Z"
+    },
+    "s5-finish": {
+      "reviewerId": "reviewer-s5-finish-independent",
+      "snapshotId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "criterionIds": [
+        "PLT-4",
+        "DOC-1"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-4",
+            "DOC-1"
+          ],
+          "sha256": "2c5be95bb24e526cf960f64f18ec3f9ee06d16e9420aed543bf79fc91320a1be"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-4"
+          ],
+          "sha256": "383c025b2bb8e8d3957779073013f8acdb1d3718c01cfdf1749ba142c0013a95"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_wasm.rs",
+          "kind": "test",
+          "criterionIds": [
+            "PLT-4"
+          ],
+          "sha256": "9ed644e9a2552996a0324fe1b52faa9ff7584016ae6b58b361e7d55d88c3393d"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "3fbc6ff5ce44ca4b5335415cba7fe4825a4a8b03792e46a993f1d512834bdf21"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "7e7b62083f3402904264e436788fbad3d7b59b61f422481639b154dcf19109bd"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "1dc2d0a9eaa41b0df4ca2939b2e5d353efe471576d2aa1e1669b1c4a2f5be775"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/values.rs",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "4995ec959ce2de3db250859f4c29d8f36423a1a5670632837996839d37c73ebf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md",
+          "kind": "test",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "1af8dc3901f384eeeaafd01515f62aca66bc27c5febc379b34047ff2af2b74e8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/05-value-types.md",
+          "kind": "test",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "34d99464868a45a153e6517c12f25d08a25715ba8a7a029add62974317c27d40"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/expressions.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "afc8f431fa29b1722cbb5ff064cb33fe6a122d2e7fba8faaf9fa0bb7795883c3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "752044046d7af98ce5e43ab79cbd12a05d0c8dd4ccdcb1e77fb3a5d2d76c7a1e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/troubleshooting.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "96ab2a206d6f09c3cbb18df9aa0e2694c0a57810d7704547eb9ce5a550f0def6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/limits.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "037e1cf71849d1e775ea9668e4031b67b3c651866e2414a5080b527035b39d7b"
+        }
+      ],
+      "deltaSummaryMarkdown": "Criteria unchanged (PLT-4, DOC-1). The delta since the previous reattestation is the `DtcgError::Expression` row of the errors table in `docs/11-errors-limits-and-diagnostics.md`, which now reads \"with the authored line and column when QuickJS reports one\", matching `caught_message`/`frame_position` in `expressions/engine.rs`. A search of `docs/`, the README and the website finds no remaining unconditional position claim. S5-F1, S5-F2, S5-F3 and S5-F5 stay resolved as reattested before; `check --sprint s5-finish` passed 3/3 on this snapshot.",
+      "reattestedFrom": "cf7dbe691009fefb905a440c28c70e342fd1ea5b464ed258f2c57e7305f31461",
+      "summaryMarkdown": "PLT-4 passes: `tests/expressions_wasm.rs` adds a TypeScript host-module import (`step(4, 2)` = 9), a host native module call (`double(21)` = 42 and the caught `brand/native.divide: division by zero`) and a `dxn.dtcg/color` OKLCH conversion asserting colorjs.io's reference values rounded to six places, matching `expressions_modules`, `expressions_native` and `expressions_color`; the s5 `check-expr-wasm` run recorded 7 passing tests. DOC-1 coverage is complete (new chapter included under `cfg(feature = \"expressions\")` inside the doctest module with 7 passing doctests, every listed chapter and website page updated, the new page has title/description/order 135 and all relative links and anchors resolve, the S2-F2 clock statement is in chapter 15 and platforms, wording is consumer-free, forbidden paths untouched, all `documentation` doctests pass with `--all-features`). Most claims match source (limits and defaults, reserved namespace, export-name validation, `Json<T>`/`NativeReturn`, built-ins and their messages, color API and the new precision note, CI jobs, `wasm-bindgen` 0.2.129). Five minor accuracy defects remain (S5-F1 to S5-F5), so DOC-1 fails until they are repaired.",
+      "findingIds": [
+        "S5-F1",
+        "S5-F2",
+        "S5-F3",
+        "S5-F4",
+        "S5-F5"
+      ],
+      "recordedAt": "2026-10-25T17:27:22Z"
     }
   },
   "checkpoints": {
@@ -1175,6 +1390,14 @@
       },
       "reviewHash": "18b1a011f9757593e02653607a16772d009263414a9fde931573cb430beb9a76",
       "recordedAt": "2026-10-25T17:14:54Z"
+    },
+    "s5-finish": {
+      "snapshotId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "commits": {
+        "dtcg": "068cbc2113bd68eba9d9ae94f281cba6f31ccae8"
+      },
+      "reviewHash": "cbbca4380b5850be3a861741edde56bfe79f726072d342870977dbf8aaadcaf0",
+      "recordedAt": "2026-10-25T17:27:43Z"
     }
   },
   "findings": [
@@ -1721,6 +1944,111 @@
           "symbol": "non_finite_inputs_give_valid_colors"
         }
       ]
+    },
+    {
+      "id": "S5-F1",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Website contributing page states serde for every value model and lists `value_serde`; `docs/14` tree names `#[expression_module]` in derive `src/lib.rs`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/contributing.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/14-architecture-and-contributing.md"
+        }
+      ],
+      "boundaryId": "s5-finish"
+    },
+    {
+      "id": "S5-F2",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Troubleshooting heading matches both result messages written by `engine.rs`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/troubleshooting.md"
+        }
+      ],
+      "boundaryId": "s5-finish"
+    },
+    {
+      "id": "S5-F3",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "The module-document bound is documented as a separate `max_documents` count and pinned by a passing test.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
+          "symbol": "module_documents_are_bounded_by_max_documents_as_their_own_count"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/limits.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md"
+        }
+      ],
+      "boundaryId": "s5-finish"
+    },
+    {
+      "id": "S5-F4",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Error positions are documented as present only when QuickJS reports one, in `docs/15`, `docs/11` (errors table and diagnostics row), website `expressions.md` and `errors.md`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/11-errors-limits-and-diagnostics.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/errors.md"
+        }
+      ],
+      "boundaryId": "s5-finish"
+    },
+    {
+      "id": "S5-F5",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "`docs/12-conformance.md` says values, types and fingerprints match the documents without the member, which stays in `ResolvedToken::extensions` and exports.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/12-conformance.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_disabled.rs"
+        }
+      ],
+      "boundaryId": "s5-finish"
     }
   ],
   "handoffMarkdown": "",
