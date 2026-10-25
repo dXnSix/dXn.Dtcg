@@ -5,7 +5,7 @@ root, except the typed value models, which live in the public `dxn_dtcg::values`
 Signatures are shown in simplified form, without `pub`.
 
 - [Runtime](#runtime): `DtcgRuntime`
-- [Results](#results): `Resolution`, `DocumentRequest`, `ResolvedTokens`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
+- [Results](#results): `Resolution`, `DocumentRequest`, `DocumentKind`, `ResolvedTokens`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
 - [Configuration](#configuration): `RuntimeOptions`, `RuntimeLimits`, `ValueExtensions`
 - [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
 - [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `selection_from_json`, `selection_refs`
@@ -14,6 +14,7 @@ Signatures are shown in simplified form, without `pub`.
 - [Inspection](#inspection): `SourceOccurrence`, `SourceOrigin`, `SourceReference`, `set_sources`, `modifier_contexts`
 - [Errors](#errors): `DtcgError`
 - [Diagnostics](#diagnostics-feature-diagnostics) (feature `diagnostics`): `DtcgDiagnostic`, `DtcgDiagnosticCode`
+- [Expressions](#expressions-feature-expressions) (feature `expressions`): `EXPRESSION_EXTENSION`, `ExpressionOptions`, `ExpressionModule`, `NativeModule`, `NativeFunction`, `NativeReturn`, `Json`, `expression_module`
 
 Throughout, a *selection* is `&[(&str, &str)]`, a list of `(modifier, context)` pairs.
 
@@ -65,7 +66,10 @@ Options are fixed at construction.
 | `fn provide_requested_json(&mut self, request: &DocumentRequest, json: impl Into<Arc<str>>) -> Result<(), DtcgError>` | `provide_json` for `request.resource_id` |
 | `fn provide_json_batch<I, Id, Json>(&mut self, documents: I) -> Result<(), DtcgError>` where `I: IntoIterator<Item = (Id, Json)>, Id: AsRef<str>, Json: Into<Arc<str>>` | Inserts several documents atomically, as one revision |
 | `fn replace_json(&mut self, resource_id: impl AsRef<str>, json: impl Into<Arc<str>>) -> Result<(), DtcgError>` | Replaces an existing document |
-| `fn remove_document(&mut self, resource_id: impl AsRef<str>) -> Result<(), DtcgError>` | Removes an existing document |
+| `fn provide_module(&mut self, resource_id: impl AsRef<str>, source: impl Into<Arc<str>>) -> Result<(), DtcgError>` | Inserts or replaces a module's JavaScript or TypeScript source ([module documents](07-document-loading.md#module-documents)). A JSON document at the id is a kind mismatch. |
+| `fn provide_requested_module(&mut self, request: &DocumentRequest, source: impl Into<Arc<str>>) -> Result<(), DtcgError>` | `provide_module` for a request of `kind: DocumentKind::Module` (`provide_requested_json` likewise checks for `DocumentKind::Json`) |
+| `fn replace_module(&mut self, resource_id: impl AsRef<str>, source: impl Into<Arc<str>>) -> Result<(), DtcgError>` | Replaces an existing module |
+| `fn remove_document(&mut self, resource_id: impl AsRef<str>) -> Result<(), DtcgError>` | Removes an existing JSON document or module |
 | `fn contains_document(&self, resource_id: impl AsRef<str>) -> Result<bool, DtcgError>` | Whether a document is in the catalog. `Err` only for an invalid id. |
 | `fn catalog_revision(&self) -> u64` | A counter that goes up on every successful mutation |
 
@@ -123,10 +127,18 @@ struct DocumentRequest {
     resource_id: ResourceId,          // the normalized id to provide
     referenced_from: ResourceId,      // the document containing the reference
     original_reference: Arc<str>,     // the reference as written, including any fragment
+    kind: DocumentKind,               // what to provide
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[non_exhaustive]
+enum DocumentKind {
+    Json,   // a token document or resolver
+    Module, // a JavaScript or TypeScript module expressions import (feature `expressions`)
 }
 ```
 
-All fields are public.
+All fields are public. Without expressions every request is `DocumentKind::Json`.
 
 ### `ResolvedTokens`
 
@@ -184,7 +196,8 @@ struct ResolvedToken {
     path: Arc<str>,                    // dotted token path
     token_type: Option<Arc<str>>,      // effective DTCG type; always Some after resolution
     authored_value: serde_json::Value, // the $value as written (the token object for a token-level $ref)
-    value: serde_json::Value,          // fully resolved and validated value
+    value: serde_json::Value,          // fully resolved and validated value (an expression's result)
+    snapshot: Option<serde_json::Value>, // for an evaluated expression, the resolved $value it replaced
     extensions: serde_json::Value,     // the token's own $extensions, or Null; never inherited
     description: Option<Arc<str>>,     // the token's own $description; never inherited
     deprecated: Deprecation,           // own $deprecated, else the nearest group's
@@ -197,7 +210,8 @@ impl ResolvedToken {
 ```
 
 All fields are public. A token copied by `$extends` names the document of that `$extends` as its
-`source`. `typed` converts `value` by the effective type into a [`TypedValue`](#typedvalue),
+`source`. `snapshot` is `None` unless an [expression](15-expressions.md) replaced the value.
+`typed` converts `value` by the effective type into a [`TypedValue`](#typedvalue),
 validating it with `extensions`; a failure is `DtcgError::Projection`.
 
 ### `ResolvedGroup`
@@ -264,11 +278,15 @@ Apply it to a snapshot with `ResolvedTokens::apply_affected`.
 struct RuntimeOptions {
     limits: RuntimeLimits,         // default RuntimeLimits::default()
     extensions: ValueExtensions,   // default: none, strict DTCG 2025.10 values
+    #[cfg(feature = "expressions")]
+    expressions: Option<ExpressionOptions>, // default None: expressions are not evaluated
 }
 
 impl RuntimeOptions {
     fn with_limits(self, limits: RuntimeLimits) -> Self;
     fn with_extensions(self, extensions: ValueExtensions) -> Self;
+    #[cfg(feature = "expressions")]
+    fn with_expressions(self, expressions: ExpressionOptions) -> Self;
 }
 ```
 
@@ -495,7 +513,8 @@ Joins two dotted paths with `.`, ignoring empty parts: `("", "a") → "a"`, `("a
 ### Derive macros
 
 `#[derive(DtcgTokens)]` and `#[derive(DtcgComponentTokens)]`, re-exported from
-`dxn_dtcg_derive`. Both accept structs with named fields only.
+`dxn_dtcg_derive`. Both accept structs with named fields only. The derive crate also provides the
+attribute macro [`#[expression_module]`](#expression_module) (feature `expressions`).
 
 | Position | Attribute | Effect |
 |---|---|---|
@@ -581,7 +600,7 @@ specification.
 | Type | Shape |
 |---|---|
 | `Color { color_space: ColorSpace, components: [Component; 3], alpha: f64, hex: Option<String> }` | `alpha` is `1.0` when absent; `hex` is the authored fallback |
-| `ColorSpace` | The 14 color spaces: `Srgb`, `SrgbLinear`, `Hsl`, `Hwb`, `Lab`, `Lch`, `Oklab`, `Oklch`, `DisplayP3`, `A98Rgb`, `ProphotoRgb`, `Rec2020`, `XyzD65`, `XyzD50`; `fn name(self) -> &'static str` returns the DTCG name |
+| `ColorSpace` | The 14 color spaces: `Srgb`, `SrgbLinear`, `Hsl`, `Hwb`, `Lab`, `Lch`, `Oklab`, `Oklch`, `DisplayP3`, `A98Rgb`, `ProphotoRgb`, `Rec2020`, `XyzD65`, `XyzD50`; `fn name(self) -> &'static str` returns the DTCG name, `fn from_name(name: &str) -> Option<Self>` parses one |
 | `Component` | `Number(f64)` or `None` (the `"none"` keyword) |
 | `Dimension { value: f64, unit: DimensionUnit }` | `DimensionUnit::{Px, Rem}`; `fn to_px(&self, rem_base: f64) -> f64` |
 | `Duration { value: f64, unit: DurationUnit }` | `DurationUnit::{Ms, S}`; `fn to_millis(&self) -> f64` |
@@ -598,6 +617,27 @@ specification.
 | `Typography { font_family, font_size, font_weight, letter_spacing, line_height: LineHeight }` | |
 | `LineHeight` | `Multiplier(f64)`, or `Dimension(Dimension)` with the `line_height_dimension` extension |
 | `Blur { kind: BlurKind, radius: Dimension }` | `BlurKind::{Layer, Background}`; the `dxn.dtcg.blur` extension |
+
+#### The color API
+
+| Signature | Description |
+|---|---|
+| `fn Color::new(color_space: ColorSpace, components: [f64; 3], alpha: f64) -> Color` | A color from numeric components, without `hex` |
+| `fn coordinates(&self) -> [f64; 3]` | The components as numbers, `none` counting as 0 |
+| `fn convert(&self, space: ColorSpace) -> Color` | The color in `space`, components clamped to the space's ranges; alpha kept, `hex` dropped |
+| `fn mix(&self, other: &Color, amount: f64) -> Color` | `mix_in` in OKLCH |
+| `fn mix_in(&self, other: &Color, amount: f64, space: ColorSpace) -> Color` | CSS Color 4 interpolation in `space` (premultiplied alpha, shorter hue arc); the result is in `space` |
+| `fn lighten(&self, amount: f64) -> Color`, `fn darken(&self, amount: f64) -> Color` | OKLCH lightness shifted by `amount`, in the color's space |
+| `fn with_alpha(&self, alpha: f64) -> Color` | The color with `alpha` clamped to `[0, 1]` |
+| `fn to_hex(&self) -> String`, `fn Color::from_hex(hex: &str) -> Option<Color>` | 6-digit sRGB hex out and in |
+| `fn luminance(&self) -> f64`, `fn contrast(&self, other: &Color) -> f64` | WCAG 2.x relative luminance and contrast ratio |
+| `fn in_gamut(&self, space: ColorSpace) -> bool`, `fn clamp_to_gamut(&self, space: ColorSpace) -> Color` | Gamut test (linear light; sRGB's gamut for HSL and HWB) and clipping |
+| `fn to_json(&self) -> serde_json::Value` | The DTCG JSON form |
+
+Every other value model (`Dimension`, `Duration`, `CubicBezier`, `FontFamily`, `FontWeight`,
+`StrokeStyle`, `Border`, `Transition`, `ShadowLayer`, `Shadow`, `Gradient`, `Typography`) also has
+`fn to_json(&self) -> serde_json::Value`, and the twelve models of the DTCG types implement serde's
+`Serialize` and `Deserialize` with their DTCG JSON forms (deserializing validates the type). Details: [color conversions](05-value-types.md#color-conversions).
 
 #### `TypedValue`
 
@@ -718,6 +758,7 @@ enum DtcgError {
     Projection { path: String, message: String },
     TokenType { resource: ResourceId, path: String, message: String },
     InvalidReference { resource: ResourceId, reference: String, message: String },
+    Expression { resource: ResourceId, path: String, message: String },
     InvalidInput { message: String },
     UnknownModifier { modifier: String, known: Vec<String> },
     UnknownContext { modifier: String, context: String, allowed: Vec<String>, message: String },
@@ -751,9 +792,107 @@ struct DtcgDiagnostic { /* … */ }
 enum DtcgDiagnosticCode {
     InvalidResourceId, InvalidPointer, InvalidJson, InvalidDocument, UnknownDocument,
     DuplicateDocument, LimitExceeded, DocumentCycle, Token, UnresolvedReference, Projection,
-    Reference, Selection, InvalidInput,
+    Reference, Selection, InvalidInput, Expression,
 }
 ```
 
 The mapping from `DtcgError` is in
 [The `diagnostics` feature](11-errors-limits-and-diagnostics.md#the-diagnostics-feature).
+
+## Expressions (feature `expressions`)
+
+The guide is [Expressions](15-expressions.md). Always present, without the feature:
+`EXPRESSION_EXTENSION`, `ResolvedToken::snapshot`, `DtcgError::Expression`,
+`DtcgDiagnosticCode::Expression`, `DocumentKind`, the module catalog methods and the color API.
+
+### `EXPRESSION_EXTENSION`
+
+```rust,ignore
+const EXPRESSION_EXTENSION: &str = "dxn.dtcg.expressions";
+```
+
+The `$extensions` key of token expressions and of a document's module declarations.
+
+### `ExpressionOptions`
+
+```rust,ignore
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[non_exhaustive]
+struct ExpressionOptions {
+    step_budget: usize,        // default 1_000 interrupt checks per evaluation (at least 1)
+    memory_limit: usize,       // default 64 MiB per resolution
+    stack_limit: usize,        // default 256 KiB (at least 16 KiB)
+    precision: Option<u32>,    // default Some(6) decimal places; None keeps results unrounded
+    /* host modules and native modules, private */
+}
+```
+
+| Signature | Description |
+|---|---|
+| `fn with_step_budget(self, budget: usize) -> Self`, `fn with_memory_limit(self, limit: usize) -> Self`, `fn with_stack_limit(self, limit: usize) -> Self`, `fn with_precision(self, precision: Option<u32>) -> Self` | Set the public fields |
+| `fn with_module(self, specifier: impl Into<String>, module: ExpressionModule) -> Self` | Registers a JavaScript or TypeScript module under a bare specifier |
+| `fn with_native_module(self, module: NativeModule) -> Self` | Registers a native module under its specifier |
+| `fn modules(&self) -> impl Iterator<Item = (&str, &ExpressionModule)>` | The registered modules |
+| `fn native_modules(&self) -> impl Iterator<Item = &NativeModule>` | The registered native modules |
+| `fn typescript_declarations(&self) -> String` | A `.d.ts` declaring the DTCG value types, `dxn.dtcg`, `dxn.dtcg/color` and every native module |
+
+### `ExpressionModule`
+
+```rust,ignore
+#[derive(Clone, Eq, PartialEq)]
+struct ExpressionModule { /* language and source */ }
+impl Debug for ExpressionModule // prints the language and the source length
+
+impl ExpressionModule {
+    fn javascript(source: impl Into<Arc<str>>) -> Self;
+    fn typescript(source: impl Into<Arc<str>>) -> Self;
+}
+```
+
+### `NativeModule`
+
+```rust,ignore
+#[derive(Clone)]
+struct NativeModule { /* specifier, exports, docs */ }
+impl Debug for NativeModule     // prints the specifier and the export names
+impl PartialEq, Eq for NativeModule // identity: clones are equal
+```
+
+| Signature | Description |
+|---|---|
+| `fn new(specifier: impl Into<String>) -> Self` | An empty module imported as `specifier` |
+| `fn specifier(&self) -> &str` | Its specifier |
+| `fn function<Args, F: NativeFunction<Args>>(self, name: impl Into<String>, function: F) -> Self` | Exports a closure; panics when `name` is not a JavaScript identifier or is a reserved word |
+| `fn constant(self, name: impl Into<String>, value: impl Serialize) -> Self` | Exports a JSON constant; panics when `value` does not serialize or `name` is not a valid export name |
+| `fn describe(self, name: &str, typescript: impl Into<String>, docs: impl Into<String>) -> Self` | The TypeScript type and documentation of an export, for the declarations |
+| `fn with_docs(self, docs: impl Into<String>) -> Self` | Documentation of the module |
+
+### `NativeFunction`, `NativeReturn` and `Json`
+
+```rust,ignore
+trait NativeFunction<Args>: Send + Sync + 'static { /* hidden */ }
+trait NativeReturn { /* hidden */ }
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+struct Json<T>(pub T); // any serializable result
+```
+
+`NativeFunction<(A0, …, An)>` is implemented for every `Fn(A0, …, An) -> R + Send + Sync +
+'static` with up to eight `A: DeserializeOwned` arguments and `R: NativeReturn`. `NativeReturn` is
+implemented for `()`, `bool`, `char`, the number types, `String`, `&'static str`,
+`serde_json::Value`, `Vec<T>`, `Option<T>`, `[T; N]` and `BTreeMap<String, T>` of serializable
+`T`, the twelve `values` models (`Color` through `Typography`), `Json<T>` for any `T: Serialize`,
+and `Result<T, E>` for any `T: Serialize` and `E: Display`.
+
+### `expression_module`
+
+```rust,ignore
+#[expression_module(specifier = "…")]
+impl Type { /* pub fns */ }
+// generates: impl Type { pub fn expression_module() -> NativeModule }
+```
+
+An attribute macro from `dxn_dtcg_derive`, re-exported as `dxn_dtcg::expressions::expression_module`.
+Function attributes: `#[expression(name = "…")]` (the export name, default camelCase) and
+`#[expression(ts = "…")]` (the TypeScript signature). See
+[the macro](15-expressions.md#the-expression_module-macro).

@@ -195,17 +195,19 @@ projected token can alias an unprojected one. See [Typed projection](08-typed-pr
 | Crate | Kind | Contents |
 |---|---|---|
 | `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, diagnostics |
-| `dxn_dtcg_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` |
+| `dxn_dtcg_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]`, `#[expression_module]` |
 
-`dxn_dtcg` depends on the derive crate and re-exports both macros, so applications depend only
+`dxn_dtcg` depends on the derive crate and re-exports its macros, so applications depend only
 on `dxn_dtcg`.
 
 | Feature | Default | Adds |
 |---|---|---|
 | `diagnostics` | off | `DtcgDiagnostic` and `DtcgDiagnosticCode`, plus `AffectedResolution::nodes_visited()` |
+| `expressions` | off | Computed tokens: the `expressions` module (`ExpressionOptions`, `ExpressionModule`, `NativeModule`, `expression_module`), `RuntimeOptions::with_expressions`, and the QuickJS engine and oxc compiler behind them ([expressions](15-expressions.md)) |
 
-Runtime dependencies are `serde`, `serde_json` (with `preserve_order`), `sha2` and `thiserror`. The
-derive crate depends on `syn`, `quote` and `proc-macro2`.
+Runtime dependencies are `serde`, `serde_json` (with `preserve_order`), `sha2` and `thiserror`;
+the `expressions` feature adds `quickjs-jit` (QuickJS, compiled from C) and `oxc`. The derive crate
+depends on `syn`, `quote` and `proc-macro2`.
 
 ## Platform support
 
@@ -213,12 +215,14 @@ derive crate depends on `syn`, `quote` and `proc-macro2`.
 |---|---|
 | Linux x86_64 | CI: `cargo fmt`, Clippy with `-D warnings`, tests, `cargo package` |
 | Windows x86_64 | CI: same as Linux |
-| `wasm32-unknown-unknown` | CI: `cargo check --workspace --target wasm32-unknown-unknown` |
+| `wasm32-unknown-unknown` | CI: `cargo check --workspace --target wasm32-unknown-unknown`; with `expressions`, a build with an LLVM clang and a test group under Node |
 | macOS, iOS, Android, other `std` targets | Expected to work; not covered by CI |
 
-The crates:
+With the default features, the crates:
 
-- contain no `unsafe` code, build scripts, platform-conditional code or FFI;
+- contain no `unsafe` code, build scripts, platform-conditional code or FFI (the `expressions`
+  feature adds QuickJS through its C bindings, a counting allocator for the engine, and the
+  WebAssembly clock symbol described in [expressions](15-expressions.md#webassembly));
 - need `std` (`Arc`, `BTreeMap`, `HashSet`); `no_std` is not supported;
 - start no threads and need no async runtime, clock, randomness or environment access;
 - need Rust **1.97** or newer and use edition 2024. The repository pins the toolchain in
@@ -243,6 +247,14 @@ runtime accepts them only when created with
   ([value types](05-value-types.md#dxndtcgblur-extension));
 - typography `lineHeight` given as a `dimension` as well as the standard unitless number, the form
   design tools commonly export.
+
+Computed tokens are **off twice**: the `expressions` feature compiles the engine in, and
+`RuntimeOptions::with_expressions` turns evaluation on for one runtime. Without both, a token's
+`$extensions["dxn.dtcg.expressions"]` is opaque metadata and resolution is exactly as described in
+the other chapters; with both, a token computes its value with a JavaScript or TypeScript
+expression and its `$value` stays the valid DTCG snapshot
+([expressions](15-expressions.md)). The color conversion API on `values::Color` needs no feature
+([value types](05-value-types.md#color-conversions)).
 
 `LocalReferencePolicy` needs no options: a host that loads documents from a local tree applies it
 in its loader to allow only relative local references
@@ -269,3 +281,5 @@ in its loader to allow only relative local references
 | **Occurrence** | A `SourceOccurrence`: one terminal source, as authored, together with where it came from. Used by the inspection APIs. |
 | **Fingerprint** | The SHA-256 digest of a resolved token set's paths, types, values and sources, as a hex string. Metadata does not contribute. |
 | **Extensions** | Opt-in value shapes beyond DTCG 2025.10, selected with `ValueExtensions` in `RuntimeOptions`. Not to be confused with `$extensions` metadata. |
+| **Expression** | A JavaScript or TypeScript expression in a token's `$extensions["dxn.dtcg.expressions"]` that computes the token's value when expressions are enabled. |
+| **Snapshot** | The resolved `$value` of a token whose expression was evaluated (`ResolvedToken::snapshot`): what tools that ignore the extension read. |

@@ -22,12 +22,14 @@ introduction and quick examples, start with the [project README](../README.md).
 | 12 | [DTCG 2025.10 conformance](12-conformance.md) | What is supported, extensions, implementation-defined behavior, what is not supported |
 | 13 | [API reference](13-api-reference.md) | Every public type, trait, function and method |
 | 14 | [Architecture and contributing](14-architecture-and-contributing.md) | Source layout, pipeline internals, invariants, tests, CI and releases |
+| 15 | [Expressions](15-expressions.md) | Computed tokens with JavaScript and TypeScript (feature `expressions`): the format, evaluation, modules, Rust functions, built-in modules, the sandbox, declarations, WebAssembly |
 
 ## Reading paths
 
 - **Using the crate in an application:** chapters 1, 2, 6, 7 and 8, with 11 for error handling.
 - **Writing token files and resolvers:** chapters 3, 4, 5 and 6, with 12 for the edge cases.
 - **Building an editor or linter for token files:** chapters 9 and 10 on top of the application path.
+- **Computing tokens from other tokens:** chapter 15, after chapters 4 and 5.
 - **Contributing to the crates:** chapter 14, after chapter 1.
 
 ## Conventions

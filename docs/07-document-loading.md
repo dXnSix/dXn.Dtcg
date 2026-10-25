@@ -10,6 +10,7 @@ local reference policy.
 - [Fragments](#fragments)
 - [The request/provide protocol](#the-requestprovide-protocol)
 - [Loader patterns](#loader-patterns)
+- [Module documents](#module-documents)
 - [Catalog API](#catalog-api)
 - [Limits](#limits)
 - [Caching and sharing](#caching-and-sharing)
@@ -19,7 +20,9 @@ local reference policy.
 ## The catalog
 
 Each `DtcgRuntime` owns a catalog that maps `ResourceId`s to document text (`Arc<str>`), plus a
-revision counter and the id of the root document.
+revision counter and the id of the root document. Every entry has a kind (`DocumentKind`): a JSON
+document, or the source text of a JavaScript or TypeScript module that token expressions import
+(see [module documents](#module-documents)).
 
 - **On insert**, the runtime checks that the id is a valid resource id and that the text is
   well-formed JSON. Nothing else is checked yet. A syntactically valid but wrong DTCG document is
@@ -168,6 +171,7 @@ pub struct DocumentRequest {
     pub resource_id: ResourceId,     // the normalized id to provide
     pub referenced_from: ResourceId, // the document that contains the reference
     pub original_reference: Arc<str>,// the reference as written, fragment included
+    pub kind: DocumentKind,          // what to provide: Json, or Module (requested only by expressions)
 }
 ```
 
@@ -199,7 +203,8 @@ The loop always makes progress, because each round provides at least one documen
 the catalog, and [`RuntimeLimits::max_documents`](#limits) bounds what one discovery can reach.
 
 `provide_requested_json(&request, json)` is equivalent to
-`provide_json(request.resource_id.as_str(), json)`, minus the re-parse of the id.
+`provide_json(request.resource_id.as_str(), json)`, minus the re-parse of the id, and checks that
+the request asks for JSON. Without expressions, every request has `kind: DocumentKind::Json`.
 
 ## Loader patterns
 
@@ -373,6 +378,40 @@ fn main() -> Result<(), DtcgError> {
 }
 ```
 
+## Module documents
+
+With the `expressions` feature and `RuntimeOptions::with_expressions`, a token document may declare
+JavaScript and TypeScript modules at its root (`$extensions["dxn.dtcg.expressions"].modules`), and
+token expressions import them ([expressions](15-expressions.md#modules-in-token-documents)). Module
+text loads through the same protocol: when an expression imports a declared module the catalog
+lacks, resolution returns `Missing` with a `DocumentRequest` of `kind: DocumentKind::Module`, and
+the caller answers with `provide_requested_module(&request, source)`. `DocumentKind` and the module
+methods exist in every build, so loaders compile the same way with or without the feature; only a
+runtime with expressions requests modules:
+
+```rust,ignore
+for request in requests {
+    let text = load(request.resource_id.as_str())?;
+    match request.kind {
+        DocumentKind::Json => runtime.provide_requested_json(&request, text)?,
+        DocumentKind::Module => runtime.provide_requested_module(&request, text)?,
+        _ => unreachable!("new kinds come with new features"),
+    }
+}
+```
+
+- A module's relative imports (`./units.ts`) resolve against its resource id and are requested in
+  later rounds, until the whole static import graph is loaded; `referenced_from` is then the
+  importing module.
+- The language follows the extension: `.js` and `.mjs` are JavaScript, `.ts` and `.mts`
+  TypeScript; any other extension fails with `DtcgError::Expression`.
+- A module text is not checked when it is provided, only when a resolution imports it.
+- Only modules that expressions reach are requested; `validate_complete` requests the modules
+  that the sources of every context declare, and what those import.
+- A JSON reference (a resolver source, a `$ref`) to a module document fails with
+  `DtcgError::InvalidDocument`, and so does a request answered with the wrong kind.
+- Affected resolution does not follow module edits: after `replace_module`, resolve fully.
+
 ## Catalog API
 
 | Method | Effect | Revision |
@@ -384,14 +423,18 @@ fn main() -> Result<(), DtcgError> {
 | `provide_requested_json(&request, json)` | `provide_json` keyed by `request.resource_id` | +1 |
 | `provide_json_batch(iter)` | Inserts several documents, **all or nothing**. A repeated id in the batch fails with `DuplicateDocument`. | +1 for the batch |
 | `replace_json(id, json)` | Like `provide_json`, but the document must already exist (`UnknownDocument` otherwise) | +1 |
+| `provide_module(id, source)` | Inserts a module's source text, replacing a previous module at `id` | +1 |
+| `provide_requested_module(&request, source)` | `provide_module` keyed by `request.resource_id`, for a request of `kind: DocumentKind::Module` | +1 |
+| `replace_module(id, source)` | Like `provide_module`, but the module must already exist (`UnknownDocument` otherwise) | +1 |
 | `replace_json_and_resolve_affected(…)` | See [Incremental resolution](09-incremental-resolution.md) | +1, or +2 when it rolls back |
-| `remove_document(id)` | Removes a document, which must exist (`UnknownDocument` otherwise) | +1 |
+| `remove_document(id)` | Removes a JSON document or a module, which must exist (`UnknownDocument` otherwise) | +1 |
 | `contains_document(id)` | `Ok(true)` if present. `Err` only for an invalid id. | unchanged |
 | `catalog_revision()` | The current revision (`u64`) | n/a |
 
 **Atomicity.** A mutation that fails, because of an invalid id, malformed JSON, a duplicate in a
-batch or an unknown document, changes nothing: neither the documents nor the
-revision. The revision increases on every successful mutation, even if the new text is identical to
+batch, an unknown document or a kind mismatch (JSON provided where the catalog holds a module, a
+module where it holds JSON, or a request answered with the other kind), changes nothing: neither
+the documents nor the revision. The revision increases on every successful mutation, even if the new text is identical to
 the old.
 
 `limits()` and `options()` return what the runtime was created with. `Debug` for `DtcgRuntime`
@@ -406,7 +449,7 @@ limits with the `with_*` setters. Pass it to `DtcgRuntime::with_limits`, or comb
 
 | Limit | Default | What it bounds |
 |---|---|---|
-| `max_documents` | 256 | Per discovery: the source occurrences collected (loaded and inline sources, and missing-document requests), and separately the expansion steps (every set reference, local reference, document load and nested resolver, even one that contributes no source) |
+| `max_documents` | 256 | Per discovery: the source occurrences collected (loaded and inline sources, and missing-document requests), and separately the expansion steps (every set reference, local reference, document load and nested resolver, even one that contributes no source). Module documents are a third, separate count: one resolution loads at most `max_documents` of them. |
 | `max_reference_depth` | 64 | Nesting of resolver and source references |
 | `max_alias_depth` | 64 | Reference hops in one chain: aliases, token pointers and document pointers |
 | `max_value_nodes` | 4,000,000 | JSON nodes copied into resolved values through references |

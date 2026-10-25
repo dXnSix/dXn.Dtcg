@@ -300,6 +300,8 @@ fn main() -> Result<(), DtcgError> {
 }
 ```
 
+The recipe skips colors in other spaces. To emit them as sRGB, convert first with `color.convert(ColorSpace::Srgb)`, or format `color.to_hex()`; see [Color conversions](./value-types.md#color-conversions).
+
 ## Reload a token file
 
 When a file changes on disk, replace it in the catalog and compare fingerprints to see whether anything the UI shows actually changed. `replace_json` fails for an unknown id and for malformed JSON, and leaves the catalog untouched in both cases, so a half-saved file never breaks the running theme.
@@ -339,7 +341,7 @@ fn main() -> Result<(), DtcgError> {
 }
 ```
 
-If edits come keystroke by keystroke in a large file set, see [Incremental resolution](./incremental.md).
+If edits come keystroke by keystroke in a large file set, see [Incremental resolution](./incremental.md). A changed JavaScript or TypeScript module that [expressions](./expressions.md) import is reloaded with `replace_module` instead, followed by a full `resolve`.
 
 ## Report deprecated tokens
 
@@ -489,5 +491,6 @@ Editors and linters for token files combine three groups of APIs, each with its 
 | Rename or move a token file and fix every reference | `source_references()` | [Source inspection](./inspection.md#listing-reference-sites) |
 | Show the authored value next to the resolved one | `ResolvedToken::authored_value` and `value` | [Aliases and references](./aliases.md) |
 | Export the final theme for another tool | `ResolvedTokens::to_document()` | [Token documents](./token-documents.md#export) |
+| Flag computed tokens whose authored `$value` is stale | `ResolvedToken::snapshot` compared with `value` | [Expressions](./expressions.md#how-resolution-evaluates-an-expression) |
 
 Next: [Incremental resolution](./incremental.md), or [Troubleshooting](./troubleshooting.md).

@@ -42,7 +42,7 @@ needs a wildcard arm.
 | `InvalidPointer(String)` | A JSON Pointer is malformed (no `#/`, a bad `~` escape, a bad `%` escape, an array index with a sign or a leading zero), points to nothing, or is part of a circular chain of document pointers. Also raised by a `resolutionOrder` step whose `$ref` names an undefined set or modifier, and by a source reference whose fragment does not exist. |
 | `InvalidJson { resource, message }` | A provided document is not well-formed JSON. `message` is the parser's, with line and column. |
 | `InvalidDocument { resource, message }` | The resolver structure is wrong: a version other than `2025.10`, an unknown member in a resolver, set, modifier or inline step, a missing or empty `resolutionOrder`, a modifier with fewer than two contexts, an inline step without `type` or `name`, a modifier defined by two steps, a default that names no context, a source reference into `resolutionOrder` or `modifiers`, a local reference cycle. Also a non-object group, and resource `catalog` with message `root document is not set` when no root was set. |
-| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
+| `UnknownDocument(ResourceId)` | `replace_json`, `replace_module`, `remove_document` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
 | `DuplicateDocument(ResourceId)` | `provide_json_batch` received the same id twice |
 | `LimitExceeded { kind, limit }` | A [runtime limit](#runtime-limits) or one of the [fixed bounds](#fixed-bounds) was exceeded. `kind` names it. |
 | `DocumentCycle(String)` | A resolver includes itself, directly or through other resolvers. The field is the resource id. |
@@ -51,6 +51,7 @@ needs a wildcard arm.
 | `UnresolvedReference { resource, path, target, message }` | A reference names no resolvable target: a missing alias target, an alias to a group (`{group}`) or an empty alias (`{}`), or a missing or malformed `$extends` target. `path` is the referring token or group, `target` the reference as written. |
 | `Projection { path, message }` | A projected token is missing or does not convert into the requested Rust type, or `ResolvedToken::typed` cannot convert a value. Used only for projection. |
 | `InvalidReference { resource, reference, message }` | A reference breaks `LocalReferencePolicy` |
+| `Expression { resource, path, message }` | With [expressions](15-expressions.md) enabled: a malformed expression object (`path` is the token) or module declaration (`resource` is the document, `path` the specifier); a syntax error or an uncaught exception, with the authored line and column when QuickJS reports one; a result that is not a JSON value; a stack overflow; an unknown module or export; a module that does not compile or evaluate (a document module names its resource and the specifier that imported it). |
 | `InvalidInput { message }` | `selection_from_json` got something other than a JSON object of strings |
 | `UnknownModifier { modifier, known }` | A selection names a modifier that no reached resolver declares (`known` lists the declared ones in declaration order, root first), or a name that matches several declared modifiers case-insensitively (`known` lists the candidates). |
 | `UnknownContext { modifier, context, allowed, message }` | A selection names a context the modifier does not declare (`selected modifier context is unknown`), a context that matches several case-insensitively, the same modifier twice (`modifier is selected twice`), or omits a modifier without a default (`modifier has no default and was not selected`, with an empty `context`). `allowed` lists the modifier's contexts. |
@@ -186,7 +187,7 @@ chainable setters, not with a struct literal.
 
 | Limit | Default | Setter | Bounds | Error `kind` |
 |---|---|---|---|---|
-| `max_documents` | 256 | `with_max_documents` | Two counts per discovery, checked separately: the source occurrences it collects (loaded and inline sources and missing-document requests), and its expansion steps (each set reference, local reference, document load and nested resolver, even one that yields no source). Every source counts, inline ones included, so one set with 300 inline sources exceeds the default. Preview occurrences count together with the root's sources. For `source_references`, it bounds the distinct documents loaded and, in discovery's units, the steps and the inline sources of repeated walks (a location reached again under different reference-object overrides); first walks are free and token-document targets are never walked. | `"documents"` |
+| `max_documents` | 256 | `with_max_documents` | Two counts per discovery, checked separately (and, with expressions, a third: the module documents one resolution loads): the source occurrences it collects (loaded and inline sources and missing-document requests), and its expansion steps (each set reference, local reference, document load and nested resolver, even one that yields no source). Every source counts, inline ones included, so one set with 300 inline sources exceeds the default. Preview occurrences count together with the root's sources. For `source_references`, it bounds the distinct documents loaded and, in discovery's units, the steps and the inline sources of repeated walks (a location reached again under different reference-object overrides); first walks are free and token-document targets are never walked. | `"documents"` |
 | `max_reference_depth` | 64 | `with_max_reference_depth` | How deeply resolver and source references nest: each `$ref` hop and each nested resolver adds a level | `"reference depth"` |
 | `max_alias_depth` | 64 | `with_max_alias_depth` | Reference hops in one resolution chain, counting curly-brace aliases, pointers to tokens and pointers to other document locations alike. The count does not depend on authored order. Literal values cost nothing, so a limit of 0 still resolves tokens without references. | `"alias depth"` |
 | `max_value_nodes` | 4,000,000 | `with_max_value_nodes` | JSON nodes that references copy into resolved values in one resolution, checked before each copy. This stops pointer fan-out that would build exponentially large values. | `"value nodes"` |
@@ -199,11 +200,27 @@ authored document reaches them except through references or `$extends`:
 
 | Bound | Value | Error `kind` |
 |---|---|---|
-| Nesting depth of a resolved value, root level included | 128 | `"value depth"` |
+| Nesting depth of a resolved value, root level included (an expression's result too) | 128 | `"value depth"` |
 | Segments of a flattened token or group path | 128 | `"path depth"` |
 
 Together with the limits, they keep every algorithm iterative or bounded: nothing recurses without
 a bound, and a chain of 100,000 pointers fails with `alias depth` instead of overflowing the stack.
+
+### Expression limits
+
+With the `expressions` feature, `ExpressionOptions` bounds the JavaScript engine of each
+resolution ([expressions](15-expressions.md#the-sandbox-and-its-limits)). Expression code cannot
+catch any of these limits, and the runtime resolves normally afterwards.
+
+| Option | Default | Bounds | Error |
+|---|---|---|---|
+| `step_budget` | 1,000 | QuickJS interrupt checks (about every 10,000 calls and loop iterations) of one evaluation: an expression call, a module's top-level code, or an import cycle's as a whole; at least 1 | `LimitExceeded { kind: "expression steps" }` |
+| `memory_limit` | 64 MiB | Bytes the engine of one resolution allocates | `LimitExceeded { kind: "expression memory" }` |
+| `stack_limit` | 256 KiB | Native stack JavaScript code uses below the resolving call; at least 16 KiB | `Expression` with a stack overflow message |
+| (fixed) | about 120 brackets, 40 function bodies or 300 chained operators | How deeply the text of an expression or module nests, bounded before the compiler sees it | `Expression`: `the source nests too deeply` |
+
+Expression results also count toward `max_value_nodes` and the 128-level value depth, and
+expression inputs toward `max_alias_depth`.
 
 ### Setting limits
 
@@ -298,6 +315,7 @@ variants.
 | `Reference` | `InvalidReference` | resource | the reference | message |
 | `Selection` | `UnknownModifier` and `UnknownContext` | none | the modifier | the full `Display` text |
 | `InvalidInput` | `InvalidInput` | none | none | message |
+| `Expression` | `Expression` | resource | token path (or specifier) | the error's kind and, when known, authored position only, such as `TypeError at line 2, column 9`: never the JavaScript message, which may quote document text or thrown values |
 
 The messages the runtime writes contain ids, paths and short reasons, never document bodies. A
 message from your own conversion function is passed through as is.

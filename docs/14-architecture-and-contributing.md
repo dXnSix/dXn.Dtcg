@@ -23,10 +23,13 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 │   ├── dxn_dtcg/
 │   │   ├── src/                  the runtime (see the module map)
 │   │   ├── tests/                one integration-test group per feature
-│   │   │   └── fixtures/dtcg-test-suite/   the vendored official 2025.10 corpus (not packaged)
+│   │   │   ├── fixtures/dtcg-test-suite/   the vendored official 2025.10 corpus (not packaged)
+│   │   │   ├── fixtures/expressions/       the ES module library fixture of the module tests
+│   │   │   └── expression_module_ui/       trybuild cases of #[expression_module]
 │   │   └── benches/resolver.rs   timing baseline, written as a #[test]
 │   └── dxn_dtcg_derive/
-│       ├── src/lib.rs            the two derive macros
+│       ├── src/lib.rs            the two derive macros and `#[expression_module]`
+│       ├── src/expression_module.rs  the #[expression_module] attribute (feature expressions of dxn_dtcg)
 │       └── tests/                derive shape, projection and hardening tests
 │           └── ui/               trybuild compile-fail cases with their .stderr snapshots
 ├── docs/                         this documentation (compiled as doctests)
@@ -43,7 +46,8 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 
 ## Module map
 
-All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the public items.
+All modules of `dxn_dtcg` are private except `values` and, with its feature, `expressions`;
+`lib.rs` re-exports the public items.
 
 | Module | Responsibility |
 |---|---|
@@ -62,7 +66,17 @@ All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the p
 | `reference_positions.rs` | Where a curly-brace alias may appear inside a value, and which type it must target |
 | `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected` |
 | `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
-| `values.rs` | The public `values` module: typed models, `TypedValue`, `ResolvedToken::typed` and their `FromDtcgValue` implementations |
+| `values.rs` | The public `values` module: typed models, `TypedValue`, `ResolvedToken::typed` and their `FromDtcgValue` implementations, DTCG JSON forms and serde for every model |
+| `color.rs` | The color API on `values::Color`: CSS Color 4 conversions between the 14 spaces, mixing, lightness, hex, contrast, gamut |
+| `expression_extension.rs` | `EXPRESSION_EXTENSION`, present without the feature |
+| `expressions/mod.rs` | Feature `expressions`: `ExpressionOptions`, the public re-exports, and the in-crate QuickJS clock symbol on `wasm32-unknown-unknown` |
+| `expressions/format.rs` | Validation of the token expression object |
+| `expressions/compile.rs` | oxc: syntax and early errors, rejection of `import()`, static import scan, TypeScript stripping with a source map |
+| `expressions/nesting.rs` | The bound on how deeply a source nests, checked before oxc's recursive parser and walks see it |
+| `expressions/engine.rs` | The per-resolution QuickJS `Session`: generated wrapper modules, the module table and loader, module evaluation in ES order (Tarjan components), the native bridge, JSON conversion, error positions |
+| `expressions/sandbox.rs` | The counting allocator (memory limit, stack-overflow probe), the step budget's interrupt handler, the hardening script |
+| `expressions/modules.rs` | `ExpressionModule`, document module declarations, the request walk over static import graphs |
+| `expressions/native.rs`, `builtins.rs`, `declarations.rs` | `NativeModule` and its traits, the `dxn.dtcg` and `dxn.dtcg/color` modules, the `.d.ts` renderer |
 | `dtcg_tokens.rs`, `dtcg_component_tokens.rs`, `from_dtcg_value.rs`, `type_registry.rs` | Projection traits, built-in conversions, `join_token_path` |
 | `local_reference.rs` | `LocalReferencePolicy` |
 | `affected_resolution.rs` | `AffectedResolution` |
@@ -70,7 +84,9 @@ All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the p
 | `diagnostics/mod.rs` | `DtcgDiagnostic`, compiled only with the `diagnostics` feature |
 
 `dxn_dtcg_derive/src/lib.rs` parses the `#[dtcg(...)]` attributes strictly with `syn` and
-emits a `DtcgTokens` implementation (and, for the component derive, `DtcgComponentTokens`). The
+emits a `DtcgTokens` implementation (and, for the component derive, `DtcgComponentTokens`);
+`expression_module.rs` turns an `impl` block's public functions into `NativeModule`
+registrations with mapped TypeScript signatures. The
 generated code refers to `::dxn_dtcg::…` and `::core::…` paths only, which is why applications
 use the macros through `dxn_dtcg` and why local aliases cannot change it.
 
@@ -143,6 +159,10 @@ structure.
 - The effective type is the own `$type`, else the type of a whole-value reference's target, else
   the group's; an own type that differs from the target's is a `reference type mismatch`.
 - `validate_value_with` checks the result with the runtime's `ValueExtensions`.
+- With expressions enabled, `evaluate_expression` then resolves the token's expression inputs
+  through `resolve_value` (same limits, same cycle detection), evaluates the expression in the
+  resolution's lazily started `Session`, converts and bounds the result, validates it against the
+  same type and keeps the resolved `$value` as the snapshot.
 
 `resolver.rs` then computes the fingerprint: SHA-256 over `(path, type, value, source)` for every
 token in order, hashing object members with sorted keys.
@@ -154,7 +174,7 @@ token in order, hashing object members with sorted keys.
 and flattening, then seeds the affected set with the named paths and everything under them, every
 changed or new flattened definition (`same_definition`), and the removed paths. If any group uses
 `$extends`, or the previous state is unknown, every token is affected. `DependencyCollector`
-builds the reverse dependencies, marks readers of document pointers as affected, and the closure is
+builds the reverse dependencies (with expressions enabled, from expression inputs too), marks readers of document pointers as affected, and the closure is
 walked outwards. Only affected tokens are resolved. The runtime restores the previous document
 unless the result is `Ready`. `ResolvedTokens::apply_affected` patches a snapshot so that it equals a
 full resolution.
@@ -262,7 +282,9 @@ mod documentation {
 Every code block in the Markdown must therefore carry a language tag: `rust` (compiled and run),
 `rust,no_run` (compiled), `rust,ignore` (only for signature listings that cannot compile), or a
 non-Rust tag such as `json`, `toml`, `text` or `bash`. Doctests see the dev-dependencies, so the
-`diagnostics` feature and `serde_json` are available. When you change public behavior, update the
+`diagnostics` feature and `serde_json` are available. The expressions chapter is compiled only
+with the `expressions` feature (its module in `lib.rs` is `#[cfg(feature = "expressions")]`), so default
+doctests stay free of the engine. When you change public behavior, update the
 affected chapters and check them, one chapter at a time:
 
 ```bash
@@ -309,6 +331,21 @@ behavior change gets a new group.
 | `dxn_dtcg_derive/tests/derive_projection.rs`, `derive_shapes.rs` | Narrow projection and derive shapes with stable component metadata |
 | `dxn_dtcg_derive/tests/derive_hardening.rs` | `Option` fields, hygienic generated code, raw identifiers, per-field generic bounds |
 | `dxn_dtcg_derive/tests/compile_fail.rs` | `trybuild` compile-fail cases in `tests/ui` |
+| `dxn_dtcg/tests/color_conversion.rs` | The color API on `values::Color` against CSS Color 4 reference values (colorjs.io), round trips, operations |
+| `dxn_dtcg/tests/value_serde.rs` | Serde for every value model through its DTCG JSON form, and rejection of invalid JSON |
+| `dxn_dtcg/tests/expressions_disabled.rs` | Expression extensions stay opaque without the feature or the option (run with and without `--features expressions`) |
+| `dxn_dtcg/tests/expressions_format.rs` | The expression object's validation |
+| `dxn_dtcg/tests/expressions_evaluation.rs` | Snapshots, types, inputs as references with their limits and cycles, result conversion and rounding |
+| `dxn_dtcg/tests/expressions_sandbox.rs` | Removed capabilities, frozen built-ins, uncatchable limits, deterministic step budgets, the nesting bound (including a 1 MiB stack proof), determinism |
+| `dxn_dtcg/tests/expressions_typescript.rs` | TypeScript stripping, authored error positions, the diagnostic code |
+| `dxn_dtcg/tests/expressions_apis.rs` | Every resolving API, affected resolution, export round trips |
+| `dxn_dtcg/tests/expressions_modules.rs` | Host modules, ES module semantics and cycle order, module errors, the module library fixture |
+| `dxn_dtcg/tests/expressions_document_modules.rs` | Module declarations, the request/provide protocol for modules, catalog kinds, `validate_complete` |
+| `dxn_dtcg/tests/expressions_native.rs` | `NativeModule`, the bridge's errors and panics, once-per-resolution module evaluation |
+| `dxn_dtcg/tests/expressions_builtin.rs`, `expressions_color.rs` | The `dxn.dtcg` and `dxn.dtcg/color` modules |
+| `dxn_dtcg/tests/expressions_native_macro.rs` | `#[expression_module]`, with `trybuild` cases in `tests/expression_module_ui` |
+| `dxn_dtcg/tests/expressions_declarations.rs` | The `.d.ts` parses (oxc) and matches the run-time exports |
+| `dxn_dtcg/tests/expressions_wasm.rs` | Expressions on `wasm32-unknown-unknown` under Node (see below) |
 
 ### The official corpus
 
@@ -328,6 +365,26 @@ the snapshots and review the diff:
 TRYBUILD=overwrite cargo test -p dxn_dtcg_derive --test compile_fail
 ```
 
+The `#[expression_module]` cases live in `crates/dxn_dtcg/tests/expression_module_ui/`:
+
+```bash
+TRYBUILD=overwrite cargo test -p dxn_dtcg --features expressions --test expressions_native_macro
+```
+
+### The WebAssembly group
+
+`expressions_wasm.rs` runs under `wasm-bindgen-test-runner` with Node. It needs an LLVM clang
+with the WebAssembly target and `llvm-ar` (Apple's clang has none; Homebrew's `llvm` works), and
+the runner at the version of `wasm-bindgen` in `Cargo.lock`:
+
+```bash
+cargo install wasm-bindgen-cli --version 0.2.129 --locked
+CC_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/clang \
+AR_wasm32_unknown_unknown=/opt/homebrew/opt/llvm/bin/llvm-ar \
+CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner \
+cargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --test expressions_wasm
+```
+
 ## CI
 
 `.github/workflows/ci.yml` runs on pull requests and on pushes to `main`, on `ubuntu-latest` and
@@ -337,8 +394,14 @@ TRYBUILD=overwrite cargo test -p dxn_dtcg_derive --test compile_fail
 2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
 3. `cargo test --workspace --all-features` (including the official corpus and the documentation
    doctests)
-4. `cargo check --workspace --target wasm32-unknown-unknown`
+4. `cargo check --workspace --target wasm32-unknown-unknown` (default features: no C compiler)
 5. `cargo package --workspace`
+
+The `--all-features` steps compile QuickJS with GCC on Ubuntu and MSVC on Windows. A second job,
+`wasm-expressions` on `ubuntu-latest`, installs `clang` and `llvm`, installs `wasm-bindgen-cli` at
+the locked `wasm-bindgen` version, and runs
+`cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the
+`expressions_wasm` group.
 
 ## Releases
 

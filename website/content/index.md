@@ -15,7 +15,8 @@ facts:
   - { label: Spec, value: "DTCG 2025.10" }
   - { label: Official fixtures, value: "250 of 250 pass" }
   - { label: Rust, value: "1.97+" }
-  - { label: I/O, value: "none, no unsafe" }
+  - { label: I/O, value: "none" }
+  - { label: Default build, value: "no unsafe, no C" }
   - { label: Targets, value: "native and wasm32" }
   - { label: License, value: "MIT OR Apache-2.0" }
 heroTitle: main.rs
@@ -151,3 +152,26 @@ snapshot.apply_affected(&affected); // equals a full resolve
 ```
 
 See [Incremental resolution](./docs/incremental.md) and [Source inspection](./docs/inspection.md).
+
+## Compute tokens with expressions (opt-in)
+
+With the `expressions` feature and `RuntimeOptions::with_expressions`, a token can compute its value from other tokens with a JavaScript or TypeScript expression stored in its `$extensions`. The `$value` stays a valid DTCG snapshot, so every other tool still reads the document, and without the option the extension is opaque metadata.
+
+```json
+{
+  "accent": { "$type": "color", "$value": { "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] } },
+  "accent-hover": {
+    "$type": "color",
+    "$value": { "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] },
+    "$extensions": { "dxn.dtcg.expressions": {
+      "imports": { "dxn.dtcg/color": ["lighten"] },
+      "inputs": { "accent": "{accent}" },
+      "js": "lighten(accent, 0.08)"
+    } }
+  }
+}
+```
+
+Expressions run in a sandboxed QuickJS engine with no clock or randomness and deterministic step, memory and stack limits, import ES modules from the host or from token documents, and call Rust functions. The feature compiles QuickJS from C and adds `unsafe` code around it; the default build stays free of both, and the color conversions on `values::Color` need no feature.
+
+See [Expressions](./docs/expressions.md) and [Platforms and versions](./docs/platforms.md#webassembly-and-expressions).

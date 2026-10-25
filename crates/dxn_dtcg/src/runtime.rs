@@ -110,8 +110,9 @@ impl DtcgRuntime {
     }
 
     /// Stores the source text of a JavaScript (`.js`, `.mjs`) or TypeScript
-    /// (`.ts`, `.mts`) ES module that token expressions import (feature
-    /// `expressions`). The text is not checked until a resolution imports
+    /// (`.ts`, `.mts`) ES module that token expressions import. It exists in
+    /// every build; only a runtime with the `expressions` feature enabled
+    /// imports modules. The text is not checked until a resolution imports
     /// it; an existing JSON document at the id is a kind mismatch, and the
     /// catalog stays unchanged.
     pub fn provide_module(

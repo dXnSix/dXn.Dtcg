@@ -47,6 +47,11 @@ on a server, in a build script or in the browser through WebAssembly.
   on them. Each resolved set carries a SHA-256 fingerprint you can use as a cache key.
 - **Editor tooling**: inspect authored sources and where they came from, preview unsaved sources
   without touching the catalog, and list every document reference so files can be moved safely.
+- **Computed tokens (opt-in)**: with the `expressions` feature, a token can compute its value
+  with a JavaScript or TypeScript expression stored in `$extensions["dxn.dtcg.expressions"]`,
+  while its `$value` stays the valid DTCG snapshot other tools read. Expressions read other
+  tokens as declared inputs, import ES modules and call Rust functions, and run in a
+  deterministic sandbox; see [Expressions](#expressions).
 - **Bounded on untrusted input**: configurable limits on documents, reference depth, reference
   chains, copied value size and token count, plus fixed bounds on value and path depth. Resource
   ids are normalized, portable and cannot climb above the root, and an opt-in policy rejects
@@ -54,14 +59,17 @@ on a server, in a build script or in the browser through WebAssembly.
 
 ## Platform support
 
-The crates are pure, safe Rust. They have no build scripts, no `unsafe` code, no async runtime and
-no file-system or network access, so they build for any target that has the Rust standard library.
+With the default features the crates are pure, safe Rust: no build scripts, no C code, no
+`unsafe` code, no async runtime and no file-system or network access, so they build for any target
+that has the Rust standard library. The opt-in `expressions` feature adds a JavaScript engine
+written in C (QuickJS), compiled with the platform's C compiler; on WebAssembly it needs an LLVM
+clang (see [Expressions](docs/15-expressions.md#webassembly)).
 
 | Platform | Status |
 |---|---|
 | Linux x86_64 | Tested in CI: formatting, Clippy, tests, packaging |
 | Windows x86_64 | Tested in CI: formatting, Clippy, tests, packaging |
-| WebAssembly (`wasm32-unknown-unknown`) | Built in CI; needs no host I/O, threads or system calls |
+| WebAssembly (`wasm32-unknown-unknown`) | Built in CI, and with the `expressions` feature also tested under Node; needs no host I/O, threads or system calls |
 | macOS, iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI |
 
 - **Rust**: 1.97 or newer, edition 2024. `no_std` is not supported.
@@ -82,8 +90,9 @@ serde_json = "1"
 
 `Cargo.lock` records the exact commit of the tag; to update, change the tag by hand. Depend only on
 a release tag, never on a branch or a path. `dxn_dtcg` re-exports the derive macros, so you do
-not depend on `dxn_dtcg_derive` directly. The one optional feature, `diagnostics`, adds
-redacted error diagnostics and resolution counters for test harnesses.
+not depend on `dxn_dtcg_derive` directly. Two features are optional: `diagnostics` adds redacted
+error diagnostics and resolution counters for test harnesses, and `expressions` adds computed
+tokens.
 
 Releases up to `v1.0.0` were published as `dtcg_runtime` and `dtcg_runtime_derive`. From `v1.1.0`
 they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`: rename the dependency and replace
@@ -361,7 +370,7 @@ JSON strings ──provide──► catalog (ResourceId → document text)
 | Crate | Purpose |
 |---|---|
 | [`dxn_dtcg`](crates/dxn_dtcg) | Catalog, resolver, value validation, typed projection, source inspection, diagnostics |
-| [`dxn_dtcg_derive`](crates/dxn_dtcg_derive) | `#[derive(DtcgTokens)]` and `#[derive(DtcgComponentTokens)]`, re-exported by `dxn_dtcg` |
+| [`dxn_dtcg_derive`](crates/dxn_dtcg_derive) | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` and `#[expression_module]`, re-exported by `dxn_dtcg` |
 
 ## Documentation
 
@@ -384,6 +393,8 @@ The full technical documentation is in [`docs/`](docs/README.md):
 12. [DTCG 2025.10 conformance](docs/12-conformance.md): support, extensions, deviations
 13. [API reference](docs/13-api-reference.md)
 14. [Architecture and contributing](docs/14-architecture-and-contributing.md)
+15. [Expressions](docs/15-expressions.md): computed tokens with JavaScript and TypeScript, modules,
+    Rust functions, the sandbox (feature `expressions`)
 
 ## Value extensions
 
@@ -414,6 +425,41 @@ fn main() -> Result<(), DtcgError> {
 
 See [value types](docs/05-value-types.md#strict-values-and-the-value-extensions) and
 [conformance](docs/12-conformance.md#strict-by-default-value-extensions-on-request).
+
+## Expressions
+
+DTCG values are literals. With the `expressions` feature and
+`RuntimeOptions::with_expressions(ExpressionOptions::default())`, a token can compute its value
+from other tokens with a JavaScript or TypeScript expression in its `$extensions`:
+
+```json
+{
+  "space": {
+    "$type": "dimension",
+    "base": { "$value": { "value": 4, "unit": "px" } },
+    "large": {
+      "$value": { "value": 16, "unit": "px" },
+      "$extensions": {
+        "dxn.dtcg.expressions": {
+          "inputs": { "base": "{space.base}" },
+          "js": "({ ...base, value: base.value * 4 })"
+        }
+      }
+    }
+  }
+}
+```
+
+The `$value` stays a valid DTCG snapshot, so every other tool still reads the document, and
+without the option the extension is opaque metadata. With it, resolution evaluates the expression
+in a sandboxed QuickJS engine (no clock, no randomness, frozen built-ins, deterministic step,
+memory and stack limits), validates the result against the token's type and keeps the resolved
+`$value` as `ResolvedToken::snapshot`. Expressions import ES modules that the host registers or a
+token document declares (loaded through the same request/provide protocol), call Rust functions
+registered as native modules or with `#[expression_module]`, and use the built-in modules
+`dxn.dtcg` (dimensions, durations, rounding) and `dxn.dtcg/color` (conversions between the DTCG
+color spaces, mixing, contrast). The color API is also available in Rust on `values::Color`,
+without the feature. See [Expressions](docs/15-expressions.md).
 
 ## Development
 

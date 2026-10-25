@@ -138,11 +138,21 @@ let extended = DtcgRuntime::from_json_with_options(
 assert!(extended.resolve(&[]).unwrap().is_ready());
 ```
 
-One further addition does not change how standard documents behave:
+Two further additions do not change how standard documents behave:
 
 | Addition | What it adds | Details |
 |---|---|---|
 | `LocalReferencePolicy` | An opt-in rule that allows only relative local references | [`LocalReferencePolicy`](07-document-loading.md#localreferencepolicy) |
+| Expressions (feature `expressions`) | Tokens computed by JavaScript or TypeScript stored in `$extensions["dxn.dtcg.expressions"]` | [Expressions](15-expressions.md) |
+
+Expressions use the room Format §5.2.3 gives tools: vendor data under `$extensions` that other
+tools preserve. They leave strict DTCG 2025.10 behavior unchanged. Without the feature, or without
+`RuntimeOptions::with_expressions`, the `dxn.dtcg.expressions` member is opaque metadata, never
+validated: values, types and fingerprints are those of the same documents without it, and the
+member stays in `ResolvedToken::extensions` and in exports like any other extension data. With expressions on, every token still needs a `$value` that matches its type
+(Format §8): the `$value` resolves and is validated as before, decides the token's type, and stays
+the snapshot other tools read; only the resolved value is the expression's result, validated
+against the same type. The official corpus passes with the feature on.
 
 ## Implementation-defined choices
 

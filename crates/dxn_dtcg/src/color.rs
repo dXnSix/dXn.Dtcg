@@ -659,6 +659,11 @@ impl Color {
     /// This color in `space`, its components clamped to the space's ranges
     /// (an out-of-gamut color is clipped into an RGB space). The alpha is
     /// kept; the hex fallback is dropped.
+    ///
+    /// Round trips of in-gamut colors return the input within 1e-9, with
+    /// one exception: linear values within 1e-14 of 0 encode as 0, so A98
+    /// RGB components below about 4e-7 and Rec. 2020 components below
+    /// about 1.5e-6 come back as 0.
     pub fn convert(&self, space: ColorSpace) -> Self {
         Self::from_coordinates(space, self.coordinates_in(space), self.alpha)
     }

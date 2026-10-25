@@ -15,7 +15,7 @@ Find your message, read the cause, apply the fix. Messages are matched by their 
 
 ### `resolved value does not match DTCG type <type>`
 
-`TokenType`. The value has the wrong shape. Frequent causes: a dimension with `"unit": "em"`, `"pt"` or `"%"` (only `px` and `rem`), a number written as a string (`"16"`), a color given as `"#ff0000"` or with four components, extra members in an object (validation is exact), a `fontWeight` outside 1 to 1000, an `hsl` hue of 360. See [Value types](./value-types.md).
+`TokenType`. The value has the wrong shape. Frequent causes: a dimension with `"unit": "em"`, `"pt"` or `"%"` (only `px` and `rem`), a number written as a string (`"16"`), a color given as `"#ff0000"` or with four components, extra members in an object (validation is exact), a `fontWeight` outside 1 to 1000, an `hsl` hue of 360. With [expressions](./expressions.md) enabled, an expression's result is checked the same way. See [Value types](./value-types.md).
 
 ### `unsupported DTCG type <type> for final 2025.10`
 
@@ -100,6 +100,32 @@ Each round must provide the requested documents. Typical bugs: providing under a
 ### `root document is not set`
 
 `InvalidDocument`. You created the runtime with `DtcgRuntime::default()` and did not call `set_root`.
+
+## Expressions
+
+### An expression has no effect
+
+The token resolves to its `$value`. Expressions are evaluated only with the `expressions` feature **and** a runtime created with `RuntimeOptions::with_expressions`; `DtcgRuntime::default()`, `from_json` and options without it leave the extension opaque. Also check that the key is exactly `dxn.dtcg.expressions` in the token's own `$extensions` (groups are never evaluated). `ResolvedToken::snapshot` is `Some` exactly when a token's expression was evaluated. See [Expressions](./expressions.md#enabling-expressions).
+
+### `ReferenceError: <name> is not defined at line <l>, column <c>`
+
+`Expression`. The expression uses a name that is neither an input nor an import: inputs and imports are bound only by the names declared in `inputs` and `imports`. `Date` is also undefined, because the sandbox has no clock.
+
+### `the result is <what>, not a JSON value`, `the result at <path> is <what>, ...`
+
+`Expression`. The result is `undefined` (often an arrow function body in braces without `return`), a function, a `Map`, a class instance, `NaN` or another non-JSON value. Return plain objects, arrays, strings, numbers, booleans or `null`.
+
+### `document graph exceeds <n> expression steps`, `... expression memory`
+
+`LimitExceeded` with kind `expression steps` or `expression memory`. An evaluation ran longer than `step_budget` or the engine allocated more than `memory_limit`. Look for a runaway loop or recursion first; raise the limit with `ExpressionOptions::with_step_budget` or `with_memory_limit` only for legitimate work. Expression code cannot catch these. See [Limits](./limits.md#expression-limits).
+
+### `the source nests too deeply`
+
+`Expression`. An expression or module nests deeper than the compiler's bound (about 120 brackets, 40 function bodies or 300 chained operators). This usually comes from generated code; simplify or split it.
+
+### `the request asks for a module, not a JSON document`
+
+`InvalidDocument`. A `DocumentRequest` with `kind: DocumentKind::Module` was answered with `provide_requested_json`. Dispatch on `request.kind` and use `provide_requested_module` for modules ([module documents](./loading.md#module-documents)).
 
 ## Projection
 

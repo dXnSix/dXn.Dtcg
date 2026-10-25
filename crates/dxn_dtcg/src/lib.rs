@@ -96,4 +96,8 @@ mod documentation {
     mod api_reference {}
     #[doc = include_str!("../../../docs/14-architecture-and-contributing.md")]
     mod architecture_and_contributing {}
+    /// Compiled only with the `expressions` feature, whose API it uses.
+    #[cfg(feature = "expressions")]
+    #[doc = include_str!("../../../docs/15-expressions.md")]
+    mod expressions {}
 }

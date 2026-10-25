@@ -9,9 +9,9 @@ order: 90
 
 ## The catalog
 
-Each `DtcgRuntime` owns a catalog mapping `ResourceId`s to document text (`Arc<str>`), a revision counter and the id of the root document.
+Each `DtcgRuntime` owns a catalog mapping `ResourceId`s to document text (`Arc<str>`), a revision counter and the id of the root document. Every entry has a `DocumentKind`: a JSON document (token document or resolver), or the source text of a JavaScript or TypeScript module that [expressions](./expressions.md) import (see [module documents](#module-documents)).
 
-- **On insert** the runtime checks that the id is valid and the text is well-formed JSON, nothing more. A valid JSON document that is wrong DTCG is accepted and reported when a resolution reaches it.
+- **On insert** the runtime checks that the id is valid and the text is well-formed JSON (module text is not checked), nothing more. A valid JSON document that is wrong DTCG is accepted and reported when a resolution reaches it.
 - **On resolve** the documents involved are parsed from their text; nothing parsed is kept between calls.
 - **The root** is where resolution starts. `from_json` sets it; otherwise call `set_root`. The root need not be in the catalog yet; if it is not, the first `resolve` requests it.
 
@@ -79,7 +79,10 @@ pub struct DocumentRequest {
     pub resource_id: ResourceId,      // the normalized id to provide
     pub referenced_from: ResourceId,  // the document that contains the reference
     pub original_reference: Arc<str>, // the reference as written, fragment included
+    pub kind: DocumentKind,           // what to provide: Json, or Module (expressions)
 }
+
+pub enum DocumentKind { Json, Module } // non_exhaustive
 ```
 
 `Resolution` has `ready()` (`Some` for `Ready`), `map(f)`, `is_ready()`, `is_missing()` and `missing()` (borrows the requests). These methods can return `Missing`: `resolve`, `project`, `modifiers`, `normalize_selection`, `validate_complete`, `replace_json_and_resolve_affected`, `source_references`, `inspect_source`, `validate_source`, `preview_source` and `preview_occurrence`.
@@ -88,11 +91,11 @@ A `Missing` response is:
 
 - **Complete for the pass**: every missing document reachable without the missing documents' own contents.
 - **De-duplicated and sorted** by resource id, so the same catalog gives the same requests.
-- **Scoped to the active graph**: `resolve` requests only the selected contexts' documents; `validate_complete`, `validate_source` and `source_references` request every context's.
+- **Scoped to the active graph**: `resolve` requests only the selected contexts' documents; `validate_complete`, `validate_source` and `source_references` request every context's. With expressions enabled, `validate_complete` also requests the modules every context's sources declare.
 - **Possibly incremental**: a missing nested resolver reveals more references once provided. Loop until `Ready`.
 - **Before input errors**: a missing nested resolver may declare modifiers, so selection inputs are checked only once every reached document is present.
 
-When the root itself is missing, the request has `referenced_from` and `original_reference` equal to the root's id. `provide_requested_json(&request, json)` is `provide_json(request.resource_id.as_str(), json)` without re-parsing the id.
+When the root itself is missing, the request has `referenced_from` and `original_reference` equal to the root's id. `provide_requested_json(&request, json)` is `provide_json(request.resource_id.as_str(), json)` without re-parsing the id, and fails with `InvalidDocument` when the request asks for a module. Without expressions, every request has `kind: DocumentKind::Json`.
 
 :::tip Why the loop terminates
 Each round provides at least one document that was not in the catalog, and `RuntimeLimits::max_documents` bounds what one discovery can reach.
@@ -268,6 +271,44 @@ fn main() -> Result<(), DtcgError> {
 }
 ```
 
+## Module documents
+
+With the `expressions` feature and `RuntimeOptions::with_expressions`, a token document may declare JavaScript and TypeScript modules at its root (`$extensions["dxn.dtcg.expressions"].modules`), and token expressions import them ([modules in token documents](./expressions.md#modules-in-token-documents)). Module text loads through the same protocol: when an expression imports a declared module the catalog lacks, resolution returns `Missing` with a `DocumentRequest` of `kind: DocumentKind::Module`. A loader that serves both kinds dispatches on `kind`:
+
+```rust
+use dxn_dtcg::{DocumentKind, DtcgError, DtcgRuntime, Resolution, ResolvedTokens};
+
+fn resolve_all(
+    runtime: &mut DtcgRuntime,
+    load: impl Fn(&str) -> String,
+) -> Result<ResolvedTokens, DtcgError> {
+    loop {
+        match runtime.resolve(&[])? {
+            Resolution::Ready(tokens) => return Ok(tokens),
+            Resolution::Missing(requests) => {
+                for request in requests {
+                    let text = load(request.resource_id.as_str());
+                    match request.kind {
+                        DocumentKind::Module => runtime.provide_requested_module(&request, text)?,
+                        _ => runtime.provide_requested_json(&request, text)?,
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+- A module's relative imports (`./units.ts`) resolve against its resource id with the same [resource id rules](#resource-ids) and are requested in later rounds, until the whole static import graph is loaded; `referenced_from` is then the importing module.
+- The language follows the extension: `.js` and `.mjs` are JavaScript, `.ts` and `.mts` TypeScript; any other extension fails with `DtcgError::Expression`.
+- Module text is not checked when it is provided, only when a resolution imports it.
+- Only modules that expressions reach are requested. `validate_complete` requests the modules the sources of every context declare, and what those import, so a catalog it accepts resolves in every context. The preview APIs request modules like `resolve`.
+- Module documents are a separate count: one resolution loads at most `max_documents` of them, besides its JSON documents (`LimitExceeded { kind: "documents" }`).
+- **Kinds never mix.** An entry is either JSON or a module. Providing JSON at an id that holds a module, a module at an id that holds JSON, or answering a request with the other kind (`provide_requested_json` for a module request, or the reverse) fails with `InvalidDocument` and leaves the catalog unchanged. A JSON reference (a resolver source, a `$ref`) to a module document fails with `InvalidDocument`; a module declaration or import that reaches a JSON document fails with `DtcgError::Expression`.
+- **Module edits are not incremental.** Affected resolution does not follow module edits: after `replace_module`, resolve fully.
+
+The module methods exist in every build. Without the feature or the option, nothing requests or reads modules.
+
 ## Catalog API
 
 | Method | Effect | Revision |
@@ -279,12 +320,15 @@ fn main() -> Result<(), DtcgError> {
 | `provide_requested_json(&request, json)` | `provide_json` keyed by `request.resource_id` | +1 |
 | `provide_json_batch(iter)` | Inserts several documents, all or nothing; a repeated id is `DuplicateDocument` | +1 |
 | `replace_json(id, json)` | Like `provide_json`, but the document must exist (`UnknownDocument`) | +1 |
+| `provide_module(id, source)` | Inserts a module's source text, replacing a previous module at `id` | +1 |
+| `provide_requested_module(&request, source)` | `provide_module` keyed by `request.resource_id`, for a request of `kind: DocumentKind::Module` | +1 |
+| `replace_module(id, source)` | Like `provide_module`, but the module must exist (`UnknownDocument`) | +1 |
 | `replace_json_and_resolve_affected(..)` | See [Incremental resolution](./incremental.md) | +1, or +2 on rollback |
-| `remove_document(id)` | Removes a document, which must exist | +1 |
+| `remove_document(id)` | Removes a JSON document or a module, which must exist | +1 |
 | `contains_document(id)` | `Ok(true)` if present; `Err` only for an invalid id | unchanged |
 | `catalog_revision()` | The current revision (`u64`) | n/a |
 
-A mutation that fails (invalid id, malformed JSON, duplicate in a batch, unknown document) changes nothing, revision included. The revision increases on every successful mutation, even if the new text equals the old. `Debug` for `DtcgRuntime` prints the root, options, revision and document ids, never document text.
+A mutation that fails (invalid id, malformed JSON, duplicate in a batch, unknown document, kind mismatch) changes nothing, revision included. The revision increases on every successful mutation, even if the new text equals the old. `Debug` for `DtcgRuntime` prints the root, options, revision and document ids, never document text.
 
 ## Caching and sharing
 

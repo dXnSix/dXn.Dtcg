@@ -35,8 +35,9 @@ pub enum DocumentKind {
     /// A JSON document: a token document or a resolver.
     Json,
     /// The source text of a JavaScript or TypeScript ES module that token
-    /// expressions import (feature `expressions`); its language follows its
-    /// extension (`.js`/`.mjs` or `.ts`/`.mts`).
+    /// expressions import; its language follows its extension (`.js`/`.mjs`
+    /// or `.ts`/`.mts`). The kind exists in every build; only a runtime with
+    /// the `expressions` feature enabled requests modules.
     Module,
 }
 

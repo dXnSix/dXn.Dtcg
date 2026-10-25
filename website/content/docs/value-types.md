@@ -5,7 +5,7 @@ group: Concepts
 order: 70
 ---
 
-Every resolved token is checked against its effective type after aliases resolve. This page lists the accepted shapes, the opt-in extensions, direct validation, and the typed Rust models you read values with.
+Every resolved token is checked against its effective type after aliases resolve. This page lists the accepted shapes, the opt-in extensions, direct validation, the typed Rust models you read values with, and the color conversions on `values::Color`.
 
 ## How validation works
 
@@ -219,7 +219,7 @@ fn main() {
 
 | Type | Model | Notes |
 |---|---|---|
-| `color` | `Color { color_space, components, alpha, hex }` | 14 `ColorSpace` variants; each `Component` is `Number(f64)` or `None`; a missing `alpha` is `1.0` |
+| `color` | `Color { color_space, components, alpha, hex }` | 14 `ColorSpace` variants; each `Component` is `Number(f64)` or `None`; a missing `alpha` is `1.0`; conversions [below](#color-conversions) |
 | `dimension` | `Dimension { value, unit }` | `DimensionUnit::{Px, Rem}`; `to_px(rem_base)` |
 | `duration` | `Duration { value, unit }` | `DurationUnit::{Ms, S}`; `to_millis()` |
 | `number` | `TypedValue::Number(f64)` | |
@@ -303,7 +303,7 @@ fn projection_error(token: &ResolvedToken, message: &str) -> DtcgError {
     DtcgError::Projection { path: token.path.to_string(), message: message.into() }
 }
 
-/// sRGB colors as 8-bit RGBA. Other color spaces need a color-management library.
+/// sRGB colors as 8-bit RGBA. For other color spaces, convert first with `values::Color::convert`.
 fn rgba8(token: &ResolvedToken) -> Result<[u8; 4], DtcgError> {
     let value = &token.value;
     if value["colorSpace"] != "srgb" {
@@ -347,5 +347,49 @@ fn main() -> Result<(), DtcgError> {
     Ok(())
 }
 ```
+
+## Color conversions
+
+`values::Color` converts between the 14 DTCG color spaces with the formulas of CSS Color 4 and offers the operations design tokens commonly need. It needs no feature; with the `expressions` feature, the built-in module [`dxn.dtcg/color`](./expressions.md#built-in-modules) gives expressions the same operations on color JSON.
+
+| Method | Result |
+|---|---|
+| `Color::new(space, components, alpha)` | A valid color from numeric components: clamped to the space's ranges, a non-finite component counting as 0 and a non-finite alpha as 1 |
+| `coordinates()` | The components as numbers, `none` counting as 0 |
+| `convert(space)` | The color in `space`, its components clamped to the space's ranges (an out-of-gamut color is clipped into an RGB space); the alpha is kept, the `hex` fallback dropped |
+| `mix(other, amount)`, `mix_in(other, amount, space)` | `other` mixed in by `amount` (0 is this color, 1 is `other`), in OKLCH (the CSS `color-mix()` default) or in `space`, as CSS Color 4 interpolates: premultiplied alpha, the shorter hue arc, and the powerless hue of white, black or a gray taking the other color's; the result is in the mixing space |
+| `lighten(amount)`, `darken(amount)` | The OKLCH lightness shifted by `amount` (stopping at black and white, where no chroma remains), in the color's own space |
+| `with_alpha(alpha)` | The color with `alpha`, clamped to `[0, 1]`; a non-finite `alpha` keeps the current one |
+| `to_hex()`, `Color::from_hex(hex)` | The 6-digit sRGB hex form (`#rrggbb`, clipped into sRGB, alpha not represented), and the sRGB color of one (`None` unless it is `#` and six hex digits, any case) |
+| `luminance()`, `contrast(other)` | The WCAG 2.x relative luminance, and the contrast ratio from 1 to 21 |
+| `in_gamut(space)`, `clamp_to_gamut(space)` | Whether the color lies inside the gamut of `space` (the unit cube of an RGB or XYZ space in linear light, sRGB's for HSL and HWB; the Lab spaces contain every color), and the color clipped into it |
+| `to_json()` | The DTCG JSON form; `alpha` only when it is not 1 |
+
+Conversions go through CIE XYZ relative to D65: the RGB spaces through their transfer functions and primaries, ProPhoto RGB, `xyz-d50` and CIE Lab/LCH through D50 with Bradford chromatic adaptation, OKLab and OKLCH through their LMS matrices, and HSL and HWB through sRGB. `none` components count as 0, and every returned color is a valid DTCG color: components are clamped to their ranges and hues normalized to `[0, 360)`, a powerless hue (of a color without chroma) written as 0. A non-finite `amount` counts as 0. Results match the CSS Color 4 reference implementation within 1e-5, and in-gamut round trips through every space return the input within 1e-9; to keep them exact, encoded A98 RGB components below about 4e-7 and Rec. 2020 components below about 1.5e-6 read as 0.
+
+```rust
+use dxn_dtcg::values::{Color, ColorSpace};
+
+fn main() {
+    let accent = Color::new(ColorSpace::Srgb, [0.2, 0.4, 0.9], 1.0);
+
+    let oklch = accent.convert(ColorSpace::Oklch).coordinates();
+    assert!((oklch[0] - 0.5518).abs() < 1e-4);
+
+    let white = Color::new(ColorSpace::Srgb, [1.0, 1.0, 1.0], 1.0);
+    assert!((accent.contrast(&white) - 5.026).abs() < 1e-3);
+    assert_eq!(accent.to_hex(), "#3366e6");
+    assert_eq!(Color::from_hex("#3366e6").unwrap().color_space, ColorSpace::Srgb);
+
+    // Lighter in OKLCH, still an sRGB color.
+    let hover = accent.lighten(0.08);
+    assert_eq!(hover.color_space, ColorSpace::Srgb);
+
+    assert!(Color::new(ColorSpace::DisplayP3, [0.0, 1.0, 0.0], 1.0).in_gamut(ColorSpace::Rec2020));
+    println!("{}", hover.to_json());
+}
+```
+
+`ColorSpace::from_name(name)` parses a DTCG `colorSpace` name, the inverse of `name()`. Every value model has `to_json()` too, and the twelve models of the DTCG types (`Color`, `Dimension`, `Duration`, `CubicBezier`, `FontFamily`, `FontWeight`, `StrokeStyle`, `Border`, `Transition`, `Shadow`, `Gradient` and `Typography`) implement serde's `Serialize` and `Deserialize` with their DTCG JSON forms. Deserializing validates the value as its DTCG type (with every value extension), which is how a [native function](./expressions.md#rust-functions-native-modules) of an expression module takes and returns them.
 
 Next: [Resolvers and modifiers](./resolvers.md), or [Typed projection](./typed-projection.md).

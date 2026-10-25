@@ -226,6 +226,10 @@ Affected re-resolution relies on the caller for a few points:
   same selection.
 - **One document per call.** Edits to several documents need one call each, applied in order, or a
   full resolve.
+- **Module edits need a full resolve.** With [expressions](15-expressions.md), affected
+  re-resolution follows expression inputs (editing an input's target re-evaluates the expression
+  and its dependents) and edited expression objects, but not the text of modules: after
+  `replace_module`, or a change of host modules, resolve fully.
 
 ## What is and is not saved
 

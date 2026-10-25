@@ -24,6 +24,7 @@ and the exact rules for each one, the opt-in value extensions, and the typed Rus
 - [Unsupported types](#unsupported-types)
 - [Validating values directly](#validating-values-directly)
 - [Reading values in Rust](#reading-values-in-rust)
+- [Color conversions](#color-conversions)
 
 ## How validation works
 
@@ -527,3 +528,58 @@ fn main() -> Result<(), DtcgError> {
     Ok(())
 }
 ```
+
+## Color conversions
+
+`values::Color` converts between the 14 DTCG color spaces with the formulas of CSS Color 4 and
+offers the operations design tokens commonly need. It needs no feature; the
+[expressions](15-expressions.md#built-in-modules) module `dxn.dtcg/color` exposes the same
+operations to expressions.
+
+| Method | Result |
+|---|---|
+| `Color::new(space, components, alpha)` | A valid color from numeric components: clamped to the space's ranges, a non-finite component counting as 0 and a non-finite alpha as 1 |
+| `coordinates()` | The components as numbers, `none` counting as 0 |
+| `convert(space)` | The color in `space`, its components clamped to the space's ranges (an out-of-gamut color is clipped into an RGB space); the alpha is kept, the `hex` fallback dropped |
+| `mix(other, amount)`, `mix_in(other, amount, space)` | `other` mixed in by `amount` (0 is this color, 1 is `other`), in OKLCH or in `space`, as CSS Color 4 interpolates: premultiplied alpha, the shorter hue arc, and the powerless hue of white, black or a gray taking the other color's; the result is in the mixing space |
+| `lighten(amount)`, `darken(amount)` | The OKLCH lightness shifted by `amount` (stopping at black and white, where no chroma remains), in the color's own space |
+| `with_alpha(alpha)` | The color with `alpha`, clamped to `[0, 1]`; a non-finite `alpha` keeps the current one |
+| `to_hex()`, `Color::from_hex(hex)` | The 6-digit sRGB hex form (`#rrggbb`, clipped into sRGB, alpha not represented), and the sRGB color of one (`None` unless it is `#` and six hex digits) |
+| `luminance()`, `contrast(other)` | The WCAG 2.x relative luminance, and the contrast ratio from 1 to 21 |
+| `in_gamut(space)`, `clamp_to_gamut(space)` | Whether the color lies inside the gamut of `space` (the unit cube of an RGB or XYZ space in linear light, sRGB's for HSL and HWB; the Lab spaces contain every color), and the color clipped into it |
+| `to_json()` | The DTCG JSON form; `alpha` only when it is not 1 |
+
+Conversions go through CIE XYZ relative to D65: the RGB spaces through their transfer functions
+and primaries, ProPhoto RGB, `xyz-d50` and CIE Lab/LCH through D50 with Bradford chromatic
+adaptation, OKLab/OKLCH through their LMS matrices, and HSL and HWB through sRGB. Rec. 2020 uses
+the BT.1886 transfer function CSS Color 4 specifies (a pure 2.4 power). `none` components count
+as 0, and every returned color is a valid DTCG color: components clamped to their ranges, hues
+normalized to `[0, 360)`, a powerless hue (of a color without chroma) written as 0. A non-finite
+`amount` counts as 0. Values match the CSS Color 4 reference implementation within 1e-5, and
+round trips of colors inside every gamut return the input within 1e-9. To keep the round trips
+exact, linear values within 1e-14 of 0 count as 0, so encoded A98 RGB components below about
+4e-7 and Rec. 2020 components below about 1.5e-6 read as 0.
+
+```rust
+use dxn_dtcg::values::{Color, ColorSpace};
+
+let accent = Color::new(ColorSpace::Srgb, [0.2, 0.4, 0.9], 1.0);
+
+let oklch = accent.convert(ColorSpace::Oklch).coordinates();
+assert!((oklch[0] - 0.5518).abs() < 1e-4);
+
+let white = Color::new(ColorSpace::Srgb, [1.0, 1.0, 1.0], 1.0);
+assert!((accent.contrast(&white) - 5.026).abs() < 1e-3);
+assert_eq!(accent.to_hex(), "#3366e6");
+assert_eq!(Color::from_hex("#3366e6").unwrap().color_space, ColorSpace::Srgb);
+
+let hover = accent.lighten(0.08);
+assert_eq!(hover.color_space, ColorSpace::Srgb);
+assert!(Color::new(ColorSpace::DisplayP3, [0.0, 1.0, 0.0], 1.0).in_gamut(ColorSpace::Rec2020));
+```
+
+Every value model (`Color`, `Dimension`, `Duration`, `CubicBezier`, `FontFamily`, `FontWeight`,
+`StrokeStyle`, `Border`, `Transition`, `Shadow`, `Gradient` and `Typography`) also implements serde's
+`Serialize` and `Deserialize` with its DTCG JSON form; deserializing validates the value as its DTCG
+type (with every value extension), so a native function of an [expression module](15-expressions.md#rust-functions-native-modules)
+can take and return them.

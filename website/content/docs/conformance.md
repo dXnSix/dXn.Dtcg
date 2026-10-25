@@ -63,6 +63,15 @@ When sources disagree, the runtime follows them in this order: the published spe
 
 With default `RuntimeOptions`, values are validated strictly against 2025.10, and `validate_value` is always strict. Two value shapes beyond 2025.10 are opt-in through `ValueExtensions`: typography `lineHeight` as a `dimension` (or an alias to one), and the `dxn.dtcg.blur` type. `ValueExtensions::all()` turns both on. The opt-in `LocalReferencePolicy`, which limits a resolver to relative local documents, does not change how standard documents behave; a host applies it in its own loader. See [Value types](./value-types.md#strict-values-and-the-value-extensions) and [Loading documents](./loading.md#path-safety).
 
+## Expressions: an extension, not a change
+
+DTCG 2025.10 has no computed values. The opt-in [expressions](./expressions.md) extension adds them without changing how any standard document resolves:
+
+- **Where it lives.** An expression is stored in a token's `$extensions` under `dxn.dtcg.expressions`, the place Format §5.2.3 gives tools for their own data, and module declarations under the same key in a document's root `$extensions`. The token keeps its `$value`, which Format §8 requires to match its `$type`.
+- **The snapshot stays valid.** That `$value` is resolved and validated exactly as without expressions, so a document with expressions is a valid DTCG 2025.10 document for every tool, and an invalid snapshot is an error even when an expression would replace it.
+- **Opaque unless enabled.** Without the `expressions` feature, or with it but without `RuntimeOptions::with_expressions`, the extension is ordinary metadata: values come from `$value`, the object is kept unchanged in `ResolvedToken::extensions` and never validated, and resolution is strict DTCG 2025.10 as described on this page. The official corpus runs with default options, so the result above does not depend on the feature.
+- **With it enabled**, an evaluated result replaces the value, is validated against the token's type like any value, and the resolved `$value` is kept as `ResolvedToken::snapshot`. `to_document` writes the evaluated values as `$value` and keeps the `$extensions`, so the export is again a valid DTCG document.
+
 ## Implementation-defined choices
 
 Places where the specification is silent, leaves a choice or contradicts itself. They matter when moving token files from other tools.
@@ -117,5 +126,6 @@ Run one group with `cargo test -p dxn_dtcg --all-features --test <group>`.
 | `merged_resolution.rs`, `extensions_merge.rs` | Merging sources, `$extends` across sources, recursive `$extensions` merge |
 | `resolver_2025_10.rs`, `resolver_document_validation.rs`, `input_selection.rs` | Resolver version, members, steps, overrides, case-insensitive and nested inputs |
 | `value_extensions.rs`, `value_extension_types.rs` | Strict values and the opt-in extensions |
+| `expressions_disabled.rs` | Expression extensions stay opaque metadata without the feature or the option (run with and without `--features expressions`) |
 
 Next: [Platforms and versions](./platforms.md).

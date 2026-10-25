@@ -15,6 +15,7 @@ The crate has one entry point, `DtcgRuntime`, and a handful of methods that diff
 | A resolver that references other files | `DtcgRuntime::default()` then `set_root(id)`, and load on demand |
 | All documents up front (embedded assets, tests) | `from_json` for the root, then `provide_json_batch([...])` |
 | Custom limits, or the value extensions | the `*_with_options` variants or `DtcgRuntime::with_options(options)` |
+| Tokens computed by [expressions](./expressions.md) | the `expressions` feature, then `RuntimeOptions::default().with_expressions(ExpressionOptions::default())` passed to those constructors |
 
 Options are fixed at construction. `default()` and `from_json` use default limits and strict DTCG 2025.10 values.
 
@@ -36,6 +37,8 @@ Options are fixed at construction. `default()` and `from_json` use default limit
 | A Rust model per DTCG type (`Color`, `Dimension`, `Shadow`, ...) | `dxn_dtcg::values` types as struct fields, or `ResolvedToken::typed` |
 | Your own type (a renderer's color, `std::time::Duration`) | `impl FromDtcgValue for YourType` when you own the type, else `#[dtcg(with = "convert_fn")]` on the field |
 | The value as authored, aliases intact (to show or preserve them) | `ResolvedToken::authored_value` |
+| The authored `$value` of a token whose expression was evaluated | `ResolvedToken::snapshot` |
+| A color in another space, mixed, lightened, as hex, or its contrast | the `values::Color` methods ([Color conversions](./value-types.md#color-conversions)) |
 
 ## Selections and pickers
 
@@ -50,6 +53,7 @@ Options are fixed at construction. `default()` and `from_json` use default limit
 | You want | Use |
 |---|---|
 | Load only what one selection needs | loop on `resolve` until `Ready` |
+| Load the JavaScript or TypeScript modules expressions import | the same loop; answer `DocumentKind::Module` requests with `provide_requested_module` ([module documents](./loading.md#module-documents)) |
 | Fetch every context's documents (offline cache, bundle) | loop on `validate_complete()` |
 | Check that every theme combination resolves (CI) | resolve every combination of `modifiers()`; see the [cookbook](./cookbook.md#validate-every-theme-combination-in-ci) |
 | Validate one value without a runtime | `validate_value(type, &value)` or `validate_value_with` |

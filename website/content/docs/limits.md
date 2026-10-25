@@ -5,7 +5,7 @@ group: Reference
 order: 160
 ---
 
-Resolution is bounded: a hostile or accidental document set ends in `DtcgError::LimitExceeded`, never in unbounded memory, time or stack use. This page lists the bounds, how to change them and the optional `diagnostics` feature.
+Resolution is bounded: a hostile or accidental document set ends in `DtcgError::LimitExceeded`, never in unbounded memory, time or stack use. This page lists the bounds, the expression limits, how to change them and the optional `diagnostics` feature.
 
 ## Runtime limits
 
@@ -27,10 +27,29 @@ Two bounds are not configurable. They match `serde_json`'s parse recursion limit
 
 | Bound | Value | Error `kind` |
 |---|---|---|
-| Nesting depth of a resolved value | 128 | `"value depth"` |
+| Nesting depth of a resolved value, an expression's result included | 128 | `"value depth"` |
 | Segments of a flattened token or group path | 128 | `"path depth"` |
 
 Together with the limits they keep every algorithm iterative or bounded: a chain of 100,000 pointers fails with `alias depth` instead of overflowing the stack.
+
+### Expression limits
+
+With the `expressions` feature and `RuntimeOptions::with_expressions`, `ExpressionOptions` bounds the JavaScript engine of each resolution ([the sandbox](./expressions.md#the-sandbox-and-its-limits)). It is `#[non_exhaustive]`: start from `ExpressionOptions::default()` and use the `with_*` setters. Expression code cannot catch any of these limits, and the same runtime resolves normally afterwards.
+
+| Option | Default | Setter | Bounds | Error |
+|---|---|---|---|---|
+| `step_budget` | 1,000 | `with_step_budget` | QuickJS interrupt checks (about every 10,000 function calls and loop iterations) of one evaluation: an expression call, a module's top-level code, or an import cycle's as a whole. Counted, not timed, so it is deterministic; below 1 counts as 1 | `LimitExceeded { kind: "expression steps" }` |
+| `memory_limit` | 64 MiB | `with_memory_limit` | Bytes the JavaScript engine of one resolution allocates | `LimitExceeded { kind: "expression memory" }` |
+| `stack_limit` | 256 KiB | `with_stack_limit` | Native stack JavaScript code uses below the resolving call; at least 16 KiB | `Expression` (stack overflow) |
+| `precision` | `Some(6)` | `with_precision` | Decimal places every non-integral number of a result is rounded to; `None` keeps results unrounded | none |
+
+One bound is fixed. The JavaScript and TypeScript compiler works recursively, so the text of every expression and module may nest about 120 brackets, 40 function bodies or 300 chained operators deep, and regular expression literals 20 groups; deeper text fails with `Expression` (`the source nests too deeply`) before the compiler sees it.
+
+Expressions also charge the runtime limits: input references count toward `max_alias_depth`, inputs and results toward `max_value_nodes`, results toward the 128-level value depth. Module documents are a separate count against `max_documents`: one resolution loads at most that many, besides its JSON documents.
+
+:::warning Leave room on the resolving thread's stack
+`stack_limit` must stay well below the stack of the thread that resolves. A limit near that stack's size lets QuickJS overflow the real stack before its own check, which aborts the process. The default (256 KiB) fits the default 1 MiB stack of `wasm32-unknown-unknown`; raise it only for threads you give a larger stack.
+:::
 
 ### Setting limits
 
@@ -71,10 +90,10 @@ fn main() -> Result<(), DtcgError> {
 }
 ```
 
-`from_json` uses the default limits; `from_json_with_options` takes `RuntimeOptions`.
+`from_json` uses the default limits; `from_json_with_options` takes `RuntimeOptions`. Expression limits travel inside `RuntimeOptions::with_expressions(ExpressionOptions::default().with_step_budget(..))`.
 
 :::tip Resolving untrusted documents
-On a server that resolves documents from users, lower the limits (documents, tokens, value nodes) to what your largest legitimate design system needs, load only through a loader that applies `LocalReferencePolicy` and a base-directory check ([path safety](./loading.md#path-safety)), and treat every `DtcgError` as a user-facing validation failure. Raise `max_documents` for systems assembled from many small sources.
+On a server that resolves documents from users, lower the limits (documents, tokens, value nodes, and with expressions the step budget and memory) to what your largest legitimate design system needs, load only through a loader that applies `LocalReferencePolicy` and a base-directory check ([path safety](./loading.md#path-safety)), and treat every `DtcgError` as a user-facing validation failure. Raise `max_documents` for systems assembled from many small sources.
 :::
 
 ## The diagnostics feature
@@ -124,8 +143,9 @@ fn main() {
 | `Reference` | `InvalidReference` | resource | the reference | message |
 | `Selection` | `UnknownModifier`, `UnknownContext` | none | the modifier | the full `Display` text |
 | `InvalidInput` | `InvalidInput` | none | none | message |
+| `Expression` | `Expression` | resource | token path, or module specifier | only the error's kind and authored position, such as `TypeError at line 2, column 9` |
 
-Messages the runtime writes contain ids, paths and short reasons, never document bodies. A message from your own conversion function passes through unchanged.
+Messages the runtime writes contain ids, paths and short reasons, never document bodies. An expression error's JavaScript message may quote document text or thrown values, so its diagnostic keeps only the kind and position. A message from your own conversion function passes through unchanged.
 
 ### AffectedResolution::nodes_visited
 

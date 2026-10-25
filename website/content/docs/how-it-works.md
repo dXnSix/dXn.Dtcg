@@ -31,7 +31,7 @@ Operations that need documents return `Result<Resolution<T>, DtcgError>`:
 | `Ok(Resolution::Missing(requests))` | Documents are needed | Provide them and call again |
 | `Err(error)` | The input is wrong or a limit was hit | Report it; retrying fails the same way |
 
-Each `DocumentRequest` has the normalized `resource_id` to provide, the document it was `referenced_from` and the `original_reference` as written. A `Missing` response lists every document reachable in that pass, de-duplicated and sorted by id. A nested resolver can reveal more references once provided, which is why you loop until `Ready`.
+Each `DocumentRequest` has the normalized `resource_id` to provide, the document it was `referenced_from`, the `original_reference` as written and its `kind`: a JSON document, or a module that [expressions](./expressions.md) import. A `Missing` response lists every document reachable in that pass, de-duplicated and sorted by id. A nested resolver can reveal more references once provided, which is why you loop until `Ready`.
 
 ## The pipeline
 
@@ -41,6 +41,7 @@ Every `resolve` call runs these stages from the catalog's current contents. Noth
 2. **Merge and flatten.** Fold all active sources into one structure: groups merge member by member, a later token replaces an earlier one whole. Apply `$extends`, inherit `$type` and `$deprecated`, and list dotted token paths in a fixed order.
 3. **Resolve.** Substitute aliases and JSON Pointers against the merged document, determine each token's effective type, detect cycles, enforce limits.
 4. **Validate.** Check each resolved value against its DTCG type.
+   With [expressions](./expressions.md) enabled, a token with an expression then resolves its inputs like values, runs the expression in a sandboxed JavaScript engine started for this resolution, and validates the result against the same type; the resolved `$value` is kept as the snapshot.
 5. **Fingerprint.** SHA-256 over path, type, value and source of every token, in order.
 
 Because aliases resolve after the merge, a theme only overrides the few palette tokens that differ and every semantic token that aliases them follows.
@@ -48,7 +49,7 @@ Because aliases resolve after the merge, a theme only overrides the few palette 
 ## Guarantees
 
 - **Deterministic.** JSON member order is preserved, so token order is the authored order, never hash order. Missing-document requests are sorted. The same catalog, options and selection give the same result or the same error.
-- **Bounded.** `RuntimeLimits` caps documents, reference depth, alias chains, copied JSON nodes and token count; value depth and path depth are fixed at 128. Hostile input ends in an error, not in a stack overflow. See [Limits and diagnostics](./limits.md).
+- **Bounded.** `RuntimeLimits` caps documents, reference depth, alias chains, copied JSON nodes and token count; value depth and path depth are fixed at 128; `ExpressionOptions` bounds expression steps, memory and stack. Hostile input ends in an error, not in a stack overflow. See [Limits and diagnostics](./limits.md).
 - **Strict.** Unknown `$` properties, malformed tokens, unsupported types, wrong value shapes, aliases at disallowed positions and dangling references are errors. Errors name the document and token path.
 - **Atomic catalog.** A failed `provide_json`, `replace_json` or batch leaves documents and revision as they were.
 - **Thread-safe reads.** `DtcgRuntime`, `ResolvedTokens`, `ResolvedToken` and `DtcgError` are `Send + Sync`. Resolution takes `&self`, so threads can resolve against one runtime at once; mutation takes `&mut self`. Cloning a runtime is cheap because documents are `Arc<str>`.
