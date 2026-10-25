@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-expressions",
+  "scopeMarkdown": "JavaScript and TypeScript expressions as computed token values in `dxn_dtcg`, without breaking DTCG 2025.10.\n\nAn expression lives in a token's `$extensions[\"dxn.dtcg.expressions\"]`; the token keeps a valid `$value`, the snapshot every DTCG tool reads (Format §5.2.3: extension data is optional metadata that other tools must preserve; §8: `$value` must match `$type`, so expressions cannot live in `$value`). With expressions enabled, `dxn_dtcg` evaluates the expression with QuickJS and uses the result instead of the snapshot.\n\n**In scope:** the extension format; evaluation inside resolution (inputs declared as DTCG references, result validation, rounding); TypeScript by type stripping; a sandbox with deterministic budgets and limits; ES module imports of host-registered and document-declared JS/TS modules (document modules loaded through the existing `Resolution::Missing` protocol); Rust functions callable from expressions (host native modules through a builder and an attribute macro, and the built-in modules `dxn.dtcg` and `dxn.dtcg/color`, the latter backed by a public Rust color-conversion API on `values::Color`); TypeScript declarations for editors; wasm32-unknown-unknown support; CI; documentation.\n\n**Owner decisions (2026-10-25):** extension identifiers use the `dxn.dtcg.*` namespace (key `dxn.dtcg.expressions`); QuickJS on every supported target, through the crate nsh uses (`quickjs-jit =0.14.1`, imported as `rquickjs`); TypeScript in the first release through oxc `=0.153.0` (as nsh), dependency size is not a concern, and the workspace already requires Rust 1.97 for it; imports of JS/TS libraries and calls to Rust functions are in scope; built-in module names `dxn.dtcg` and `dxn.dtcg/color`; documents may declare modules; the Rust color module ships in this epic.\n\n**Excluded:** type checking TypeScript (types are stripped, not checked); per-token TypeScript declarations of inputs; async functions, promises, timers and dynamic `import()`; bundling npm packages inside the library (hosts provide single-file ES modules, bundling them beforehand when a package has several files); network or file-system loading (the library stays I/O-free); affected resolution after a module source edit (a module edit needs a full resolution); a helper that rewrites authored `$value` snapshots; caching compiled modules across resolution calls.\n\n**Assumptions:** consumers that build the feature for wasm32 have an LLVM clang with the WebAssembly target and `llvm-ar` (Apple's clang has no wasm32 target); third-party libraries used from expressions are ES modules that need no Node or DOM APIs, `eval`, `new Function` or ambient randomness.",
+  "constraintsMarkdown": "- `dxn_dtcg` stays I/O-free and UI-neutral: no file system, network, async runtime, UI toolkit or application dependency; module sources arrive as strings through the catalog or the options.\n- Strict by default: without the `expressions` feature, or without `RuntimeOptions::with_expressions`, behavior is exactly today's; the extension object is opaque metadata.\n- Library-defined identifiers use the `dxn.dtcg` namespace; never name, justify or model a feature after a consumer.\n- Pin `rquickjs = { package = \"quickjs-jit\", version = \"=0.14.1\", default-features = false }` with only the features the epic needs (never `full`, whose `dyn-load` breaks some targets) and `oxc = \"=0.153.0\"`; declare every dependency once in `[workspace.dependencies]`.\n- The default-feature build compiles no C and still checks for wasm32-unknown-unknown without a wasm C toolchain.\n- Every new behavior gets its own `crates/<crate>/tests/<feature>.rs` group; run only the touched groups while iterating.\n- The README and every `docs/` chapter are doctests; the new chapter's examples compile under the `expressions` feature.\n- 1.x policy: commits are `feat`/`fix` without `!` or `BREAKING CHANGE:`; this epic is additive, so no `Migration:` footer is expected. `CHANGELOG.md` is written by release-plz and is not edited.\n- The vendored DTCG corpus is never edited, and the official corpus keeps passing with the feature on.",
+  "requirements": [
+    {
+      "id": "R-FORMAT",
+      "title": "Expression extension format",
+      "descriptionMarkdown": "The token-level expression object and the document-level module declarations, and how they behave when expressions are off.",
+      "criteria": [
+        {
+          "id": "EXP-1",
+          "verification": "automated",
+          "descriptionMarkdown": "With expressions off (the `expressions` feature disabled, or enabled without `RuntimeOptions::with_expressions`), a token carrying `$extensions[\"dxn.dtcg.expressions\"]` resolves exactly as today: its value comes from `$value`, the extension object is kept unchanged in `ResolvedToken::extensions`, `ResolvedToken::snapshot` is `None`, a malformed expression object or `modules` declaration is not an error (it is opaque metadata), and fingerprints equal those of the same documents without the extension. Verified by one test group run once without the feature and once with it."
+        },
+        {
+          "id": "EXP-2",
+          "verification": "automated",
+          "descriptionMarkdown": "With expressions on, the token-level object is validated before evaluation. It is a JSON object with exactly one of `js` or `ts` (a string), an optional `inputs` object whose keys are JavaScript identifiers that are not reserved words, and an optional `imports` object mapping a module specifier to an array of imported export names or to one identifier for a namespace import. Local names across `inputs` and `imports` are unique. Any other member, a wrong member type, both or neither of `js`/`ts`, and an invalid or duplicate name fail with `DtcgError::Expression { resource, path, message }` naming the token and the offending member. `$value` (or a token-level `$ref`) stays required, as for every token."
+        },
+        {
+          "id": "EXP-3",
+          "verification": "automated",
+          "descriptionMarkdown": "A token document's root `$extensions[\"dxn.dtcg.expressions\"].modules` maps bare module specifiers to module references relative to the declaring document, canonicalized with the same `ResourceId` rules as other document references. With expressions on, a non-object `modules`, a specifier that is empty, relative or in the reserved `dxn.dtcg` namespace, and a reference that is not a valid relative resource fail with `DtcgError::Expression` naming the document and the specifier. Declarations from several sources combine in resolution order; a later declaration of a specifier replaces an earlier one."
+        }
+      ]
+    },
+    {
+      "id": "R-EVAL",
+      "title": "Evaluation in resolution",
+      "descriptionMarkdown": "How an expression token resolves, what the expression sees, and what its result must be.",
+      "criteria": [
+        {
+          "id": "EVAL-1",
+          "verification": "automated",
+          "descriptionMarkdown": "With expressions on, a token with a valid expression object first resolves `$value` exactly as today (same effective-type order, references and validation, so an invalid snapshot still fails), then evaluates the expression and uses its result as `ResolvedToken::value`, validated against the same effective type and the runtime's `ValueExtensions`; a mismatch fails with `DtcgError::TokenType`. `ResolvedToken::snapshot` holds the resolved `$value` the result replaced; `authored_value` is unchanged; tokens without an expression have `snapshot: None`. An expression replaces the whole value; there are no per-member expressions."
+        },
+        {
+          "id": "EVAL-2",
+          "verification": "automated",
+          "descriptionMarkdown": "Each `inputs` entry resolves like a token value at an unchecked position: curly aliases, JSON Pointer `$ref` objects (also nested inside literal objects and arrays) and literals. Input references count toward `max_alias_depth`, `max_value_nodes` and the 128-level value depth like any reference; a missing target fails with `DtcgError::UnresolvedReference`; a cycle through inputs, including an expression token whose input reaches itself, fails with the alias-cycle error. Tokens that alias or point into an expression token receive its evaluated value. The expression sees each input as a frozen JSON value bound to its name."
+        },
+        {
+          "id": "EVAL-3",
+          "verification": "automated",
+          "descriptionMarkdown": "The result converts to JSON: `null`, booleans, strings, numbers, arrays and plain objects. An integral number within ±2^53 becomes a JSON integer; `undefined`, functions, symbols, bigints, `NaN` and infinities fail with `DtcgError::Expression`; nesting beyond 128 levels fails with `LimitExceeded { kind: \"value depth\" }`, and the result's nodes count toward `max_value_nodes`. Every non-integral number is rounded to the configured precision (default 6 decimal places; `None` disables rounding). Strings in the result are literals: `\"{a.b}\"` is not resolved as an alias."
+        },
+        {
+          "id": "EVAL-4",
+          "verification": "automated",
+          "descriptionMarkdown": "A `ts` expression has its TypeScript types removed by oxc before evaluation; types are not checked. Syntax errors and uncaught exceptions in `js` and `ts` expressions fail with `DtcgError::Expression { resource, path, message }` whose message contains the JavaScript error message and the line and column within the authored expression text (for `ts`, mapped back from the generated JavaScript). With the `diagnostics` feature the error maps to `DtcgDiagnosticCode::Expression`."
+        },
+        {
+          "id": "EVAL-5",
+          "verification": "automated",
+          "descriptionMarkdown": "Every API that resolves values evaluates expressions the same way: `resolve`, `project`, `preview_source`, `preview_occurrence` and `replace_json_and_resolve_affected`. Affected resolution re-evaluates a token whose expression object changed or whose inputs reach a changed token, and their dependents, and `ResolvedTokens::apply_affected` then equals a full resolution. `ResolvedTokens::to_document` writes evaluated values as `$value` and keeps the token's `$extensions`, so re-resolving the export yields the same values with expressions on or off."
+        }
+      ]
+    },
+    {
+      "id": "R-SANDBOX",
+      "title": "Sandbox, limits and determinism",
+      "descriptionMarkdown": "What expression and module code can reach, how its work is bounded, and why results repeat.",
+      "criteria": [
+        {
+          "id": "SBX-1",
+          "verification": "automated",
+          "descriptionMarkdown": "Expressions and modules run without ambient capabilities: `Date` is absent; `Math.random` throws; `eval` is absent and the `Function`, async, generator and async-generator function constructors throw; `Promise`, `Proxy`, `WeakRef`, timers and dynamic `import()` are unavailable; `globalThis` and the built-in prototypes are frozen, so writes to them fail; input values are frozen. Each case fails with `DtcgError::Expression`, or yields a value when the expression catches it, and nothing escapes the sandbox."
+        },
+        {
+          "id": "SBX-2",
+          "verification": "automated",
+          "descriptionMarkdown": "Each evaluation (an expression call or a module's top-level evaluation) has a deterministic step budget counted in QuickJS interrupt ticks, and each resolution a memory limit and a stack limit; all three have documented defaults configurable in `ExpressionOptions`. An infinite loop fails with `LimitExceeded { kind: \"expression steps\" }`, exhausting memory with `LimitExceeded { kind: \"expression memory\" }` and runaway recursion with `DtcgError::Expression` (stack overflow); expression code cannot catch any of them, and afterwards the same runtime resolves again successfully."
+        },
+        {
+          "id": "SBX-3",
+          "verification": "automated",
+          "descriptionMarkdown": "Resolving the same catalog, selection and options twice yields equal `ResolvedTokens` and equal fingerprints, independent of the order tokens are evaluated in; one expression cannot affect another (no shared mutable globals), and nothing carries over between resolution calls. A resolution without expression tokens never starts the JavaScript engine (verifiable because it succeeds even with a memory limit too small to create one)."
+        }
+      ]
+    },
+    {
+      "id": "R-MODULES",
+      "title": "JavaScript and TypeScript modules",
+      "descriptionMarkdown": "ES modules that expressions import: registered by the host or declared by documents.",
+      "criteria": [
+        {
+          "id": "MOD-1",
+          "verification": "automated",
+          "descriptionMarkdown": "`ExpressionOptions` registers host modules by bare specifier with JavaScript or TypeScript ES module source (`ExpressionModule::javascript` / `ExpressionModule::typescript`). A token imports named exports or a namespace through `imports`; modules import host modules, document modules and built-in modules with standard ES module semantics (named and namespace imports, re-exports, live bindings, cycles). Only static imports exist."
+        },
+        {
+          "id": "MOD-2",
+          "verification": "automated",
+          "descriptionMarkdown": "For document-declared specifiers, every module source not yet in the catalog is requested through `Resolution::Missing` with `DocumentRequest::kind == DocumentKind::Module` (JSON documents report `DocumentKind::Json`). `provide_module`, `provide_requested_module` and `replace_module` store module sources atomically (a kind mismatch or invalid id leaves the catalog unchanged) and `remove_document` removes them. Relative imports inside a module resolve against the module's resource id and are requested the same way until the whole static import graph is loaded. `resolve`, the preview APIs and `validate_complete` (across every context) request modules; the language follows the extension (`.ts`/`.mts` TypeScript, `.js`/`.mjs` JavaScript, anything else fails with `DtcgError::Expression`). A resolution that imports no document module requests none."
+        },
+        {
+          "id": "MOD-3",
+          "verification": "automated",
+          "descriptionMarkdown": "An unknown specifier, an imported name the module does not export, a specifier registered by the host and also declared by a document, a host registration in the reserved `dxn.dtcg` namespace, and module syntax or evaluation errors fail with `DtcgError::Expression` naming the token or the module resource and the specifier, with line and column for syntax errors."
+        },
+        {
+          "id": "MOD-4",
+          "verification": "automated",
+          "descriptionMarkdown": "A realistic single-file ES module library fixture written for the tests, in the style of color libraries such as culori (classes, closures, module-level constants, `Math` functions, re-exports), works unmodified through host registration and through document declaration."
+        },
+        {
+          "id": "MOD-5",
+          "verification": "automated",
+          "descriptionMarkdown": "Each module compiles and evaluates at most once per resolution however many tokens import it, observable through a host native function called from the module's top level, and again once in the next resolution call (sessions are not shared)."
+        }
+      ]
+    },
+    {
+      "id": "R-NATIVE",
+      "title": "Rust functions in expressions",
+      "descriptionMarkdown": "Native modules: the built-in `dxn.dtcg` and `dxn.dtcg/color`, host modules, the attribute macro, and TypeScript declarations.",
+      "criteria": [
+        {
+          "id": "NAT-1",
+          "verification": "automated",
+          "descriptionMarkdown": "The built-in module `dxn.dtcg` exports `px(value)`, `rem(value)`, `dimension(value, unit)`, `ms(value)`, `s(value)`, `duration(value, unit)`, `toPx(dimension, remBase)`, `toMillis(duration)`, `round(value, step)`, `clamp(value, min, max)` and `isValid(type, value)`, which validates with the runtime's `ValueExtensions`. Constructors return valid DTCG values; invalid arguments (a unit outside the type's units, a non-number) throw a `TypeError` naming the function."
+        },
+        {
+          "id": "NAT-2",
+          "verification": "automated",
+          "descriptionMarkdown": "A public Rust API on `values::Color` converts between all 14 DTCG color spaces with the CSS Color 4 formulas (D65 and D50 white points with Bradford adaptation; `none` components count as 0) and provides mixing (default space `oklch`, shorter-hue interpolation), OKLCH lightening and darkening, alpha replacement, 6-digit sRGB hex output and parsing, the WCAG 2.x contrast ratio, and gamut test and clamping for the RGB spaces. The built-in module `dxn.dtcg/color` exposes them as `convert`, `mix`, `lighten`, `darken`, `withAlpha`, `toHex`, `fromHex`, `contrast`, `inGamut` and `clampToGamut` on DTCG color JSON. Results are valid DTCG colors; conversions match CSS Color 4 reference values within 1e-5, and in-gamut round trips through every space return the input within 1e-9."
+        },
+        {
+          "id": "NAT-3",
+          "verification": "automated",
+          "descriptionMarkdown": "Hosts register native modules with `NativeModule::new(specifier)`, `.function(name, closure)` and `.constant(name, value)`. Closures are `Send + Sync + 'static`, take and return serde-(de)serializable types and may return `Result<T, E: Display>`. An `Err` or a panic becomes a JavaScript `Error` whose message starts with `<specifier>.<name>:`, catchable by expression code and otherwise failing with `DtcgError::Expression`; a panic leaves the runtime usable; an argument that does not deserialize throws a `TypeError`. `RuntimeOptions` stays `Clone`, `Debug` and `PartialEq` (native modules compare by identity)."
+        },
+        {
+          "id": "NAT-4",
+          "verification": "automated",
+          "descriptionMarkdown": "`#[expression_module(specifier = \"…\")]` from `dxn_dtcg_derive` (re-exported by `dxn_dtcg` with the feature) on an `impl` block generates a function returning a `NativeModule` from its `pub fn`s: export names in camelCase unless `#[expression(name = \"…\")]` renames them, doc comments kept as TSDoc, and TypeScript signatures mapped from the Rust types syntactically (number types to `number`, `String`/`&str` to `string`, `bool`, `Option<T>` to `T | null`, `Vec<T>` to `T[]`, `serde_json::Value` to `unknown`, `dxn_dtcg::values` models to their DTCG value type names, anything else `unknown` unless `#[expression(ts = \"…\")]`). A receiver, an `async fn`, generic parameters or an unknown attribute key is a compile error with a clear message."
+        },
+        {
+          "id": "NAT-5",
+          "verification": "automated",
+          "descriptionMarkdown": "`ExpressionOptions::typescript_declarations()` returns one `.d.ts` text declaring the DTCG value types, the modules `dxn.dtcg` and `dxn.dtcg/color`, and every registered native module with its doc comments. It parses as TypeScript without diagnostics (checked with oxc's parser), and every declared export exists at run time. Host and document JS/TS modules are not declared (their sources carry their types)."
+        }
+      ]
+    },
+    {
+      "id": "R-PLATFORM",
+      "title": "Packaging and platforms",
+      "descriptionMarkdown": "The feature gate, wasm32 support and CI.",
+      "criteria": [
+        {
+          "id": "PLT-1",
+          "verification": "automated",
+          "descriptionMarkdown": "The `expressions` feature is off by default: without it, the normal and build dependency graph of `dxn_dtcg` contains no QuickJS, oxc or `cc` crate, and `cargo check -p dxn_dtcg --target wasm32-unknown-unknown` passes with the wasm32 C compiler variable pointing at a nonexistent program."
+        },
+        {
+          "id": "PLT-2",
+          "verification": "automated",
+          "descriptionMarkdown": "With the feature, `dxn_dtcg` builds for `wasm32-unknown-unknown` with an LLVM clang and `llvm-ar` (set through `CC_wasm32_unknown_unknown` and `AR_wasm32_unknown_unknown`), the test module imports nothing on QuickJS's behalf (its clock import is defined inside the crate, so instantiation under the wasm-bindgen runner succeeds), and a wasm-bindgen test group run under Node with the default wasm stack size evaluates an expression with inputs and a TypeScript expression, and fails cleanly with `LimitExceeded { kind: \"expression steps\" }` on an infinite loop and with `DtcgError::Expression` on runaway recursion."
+        },
+        {
+          "id": "PLT-4",
+          "verification": "automated",
+          "descriptionMarkdown": "The same wasm32 test group also resolves a token that imports a host module, a token that calls a host native module, and a token that converts a color with `dxn.dtcg/color`, with the same results as the native test groups."
+        },
+        {
+          "id": "PLT-3",
+          "verification": "automated",
+          "descriptionMarkdown": "The CI workflow builds and tests the feature natively on Ubuntu and Windows through its existing `--all-features` steps, keeps the default-feature wasm32 check, and adds an Ubuntu job that installs an LLVM clang, `llvm-ar` and the `wasm-bindgen-test-runner` matching the locked `wasm-bindgen`, then runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the wasm test group."
+        }
+      ]
+    },
+    {
+      "id": "R-DOCS",
+      "title": "Documentation",
+      "descriptionMarkdown": "The guide, API reference and website describe expressions.",
+      "criteria": [
+        {
+          "id": "DOC-1",
+          "verification": "automated",
+          "descriptionMarkdown": "A new chapter `docs/15-expressions.md` covers the format, evaluation, the standards rationale (DTCG Format §5.2.3 and §8), modules, native and built-in modules, the sandbox and limits, TypeScript declarations and the wasm32 toolchain; `lib.rs` compiles it as doctests under the `expressions` feature and they pass. The README, `docs/README.md`, the API reference, the errors chapter (`Expression`, the new limit kinds, `DocumentKind`), the document-loading chapter (module documents) and a new website page are updated."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,539 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-expressions",
+  "revision": 1,
+  "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
+  "validationMode": "sprint",
+  "repositories": [
+    {"id": "dtcg", "path": ".", "role": "execution"},
+    {"id": "nsh", "path": "../nsh/nsh", "role": "reference"}
+  ],
+  "boundaries": {
+    "repositoryIds": ["dtcg"],
+    "forbiddenPaths": [
+      "crates/dxn_dtcg/tests/fixtures/dtcg-test-suite/**",
+      "CHANGELOG.md",
+      "release-plz.toml",
+      "rust-toolchain.toml",
+      ".github/workflows/release-plz.yml",
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ]
+  },
+  "checks": [
+    {
+      "id": "check-expr-disabled-off",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EXP-1"],
+      "descriptionMarkdown": "The disabled-behavior group without the `expressions` feature.",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--test", "expressions_disabled"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_disabled.rs"]
+    },
+    {
+      "id": "check-expr-disabled-on",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EXP-1"],
+      "descriptionMarkdown": "The same disabled-behavior group with the feature compiled in but expressions not enabled in `RuntimeOptions`.",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_disabled"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_disabled.rs"]
+    },
+    {
+      "id": "check-expr-format",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EXP-2"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_format"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_format.rs"]
+    },
+    {
+      "id": "check-default-graph",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": ["PLT-1"],
+      "descriptionMarkdown": "Asserts PLT-1: the default normal+build dependency graph of `dxn_dtcg` has no QuickJS, oxc or `cc` package, and a default-feature wasm32 check succeeds while the wasm32 C compiler and archiver point at nonexistent programs (so any C compilation would fail).",
+      "argv": ["bash", "-c", "set -euo pipefail\ntree=$(cargo tree -p dxn_dtcg -e normal,build --prefix none --format '{p}')\nif printf '%s\\n' \"$tree\" | grep -E '^(quickjs-jit|quickjs-jit-sys|quickjs-jit-core|rquickjs|oxc[a-z_-]*|cc) v'; then echo 'default dependency graph contains engine crates'; exit 1; fi\nCC_wasm32_unknown_unknown=/nonexistent/cc AR_wasm32_unknown_unknown=/nonexistent/ar cargo check -p dxn_dtcg --target wasm32-unknown-unknown\necho 'default graph ok'\n"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "stdoutPattern": "default graph ok"},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg_derive/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**"]
+    },
+    {
+      "id": "check-expr-evaluation",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EVAL-1", "EVAL-2", "EVAL-3"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_evaluation"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_evaluation.rs"]
+    },
+    {
+      "id": "check-expr-sandbox",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["SBX-1", "SBX-2", "SBX-3"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_sandbox"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_sandbox.rs"]
+    },
+    {
+      "id": "check-expr-typescript",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EVAL-4"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_typescript"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_typescript.rs"]
+    },
+    {
+      "id": "check-expr-apis",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EVAL-5"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_apis"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_apis.rs"]
+    },
+    {
+      "id": "check-expr-wasm",
+      "repositoryId": "dtcg",
+      "kind": "runtime",
+      "criterionIds": ["PLT-2", "PLT-4"],
+      "descriptionMarkdown": "Runs the wasm32 test group under Node with `wasm-bindgen-test-runner`. Needs an LLVM clang with the WebAssembly target and `llvm-ar` (found through `LLVM_BIN`, Homebrew's `llvm`, or `/usr/lib/llvm-<n>/bin`), Node, and a `wasm-bindgen-test-runner` matching the locked `wasm-bindgen` on PATH. External toolchain, so never reused.",
+      "argv": ["bash", "-c", "set -euo pipefail\npick() {\n  for d in \"${LLVM_BIN:-}\" /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin; do\n    if [ -n \"$d\" ] && [ -x \"$d/clang\" ] && [ -x \"$d/llvm-ar\" ]; then echo \"$d\"; return 0; fi\n  done\n  for v in 21 20 19 18 17; do\n    if [ -x \"/usr/lib/llvm-$v/bin/clang\" ] && [ -x \"/usr/lib/llvm-$v/bin/llvm-ar\" ]; then echo \"/usr/lib/llvm-$v/bin\"; return 0; fi\n  done\n  return 1\n}\nllvm=$(pick) || { echo 'no LLVM clang with llvm-ar found; set LLVM_BIN'; exit 2; }\ncommand -v wasm-bindgen-test-runner >/dev/null || { echo 'wasm-bindgen-test-runner is not on PATH'; exit 2; }\ncommand -v node >/dev/null || { echo 'node is not on PATH'; exit 2; }\nexport CC_wasm32_unknown_unknown=\"$llvm/clang\" AR_wasm32_unknown_unknown=\"$llvm/llvm-ar\" CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner\ncargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --test expressions_wasm\n"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "reuse": false,
+      "timeoutSeconds": 1800,
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_wasm.rs"]
+    },
+    {
+      "id": "check-ci-workflow",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": ["PLT-3"],
+      "descriptionMarkdown": "Asserts PLT-3 from `.github/workflows/ci.yml` as text: the existing `--all-features` clippy and test steps and the default-feature wasm32 check remain, and a separate Ubuntu job installs LLVM (clang and llvm-ar), installs `wasm-bindgen-cli` at the locked `wasm-bindgen` version, sets the `CC_`/`AR_wasm32_unknown_unknown` variables and runs both the feature wasm32 check and the `expressions_wasm` group.",
+      "argv": ["python3", "-c", "import re\ntext = open('.github/workflows/ci.yml', encoding='utf-8').read()\nfor needle in ['cargo clippy --workspace --all-targets --all-features -- -D warnings', 'cargo test --workspace --all-features', 'cargo check --workspace --target wasm32-unknown-unknown', 'cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown', '--test expressions_wasm', 'wasm-bindgen-cli', 'CC_wasm32_unknown_unknown', 'AR_wasm32_unknown_unknown', 'llvm']:\n    assert needle in text, needle\njobs = re.findall(r'(?m)^  ([A-Za-z0-9_-]+):\\s*$', text)\nassert len(jobs) >= 2, jobs\nprint('ci workflow ok')\n"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "stdoutPattern": "ci workflow ok"},
+      "inputs": [".github/workflows/ci.yml"]
+    },
+    {
+      "id": "check-expr-modules",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["MOD-1", "MOD-3", "MOD-4"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_modules"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_modules.rs", "crates/dxn_dtcg/tests/fixtures/expressions/**"]
+    },
+    {
+      "id": "check-expr-document-modules",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["EXP-3", "MOD-2"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_document_modules"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_document_modules.rs", "crates/dxn_dtcg/tests/fixtures/expressions/**"]
+    },
+    {
+      "id": "check-expr-native",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-3", "MOD-5"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_native"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_native.rs"]
+    },
+    {
+      "id": "check-color-values",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-2"],
+      "descriptionMarkdown": "The Rust color API, without the `expressions` feature.",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--test", "color_conversion"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/color_conversion.rs"]
+    },
+    {
+      "id": "check-expr-color",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-2"],
+      "descriptionMarkdown": "The `dxn.dtcg/color` module from expressions.",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_color"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_color.rs"]
+    },
+    {
+      "id": "check-expr-builtin",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-1"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_builtin"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_builtin.rs"]
+    },
+    {
+      "id": "check-expr-macro",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-4"],
+      "descriptionMarkdown": "The `#[expression_module]` group, including its trybuild compile-fail cases for receivers, `async fn`, generics and unknown keys.",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_native_macro"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg_derive/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_native_macro.rs", "crates/dxn_dtcg/tests/expression_module_ui/**"]
+    },
+    {
+      "id": "check-expr-declarations",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["NAT-5"],
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--test", "expressions_declarations"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "crates/dxn_dtcg/tests/expressions_declarations.rs"]
+    },
+    {
+      "id": "check-expr-doctests",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": ["DOC-1"],
+      "descriptionMarkdown": "Only the new chapter's doctests (`documentation::expressions`).",
+      "argv": ["cargo", "test", "-p", "dxn_dtcg", "--features", "expressions", "--doc", "documentation::expressions"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "minimumTests": 1},
+      "inputs": ["Cargo.toml", "Cargo.lock", "crates/dxn_dtcg/Cargo.toml", "crates/dxn_dtcg/src/**", "crates/dxn_dtcg_derive/src/**", "docs/15-expressions.md"]
+    },
+    {
+      "id": "check-docs-index",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": ["DOC-1"],
+      "descriptionMarkdown": "Asserts the documentation wiring of DOC-1 as text: the chapter exists and `lib.rs` includes it under the feature, and the README, docs index, API reference, errors chapter, document-loading chapter and the website page mention the new surface.",
+      "argv": ["python3", "-c", "import os\nread = lambda p: open(p, encoding='utf-8').read()\nlib = read('crates/dxn_dtcg/src/lib.rs')\nassert 'docs/15-expressions.md' in lib and 'feature = \"expressions\"' in lib, 'lib.rs includes the chapter under the feature'\nchapter = read('docs/15-expressions.md')\nfor needle in ['dxn.dtcg.expressions', '5.2.3', 'dxn.dtcg/color', 'expression steps', 'wasm32-unknown-unknown', 'typescript_declarations']:\n    assert needle in chapter, ('chapter', needle)\nassert '15-expressions.md' in read('docs/README.md')\nassert 'dxn.dtcg.expressions' in read('README.md')\nassert 'ExpressionOptions' in read('docs/13-api-reference.md')\nerrors = read('docs/11-errors-limits-and-diagnostics.md')\nassert 'Expression' in errors and 'expression steps' in errors and 'expression memory' in errors\nassert 'DocumentKind' in read('docs/07-document-loading.md')\nassert os.path.exists('website/content/docs/expressions.md')\nprint('docs index ok')\n"],
+      "cwd": ".",
+      "expected": {"exitCode": 0, "stdoutPattern": "docs index ok"},
+      "inputs": ["README.md", "docs/**", "crates/dxn_dtcg/src/lib.rs", "website/content/docs/**"]
+    },
+    {
+      "id": "final-fmt",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [],
+      "argv": ["cargo", "fmt", "--all", "--check"],
+      "cwd": ".",
+      "expected": {"exitCode": 0}
+    },
+    {
+      "id": "final-clippy",
+      "repositoryId": "dtcg",
+      "kind": "static",
+      "criterionIds": [],
+      "argv": ["cargo", "clippy", "--workspace", "--all-targets", "--all-features", "--", "-D", "warnings"],
+      "cwd": ".",
+      "expected": {"exitCode": 0}
+    },
+    {
+      "id": "final-wasm-default",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "criterionIds": [],
+      "argv": ["cargo", "check", "--workspace", "--target", "wasm32-unknown-unknown"],
+      "cwd": ".",
+      "expected": {"exitCode": 0}
+    },
+    {
+      "id": "final-package",
+      "repositoryId": "dtcg",
+      "kind": "build",
+      "criterionIds": [],
+      "argv": ["cargo", "package", "--workspace"],
+      "cwd": ".",
+      "expected": {"exitCode": 0}
+    }
+  ],
+  "finalCheckIds": ["final-fmt", "final-clippy", "final-wasm-default", "final-package"],
+  "sprints": [
+    {
+      "id": "s1-core",
+      "title": "Feature, extension format and the evaluation core",
+      "dependsOn": [],
+      "memoryScopes": ["runtime", "runtime/resolution", "repository/packaging"],
+      "checkIds": ["check-expr-disabled-off", "check-expr-disabled-on", "check-expr-format", "check-default-graph", "check-expr-evaluation", "check-expr-sandbox", "check-expr-typescript", "check-expr-apis"],
+      "tasks": [
+        {
+          "id": "t01-feature-format",
+          "title": "The expressions feature, options, error surface and extension parsing",
+          "descriptionMarkdown": "Add the off-by-default feature `expressions` to `dxn_dtcg` with optional dependencies `rquickjs` (package `quickjs-jit`, `=0.14.1`, `default-features = false`, features `std` and `loader`) and `oxc = \"=0.153.0\"` (features for parser, semantic, transformer and codegen with source maps), declared once in `[workspace.dependencies]` (d-feature-options). Add the always-present surface: `EXPRESSION_EXTENSION`, `ResolvedToken::snapshot` (always `None` until t02), `DtcgError::Expression { resource, path, message }`, `DtcgDiagnosticCode::Expression`. Add the feature-gated `dxn_dtcg::expressions` module with `ExpressionOptions` (defaults and `with_*` setters for step budget, memory limit, stack limit and precision; module registries come later) and `RuntimeOptions::with_expressions`, keeping `RuntimeOptions` `Clone`/`Debug`/`Eq`. Parse and validate the token expression object per EXP-2 (only with expressions enabled), with an internal parsed form t02 consumes.\n\nNew groups: `tests/expressions_disabled.rs` (EXP-1; must compile and pass with and without the feature, so feature-dependent parts sit behind `#[cfg(feature = \"expressions\")]`) and `tests/expressions_format.rs` (EXP-2; `#![cfg(feature = \"expressions\")]`). PLT-1 is proven by `check-default-graph`.",
+          "criterionIds": ["EXP-1", "EXP-2", "PLT-1"],
+          "designIds": ["d-extension-format", "d-feature-options"],
+          "dependsOn": [],
+          "checkIds": ["check-expr-disabled-off", "check-expr-disabled-on", "check-expr-format", "check-default-graph"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "Cargo.toml"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/Cargo.toml"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/options.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/error.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/diagnostics/mod.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "ResolvedToken"}
+          ]
+        },
+        {
+          "id": "t02-evaluation",
+          "title": "Evaluate expressions inside token resolution",
+          "descriptionMarkdown": "Implement the QuickJS session (d-engine-sessions: lazy creation per resolving call, generated wrapper module per token, inputs through `JSON.parse`, value conversion with the integral rule, non-JSON rejection, depth bound and rounding) and wire it into `Resolver::token_cost` per d-dual-resolution: resolve `$value` as today, resolve inputs with `resolve_value` at `Position::Unchecked`, evaluate, convert, charge `max_value_nodes`, check depth, validate against the effective type, set `snapshot`, and record the token's cost from the result. Map caught exceptions to `DtcgError::Expression` (positions refined in t04). The sandbox hardening and limits are t03; keep a single place where the context is created so t03 extends it.\n\nNew group `tests/expressions_evaluation.rs` covering EVAL-1..3: snapshot and type rules, inputs through aliases, pointers and nested literals, hop/node/depth limits on inputs, missing targets, cycles through inputs, aliases to expression tokens, result conversions and rejections, rounding defaults and `None`, literal strings.",
+          "criterionIds": ["EVAL-1", "EVAL-2", "EVAL-3"],
+          "designIds": ["d-dual-resolution", "d-engine-sessions"],
+          "dependsOn": ["t01-feature-format"],
+          "checkIds": ["check-expr-evaluation"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/token_resolution.rs", "symbol": "Resolver::token_cost"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "resolve_sources"},
+            {"repositoryId": "nsh", "path": "crates/nsh-js/src/protocol.rs"}
+          ]
+        },
+        {
+          "id": "t03-sandbox",
+          "title": "Sandbox, limits and determinism",
+          "descriptionMarkdown": "Harden the context per d-engine-sessions, adapting nsh's `sandbox.rs` (intrinsic subset, deleted `eval`, throwing function constructors, frozen prototypes with accessor members, frozen `globalThis`, throwing `Math.random`, frozen inputs, no dynamic `import()`), and enforce the step budget (interrupt ticks per evaluation, uncatchable), the memory limit and the stack limit, mapping them to `LimitExceeded { kind: \"expression steps\" | \"expression memory\" }` and `DtcgError::Expression`. Keep the runtime usable after every failure.\n\nNew group `tests/expressions_sandbox.rs` covering SBX-1..3, including repeated resolution equality, evaluation-order independence, no leakage between expressions or calls, and a document without expression tokens resolving under a memory limit too small to create an engine.",
+          "criterionIds": ["SBX-1", "SBX-2", "SBX-3"],
+          "designIds": ["d-engine-sessions"],
+          "dependsOn": ["t02-evaluation"],
+          "checkIds": ["check-expr-sandbox"],
+          "sourceRefs": [
+            {"repositoryId": "nsh", "path": "crates/nsh-js/src/sandbox.rs"},
+            {"repositoryId": "nsh", "path": "crates/nsh-js/src/host.rs"}
+          ]
+        },
+        {
+          "id": "t04-typescript",
+          "title": "TypeScript expressions and authored error positions",
+          "descriptionMarkdown": "Strip `ts` expressions with oxc per d-typescript (follow nsh's `compile_native` without JSX), and map syntax and runtime error positions back to the authored expression text for `js` and `ts` (wrapper offsets; for `ts`, through the source map). Map `DtcgError::Expression` to `DtcgDiagnosticCode::Expression` in `DtcgDiagnostic::from_error`.\n\nNew group `tests/expressions_typescript.rs` covering EVAL-4: type annotations, `as`, `satisfies`, generics and interfaces erased; syntax and runtime errors with line and column in `js` and `ts`, including multi-line expressions; the diagnostic code.",
+          "criterionIds": ["EVAL-4"],
+          "designIds": ["d-typescript", "d-engine-sessions"],
+          "dependsOn": ["t02-evaluation"],
+          "checkIds": ["check-expr-typescript"],
+          "sourceRefs": [
+            {"repositoryId": "nsh", "path": "crates/nsh-bundler/src/compile.rs", "symbol": "compile_native"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/diagnostics/mod.rs"}
+          ]
+        },
+        {
+          "id": "t05-apis",
+          "title": "Expressions across every resolving API and in affected resolution",
+          "descriptionMarkdown": "Make `project`, `preview_source`, `preview_occurrence` and `replace_json_and_resolve_affected` evaluate expressions like `resolve` (they share `resolve_sources`/`resolve_affected`; pass the expression options through), and extend the `DependencyCollector` with expression inputs per d-incremental. Confirm `to_document` round trips with expressions on and off.\n\nNew group `tests/expressions_apis.rs` covering EVAL-5: each API with an expression token, affected resolution after editing an input target, an expression object and an unrelated token (affected set and `apply_affected` equal to a full resolution), and the export round trip.",
+          "criterionIds": ["EVAL-5"],
+          "designIds": ["d-dual-resolution", "d-incremental"],
+          "dependsOn": ["t02-evaluation"],
+          "checkIds": ["check-expr-apis"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/runtime.rs", "symbol": "DtcgRuntime"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "resolve_affected"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/token_resolution.rs", "symbol": "DependencyCollector"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s2-platforms",
+      "title": "wasm32 proof and CI",
+      "dependsOn": ["s1-core"],
+      "memoryScopes": ["repository/validation"],
+      "checkIds": ["check-expr-wasm", "check-ci-workflow"],
+      "tasks": [
+        {
+          "id": "t06-wasm-core",
+          "title": "Expressions on wasm32-unknown-unknown",
+          "descriptionMarkdown": "Per d-wasm: define `__rquickjs_host_now_us` (returning 0) for `cfg(all(target_arch = \"wasm32\", target_os = \"unknown\"))` inside the crate, add `wasm-bindgen-test` as a wasm32-only dev-dependency (pin the version whose `wasm-bindgen` the CI runner will match; the local runner is 0.2.129), confirm the default stack limit works with the default wasm stack, and write `tests/expressions_wasm.rs` (wasm32-only, `wasm_bindgen_test_configure!` not needed for Node) covering PLT-2: an expression with inputs, a `ts` expression, the step budget and runaway recursion. Planning spike evidence: Apple's clang fails at link time; Homebrew LLVM (`/opt/homebrew/opt/llvm/bin`) works.",
+          "criterionIds": ["PLT-2"],
+          "designIds": ["d-wasm", "d-engine-sessions"],
+          "dependsOn": [],
+          "checkIds": ["check-expr-wasm"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/Cargo.toml"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/lib.rs"}
+          ]
+        },
+        {
+          "id": "t07-ci",
+          "title": "CI job for the wasm32 expression build",
+          "descriptionMarkdown": "Extend `.github/workflows/ci.yml` per PLT-3 and d-wasm: keep the existing matrix steps (their `--all-features` steps now build QuickJS with GCC and MSVC); add an Ubuntu job with the pinned toolchain action and wasm32 target that installs LLVM (`clang`, `llvm-ar`), installs `wasm-bindgen-cli` at the `wasm-bindgen` version in `Cargo.lock`, sets `CC_wasm32_unknown_unknown`/`AR_wasm32_unknown_unknown` and `CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER`, and runs the feature wasm32 check and the `expressions_wasm` group. The workflow run itself happens on GitHub after the push.",
+          "criterionIds": ["PLT-3"],
+          "designIds": ["d-wasm"],
+          "dependsOn": ["t06-wasm-core"],
+          "checkIds": ["check-ci-workflow"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": ".github/workflows/ci.yml"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s3-modules",
+      "title": "JavaScript and TypeScript modules",
+      "dependsOn": ["s1-core"],
+      "memoryScopes": ["runtime/resolution"],
+      "checkIds": ["check-expr-modules", "check-expr-document-modules"],
+      "tasks": [
+        {
+          "id": "t08-host-modules",
+          "title": "Imports and host-registered modules",
+          "descriptionMarkdown": "Per d-modules: `ExpressionModule::javascript`/`typescript` and `ExpressionOptions::with_module`; the in-memory module loader in the session (built-in names reserved, specifier precedence, relative specifiers inside modules), the `imports` declaration rendered into each token's wrapper module, static-only imports (oxc import scan), TypeScript modules stripped once, and module compilation once per session. Errors per MOD-3.\n\nNew group `tests/expressions_modules.rs` with fixtures under `tests/fixtures/expressions/` (a realistic single-file color-library-style ES module for MOD-4, plus small modules for named, namespace, re-export, live-binding and cycle cases) covering MOD-1, MOD-3 and MOD-4.",
+          "criterionIds": ["MOD-1", "MOD-3", "MOD-4"],
+          "designIds": ["d-modules", "d-typescript", "d-engine-sessions"],
+          "dependsOn": [],
+          "checkIds": ["check-expr-modules"],
+          "sourceRefs": [
+            {"repositoryId": "nsh", "path": "crates/nsh-js/src/modules.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/token_resolution.rs"}
+          ]
+        },
+        {
+          "id": "t09-document-modules",
+          "title": "Document-declared modules through the request/provide protocol",
+          "descriptionMarkdown": "Per d-modules and EXP-3/MOD-2: catalog entries gain a kind; add `DocumentKind`, `DocumentRequest::kind`, `provide_module`, `provide_requested_module` and `replace_module` with atomic mutations; read and validate root `modules` declarations while folding sources (canonicalized against each source's resource id); walk each imported document module's static import graph and return `Resolution::Missing` module requests from `resolve`, the preview APIs and `validate_complete` (every context). Language from the extension.\n\nNew group `tests/expressions_document_modules.rs` covering EXP-3 and MOD-2, reusing the MOD-4 fixture through document declaration.",
+          "criterionIds": ["EXP-3", "MOD-2"],
+          "designIds": ["d-modules", "d-extension-format"],
+          "dependsOn": ["t08-host-modules"],
+          "checkIds": ["check-expr-document-modules"],
+          "supportingCriterionIds": ["MOD-4"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/catalog.rs", "symbol": "DocumentCatalog"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/runtime.rs", "symbol": "DtcgRuntime::provide_requested_json"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/source_discovery.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/flatten.rs", "symbol": "Merger::fold"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resource.rs"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s4-native",
+      "title": "Rust functions: native modules, built-ins, color, macro and declarations",
+      "dependsOn": ["s3-modules"],
+      "memoryScopes": ["runtime/projection"],
+      "checkIds": ["check-expr-native", "check-color-values", "check-expr-color", "check-expr-builtin", "check-expr-macro", "check-expr-declarations"],
+      "tasks": [
+        {
+          "id": "t10-native-builder",
+          "title": "Host native modules and the JSON bridge",
+          "descriptionMarkdown": "Per d-native-modules: `NativeModule::new`, `.function`, `.constant`, typed-closure adaptation through serde, `ExpressionOptions::with_native_module`, identity-based `PartialEq`/`Debug`, the generated wrapper modules over a frozen hidden registry, error and panic mapping (`catch_unwind`), `TypeError` for argument conversion. The planning spike's JSON-text bridge avoids rquickjs's higher-ranked closure lifetimes.\n\nNew group `tests/expressions_native.rs` covering NAT-3 and MOD-5 (a module whose top level calls a counting native function, imported by several tokens, across two resolution calls).",
+          "criterionIds": ["NAT-3", "MOD-5"],
+          "designIds": ["d-native-modules", "d-modules"],
+          "dependsOn": [],
+          "checkIds": ["check-expr-native"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/options.rs"},
+            {"repositoryId": "nsh", "path": "crates/nsh-js/src/classes.rs"}
+          ]
+        },
+        {
+          "id": "t11-color",
+          "title": "Color conversions in Rust and the dxn.dtcg/color module",
+          "descriptionMarkdown": "Per d-color: the public API on `values::Color` (feature-independent) and the built-in module `dxn.dtcg/color` on DTCG color JSON. Use the CSS Color 4 sample-code matrices and published reference conversions for tests.\n\nNew groups `tests/color_conversion.rs` (Rust API, no feature) and `tests/expressions_color.rs` (the module) covering NAT-2: reference values within 1e-5, in-gamut round trips through every space within 1e-9, `none` handling, mixing defaults and hue interpolation, lighten/darken, alpha, hex both ways, WCAG contrast, gamut test and clamping, and DTCG validity of every result.",
+          "criterionIds": ["NAT-2"],
+          "designIds": ["d-color", "d-native-modules"],
+          "dependsOn": ["t10-native-builder"],
+          "checkIds": ["check-color-values", "check-expr-color"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/values.rs", "symbol": "Color"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/value.rs"}
+          ]
+        },
+        {
+          "id": "t12-dtcg-module",
+          "title": "The dxn.dtcg built-in module",
+          "descriptionMarkdown": "Per d-native-modules and NAT-1: the helpers of `dxn.dtcg`, with `isValid` validating through the runtime's `ValueExtensions` and argument errors as `TypeError`s naming the function.\n\nNew group `tests/expressions_builtin.rs` covering NAT-1.",
+          "criterionIds": ["NAT-1"],
+          "designIds": ["d-native-modules"],
+          "dependsOn": ["t10-native-builder"],
+          "checkIds": ["check-expr-builtin"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/value.rs", "symbol": "validate_value_with"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/values.rs", "symbol": "Dimension"}
+          ]
+        },
+        {
+          "id": "t13-macro",
+          "title": "#[expression_module] attribute macro",
+          "descriptionMarkdown": "Per d-native-modules and NAT-4: the attribute in `dxn_dtcg_derive` (re-exported by `dxn_dtcg` under the feature), camelCase export names, `#[expression(name = …, ts = …)]`, doc comments as TSDoc, the syntactic Rust-to-TypeScript mapping, and compile errors for receivers, `async fn`, generics and unknown keys. Keep the derive crate's dev-dependency on `dxn_dtcg` path-only.\n\nNew group `tests/expressions_native_macro.rs` with trybuild compile-fail cases under `tests/expression_module_ui/` covering NAT-4.",
+          "criterionIds": ["NAT-4"],
+          "designIds": ["d-native-modules"],
+          "dependsOn": ["t10-native-builder"],
+          "checkIds": ["check-expr-macro"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg_derive/src/lib.rs"},
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg_derive/Cargo.toml"},
+            {"repositoryId": "nsh", "path": "crates/nsh-macros/src/lib.rs"}
+          ]
+        },
+        {
+          "id": "t14-declarations",
+          "title": "TypeScript declarations for editors",
+          "descriptionMarkdown": "Per d-declarations and NAT-5: `ExpressionOptions::typescript_declarations()` from the registration data of the built-in modules, host native modules (including macro-generated metadata) and the DTCG value types.\n\nNew group `tests/expressions_declarations.rs` covering NAT-5: oxc parses the output without diagnostics, and the declared exports equal the run-time exports of every native module.",
+          "criterionIds": ["NAT-5"],
+          "designIds": ["d-declarations"],
+          "dependsOn": ["t11-color", "t12-dtcg-module", "t13-macro"],
+          "checkIds": ["check-expr-declarations"],
+          "sourceRefs": [
+            {"repositoryId": "nsh", "path": "crates/nsh-core/src/ui/component.rs"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s5-finish",
+      "title": "wasm32 coverage of modules and native functions, and documentation",
+      "dependsOn": ["s2-platforms", "s4-native"],
+      "memoryScopes": ["repository/validation"],
+      "checkIds": ["check-expr-wasm", "check-expr-doctests", "check-docs-index"],
+      "tasks": [
+        {
+          "id": "t15-wasm-complete",
+          "title": "Modules, native functions and color on wasm32",
+          "descriptionMarkdown": "Extend `tests/expressions_wasm.rs` per PLT-4 with a host module import, a host native module call and a `dxn.dtcg/color` conversion, asserting the same values as the native groups.",
+          "criterionIds": ["PLT-4"],
+          "designIds": ["d-wasm"],
+          "dependsOn": [],
+          "checkIds": ["check-expr-wasm"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/Cargo.toml"}
+          ]
+        },
+        {
+          "id": "t16-docs",
+          "title": "Expressions chapter, API reference and website",
+          "descriptionMarkdown": "Per d-docs-release and DOC-1: write `docs/15-expressions.md` (rust examples compile under the feature; include the standards rationale, the format, inputs and results, TypeScript, modules and the request/provide flow for module documents, native modules, the macro, built-in modules, limits and sandbox, declarations, the wasm32 toolchain and determinism notes), include it in `lib.rs` under `#[cfg(all(doctest, feature = \"expressions\"))]`, and update the README, `docs/README.md`, the API reference, the errors chapter, the document-loading chapter and add `website/content/docs/expressions.md`, keeping the consumer-free wording rules.",
+          "criterionIds": ["DOC-1"],
+          "designIds": ["d-docs-release"],
+          "dependsOn": ["t15-wasm-complete"],
+          "checkIds": ["check-expr-doctests", "check-docs-index"],
+          "sourceRefs": [
+            {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/lib.rs"},
+            {"repositoryId": "dtcg", "path": "docs/README.md"},
+            {"repositoryId": "dtcg", "path": "docs/13-api-reference.md"},
+            {"repositoryId": "dtcg", "path": "website/content/docs/value-types.md"}
+          ]
+        }
+      ]
+    }
+  ]
+}

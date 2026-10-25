@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-expressions",
+  "revision": 0,
+  "planRevision": 1,
+  "specHashes": {
+    "requirements": "9b3d201113759ab31d63835311c100cd21b63702fad5c06f493dafb2f564e6bd",
+    "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
+    "plan": "2c595bb2249a4406870742378063099b4efeb532b13b90b66d3cf87f1af0117a"
+  },
+  "tasks": {
+    "t01-feature-format": {
+      "status": "pending"
+    },
+    "t02-evaluation": {
+      "status": "pending"
+    },
+    "t03-sandbox": {
+      "status": "pending"
+    },
+    "t04-typescript": {
+      "status": "pending"
+    },
+    "t05-apis": {
+      "status": "pending"
+    },
+    "t06-wasm-core": {
+      "status": "pending"
+    },
+    "t07-ci": {
+      "status": "pending"
+    },
+    "t08-host-modules": {
+      "status": "pending"
+    },
+    "t09-document-modules": {
+      "status": "pending"
+    },
+    "t10-native-builder": {
+      "status": "pending"
+    },
+    "t11-color": {
+      "status": "pending"
+    },
+    "t12-dtcg-module": {
+      "status": "pending"
+    },
+    "t13-macro": {
+      "status": "pending"
+    },
+    "t14-declarations": {
+      "status": "pending"
+    },
+    "t15-wasm-complete": {
+      "status": "pending"
+    },
+    "t16-docs": {
+      "status": "pending"
+    }
+  },
+  "validationBatches": {},
+  "checkResults": {},
+  "reviews": {},
+  "checkpoints": {},
+  "findings": [],
+  "handoffMarkdown": "",
+  "protectedPaths": {
+    "dtcg": {
+      "crates/dxn_dtcg/tests/fixtures/dtcg-test-suite/**": "fdf7d386264082891173de43e921ac005096fe1177837134ea83c82a8aff2e34",
+      "CHANGELOG.md": "ada0abd8eaaf025785cafd10f63e85612534fc5f163eb7d7b2d2a410b6331726",
+      "release-plz.toml": "3e8a9e3fad40ab4fbc30260aae5c38569da70f8c00aeb17026b3a4dd5a6f6758",
+      "rust-toolchain.toml": "0d90a9379fbd97a36c5f715cd8bc24e5c96d2a78db903645b227c83fa3a54c16",
+      ".github/workflows/release-plz.yml": "8e14cdc62d012ecf9e8e8aacc72f11903f0ee57c729ac5ba7c45fb7ddfff490c",
+      "LICENSE-APACHE": "1d39282f42adc0ef965c88cac88e9b39aa332f31fecfd8615eb0e359f84fa663",
+      "LICENSE-MIT": "13c3326d5ad827218788303fa4c9b091b94d3e3ec235b46650239eff71576fba"
+    }
+  }
+}

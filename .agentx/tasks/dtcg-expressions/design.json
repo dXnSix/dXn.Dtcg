@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 7,
+  "epicId": "dtcg-expressions",
+  "decisions": [
+    {
+      "id": "d-extension-format",
+      "requirementIds": ["R-FORMAT"],
+      "descriptionMarkdown": "An expression is the object at `$extensions[\"dxn.dtcg.expressions\"]` of a token: `{ \"inputs\"?: { name: <DTCG value> }, \"imports\"?: { specifier: [name, …] | namespace }, \"js\" | \"ts\": \"<expression>\" }`. The key is the public constant `dxn_dtcg::EXPRESSION_EXTENSION = \"dxn.dtcg.expressions\"`. The same key at a token document's root `$extensions` may hold `modules: { specifier: \"relative/reference\" }`. The token keeps its required `$value`, the DTCG-valid snapshot. With expressions off the object is opaque `$extensions` data and nothing reads it.\n\nInputs are the only way an expression reads tokens: declared references in JSON, never a lookup function inside JavaScript. `imports` are declared the same way. Both keep every dependency static, so cycle detection, limits and affected resolution need no JavaScript parsing of the expression.",
+      "invariantsMarkdown": "- No library behavior changes unless expressions are enabled at run time.\n- Validation of the object happens only with expressions on, and reports `DtcgError::Expression` naming the token (or document) and member.\n- Specifiers in the `dxn.dtcg` namespace (`dxn.dtcg`, `dxn.dtcg/…`) are reserved for built-in modules.",
+      "rationaleMarkdown": "DTCG Format §8 requires `$value` to match `$type` (a string dimension is invalid), and §5.2.3 lets tools add vendor data under `$extensions` that other tools must preserve, while recommending that such data stay optional metadata. A computed value whose snapshot stays in `$value` satisfies both: tools that ignore the extension read a valid value, and this runtime recomputes it. The community group closed computed values as out of scope for the format (issue #81), so an extension is the expected route. Declared inputs follow the library's existing reference syntax and resolution machinery.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/flatten.rs", "symbol": "RawToken"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/options.rs"}
+      ],
+      "memoryDecisionRefs": [
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-10-07-runtime-resolution-conformance-bar.md"},
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/packaging/2026-10-25-repository-packaging-standalone-library.md"}
+      ]
+    },
+    {
+      "id": "d-feature-options",
+      "requirementIds": ["R-FORMAT", "R-PLATFORM", "R-NATIVE"],
+      "descriptionMarkdown": "Expressions are an off-by-default Cargo feature `expressions` of `dxn_dtcg` plus a run-time switch: `RuntimeOptions::with_expressions(ExpressionOptions)` (field `expressions: Option<ExpressionOptions>`, present only with the feature). The feature compiles the engine in; only the option turns evaluation on, so Cargo feature unification never changes resolution for code that did not opt in. There is no public engine trait: QuickJS is the engine on every target.\n\nThe feature-gated module `dxn_dtcg::expressions` holds `ExpressionOptions` (step budget, memory limit, stack limit, precision, host modules, native modules; chainable `with_*` setters; `typescript_declarations()`), `ExpressionModule` and `NativeModule`. Always present (no feature needed, no dependencies): `EXPRESSION_EXTENSION`, `ResolvedToken::snapshot`, `DtcgError::Expression { resource, path, message }`, `DtcgDiagnosticCode::Expression`, `DocumentRequest::kind` with `DocumentKind::{Json, Module}`, the module-document catalog methods, and the color API on `values::Color`.",
+      "invariantsMarkdown": "- `RuntimeOptions` keeps `Clone`, `Debug`, `PartialEq` and `Eq`; types holding closures implement them by identity (`Arc::ptr_eq`) and print names, never closures.\n- `DtcgRuntime` stays `Send + Sync`: options hold only `Send + Sync` data; QuickJS state never lives in options or the runtime.\n- New public structs and enums are `#[non_exhaustive]` where the crate's pattern requires it.",
+      "rationaleMarkdown": "A separate engine crate behind a public trait was considered so the core stays C-free, but the owner chose QuickJS on every target, which removes the reason for a pluggable engine; a feature gate keeps default builds C-free just as well, and private engine code can change without API breaks.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/Cargo.toml"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/options.rs", "symbol": "RuntimeOptions"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/error.rs", "symbol": "DtcgError"}
+      ]
+    },
+    {
+      "id": "d-dual-resolution",
+      "requirementIds": ["R-EVAL"],
+      "descriptionMarkdown": "In `Resolver::token_cost` (`token_resolution.rs`), a token resolves its `$value` exactly as today, including the effective-type order and value validation. Then, when expressions are enabled and the token has a valid expression object, its inputs resolve through `resolve_value` at `Position::Unchecked` (so aliases, `$ref` objects, hop counting, memoized costs, node charging, depth checks and the `visiting` cycle detection all apply unchanged), the expression is evaluated, the result is converted, rounded, depth-checked, charged against `max_value_nodes` and validated against the already-determined effective type. The result replaces the value; the resolved `$value` is kept as `ResolvedToken::snapshot`. The cost recorded for the token reflects the result (its node count and depth) and the maximum hop count of `$value` and inputs.",
+      "invariantsMarkdown": "- The effective type comes from `$value` exactly as without expressions, so a token has the same type with expressions on or off.\n- Expression results are literals; they are never resolved again as references.\n- An expression replaces the whole value of its token; whole-token overlay and composite replacement rules are unchanged.",
+      "rationaleMarkdown": "Resolving the snapshot keeps every document valid for strict DTCG tools (an invalid snapshot is reported here too) and keeps type determination independent of whether expressions run; it also gives callers a free staleness signal (`value != snapshot`).",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/token_resolution.rs", "symbol": "Resolver::token_cost"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "ResolvedToken"}
+      ],
+      "memoryDecisionRefs": [
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-07-26-runtime-resolution-whole-token-overlay.md"},
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-10-07-runtime-resolution-type-order.md"}
+      ]
+    },
+    {
+      "id": "d-engine-sessions",
+      "requirementIds": ["R-EVAL", "R-SANDBOX", "R-MODULES"],
+      "descriptionMarkdown": "The engine is `rquickjs` = `quickjs-jit =0.14.1` with `default-features = false` and features `std` and `loader` only, synchronous `Runtime`/`Context` (no `futures`, no `parallel`).\n\n**Sessions.** One session per resolving call (`resolve_sources`, `resolve_affected`), created lazily at the first expression token and dropped when the call returns; it owns the QuickJS runtime and context, the compiled modules and a cache of compiled expression functions keyed by their generated source. Each token's expression compiles into a generated ES module `import …; export default function (<inputs>) { return (<expression>\\n); }` named after the token path; calling its default export with the frozen inputs evaluates it.\n\n**Sandbox** (following nsh's `sandbox.rs` hardening): a custom context with only the intrinsics the language core needs (base objects, eval for compiling, JSON, RegExp, Map/Set, typed arrays; no Date, Promise, Proxy, WeakRef, Performance or DOMException); after the prelude, `eval` is deleted, the function constructors are replaced with throwing ones, `Math.random` throws, built-in prototypes and `globalThis` are frozen (accessors for `constructor`/`toString`-style members, as nsh does, to avoid the override mistake). Inputs and native module objects are frozen. The loader is synchronous and dynamic `import()` is rejected.\n\n**Limits.** The interrupt handler counts ticks per evaluation and stops past `step_budget` (uncatchable); memory via a counting allocator or `set_memory_limit` per session (nsh notes `set_memory_limit` has no effect with a custom allocator); `set_max_stack_size` from `stack_limit` (default 256 KiB, so it fits the default 1 MiB wasm32 stack). Exceeding them maps to `LimitExceeded { kind: \"expression steps\" | \"expression memory\" }` or `DtcgError::Expression` for stack overflow.\n\n**Conversion.** JavaScript values convert to `serde_json::Value` by walking the value (as nsh's `protocol::to_json`), with the integral-number rule, rejection of non-JSON values, the 128-level depth bound and rounding to `precision` decimal places; inputs enter through `JSON.parse` of their serialized JSON.\n\n**Errors.** Caught QuickJS exceptions (`.catch(&ctx)`) become `DtcgError::Expression` with the message and the position mapped to the authored text; interrupts and out-of-memory are classified before mapping.",
+      "invariantsMarkdown": "- QuickJS state never outlives one resolving call and never crosses threads.\n- No expression or module can observe time, randomness or host I/O.\n- Results depend only on documents, selection and options; equal inputs give equal outputs.",
+      "rationaleMarkdown": "Measured in the planning spike (macOS arm64, Node 24 for wasm32): session setup 0.17 ms native and 0.25 ms wasm32; 10,000 distinct expressions compiled and evaluated in 42 ms native and 65 ms wasm32; a 1,000-tick budget stops a tight loop after about 25 ms. Rounding to fixed decimals keeps fingerprints stable across platforms whose `libm` differs in the last bit (QuickJS uses the platform math library).",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "resolve_sources"},
+        {"repositoryId": "nsh", "path": "crates/nsh-js/src/sandbox.rs"},
+        {"repositoryId": "nsh", "path": "crates/nsh-js/src/protocol.rs"}
+      ]
+    },
+    {
+      "id": "d-typescript",
+      "requirementIds": ["R-EVAL", "R-MODULES"],
+      "descriptionMarkdown": "TypeScript (`ts` expressions and `.ts`/`.mts` or `ExpressionModule::typescript` modules) is converted with `oxc =0.153.0` exactly as nsh's `compile_native` does without JSX: `Parser` → `SemanticBuilder` → `Transformer` (TypeScript stripping) → `Codegen` with a source map. A `ts` expression is stripped as part of its generated wrapper module. oxc parse diagnostics become `DtcgError::Expression` with the authored line and column; runtime positions in generated code are mapped back through the source map (oxc's sourcemap crate at the version oxc 0.153 uses).",
+      "invariantsMarkdown": "- Types are erased, never checked.\n- Error positions always refer to the text the author wrote.",
+      "rationaleMarkdown": "The planning spike stripped a TypeScript expression in 2.3 µs; oxc builds for wasm32-unknown-unknown. Running the TypeScript compiler inside QuickJS was rejected (nsh measured it 10–50× slower than V8).",
+      "sourceRefs": [
+        {"repositoryId": "nsh", "path": "crates/nsh-bundler/src/compile.rs", "symbol": "compile_native"}
+      ]
+    },
+    {
+      "id": "d-modules",
+      "requirementIds": ["R-MODULES", "R-FORMAT"],
+      "descriptionMarkdown": "Specifiers resolve in this order: built-in modules (`dxn.dtcg`, `dxn.dtcg/color`), host modules from `ExpressionOptions`, then document modules; a specifier both registered by the host and declared by a document is an error, and hosts cannot register `dxn.dtcg` names. Relative specifiers are allowed only inside modules with a resource id and resolve against it.\n\n**Document modules** follow the I/O-free catalog protocol. The catalog stores each entry with a kind (`DocumentKind::Json` or `Module`); `provide_module` / `provide_requested_module` / `replace_module` add module text (no JSON validation), `remove_document` removes either kind, and a request answered with the wrong kind is rejected without changing the catalog. While folding sources, `flatten` reads each source's root `modules` declarations and canonicalizes their references against that source's resource id (later sources replace earlier specifiers). Before evaluation, the runtime walks the static import graph of every imported document module (static import and export-from specifiers read with oxc's parser; dynamic `import()` rejected) and returns `Resolution::Missing` with `DocumentKind::Module` requests until the graph is complete. `validate_complete` performs the same walk over the declarations of every context's sources.\n\n**Evaluation** registers every reachable module source with a `BuiltinResolver`/`BuiltinLoader`-style in-memory loader (custom resolver and loader implementations where relative resolution or diagnostics need them); modules compile once per session. The language comes from the extension or the `ExpressionModule` constructor.",
+      "invariantsMarkdown": "- The library performs no I/O: module text arrives through the catalog or the options.\n- A resolution that imports no document module never requests one.\n- Catalog mutations stay atomic for module documents.",
+      "rationaleMarkdown": "nsh bundles npm code at build time with rolldown and its run-time loader accepts only registered modules; rolldown has no wasm32 build and needs a file system, so the library cannot bundle. Single-file ES modules provided as strings work on every target. Reading module imports statically with oxc lets the request/provide loop finish before any JavaScript runs. The planning spike loaded four in-memory modules (two libraries, one native-backed, one expression) in 0.31 ms.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/catalog.rs", "symbol": "DocumentCatalog"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/source_discovery.rs"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/flatten.rs", "symbol": "Merger::fold"},
+        {"repositoryId": "nsh", "path": "crates/nsh-js/src/modules.rs"}
+      ],
+      "memoryDecisionRefs": [
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-07-26-runtime-resolution-io-free-string-catalog.md"}
+      ]
+    },
+    {
+      "id": "d-native-modules",
+      "requirementIds": ["R-NATIVE"],
+      "descriptionMarkdown": "A native module is a set of named Rust functions and constants. `NativeModule::new(specifier).function(name, f).constant(name, value)` stores functions as `Arc<dyn Fn(&[serde_json::Value]) -> Result<serde_json::Value, String> + Send + Sync>`; typed closures are adapted by deserializing a tuple of arguments and serializing the result. In a session, every native module becomes an in-memory ES module whose exports wrap a frozen, hidden registry object: each export serializes its arguments with `JSON.stringify`, calls the Rust function and parses the returned JSON (the bridge measured at about 2.6 µs per call with an object argument). Rust `Err` values and caught panics (`catch_unwind`) become JavaScript `Error`s prefixed with `<specifier>.<name>:`; deserialization failures become `TypeError`s. Native functions are synchronous and must be pure (deterministic, no I/O); they receive only their arguments and cannot read other tokens.\n\nThe built-in modules use the same machinery (some helpers may be written in JavaScript inside the module). `#[expression_module]` in `dxn_dtcg_derive` turns an `impl` block's `pub fn`s into `NativeModule` registrations with signature and documentation metadata for declarations; TypeScript types come from a syntactic mapping of the Rust types because a proc macro cannot inspect trait implementations.",
+      "invariantsMarkdown": "- No native call can reach the resolver, the catalog or other tokens: dependencies stay the declared inputs.\n- A panic in host code never poisons the runtime.\n- Declarations and run-time exports come from the same registration data.",
+      "rationaleMarkdown": "nsh's interop (its own `#[module]`/`#[class]`/`#[native_module]` macros, an explicit `Registry` builder, an opaque host vtable and direct C-API calls of 28–139 ns) is designed for UI work with async ops and classes; expressions need only pure synchronous functions, so a serde JSON bridge gives \"any Rust type with serde\" at acceptable cost. Depending on nsh's crates would tie the library to nsh, which the standalone-library rule forbids; the design is copied, not the code.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg_derive/src/lib.rs"},
+        {"repositoryId": "nsh", "path": "crates/nsh-macros/src/lib.rs"},
+        {"repositoryId": "nsh", "path": "crates/nsh-js/src/classes.rs"}
+      ]
+    },
+    {
+      "id": "d-color",
+      "requirementIds": ["R-NATIVE"],
+      "descriptionMarkdown": "Color math is a public, feature-independent Rust API on `values::Color` (`convert(ColorSpace)`, `mix`, `lighten`, `darken`, `with_alpha`, `to_hex`, `from_hex`, `contrast`, `in_gamut`, `clamp_to_gamut`), implemented in pure Rust from the CSS Color 4 conversion code: linearization per RGB space, matrices to XYZ (D65, or D50 for ProPhoto and `xyz-d50`, with Bradford adaptation between them), Lab/LCH from XYZ-D50, OKLab/OKLCH from XYZ-D65, HSL/HWB from sRGB. `none` components are treated as 0. Mixing interpolates in the chosen space (default OKLCH) with shorter-hue interpolation and interpolates alpha; lighten/darken shift OKLCH lightness clamped to [0, 1]. The module `dxn.dtcg/color` wraps these functions on DTCG color JSON.",
+      "invariantsMarkdown": "- Every returned color is a valid DTCG color (component ranges and hue `[0, 360)` included).\n- The math is deterministic pure Rust with no new dependency.",
+      "rationaleMarkdown": "Conversions between the DTCG color spaces are part of the format's own model and useful to Rust users outside expressions; implementing them once in Rust serves both, and native math avoids depending on a JavaScript color library for the common cases (users can still import one).",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/values.rs", "symbol": "Color"}
+      ]
+    },
+    {
+      "id": "d-declarations",
+      "requirementIds": ["R-NATIVE"],
+      "descriptionMarkdown": "`ExpressionOptions::typescript_declarations()` renders one `.d.ts` from the same registration data the runtime uses: interfaces for the DTCG value types (`Color`, `Dimension`, `Duration`, `CubicBezier`, `Shadow`, `Typography`, …), `declare module \"dxn.dtcg\"`, `declare module \"dxn.dtcg/color\"`, and one `declare module` per registered native module with TSDoc from doc comments. Tests parse the output with oxc's TypeScript parser and compare declared exports with run-time exports.",
+      "sourceRefs": [
+        {"repositoryId": "nsh", "path": "crates/nsh-core/src/ui/component.rs"}
+      ]
+    },
+    {
+      "id": "d-wasm",
+      "requirementIds": ["R-PLATFORM"],
+      "descriptionMarkdown": "On `wasm32-unknown-unknown`, quickjs-jit compiles QuickJS with a vendored wasi-libc and a shim whose only host import is the clock `env.__rquickjs_host_now_us`. The crate defines that symbol itself under `cfg(all(target_arch = \"wasm32\", target_os = \"unknown\"))`, returning 0 (expressions have no clock), which removes the import (verified in the planning spike). The default QuickJS stack limit fits the default wasm32 stack. Builds need `CC_wasm32_unknown_unknown`/`AR_wasm32_unknown_unknown` pointing at an LLVM clang and `llvm-ar`. A wasm-bindgen test group (`wasm-bindgen-test` as a wasm32-only dev-dependency whose version matches the CI-installed runner) proves evaluation under Node. CI keeps the existing jobs (whose `--all-features` steps now compile QuickJS with MSVC and GCC) and adds an Ubuntu wasm job.",
+      "invariantsMarkdown": "- The default-feature build never compiles C.\n- Consumers of the wasm build need no QuickJS-specific host imports.",
+      "rationaleMarkdown": "The planning spike built and ran QuickJS for wasm32-unknown-unknown (Node 24): Apple's clang fails at link time, Homebrew LLVM works; the module is about 1.2 MB before optimization.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": ".github/workflows/ci.yml"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/Cargo.toml"}
+      ]
+    },
+    {
+      "id": "d-incremental",
+      "requirementIds": ["R-EVAL"],
+      "descriptionMarkdown": "`resolve_affected`'s `DependencyCollector` also collects the references in a token's expression `inputs` when expressions are enabled, so a changed input target re-evaluates the token and its dependents. An edited expression object is already a changed definition, because `same_definition` compares `extensions`. Module source edits are outside affected resolution: after `replace_module`, callers resolve fully (documented).",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/resolver.rs", "symbol": "resolve_affected"},
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/token_resolution.rs", "symbol": "DependencyCollector"}
+      ]
+    },
+    {
+      "id": "d-docs-release",
+      "requirementIds": ["R-DOCS"],
+      "descriptionMarkdown": "The new chapter is included in `lib.rs`'s doctest modules under `#[cfg(all(doctest, feature = \"expressions\"))]`, so default doctests stay feature-free; every example is language-tagged. Product commits are `feat(expressions): …` (and `feat(values): …` for the color API), released as a 1.x minor by release-plz; no `Migration:` footer, because the change is additive.",
+      "sourceRefs": [
+        {"repositoryId": "dtcg", "path": "crates/dxn_dtcg/src/lib.rs"},
+        {"repositoryId": "dtcg", "path": "docs/README.md"}
+      ],
+      "memoryDecisionRefs": [
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/validation/2026-10-18-repository-validation-doctests-and-generated-changelog.md"},
+        {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/packaging/2026-10-18-repository-packaging-release-plz-git-tag-releases.md"}
+      ]
+    }
+  ],
+  "memoryDecisionsConsidered": [
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-10-07-runtime-resolution-single-resolver-definition.md"},
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/resolution/2026-10-07-runtime-resolution-input-union-semantics.md"},
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/runtime/projection/2026-07-26-runtime-projection-narrow-typed-projection.md"},
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/packaging/2026-10-23-repository-packaging-dxn-rename.md"},
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/validation/2026-10-07-repository-validation-corpus-ratchet.md"},
+    {"repositoryId": "dtcg", "path": ".agentx/memory/decisions/repository/agentx-memory/2026-10-05-repository-agentx-memory-crate-area-taxonomy.md"}
+  ]
+}
