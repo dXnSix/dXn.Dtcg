@@ -42,3 +42,8 @@ Active sources fold, in discovery order, into one merged structure (`flatten.rs`
 - [Tests](../../../../../crates/dxn_dtcg/tests)
 - 2026-07-26 current [I/O-free string catalog decision](../../../decisions/runtime/resolution/2026-07-26-runtime-resolution-io-free-string-catalog.md)
 - 2026-07-26 current [whole-token overlay decision](../../../decisions/runtime/resolution/2026-07-26-runtime-resolution-whole-token-overlay.md)
+- 2026-10-26 current [expressions opt-in decision](../../../decisions/runtime/resolution/2026-10-26-runtime-resolution-expressions-opt-in-quickjs.md)
+- 2026-10-26 current [expression sessions and sandbox decision](../../../decisions/runtime/resolution/2026-10-26-runtime-resolution-expression-sessions-and-sandbox.md)
+- 2026-10-26 current [TypeScript stripping decision](../../../decisions/runtime/resolution/2026-10-26-runtime-resolution-typescript-by-stripping.md)
+- 2026-10-26 current [native modules decision](../../../decisions/runtime/resolution/2026-10-26-runtime-resolution-native-modules-json-bridge.md)
+- 2026-10-26 current [wasm32 clock symbol decision](../../../decisions/runtime/resolution/2026-10-26-runtime-resolution-wasm-clock-symbol.md)

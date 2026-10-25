@@ -42,3 +42,4 @@ Struct attributes: `#[dtcg(root = "...")]` and, for components, `#[dtcg(id = "..
 - [Derive macros](../../../../../crates/dxn_dtcg_derive/src/lib.rs)
 - [Value extension shapes](../../../../../crates/dxn_dtcg/tests/value_extension_types.rs)
 - 2026-07-26 current [narrow typed projection decision](../../../decisions/runtime/projection/2026-07-26-runtime-projection-narrow-typed-projection.md)
+- 2026-10-26 current [color API decision](../../../decisions/runtime/projection/2026-10-26-runtime-projection-color-api-on-values.md)
