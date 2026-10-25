@@ -234,15 +234,33 @@ fn runaway_recursion_is_a_stack_overflow_uncatchably() {
         text(deep, ExpressionOptions::default()).unwrap(),
         json!("40")
     );
-    // A recursion that overflows a 16 KiB limit with any frame size.
-    let deeper =
-        "(() => { const f = (n) => n === 0 ? 0 : f(n - 1) + 1; return String(f(10000)); })()";
+    // The configured limit applies: the deepest recursion that fits the
+    // default limit on this platform overflows a 16 KiB one.
+    let recursion = |depth: u32| {
+        format!(
+            "(() => {{ const f = (n) => n === 0 ? 0 : f(n - 1) + 1; return String(f({depth})); }})()"
+        )
+    };
+    let fits = |depth: u32| text(&recursion(depth), ExpressionOptions::default()).is_ok();
+    let (mut deepest, mut overflowing) = (40, 20_000);
+    if fits(overflowing) {
+        deepest = overflowing;
+    } else {
+        while overflowing - deepest > 1 {
+            let middle = deepest + (overflowing - deepest) / 2;
+            if fits(middle) {
+                deepest = middle;
+            } else {
+                overflowing = middle;
+            }
+        }
+    }
     let message = match text(
-        deeper,
+        &recursion(deepest),
         ExpressionOptions::default().with_stack_limit(16 * 1024),
     ) {
         Err(DtcgError::Expression { message, .. }) => message,
-        other => panic!("{other:?}"),
+        other => panic!("{deepest} calls under 16 KiB: {other:?}"),
     };
     assert!(message.contains("stack overflow"), "{message}");
 }
