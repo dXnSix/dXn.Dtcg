@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 25,
+  "revision": 34,
   "planRevision": 4,
   "specHashes": {
     "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
@@ -52,10 +52,16 @@
       ]
     },
     "t08-host-modules": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t09-document-modules": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t10-native-builder": {
       "status": "pending"
@@ -106,6 +112,15 @@
         }
       },
       "recordedAt": "2026-10-25T16:32:43Z"
+    },
+    "feb1517b7bfd70e15e6d3a9d917d5d2e3ab0644f8d238a9c32b708cd1c32b5f7": {
+      "snapshot": {
+        "specHash": "71ff104090ae763849db764d785bd2b724873735e77658db17e7fd88143fdb05",
+        "repositories": {
+          "dtcg": "dc754376004ca7e97c5a0a7b9999a5bda4940b4fd0277158b8107850cfce7368"
+        }
+      },
+      "recordedAt": "2026-10-25T16:50:27Z"
     }
   },
   "checkResults": {
@@ -278,6 +293,40 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s2-platforms-final-2baceb5d8eff.log",
       "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
       "inputsHash": "8e842c603d38549a81a0729b2812cfd323d6830522e87f77d3eecad62c111721"
+    },
+    "s3-modules/check-expr-modules/final": {
+      "checkId": "check-expr-modules",
+      "boundaryId": "s3-modules",
+      "phase": "final",
+      "batchId": "feb1517b7bfd70e15e6d3a9d917d5d2e3ab0644f8d238a9c32b708cd1c32b5f7",
+      "definitionHash": "b839124c91ede60d17bec46f6414c4ddecd8df889dfcb7d42ef708026970967d",
+      "basisHash": "fb092bf9ff3c9aa8175b8ca5a758c5730d9cbd7d59be083975c27fab9876ce8c",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.1555,
+      "recordedAt": "2026-10-25T16:50:27Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s3-modules-final-5dfa98a646ba.log",
+      "logSha256": "9da7d8eddfda8c8563d98ec5dc9344eb42c240bfb57750680370944f2fb68283",
+      "inputsHash": "447c88fd39beea9b8dfaa4726580ad9b49eb2e81241336431acbafd49d5e4f00"
+    },
+    "s3-modules/check-expr-document-modules/final": {
+      "checkId": "check-expr-document-modules",
+      "boundaryId": "s3-modules",
+      "phase": "final",
+      "batchId": "feb1517b7bfd70e15e6d3a9d917d5d2e3ab0644f8d238a9c32b708cd1c32b5f7",
+      "definitionHash": "499e1952546c871cd3b749e807c3b3716556c1ded19cdd37ca0c26ddee4a8531",
+      "basisHash": "4d99acc58ca7bf0f968f0ebb187cbfd0f2cf9f901919f92f9cbca66666e6047c",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 17,
+      "durationSeconds": 0.0981,
+      "recordedAt": "2026-10-25T16:50:27Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s3-modules-final-db0d5dbb956b.log",
+      "logSha256": "42bb54934a2ece00a7e0b80e121ddb9b78c974429354d1388527b03ae7ee31d7",
+      "inputsHash": "66b954de42af1850f7c3c3f20733afe2d1520cfe8e1f285745ef522b8ddb82e2"
     }
   },
   "reviews": {
@@ -592,6 +641,120 @@
         "S2-F2"
       ],
       "recordedAt": "2026-10-25T16:34:55Z"
+    },
+    "s3-modules": {
+      "reviewerId": "reviewer-s3-modules-independent",
+      "snapshotId": "feb1517b7bfd70e15e6d3a9d917d5d2e3ab0644f8d238a9c32b708cd1c32b5f7",
+      "criterionIds": [
+        "EXP-3",
+        "MOD-1",
+        "MOD-2",
+        "MOD-3",
+        "MOD-4"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-3",
+            "MOD-2",
+            "MOD-4"
+          ],
+          "sha256": "f5f7d97d4e865430ad3171468a51c64838f27bd6c62a28524ba542a2af89b643"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-1",
+            "MOD-3",
+            "MOD-4"
+          ],
+          "sha256": "51244f53cc65fdd31cdbb50da478b569bddfefd81b5fc01c33a3589f135af1ec"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/catalog.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-2"
+          ],
+          "sha256": "a5022dd2d9045faa66a4cebda572e31e007657423c5895dfdd9a4c04eb42047b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/runtime.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-2"
+          ],
+          "sha256": "03f632e7ff5e53de92773dd11f10dea4a2f36d9749d4cca85a74153edf743f11"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-3",
+            "MOD-2"
+          ],
+          "sha256": "e8d716eb0ee7475fb952f4d43093b3921c3ed3febdc745b7fe50657e92c54503"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-3"
+          ],
+          "sha256": "b25e558925f9be8eef1804e9d0c418f53a73fc55ea333ba8ca29e1c8edc2681e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-1",
+            "MOD-3",
+            "MOD-4"
+          ],
+          "sha256": "7a03577b240688e895eeb8b0369ee74ec547ed3dbb6935014f8ed6d4071c911e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-3",
+            "MOD-2",
+            "MOD-3",
+            "MOD-4"
+          ],
+          "sha256": "b6f7b1827991952f8bd36877d5796c1f006a5f0c532e68428d5bda201b9da293"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/fixtures/expressions/tinycolor.js",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-4"
+          ],
+          "sha256": "95838070da457477cbc5485f8aefa4d3de27560f7cd6f138323e4c8ade8be94b"
+        }
+      ],
+      "deltaSummaryMarkdown": "Inspected the repair delta in `engine.rs` (`load_modules`, `connect`/`visit` iterative Tarjan with `Components`, `evaluate_component`, `thrower`, `module_error`, `module_table` seeding `ModuleEntry::compiled`) and `modules.rs` (`document_modules` rooted at token `imports`, `walk` with `Next::Specifier`/`Next::Module` following bare specifiers through reached host modules, `DocumentModules::compiled`), plus the new tests `an_import_cycle_evaluates_in_es_module_order`, `module_errors_name_the_module_that_threw`, `modules_outside_a_cycle_have_their_own_step_budget`, `a_host_module_nothing_imports_requests_no_document_module` and `document_cycles_name_the_module_that_threw`. Tarjan emits components dependencies-first and leads each by its lowest-index (first-reached) member; RefCell borrows are released before QuickJS declare/eval. Re-ran the original probes against the repaired code: cycle order is now `b,a` (matches Node), the TDZ case reports `module \\`b\\`: ReferenceError: a is not initialized at line 3, column 22` (matches Node), document cycle `a.js` throwing reports `a.js`/`a` with line 5, outside dependency `c.js` reports `c.js`/`./c.js` with line 2, the cycle-plus-dependency budget shape that previously exceeded `expression steps` now passes, an unreached host module importing a declared specifier yields `Ready` with no requests, and a reached host -> host -> document chain still requests `doc.js`. Sprint checks `check-expr-modules` and `check-expr-document-modules` passed (executed 2). Note, not a defect: a missing-export link error inside a cycle has no stack frame and is attributed to the cycle leader, which is the exporting module the QuickJS message names, consistent with MOD-3's wording.",
+      "reattestedFrom": "2e960ae7165babae1e8bee7d5e0aff966ba97668f9da45d4a76e79a773b43e28",
+      "summaryMarkdown": "EXP-3 declaration validation and later-declaration-replaces-earlier, the kinded catalog (atomic `provide_module`/`provide_requested_module`/`replace_module`, kind mismatch both ways, invalid ids, `provide_json_batch` over a module id, `remove_document`), discovery rejecting a module where JSON is expected, request rounds through relative imports, language by extension, `resolve`/previews/`validate_complete` across contexts, deterministic request order, MOD-4 via both routes, and MOD-3 identities for acyclic modules all hold in source, tests and probes. Two major defects remain: cycle evaluation order and error/budget attribution in cycles (S3-F1, MOD-1/MOD-3), and document-module requests caused by unreached host modules (S3-F2, MOD-2); plus a minor double-compilation issue (S3-F3). Imports of the built-in `dxn.dtcg` modules (part of MOD-1) cannot exist before s4-native and are left to that sprint and the final review. Memory rules (I/O-free catalog, atomic mutations, consumer-neutral wording, `dxn.dtcg.*` ids) are respected.",
+      "findingIds": [
+        "S3-F1",
+        "S3-F2",
+        "S3-F3"
+      ],
+      "recordedAt": "2026-10-25T16:50:58Z"
     }
   },
   "checkpoints": {
@@ -610,6 +773,14 @@
       },
       "reviewHash": "554f62fa48077127a1c4eabb632a8756d2b6e424ff0de8660cec322a9aff91c9",
       "recordedAt": "2026-10-25T16:35:16Z"
+    },
+    "s3-modules": {
+      "snapshotId": "feb1517b7bfd70e15e6d3a9d917d5d2e3ab0644f8d238a9c32b708cd1c32b5f7",
+      "commits": {
+        "dtcg": "7280e8eb83ae94d7edd503c48f5152c6ea51cf4f"
+      },
+      "reviewHash": "5781c9530740236ffa35994eff23b9fb75e742f97eb2c04039edda2d4e632df8",
+      "recordedAt": "2026-10-25T16:51:22Z"
     }
   },
   "findings": [
@@ -875,6 +1046,88 @@
         }
       ],
       "boundaryId": "s2-platforms"
+    },
+    {
+      "id": "S3-F1",
+      "criterionIds": [
+        "MOD-1",
+        "MOD-3"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "Import cycles were evaluated in non-standard order, cycle errors named the entry module instead of the thrower, and acyclic dependencies of a cycle shared its budget. Resolved: Tarjan components evaluated dependencies-first and entered at the first-reached member; failures attributed to the innermost table-module stack frame with that module's position mapping; verified by tests and probes.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "symbol": "Session::load_modules"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "symbol": "an_import_cycle_evaluates_in_es_module_order"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "symbol": "module_errors_name_the_module_that_threw"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
+          "symbol": "modules_outside_a_cycle_have_their_own_step_budget"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
+          "symbol": "document_cycles_name_the_module_that_threw"
+        }
+      ],
+      "boundaryId": "s3-modules"
+    },
+    {
+      "id": "S3-F2",
+      "criterionIds": [
+        "MOD-2"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "An unreached host module importing a declared specifier caused a document-module request. Resolved: the walk starts at token `imports` specifiers and follows only host modules it reaches; verified by test and probe (unreached: Ready, no requests; reached host -> host -> document: requested).",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
+          "symbol": "document_modules"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
+          "symbol": "a_host_module_nothing_imports_requests_no_document_module"
+        }
+      ],
+      "boundaryId": "s3-modules"
+    },
+    {
+      "id": "S3-F3",
+      "criterionIds": [
+        "MOD-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Modules were compiled twice per resolution. Resolved: `walk` returns every compiled module keyed by its session name (`DocumentModules::compiled`) and `module_table` seeds `ModuleEntry::compiled`, so reached host and document modules compile once per resolution; unreached host modules are not compiled. Verified by source inspection; covered behaviorally by the existing groups.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
+          "symbol": "walk"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "symbol": "module_table"
+        }
+      ],
+      "boundaryId": "s3-modules"
     }
   ],
   "handoffMarkdown": "",
