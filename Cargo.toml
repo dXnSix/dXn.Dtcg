@@ -13,8 +13,10 @@ homepage = "https://github.com/dXnSix/dXn.Dtcg"
 [workspace.dependencies]
 dxn_dtcg = { path = "crates/dxn_dtcg", version = "1.2.0" }
 dxn_dtcg_derive = { path = "crates/dxn_dtcg_derive", version = "1.2.0" }
+oxc = { version = "=0.153.0", default-features = false, features = ["ast_visit", "codegen", "regular_expression", "semantic", "transformer"] }
 proc-macro2 = "1.0"
 quote = "1.0"
+rquickjs = { package = "quickjs-jit", version = "=0.14.1", default-features = false, features = ["std", "loader"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 sha2 = "0.10"
@@ -22,3 +24,9 @@ syn = { version = "2.0", features = ["full"] }
 thiserror = "2.0.17"
 trybuild = "1.0"
 
+
+# QuickJS (feature `expressions`) compiled without optimization uses several
+# kilobytes of stack per JavaScript call; optimize it in test builds too, so
+# the default expression stack limit allows the same recursion as releases.
+[profile.dev.package.quickjs-jit-sys]
+opt-level = 3

@@ -7,6 +7,9 @@ mod diagnostics;
 mod dtcg_component_tokens;
 mod dtcg_tokens;
 mod error;
+mod expression_extension;
+#[cfg(feature = "expressions")]
+pub mod expressions;
 mod flatten;
 mod from_dtcg_value;
 mod json_pointer;
@@ -34,6 +37,7 @@ pub use dtcg_component_tokens::DtcgComponentTokens;
 pub use dtcg_tokens::{DtcgTokens, join_token_path};
 pub use dxn_dtcg_derive::{DtcgComponentTokens, DtcgTokens};
 pub use error::DtcgError;
+pub use expression_extension::EXPRESSION_EXTENSION;
 pub use from_dtcg_value::FromDtcgValue;
 pub use local_reference::LocalReferencePolicy;
 pub use options::{RuntimeOptions, ValueExtensions};

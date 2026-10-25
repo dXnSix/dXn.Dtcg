@@ -192,7 +192,13 @@ pub struct ResolvedToken {
     pub path: Arc<str>,
     pub token_type: Option<Arc<str>>,
     pub authored_value: Value,
+    /// The resolved value: the resolved `$value`, or the result of the
+    /// token's expression when expressions are enabled.
     pub value: Value,
+    /// For a token whose expression was evaluated, the resolved `$value` the
+    /// result replaced; `None` for every other token. A value that differs
+    /// from its snapshot means the authored `$value` is stale.
+    pub snapshot: Option<Value>,
     /// The token's own authored `$extensions` object, or `Null` when it has
     /// none. Never inherited from groups.
     pub extensions: Value,
@@ -553,6 +559,20 @@ pub(crate) fn resolve_affected(
     for (path, token) in &raw {
         let mut dependencies = Dependencies::default();
         collector.collect(&token.value, token.document.as_ref(), &mut dependencies)?;
+        // An expression also reads its inputs. A malformed expression object
+        // is reported when the token resolves.
+        #[cfg(feature = "expressions")]
+        if options.expressions.is_some()
+            && let Some(inputs) = token
+                .extensions
+                .get(crate::EXPRESSION_EXTENSION)
+                .and_then(|expression| expression.get("inputs"))
+                .and_then(Value::as_object)
+        {
+            for input in inputs.values() {
+                collector.collect(input, token.document.as_ref(), &mut dependencies)?;
+            }
+        }
         // A document pointer may read any edited location.
         if dependencies.reads_document {
             affected.insert(path.clone());

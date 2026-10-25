@@ -15,9 +15,16 @@ exclude = ["tests/fixtures/dtcg-test-suite/**"]
 
 [features]
 diagnostics = []
+# JavaScript and TypeScript expressions as computed token values
+# (`$extensions["dxn.dtcg.expressions"]`), evaluated with QuickJS. Off by
+# default: it compiles C, and resolution only evaluates expressions when
+# `RuntimeOptions::with_expressions` turns them on.
+expressions = ["dep:rquickjs", "dep:oxc"]
 
 [dependencies]
 dxn_dtcg_derive.workspace = true
+oxc = { workspace = true, optional = true }
+rquickjs = { workspace = true, optional = true }
 serde.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 sha2.workspace = true

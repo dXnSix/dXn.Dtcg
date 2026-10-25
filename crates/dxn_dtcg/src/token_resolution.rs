@@ -58,6 +58,12 @@ pub(crate) struct Resolver<'a> {
     pointers: HashMap<PointerKey, (Value, Cost)>,
     stack_hops: usize,
     copied_nodes: usize,
+    #[cfg(feature = "expressions")]
+    expressions: Option<&'a crate::expressions::ExpressionOptions>,
+    /// The JavaScript engine of this resolution, started at the first
+    /// expression token.
+    #[cfg(feature = "expressions")]
+    session: Option<crate::expressions::Session>,
 }
 
 impl<'a> Resolver<'a> {
@@ -73,6 +79,10 @@ impl<'a> Resolver<'a> {
             pointers: HashMap::new(),
             stack_hops: 0,
             copied_nodes: 0,
+            #[cfg(feature = "expressions")]
+            expressions: options.expressions.as_ref(),
+            #[cfg(feature = "expressions")]
+            session: None,
         }
     }
 
@@ -146,6 +156,11 @@ impl<'a> Resolver<'a> {
                 message: error.to_string(),
             }
         })?;
+        #[cfg(feature = "expressions")]
+        let (value, snapshot, cost) =
+            self.evaluate_expression(path, token, &token_type, value, cost, depth)?;
+        #[cfg(not(feature = "expressions"))]
+        let snapshot = None;
         self.resolved.insert(
             path.into(),
             ResolvedToken {
@@ -153,6 +168,7 @@ impl<'a> Resolver<'a> {
                 token_type: Some(token_type),
                 authored_value: token.authored_value.clone(),
                 value,
+                snapshot,
                 extensions: token.extensions.clone(),
                 description: token.description.clone(),
                 deprecated: token.deprecated.clone(),
@@ -161,6 +177,114 @@ impl<'a> Resolver<'a> {
         );
         self.costs.insert(path.into(), cost);
         Ok(cost)
+    }
+
+    /// With expressions enabled and an expression on `token`, resolves its
+    /// inputs, evaluates it and returns its validated result with the
+    /// resolved `$value` as the snapshot and the result's cost; otherwise
+    /// returns `value` and `cost` unchanged.
+    #[cfg(feature = "expressions")]
+    fn evaluate_expression(
+        &mut self,
+        path: &str,
+        token: &RawToken,
+        token_type: &str,
+        value: Value,
+        cost: Cost,
+        depth: usize,
+    ) -> Result<(Value, Option<Value>, Cost), DtcgError> {
+        use crate::expressions::{Failure, Trip, token_expression};
+
+        let Some(options) = self.expressions else {
+            return Ok((value, None, cost));
+        };
+        let Some(expression) = token_expression(&token.source, path, &token.extensions)? else {
+            return Ok((value, None, cost));
+        };
+        // Inputs resolve like a token value at an unchecked position, with
+        // the token on the visiting stack, so an input that reaches the
+        // token is an alias cycle.
+        let mut hops = cost.hops;
+        let mut inputs = Vec::with_capacity(expression.inputs.len());
+        self.visiting.push(path.into());
+        let mut resolved = Ok(());
+        for (_, input) in &expression.inputs {
+            match self.resolve_value(input, token.document.as_ref(), 1, Position::Unchecked) {
+                Ok((input, input_cost)) => {
+                    hops = hops.max(input_cost.hops);
+                    inputs.push(input);
+                }
+                Err(error) => {
+                    resolved = Err(error);
+                    break;
+                }
+            }
+        }
+        self.visiting.pop();
+        resolved?;
+        let failed = |failure: Failure| match failure {
+            Failure::Message(message) => DtcgError::Expression {
+                resource: token.source.clone(),
+                path: path.into(),
+                message,
+            },
+            Failure::Limit(Trip::Steps) => DtcgError::LimitExceeded {
+                kind: "expression steps",
+                limit: options.step_budget.max(1),
+            },
+            Failure::Limit(Trip::Memory) => DtcgError::LimitExceeded {
+                kind: "expression memory",
+                limit: options.memory_limit,
+            },
+            Failure::Limit(Trip::Stack) => DtcgError::Expression {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: format!(
+                    "stack overflow: the evaluation exceeded the stack limit of {} bytes",
+                    options.stack_limit
+                ),
+            },
+            Failure::ValueDepth => DtcgError::LimitExceeded {
+                kind: "value depth",
+                limit: MAX_VALUE_DEPTH,
+            },
+            Failure::ValueNodes => DtcgError::LimitExceeded {
+                kind: "value nodes",
+                limit: self.limits.max_value_nodes,
+            },
+        };
+        let session = match &mut self.session {
+            Some(session) => session,
+            None => self
+                .session
+                .insert(crate::expressions::Session::new(options).map_err(&failed)?),
+        };
+        let max_nodes = self
+            .limits
+            .max_value_nodes
+            .saturating_sub(self.copied_nodes);
+        let result = session
+            .evaluate(path, &expression, &inputs, max_nodes)
+            .map_err(&failed)?;
+        let (nodes, result_depth) = (node_count(&result), value_depth(&result));
+        check_depth(depth + result_depth - 1)?;
+        self.charge(nodes)?;
+        validate_value_with(token_type, &result, self.extensions).map_err(|error| {
+            DtcgError::TokenType {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: format!("expression result: {error}"),
+            }
+        })?;
+        Ok((
+            result,
+            Some(value),
+            Cost {
+                hops,
+                nodes,
+                depth: result_depth,
+            },
+        ))
     }
 
     /// Takes one reference hop to the token at `target`, whose value will be

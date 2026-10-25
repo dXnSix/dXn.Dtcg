@@ -47,6 +47,11 @@ pub struct RuntimeOptions {
     pub limits: RuntimeLimits,
     /// The value shapes beyond DTCG 2025.10 that validation accepts.
     pub extensions: ValueExtensions,
+    /// Whether and how token expressions evaluate
+    /// (`$extensions["dxn.dtcg.expressions"]`); `None`, the default, leaves
+    /// the extension opaque metadata.
+    #[cfg(feature = "expressions")]
+    pub expressions: Option<crate::expressions::ExpressionOptions>,
 }
 
 impl RuntimeOptions {
@@ -59,6 +64,13 @@ impl RuntimeOptions {
     /// Sets [`RuntimeOptions::extensions`].
     pub fn with_extensions(mut self, extensions: ValueExtensions) -> Self {
         self.extensions = extensions;
+        self
+    }
+
+    /// Enables token expressions with `expressions`.
+    #[cfg(feature = "expressions")]
+    pub fn with_expressions(mut self, expressions: crate::expressions::ExpressionOptions) -> Self {
+        self.expressions = Some(expressions);
         self
     }
 }

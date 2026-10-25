@@ -63,6 +63,17 @@ pub enum DtcgError {
         reference: String,
         message: String,
     },
+    /// An invalid or failing expression (`$extensions["dxn.dtcg.expressions"]`):
+    /// a malformed expression object or module declaration, a syntax error,
+    /// an uncaught exception, a result that is not a JSON value, or a module
+    /// that cannot be imported. `resource` and `path` name the token (or the
+    /// document and its module declaration, or the module resource).
+    #[error("expression `{path}` in `{resource}`: {message}")]
+    Expression {
+        resource: ResourceId,
+        path: String,
+        message: String,
+    },
     /// Resolver inputs that are not a JSON object of strings.
     #[error("invalid resolver inputs: {message}")]
     InvalidInput { message: String },

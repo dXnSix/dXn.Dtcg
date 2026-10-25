@@ -26,6 +26,8 @@ pub enum DtcgDiagnosticCode {
     Selection,
     /// [`DtcgError::InvalidInput`]: malformed resolver inputs.
     InvalidInput,
+    /// [`DtcgError::Expression`]: an invalid or failing token expression.
+    Expression,
 }
 
 /// Redacted diagnostic information derived from a [`DtcgError`].
@@ -131,6 +133,16 @@ impl DtcgDiagnostic {
                 Some(reference.clone()),
                 message.clone(),
             ),
+            DtcgError::Expression {
+                resource,
+                path,
+                message,
+            } => (
+                DtcgDiagnosticCode::Expression,
+                Some(resource.clone()),
+                Some(path.clone()),
+                redacted_expression_message(message),
+            ),
             DtcgError::InvalidInput { message } => (
                 DtcgDiagnosticCode::InvalidInput,
                 None,
@@ -168,4 +180,42 @@ impl DtcgDiagnostic {
     pub fn message(&self) -> &str {
         &self.message
     }
+}
+
+/// The kind of an expression failure and its authored position, without
+/// the JavaScript message, which may quote document text or thrown values:
+/// `TypeError at line 2, column 5`, `invalid expression object`.
+fn redacted_expression_message(message: &str) -> String {
+    let position = message
+        .rfind(" at line ")
+        .map(|index| &message[index..])
+        .filter(|tail| {
+            tail.strip_prefix(" at line ")
+                .and_then(|rest| rest.split_once(", column "))
+                .is_some_and(|(line, column)| {
+                    !line.is_empty()
+                        && !column.is_empty()
+                        && line
+                            .bytes()
+                            .chain(column.bytes())
+                            .all(|byte| byte.is_ascii_digit())
+                })
+        })
+        .unwrap_or_default();
+    let class = message
+        .split_once(':')
+        .map(|(head, _)| head)
+        .filter(|head| {
+            head.ends_with("Error") && head.bytes().all(|byte| byte.is_ascii_alphanumeric())
+        });
+    let kind = match class {
+        Some(class) => class,
+        None if message.starts_with("uncaught exception") => "uncaught exception",
+        None if message.starts_with("stack overflow") => "stack overflow",
+        None if message.contains("not a JSON value") => "result is not a JSON value",
+        None if message.starts_with("the source nests too deeply") => "source nests too deeply",
+        None if message.starts_with("dynamic `import()`") => "dynamic import",
+        None => "invalid expression",
+    };
+    format!("{kind}{position}")
 }
