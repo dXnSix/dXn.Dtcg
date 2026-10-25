@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 117,
+  "revision": 119,
   "planRevision": 16,
   "specHashes": {
     "requirements": "739aaef2a1ae3fb80d84bcecde8f600cb8acb9dce7b1a3d6441a351a2194600a",
@@ -280,6 +280,15 @@
         }
       },
       "recordedAt": "2026-10-25T20:28:24Z"
+    },
+    "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e": {
+      "snapshot": {
+        "specHash": "bf0e5f81d544d69f3147efddca560b34ce1aef701ce24f166bd6209397ad9278",
+        "repositories": {
+          "dtcg": "c3a0621d3739d2748311838cf8e07b734daad9640367524e5541c37e77aa78c4"
+        }
+      },
+      "recordedAt": "2026-10-25T20:37:49Z"
     }
   },
   "checkResults": {
@@ -797,35 +806,35 @@
       "checkId": "check-expr-wasm",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
       "basisHash": "148ce0a753b95be0cf1ac08979ab59fffcd1fca289e3e89eb7c0b2d0804d3719",
       "status": "passed",
       "exitCode": 0,
       "testCount": 9,
-      "durationSeconds": 3.2585,
-      "recordedAt": "2026-10-25T20:28:11Z",
+      "durationSeconds": 3.6748,
+      "recordedAt": "2026-10-25T20:37:44Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-ebfbe0c0b54a.log",
-      "logSha256": "2f9bf5316feeb709589490a50c75a89f0a3ff2af6f665b1e92f53ce54d374298",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-96e8f3ce8320.log",
+      "logSha256": "f920c167956ab09b86a1d566b7b84cbd073d3e3c999d54070f877bc7bfea94c3",
       "inputsHash": "aa630170cb9e5a6ee792d4f13ce55a4c686a60dbf0648973d50ed317d8f1a5a7"
     },
     "final/check-ci-workflow/final": {
       "checkId": "check-ci-workflow",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "c479057c24b1d1730f0cd38dbb28ca8b02e620d61df43dcd1cd590f9e31f66dc",
-      "basisHash": "252b801b4bf37283ad55d9d8d08fde8d11d1ebdb16f9585c9336910ba65a76b6",
+      "basisHash": "9705785c14cbffc1fec7d057e05b2792db823bdda2be7a097b67ff344bc14755",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.022,
-      "recordedAt": "2026-10-25T17:28:07Z",
+      "durationSeconds": 0.019,
+      "recordedAt": "2026-10-25T20:37:44Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-383af7005bd2.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-19f787a59215.log",
       "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
-      "inputsHash": "8e842c603d38549a81a0729b2812cfd323d6830522e87f77d3eecad62c111721"
+      "inputsHash": "dce79d1e72d377b9a7485214e270c6349561df46bd006dd27b1b867e8f1bcb24"
     },
     "final/check-expr-modules/final": {
       "checkId": "check-expr-modules",
@@ -984,18 +993,18 @@
       "checkId": "check-docs-index",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "e52e7289336bdd61962dc492eee50dc429cdee648d1062673f5e06c59471e60e",
-      "basisHash": "da266b760a60488f99448d9ae7e0df287dff11d67c49b8fd23b1e0e3e4777b21",
+      "basisHash": "660f783812c24025b5dea50238aa06e4695f6e3ea46b88ed14f9a735ed2809cd",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0238,
-      "recordedAt": "2026-10-25T20:28:14Z",
+      "durationSeconds": 0.0166,
+      "recordedAt": "2026-10-25T20:37:44Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-cbd7e1fce39d.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c75161d77c07.log",
       "logSha256": "e65830437d3bfb37b33333dda924825bbb9514f5fe391524952cacc44648b6c7",
-      "inputsHash": "80f07095fdf731208a58224a03aa6ae7faf99e154bb6f5329a9db10b5f1859df"
+      "inputsHash": "6d3cb95ac118be43f0277217ec92d8e42895bf28def376a4ea9137a841ff4fd4"
     },
     "final/check-value-serde/final": {
       "checkId": "check-value-serde",
@@ -1018,65 +1027,65 @@
       "checkId": "final-fmt",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "1a6f66da2f1dee6b1855e17f8c0e47a46511a4de45d9d028e5e4ec71a302c777",
-      "basisHash": "37ff88a9d89edf311c485f31e8db6c387734dfe70cc8aea8afec3bf757865e20",
+      "basisHash": "dad34e658ebbd224316db8b26d6d136f307a95bc994385cebb08074d889a4940",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.1686,
-      "recordedAt": "2026-10-25T20:28:16Z",
+      "durationSeconds": 0.2354,
+      "recordedAt": "2026-10-25T20:37:44Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b7b3ea422104.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-9e025b15e1e0.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "final/final-clippy/final": {
       "checkId": "final-clippy",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "531a67fae9bcea4038242b5b35ff1462a955c21158ff9ca84776cc471644789e",
-      "basisHash": "0a4890bee0bec3d439f244a01ce3bbf47d628c935b01ddffc83c8a83fbddf435",
+      "basisHash": "132412578db9ea73758fb2f8c31f3bb98e6657dd4483c30f63b3360d046a4c93",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.1595,
-      "recordedAt": "2026-10-25T20:28:16Z",
+      "durationSeconds": 0.2039,
+      "recordedAt": "2026-10-25T20:37:45Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-464d8302fafc.log",
-      "logSha256": "4cf86278c1e6d659943a46a3d7e3da429ac15be90f0f17742e24ef85228e7d3e"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d74cb591f07b.log",
+      "logSha256": "f0788aa36d1c86b6ccdfb7f4042a5574102d82061c046422a2d42e008a1e4710"
     },
     "final/final-wasm-default/final": {
       "checkId": "final-wasm-default",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "b681bff9c4fb5aaf934ca616a1ec38ab144605c5e54e32b721f0d35090e32a3a",
-      "basisHash": "b16dfc1d40110c4de4f770c16fb060755eae51cfb68eaa97cbd85cf981e78de5",
+      "basisHash": "5bc94c1746afa51821bc290fc5a816064da29fad655dc676d5f848e664d70192",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0799,
-      "recordedAt": "2026-10-25T20:28:16Z",
+      "durationSeconds": 0.0835,
+      "recordedAt": "2026-10-25T20:37:45Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b183c531ee40.log",
-      "logSha256": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-155fa806d167.log",
+      "logSha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
     },
     "final/final-package/final": {
       "checkId": "final-package",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "definitionHash": "9234df311b3ef66915f2ac2efdc255ea93eff9f838e4d6e02c9e4e3e2ab0bc58",
-      "basisHash": "9eabf03b9d3170db4d512848029fad234c839990c84407102fda7a0311cf7e0d",
+      "basisHash": "5f61b89936b86b9d32f991fc03fcc670e770cfe9de742b1b21d355f043862016",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 7.7233,
-      "recordedAt": "2026-10-25T20:28:24Z",
+      "durationSeconds": 4.3677,
+      "recordedAt": "2026-10-25T20:37:49Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-95bd78afd617.log",
-      "logSha256": "ea54783137b3d1e55a420e8190c896cc06346c497770ae1b92d7b1fdefd71e7a"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-89cfe5d8e611.log",
+      "logSha256": "24bd953b9e1039f97790b10f6c24f65546321eb5477e27256c5b1f330de72945"
     },
     "s6-final-repair/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
@@ -3008,7 +3017,7 @@
     },
     "final": {
       "reviewerId": "reviewer-final-independent-3",
-      "snapshotId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "snapshotId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
       "criterionIds": [
         "EXP-1",
         "EXP-2",
@@ -3271,7 +3280,7 @@
           "criterionIds": [
             "PLT-3"
           ],
-          "sha256": "c60138650faa3357cbc67190aa0160644056c7ec0ae2755aa257209e7abee968"
+          "sha256": "d8c6a4ca61cdb96279882556c87bf549d465bd6df2cb9452c9bd62057e76650a"
         },
         {
           "repositoryId": "dtcg",
@@ -3510,7 +3519,7 @@
           "criterionIds": [
             "PLT-3"
           ],
-          "sha256": "c60138650faa3357cbc67190aa0160644056c7ec0ae2755aa257209e7abee968"
+          "sha256": "d8c6a4ca61cdb96279882556c87bf549d465bd6df2cb9452c9bd62057e76650a"
         },
         {
           "repositoryId": "dtcg",
@@ -3601,8 +3610,8 @@
           "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
         }
       ],
-      "deltaSummaryMarkdown": "Inspected `git diff 94f5303..14f4a56 -- crates docs website` (2381320, 14f4a56); criteria and dispositions are unchanged.\n\n- **Guard margin** (`sandbox.rs`): `limit - min(limit/8, 16 KiB)`. It is a backstop only; detection rests on compiled-code `check`, the rejection tracker and `note_overflow`. Re-ran `f3-probe/cases1.json` on a binary built from 14f4a56: all 21 cases still fail as stack overflows.\n- **Setup limit:** `Session::new` runs setup under `max(stack_limit, 256 KiB)` and applies `stack_limit` after the setup closure, before `guard.enforce()`. A setup failure returns before a `Session` exists, so the larger limit never reaches expression code. Every evaluation's `begin` recomputes QuickJS's limit from the new stack top and the configured size.\n- **Raise and restore** (`is_stack_overflow`): `JS_SetMaxStackSize(stack_limit + CHECK_STACK_ROOM)` and the restore to `stack_limit` sit in straight-line code around a call that cannot unwind into Rust: `restore`/`call` return `Result`, and `isOverflow` runs only built-ins and reads data properties, so no expression code runs at the raised limit. Both calls happen at the stack top of the current evaluation, so the restored limit equals the one before. A nested call (a rejection inside the check) can only restore early, which shrinks the room and never leaks the raised value. The check is iterative, so the extra 64 KiB is headroom, not depth.\n- **Fallback:** it runs only when `isOverflow` fails (stack or step budget), after the restore and after `ctx.catch()`. A real overflow's `name` comes from the frozen, tamed built-in prototype and its `message` is an own data property, so detecting a real overflow runs no expression code. A getter can run only on a thrown non-overflow object, at the normal limit under the step budget. It can turn a failing evaluation into a reported stack overflow, or write module state, which is the decided exception. It cannot hide an overflow or reach outside the sandbox. Minor robustness note, not a finding: a getter that throws leaves its exception pending (`.ok()` without `ctx.catch()`). Reading the own data properties against the saved prototypes, as `isOverflow` does, would avoid running getters at all.\n- **Tests and docs:** the default-limit recursion test now uses 40 calls, with the MSVC frame sizes explained. docs/15 and the website expressions and limits pages say 'an eighth of the limit (at most 16 KiB)' and note MSVC's larger frames, matching `sandbox.rs`. The commits follow Conventional Commits without `!`, breaking footers or attribution, and no forbidden path was touched. `check --epic` 32/32 on 14f4a56 is reused.",
-      "reattestedFrom": "7d6b660947e1ffa61b84fbd6d9e2070b4a771c104f8f4979f1ffa3af1c82b272",
+      "deltaSummaryMarkdown": "Inspected `git diff 54aa224..038578b` (commit 038578b, `ci: test on macOS arm64 too`); no source or test changes, and the criteria and dispositions are unchanged.\n\n- **Workflow:** the `rust` matrix is `[ubuntu-latest, windows-latest, macos-latest]`; `macos-latest` is an arm64 runner. Its steps are plain `cargo` invocations without shell- or OS-specific syntax, so they run unchanged on macOS. The Ubuntu-only `wasm-expressions` job (apt-get LLVM, `wasm-bindgen-cli`) is untouched, so PLT-3 still holds. `check-ci-workflow`, run against 038578b, prints `ci workflow ok`: every needle is still present and the workflow still has two jobs.\n- **Docs:** README, docs/01 and website platforms list `macOS arm64` as tested, with the same steps as Linux, and the not-covered rows read 'iOS, Android and other `std` targets' (the website keeps the C-compiler note for `expressions`). docs/14 and website contributing name the three runners and say QuickJS compiles with GCC, MSVC and Apple Clang. All of this matches `ci.yml`. The wording stays consumer-neutral.\n- **Memory and rules:** the validation `state.md` sentence matches the workflow. The commit is a Conventional Commit without `!`, breaking footers or attribution, and no forbidden path was touched. `check --epic` 32/32 on 038578b is reused.",
+      "reattestedFrom": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
       "summaryMarkdown": "Passed. Every active criterion holds against source and tests, and E-F1 to E-F4, E2-F1 to E2-F4 and E3-F1 are resolved. The E3-F1 repair (03fb0ef) replaces the capped unwrapping with one walk in JavaScript (`isOverflow`, each object visited once, data properties only, under the step budget) shared by `check`, the promise rejection tracker and uncaught-error reporting; the f3 probe's 21 cases all fail as stack overflows. The three dispositions match the recorded owner decisions and SBX-5/SBX-4/EVAL-6 carry them exactly. Repository rules hold: no forbidden path touched, Conventional Commits without `!`, breaking footers or attribution, dependencies declared once, `dxn.dtcg.*` ids, consumer-neutral wording. Unproven residual risk: the tracker's check now needs JavaScript stack at the rejection depth (see E3-F1).",
       "acknowledgedDispositions": [
         "criterion:EVAL-5",
@@ -3620,7 +3629,7 @@
         "E2-F4",
         "E3-F1"
       ],
-      "recordedAt": "2026-10-25T20:29:49Z"
+      "recordedAt": "2026-10-25T20:38:23Z"
     }
   },
   "checkpoints": {
