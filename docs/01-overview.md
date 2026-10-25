@@ -215,8 +215,9 @@ depends on `syn`, `quote` and `proc-macro2`.
 |---|---|
 | Linux x86_64 | CI: `cargo fmt`, Clippy with `-D warnings`, tests, `cargo package` |
 | Windows x86_64 | CI: same as Linux |
+| macOS arm64 | CI: same as Linux |
 | `wasm32-unknown-unknown` | CI: `cargo check --workspace --target wasm32-unknown-unknown`; with `expressions`, a build with an LLVM clang and a test group under Node |
-| macOS, iOS, Android, other `std` targets | Expected to work; not covered by CI |
+| iOS, Android, other `std` targets | Expected to work; not covered by CI |
 
 With the default features, the crates:
 

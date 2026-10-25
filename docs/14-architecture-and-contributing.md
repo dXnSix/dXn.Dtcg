@@ -394,8 +394,8 @@ cargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --
 
 ## CI
 
-`.github/workflows/ci.yml` runs on pull requests and on pushes to `main`, on `ubuntu-latest` and
-`windows-latest`, with the pinned toolchain:
+`.github/workflows/ci.yml` runs on pull requests and on pushes to `main`, on `ubuntu-latest`,
+`windows-latest` and `macos-latest`, with the pinned toolchain:
 
 1. `cargo fmt --check`
 2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
@@ -404,7 +404,8 @@ cargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --
 4. `cargo check --workspace --target wasm32-unknown-unknown` (default features: no C compiler)
 5. `cargo package --workspace`
 
-The `--all-features` steps compile QuickJS with GCC on Ubuntu and MSVC on Windows. A second job,
+The `--all-features` steps compile QuickJS with GCC on Ubuntu, MSVC on Windows and Apple Clang on
+macOS. A second job,
 `wasm-expressions` on `ubuntu-latest`, installs `clang` and `llvm`, installs `wasm-bindgen-cli` at
 the locked `wasm-bindgen` version, and runs
 `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the

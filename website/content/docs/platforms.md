@@ -13,8 +13,9 @@ With the default features, `dxn_dtcg` is pure, safe Rust. The crates have no bui
 |---|---|
 | Linux x86_64 | Tested in CI: formatting, Clippy with `-D warnings`, tests, `cargo package`; the `--all-features` steps compile QuickJS with the system C compiler |
 | Windows x86_64 | Tested in CI: the same steps, with MSVC compiling QuickJS |
+| macOS arm64 | Tested in CI: the same steps, with Apple Clang compiling QuickJS |
 | WebAssembly (`wasm32-unknown-unknown`) | Default features: `cargo check --workspace --target wasm32-unknown-unknown` in CI. With `expressions`: built with an LLVM clang and tested under Node in CI ([below](#webassembly-and-expressions)). Needs no host I/O, threads or system calls |
-| macOS, iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI. With `expressions`, the target also needs a C compiler that QuickJS builds with |
+| iOS, Android and other `std` targets | Expected to work (no platform-specific code); not covered by CI. With `expressions`, the target also needs a C compiler that QuickJS builds with |
 
 - **Rust** 1.97 or newer, edition 2024. `no_std` is not supported. The repository pins the toolchain to 1.97.0 in `rust-toolchain.toml`.
 - **No threads started**, no clock, randomness or environment access, in either build. Expressions run without a clock or randomness (`Date` does not exist and `Math.random` throws).

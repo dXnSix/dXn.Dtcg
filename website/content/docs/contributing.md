@@ -174,7 +174,7 @@ The workspace pins `wasm-bindgen-test`, whose `wasm-bindgen` must match the inst
 
 `.github/workflows/ci.yml` runs on pull requests and pushes to `main` with the pinned toolchain. Two jobs:
 
-- **`rust`**, on `ubuntu-latest` and `windows-latest`: `cargo fmt --check`, Clippy with `-D warnings`, `cargo test --workspace --all-features` (including the corpus, the documentation doctests and the expressions groups), `cargo check --workspace --target wasm32-unknown-unknown` (default features, so no C compiler) and `cargo package --workspace`. The `--all-features` steps compile QuickJS with GCC on Ubuntu and MSVC on Windows.
+- **`rust`**, on `ubuntu-latest`, `windows-latest` and `macos-latest`: `cargo fmt --check`, Clippy with `-D warnings`, `cargo test --workspace --all-features` (including the corpus, the documentation doctests and the expressions groups), `cargo check --workspace --target wasm32-unknown-unknown` (default features, so no C compiler) and `cargo package --workspace`. The `--all-features` steps compile QuickJS with GCC on Ubuntu, MSVC on Windows and Apple Clang on macOS.
 - **`wasm-expressions`**, on `ubuntu-latest`: installs `clang` and `llvm`, sets `CC_wasm32_unknown_unknown=clang`, `AR_wasm32_unknown_unknown=llvm-ar` and the `wasm-bindgen-test-runner` as the wasm32 runner, installs `wasm-bindgen-cli` at the locked `wasm-bindgen` version, then runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the `expressions_wasm` group.
 
 The manifests stay packageable: the derive crate's dev-dependency on `dxn_dtcg` is path-only on purpose, which breaks the runtime and derive dependency cycle in a packaged crate, and `dxn_dtcg` excludes `tests/fixtures/dtcg-test-suite/**` from the package.
