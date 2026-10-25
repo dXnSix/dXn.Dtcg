@@ -822,3 +822,43 @@ fn document_cycles_name_the_module_that_threw() {
         other => panic!("{other:?}"),
     }
 }
+
+#[test]
+fn module_documents_are_bounded_by_max_documents_as_their_own_count() {
+    let modules = [
+        (
+            "a.js",
+            "import { b } from './b.js'; export const a = b + 1;",
+        ),
+        (
+            "b.js",
+            "import { c } from './c.js'; export const b = c + 1;",
+        ),
+        ("c.js", "export const c = 1;"),
+    ];
+    let resolve = |max_documents: usize| {
+        let options = RuntimeOptions::default()
+            .with_limits(dxn_dtcg::RuntimeLimits::default().with_max_documents(max_documents))
+            .with_expressions(ExpressionOptions::default());
+        let mut runtime = runtime(
+            "tokens.json",
+            &document(json!({ "chain": "a.js" }), json!({ "chain": ["a"] }), "a"),
+            options,
+        );
+        resolve_providing(&mut runtime, &modules).0
+    };
+    // One token document and three module documents: the module count is
+    // separate from the source count, so a limit of 3 is enough.
+    assert_eq!(resolve(3).unwrap(), json!(3));
+    let error = resolve(2).unwrap_err();
+    assert!(
+        matches!(
+            error,
+            DtcgError::LimitExceeded {
+                kind: "documents",
+                limit: 2
+            }
+        ),
+        "{error:?}"
+    );
+}

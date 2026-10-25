@@ -90,3 +90,76 @@ fn runaway_recursion_is_an_expression_error() {
         other => panic!("{other:?}"),
     }
 }
+
+#[wasm_bindgen_test]
+fn a_token_imports_a_host_module() {
+    use dxn_dtcg::expressions::ExpressionModule;
+    let options = RuntimeOptions::default().with_expressions(ExpressionOptions::default().with_module(
+        "brand/math",
+        ExpressionModule::typescript(
+            "export const ratio: number = 1.5;\nexport function step(base: number, n: number): number { return base * ratio ** n; }",
+        ),
+    ));
+    let document = json!({
+        "computed": computed("number", json!(0), json!({ "imports": { "brand/math": ["step"] }, "js": "step(4, 2)" }))
+    });
+    let tokens = DtcgRuntime::from_json_with_options("tokens.json", document.to_string(), options)
+        .unwrap()
+        .resolve(&[])
+        .unwrap()
+        .ready()
+        .unwrap();
+    assert_eq!(tokens.get("computed").unwrap().value, json!(9));
+}
+
+#[wasm_bindgen_test]
+fn a_token_calls_a_host_native_module() {
+    use dxn_dtcg::expressions::NativeModule;
+    let native = NativeModule::new("brand/native")
+        .function("double", |value: f64| value * 2.0)
+        .function("divide", |a: f64, b: f64| {
+            if b == 0.0 {
+                Err("division by zero")
+            } else {
+                Ok(a / b)
+            }
+        });
+    let options = RuntimeOptions::default()
+        .with_expressions(ExpressionOptions::default().with_native_module(native));
+    let document = json!({
+        "doubled": computed("number", json!(0), json!({ "imports": { "brand/native": ["double"] }, "js": "double(21)" })),
+        "caught": computed("fontFamily", json!("x"), json!({
+            "imports": { "brand/native": ["divide"] },
+            "js": "(() => { try { return String(divide(1, 0)); } catch (e) { return e.message; } })()"
+        }))
+    });
+    let tokens = DtcgRuntime::from_json_with_options("tokens.json", document.to_string(), options)
+        .unwrap()
+        .resolve(&[])
+        .unwrap()
+        .ready()
+        .unwrap();
+    assert_eq!(tokens.get("doubled").unwrap().value, json!(42));
+    assert_eq!(
+        tokens.get("caught").unwrap().value,
+        json!("brand/native.divide: division by zero")
+    );
+}
+
+#[wasm_bindgen_test]
+fn a_token_converts_a_color_with_the_color_module() {
+    let tokens = resolve(json!({
+        "accent": { "$type": "color", "$value": { "colorSpace": "srgb", "components": [0.2, 0.4, 0.9] } },
+        "oklch": computed(
+            "color",
+            json!({ "colorSpace": "srgb", "components": [0, 0, 0] }),
+            json!({ "imports": { "dxn.dtcg/color": ["convert"] }, "inputs": { "accent": "{accent}" }, "js": "convert(accent, 'oklch')" }),
+        )
+    }))
+    .unwrap();
+    // The native groups' values: colorjs.io's 0.551803, 0.201484, 264.262273 rounded to six places.
+    assert_eq!(
+        tokens.get("oklch").unwrap().value,
+        json!({ "colorSpace": "oklch", "components": [0.551803, 0.201484, 264.262273] })
+    );
+}
