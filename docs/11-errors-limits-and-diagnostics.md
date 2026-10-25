@@ -42,7 +42,7 @@ needs a wildcard arm.
 | `InvalidPointer(String)` | A JSON Pointer is malformed (no `#/`, a bad `~` escape, a bad `%` escape, an array index with a sign or a leading zero), points to nothing, or is part of a circular chain of document pointers. Also raised by a `resolutionOrder` step whose `$ref` names an undefined set or modifier, and by a source reference whose fragment does not exist. |
 | `InvalidJson { resource, message }` | A provided document is not well-formed JSON. `message` is the parser's, with line and column. |
 | `InvalidDocument { resource, message }` | The resolver structure is wrong: a version other than `2025.10`, an unknown member in a resolver, set, modifier or inline step, a missing or empty `resolutionOrder`, a modifier with fewer than two contexts, an inline step without `type` or `name`, a modifier defined by two steps, a default that names no context, a source reference into `resolutionOrder` or `modifiers`, a local reference cycle. Also a non-object group, and resource `catalog` with message `root document is not set` when no root was set. |
-| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document`, `replace_envelope` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
+| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document` or `replace_json_and_resolve_affected` names a document that is not in the catalog |
 | `DuplicateDocument(ResourceId)` | `provide_json_batch` received the same id twice |
 | `LimitExceeded { kind, limit }` | A [runtime limit](#runtime-limits) or one of the [fixed bounds](#fixed-bounds) was exceeded. `kind` names it. |
 | `DocumentCycle(String)` | A resolver includes itself, directly or through other resolvers. The field is the resource id. |
@@ -50,7 +50,6 @@ needs a wildcard arm.
 | `TokenType { resource, path, message }` | A token has no type (`token requires a DTCG type`), an unsupported type, or a value that does not match its type; or a reference names a token of the wrong type (`reference type mismatch: expected X, found Y`), either through an own `$type` that differs from the target's or through an alias at a composite member. |
 | `UnresolvedReference { resource, path, target, message }` | A reference names no resolvable target: a missing alias target, an alias to a group (`{group}`) or an empty alias (`{}`), or a missing or malformed `$extends` target. `path` is the referring token or group, `target` the reference as written. |
 | `Projection { path, message }` | A projected token is missing or does not convert into the requested Rust type, or `ResolvedToken::typed` cannot convert a value. Used only for projection. |
-| `InvalidEnvelope { resource, message }` | A `.tokeneditor` envelope lacks an object `data` member or has the wrong version |
 | `InvalidReference { resource, reference, message }` | A reference breaks `LocalReferencePolicy` |
 | `InvalidInput { message }` | `selection_from_json` got something other than a JSON object of strings |
 | `UnknownModifier { modifier, known }` | A selection names a modifier that no reached resolver declares (`known` lists the declared ones in declaration order, root first), or a name that matches several declared modifiers case-insensitively (`known` lists the candidates). |
@@ -138,7 +137,6 @@ fn location(error: &DtcgError) -> (Option<&ResourceId>, Option<&str>) {
         DtcgError::Projection { path, .. } => (None, Some(path)),
         DtcgError::InvalidJson { resource, .. }
         | DtcgError::InvalidDocument { resource, .. }
-        | DtcgError::InvalidEnvelope { resource, .. }
         | DtcgError::InvalidReference { resource, .. } => (Some(resource), None),
         DtcgError::UnknownDocument(resource) | DtcgError::DuplicateDocument(resource) => {
             (Some(resource), None)
@@ -172,7 +170,7 @@ non-string `$schema`.
 - **Reading methods never change the runtime.** `resolve`, `project`, `modifiers`,
   `normalize_selection`, the validation methods and the inspection methods take `&self`.
 - **Catalog mutations are atomic.** A failed `provide_json`, `provide_requested_json`,
-  `provide_json_batch`, `replace_json`, `replace_envelope` or `remove_document` leaves the
+  `provide_json_batch`, `replace_json` or `remove_document` leaves the
   documents and the revision as they were.
 - **Affected resolution rolls back.** `replace_json_and_resolve_affected` restores the previous
   document text when the result is not `Ready`, for example when an edit deletes a token that
@@ -229,15 +227,14 @@ let runtime = DtcgRuntime::from_json_with_options(
     r#"{ "gap": { "$type": "number", "$value": 4 } }"#,
     RuntimeOptions::default()
         .with_limits(limits)
-        .with_extensions(ValueExtensions::rayx()),
+        .with_extensions(ValueExtensions::all()),
 )
 .unwrap();
 assert_eq!(runtime.limits().max_alias_depth, 16);
 assert!(runtime.resolve(&[]).unwrap().is_ready());
 ```
 
-`from_json` and `from_envelope` use the default limits; `from_json_with_options` and
-`from_envelope_with_options` take `RuntimeOptions`. Raise `max_documents` for design systems
+`from_json` uses the default limits; `from_json_with_options` takes `RuntimeOptions`. Raise `max_documents` for design systems
 assembled from many small sources. Lower the limits when resolving documents from untrusted users
 on a server.
 
@@ -298,7 +295,6 @@ variants.
 | `Token` | `Token` and `TokenType` | resource | token path | message |
 | `UnresolvedReference` | `UnresolvedReference` | resource | referring token or group path | ``unresolved reference `<target>`: <message>`` |
 | `Projection` | `Projection` | none | token path | message |
-| `Envelope` | `InvalidEnvelope` | resource | none | message |
 | `Reference` | `InvalidReference` | resource | the reference | message |
 | `Selection` | `UnknownModifier` and `UnknownContext` | none | the modifier | the full `Display` text |
 | `InvalidInput` | `InvalidInput` | none | none | message |

@@ -56,13 +56,6 @@ pub enum DtcgError {
         path: String,
         message: String,
     },
-    /// A `.tokeneditor` envelope without an object `data` member or with a
-    /// resolver version other than `2025.10`.
-    #[error("invalid project envelope `{resource}`: {message}")]
-    InvalidEnvelope {
-        resource: ResourceId,
-        message: String,
-    },
     /// A document reference outside the relative local policy.
     #[error("reference `{reference}` in `{resource}`: {message}")]
     InvalidReference {

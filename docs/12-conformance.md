@@ -2,7 +2,7 @@
 
 This chapter summarizes how `dxn_dtcg` relates to the DTCG 2025.10 Format, Color and Resolver
 modules: how conformance is measured, what is supported, the choices the runtime makes where the
-specification leaves room or contradicts itself, the opt-in RayX extensions, and what it does not
+specification leaves room or contradicts itself, the opt-in value extensions, and what it does not
 do. Each point links to the chapter with the details.
 
 The runtime is a **resolver**. It reads documents, computes token values and can export a
@@ -12,7 +12,7 @@ documents it reads.
 - [Official conformance corpus](#official-conformance-corpus)
 - [Conformance tiers](#conformance-tiers)
 - [Supported](#supported)
-- [Strict by default, RayX extensions on request](#strict-by-default-rayx-extensions-on-request)
+- [Strict by default, value extensions on request](#strict-by-default-value-extensions-on-request)
 - [Implementation-defined choices](#implementation-defined-choices)
 - [Not supported](#not-supported)
 - [Where conformance is tested](#where-conformance-is-tested)
@@ -101,18 +101,18 @@ Where sources disagree, the runtime follows them in this order:
 | Inputs (§5) with defaults | Supported; names match case-insensitively | [Selections](06-resolvers-and-modifiers.md#selections) |
 | Resolved output as a token document (§8) | `ResolvedTokens::to_document()` | [API reference](13-api-reference.md#resolvedtokens) |
 
-## Strict by default, RayX extensions on request
+## Strict by default, value extensions on request
 
 With the default `RuntimeOptions`, values are validated strictly against DTCG 2025.10.
-`validate_value` is always strict. The RayX value shapes are opt-in through `ValueExtensions`,
-which `validate_value_with` and the runtime options accept:
+`validate_value` is always strict. Two value shapes beyond the specification are opt-in through
+`ValueExtensions`, which `validate_value_with` and the runtime options accept:
 
 | `ValueExtensions` field | Default | Adds | Details |
 |---|---|---|---|
 | `line_height_dimension` | `false` | Typography `lineHeight` as a `dimension`, or an alias to a `dimension` token, besides the specification's number | [`typography`](05-value-types.md#typography) |
-| `rayx_blur` | `false` | The `dev.rayx.blur` type: `{ "kind": "layer" \| "background", "radius": dimension }`, whose `radius` may alias a `dimension` token | [Value types](05-value-types.md#devrayxblur-rayx-extension) |
+| `blur` | `false` | The `dxn.dtcg.blur` type: `{ "kind": "layer" \| "background", "radius": dimension }`, whose `radius` may alias a `dimension` token | [Value types](05-value-types.md#dxndtcgblur-extension) |
 
-`ValueExtensions::rayx()` turns both on. RayX and the RayX Token Editor opt in with it:
+`ValueExtensions::all()` turns both on:
 
 ```rust
 use dxn_dtcg::{DtcgRuntime, RuntimeOptions, ValueExtensions};
@@ -128,21 +128,20 @@ let document = r#"{
 let strict = DtcgRuntime::from_json("tokens.json", document).unwrap();
 assert!(strict.resolve(&[]).is_err());
 
-// The RayX profile accepts the dimension.
-let rayx = DtcgRuntime::from_json_with_options(
+// With every extension on, the dimension is accepted.
+let extended = DtcgRuntime::from_json_with_options(
     "tokens.json",
     document,
-    RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+    RuntimeOptions::default().with_extensions(ValueExtensions::all()),
 )
 .unwrap();
-assert!(rayx.resolve(&[]).unwrap().is_ready());
+assert!(extended.resolve(&[]).unwrap().is_ready());
 ```
 
-Two further additions do not change how standard documents behave:
+One further addition does not change how standard documents behave:
 
 | Addition | What it adds | Details |
 |---|---|---|
-| `.tokeneditor` envelope | `{ "data": <resolver> }` project files for the RayX Token Editor | [Envelopes](07-document-loading.md#token-editor-envelopes) |
 | `LocalReferencePolicy` | An opt-in rule that allows only relative local references | [`LocalReferencePolicy`](07-document-loading.md#localreferencepolicy) |
 
 ## Implementation-defined choices
@@ -250,6 +249,6 @@ These optional (MAY) features and neighbors of the specification are out of scop
 | `crates/dxn_dtcg/tests/extensions_merge.rs` | Recursive group and root `$extensions` merge |
 | `crates/dxn_dtcg/tests/resolver_2025_10.rs`, `resolver_document_validation.rs` | Resolver version, allowed members, steps, overrides, set references |
 | `crates/dxn_dtcg/tests/input_selection.rs` | Case-insensitive inputs, nested-resolver inputs, selection errors |
-| `crates/dxn_dtcg/tests/value_extensions.rs`, `rayx_export_types.rs` | Strict values and the opt-in RayX extensions |
+| `crates/dxn_dtcg/tests/value_extensions.rs`, `value_extension_types.rs` | Strict values and the opt-in value extensions |
 
 Run one group with `cargo test -p dxn_dtcg --all-features --test <group>`.

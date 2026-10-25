@@ -1,7 +1,7 @@
 # 5. Value types
 
 Every resolved token is checked against its effective type. This chapter lists the accepted types
-and the exact rules for each one, the opt-in RayX extensions, and the typed Rust models in the
+and the exact rules for each one, the opt-in value extensions, and the typed Rust models in the
 `values` module that validated values convert into.
 
 - [How validation works](#how-validation-works)
@@ -19,17 +19,17 @@ and the exact rules for each one, the opt-in RayX extensions, and the typed Rust
 - [`shadow`](#shadow)
 - [`gradient`](#gradient)
 - [`typography`](#typography)
-- [`dev.rayx.blur` (RayX extension)](#devrayxblur-rayx-extension)
-- [Strict values and the RayX extensions](#strict-values-and-the-rayx-extensions)
+- [`dxn.dtcg.blur` (extension)](#dxndtcgblur-extension)
+- [Strict values and the value extensions](#strict-values-and-the-value-extensions)
 - [Unsupported types](#unsupported-types)
 - [Validating values directly](#validating-values-directly)
 - [Reading values in Rust](#reading-values-in-rust)
 
 ## How validation works
 
-- Validation is **strict DTCG 2025.10** by default. The two RayX value extensions are accepted only
+- Validation is **strict DTCG 2025.10** by default. The two value extensions are accepted only
   when the runtime is created with them (see
-  [Strict values and the RayX extensions](#strict-values-and-the-rayx-extensions)).
+  [Strict values and the value extensions](#strict-values-and-the-value-extensions)).
 - Validation runs on the **resolved** value, after every alias and reference has been substituted.
   A border whose `color` is `"{palette.ink}"` is validated with the palette color in its place.
   Where a curly-brace alias may appear inside a value, and which type it must target, is described
@@ -59,7 +59,7 @@ and the exact rules for each one, the opt-in RayX extensions, and the typed Rust
 | `shadow` | a shadow object, or a non-empty array of them |
 | `gradient` | a non-empty array of `{ "color": color, "position": number }` |
 | `typography` | `{ "fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight" }` |
-| `dev.rayx.blur` | `{ "kind": "layer" \| "background", "radius": dimension }` (RayX extension, opt-in) |
+| `dxn.dtcg.blur` | `{ "kind": "layer" \| "background", "radius": dimension }` (value extension, opt-in) |
 
 ## `color`
 
@@ -237,42 +237,42 @@ All five members are required:
 Strings such as `"auto"` or `"40px"` are rejected. An alias at `lineHeight` must target a `number`
 token.
 
-With the RayX `line_height_dimension` extension, `lineHeight` may also be a `dimension`, and a
-`lineHeight` alias may target a `dimension` token. Design-system line heights are often pixel
-tokens that text styles alias, as in `"lineHeight": "{lineHeight.body}"`. Without the extension,
+With the `line_height_dimension` extension, `lineHeight` may also be a `dimension`, and a
+`lineHeight` alias may target a `dimension` token. Design tools commonly export line heights as
+pixel tokens that text styles alias, as in `"lineHeight": "{lineHeight.body}"`. Without the extension,
 such a value fails validation and such an alias fails with
 ``reference type mismatch: expected number, found dimension``.
 
-## `dev.rayx.blur` (RayX extension)
+## `dxn.dtcg.blur` (extension)
 
 ```json
 { "kind": "background", "radius": { "value": 20, "unit": "px" } }
 ```
 
-A layer or background blur effect, as produced by the RayX Figma export. `kind` is `layer` or
+A layer or background blur effect, such as a Figma blur effect style. `kind` is `layer` or
 `background`, and `radius` is a dimension; `radius` may alias a `dimension` token. The type name is
-available as the constant `dxn_dtcg::BLUR_TYPE`. The type exists only with the RayX
-`rayx_blur` extension; a default runtime reports it as an
-[unsupported type](#unsupported-types). Other `dev.rayx.*` names are never recognized.
+available as the constant `dxn_dtcg::BLUR_TYPE`. The type exists only with the `blur` extension; a
+default runtime reports it as an [unsupported type](#unsupported-types). Other `dxn.dtcg.*` names
+are never recognized.
 
-## Strict values and the RayX extensions
+## Strict values and the value extensions
 
-A runtime validates strictly unless you pass options. `ValueExtensions` holds the two RayX value
+A runtime validates strictly unless you pass options. `ValueExtensions` holds the two value
 extensions, both off by default:
 
 | Flag | Setter | Effect |
 |---|---|---|
 | `line_height_dimension` | `with_line_height_dimension(bool)` | Typography `lineHeight` may be a `dimension` or alias a `dimension` token |
-| `rayx_blur` | `with_rayx_blur(bool)` | The `dev.rayx.blur` type is accepted |
+| `blur` | `with_blur(bool)` | The `dxn.dtcg.blur` type is accepted |
 
-`ValueExtensions::rayx()` turns both on; it is the profile RayX and the RayX Token Editor use.
+`ValueExtensions::all()` turns both on.
 Extensions reach a runtime through `RuntimeOptions`, which also carries the
 [limits](11-errors-limits-and-diagnostics.md#runtime-limits):
 
-- `DtcgRuntime::with_options(options)`, `DtcgRuntime::from_json_with_options(id, json, options)`
-  and `DtcgRuntime::from_envelope_with_options(id, json, options)` create a runtime with them;
+- `DtcgRuntime::with_options(options)` and
+  `DtcgRuntime::from_json_with_options(id, json, options)` create a runtime with them;
 - `DtcgRuntime::options()` returns them;
-- `DtcgRuntime::default()`, `from_json`, `from_envelope` and `with_limits` use strict values.
+- `DtcgRuntime::default()`, `from_json` and `with_limits` use strict values.
 
 ```rust
 use dxn_dtcg::{BLUR_TYPE, DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
@@ -290,7 +290,7 @@ const TOKENS: &str = r##"{
     }
   },
   "frost": {
-    "$type": "dev.rayx.blur",
+    "$type": "dxn.dtcg.blur",
     "$value": { "kind": "background", "radius": { "value": 20, "unit": "px" } }
   }
 }"##;
@@ -303,15 +303,15 @@ fn main() -> Result<(), DtcgError> {
         "token `body` in `tokens.json`: reference type mismatch: expected number, found dimension"
     );
 
-    // The RayX profile accepts both extensions.
-    let rayx = DtcgRuntime::from_json_with_options(
+    // With every extension on, both are accepted.
+    let extended = DtcgRuntime::from_json_with_options(
         "tokens.json",
         TOKENS,
-        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+        RuntimeOptions::default().with_extensions(ValueExtensions::all()),
     )?;
-    assert_eq!(rayx.options().extensions, ValueExtensions::rayx());
+    assert_eq!(extended.options().extensions, ValueExtensions::all());
 
-    let tokens = rayx.resolve(&[])?.ready().unwrap();
+    let tokens = extended.resolve(&[])?.ready().unwrap();
     assert_eq!(tokens.get("body").unwrap().value["lineHeight"]["value"], 24);
     assert_eq!(tokens.get("frost").unwrap().token_type.as_deref(), Some(BLUR_TYPE));
     Ok(())
@@ -324,11 +324,11 @@ not the blur type. Every other rule stays strict with the extensions on.
 
 ## Unsupported types
 
-Every token must end up with one of the 13 DTCG types, or `dev.rayx.blur` when the `rayx_blur`
+Every token must end up with one of the 13 DTCG types, or `dxn.dtcg.blur` when the `blur`
 extension is on. Anything else fails, for example:
 
 - the pre-2025 `string` type (use `fontFamily` for font names);
-- `dev.rayx.blur` in a runtime without the extension;
+- `dxn.dtcg.blur` in a runtime without the extension;
 - custom reverse-DNS types such as `com.example.elevation`;
 - misspellings such as `colour` or `fontweight` (type names are case-sensitive).
 
@@ -355,7 +355,7 @@ assert_eq!(
     validate_value(BLUR_TYPE, &blur),
     Err(ValueValidationError::UnsupportedType(BLUR_TYPE.into()))
 );
-assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::rayx()).is_ok());
+assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::all()).is_ok());
 
 assert_eq!(
     validate_value("dimension", &json!({ "value": 4, "unit": "em" })),
@@ -397,8 +397,8 @@ runtime was created with, `runtime.options().extensions`, so the same shapes are
 | `transition` | `Transition { duration, delay, timing_function }` | |
 | `shadow` | `Shadow(Vec<ShadowLayer>)` | a single shadow object is one layer; `inset` defaults to `false` |
 | `gradient` | `Gradient(Vec<GradientStop>)` | positions clamped to [0, 1] |
-| `typography` | `Typography { font_family, font_size, font_weight, letter_spacing, line_height }` | `LineHeight::Multiplier(f64)`, or `LineHeight::Dimension` with the RayX extension |
-| `dev.rayx.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}`; RayX extension |
+| `typography` | `Typography { font_family, font_size, font_weight, letter_spacing, line_height }` | `LineHeight::Multiplier(f64)`, or `LineHeight::Dimension` with the value extension |
+| `dxn.dtcg.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}`; value extension |
 
 ```rust
 use dxn_dtcg::values::{
@@ -456,7 +456,7 @@ fn main() -> Result<(), DtcgError> {
 `typed` reports a value that does not convert as `DtcgError::Projection` naming the token path.
 Every model also implements `FromDtcgValue`, so it can be a field of a
 [`#[derive(DtcgTokens)]`](08-typed-projection.md) struct, and `TypedValue` itself can be one.
-These implementations check only the value's shape, accepting the RayX extension shapes, because
+These implementations check only the value's shape, accepting the extension shapes, because
 the runtime has already validated the value with its own options.
 
 ### Converting the JSON yourself

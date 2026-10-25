@@ -25,7 +25,7 @@ Missing documents are reported before input errors: a selection naming a modifie
 | `InvalidPointer(String)` | A JSON Pointer is malformed, points to nothing, or is part of a circular chain; also a `resolutionOrder` step naming an undefined set or modifier, and a source fragment that does not exist |
 | `InvalidJson { resource, message }` | A provided document is not well-formed JSON; `message` is the parser's, with line and column |
 | `InvalidDocument { resource, message }` | Resolver structure is wrong (version, unknown member, empty `resolutionOrder`, fewer than two contexts, duplicate modifier, bad default, forbidden or cyclic source reference), a group is not an object, or no root was set (`root document is not set`) |
-| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document`, `replace_envelope` or `replace_json_and_resolve_affected` names a document not in the catalog |
+| `UnknownDocument(ResourceId)` | `replace_json`, `remove_document` or `replace_json_and_resolve_affected` names a document not in the catalog |
 | `DuplicateDocument(ResourceId)` | `provide_json_batch` received the same id twice |
 | `LimitExceeded { kind, limit }` | A [runtime limit or fixed bound](./limits.md) was exceeded; `kind` names it |
 | `DocumentCycle(String)` | A resolver includes itself, directly or through others; the field is the resource id |
@@ -33,7 +33,6 @@ Missing documents are reported before input errors: a selection naming a modifie
 | `TokenType { resource, path, message }` | No type (`token requires a DTCG type`), an unsupported type, a value that does not match its type, or `reference type mismatch: expected X, found Y` |
 | `UnresolvedReference { resource, path, target, message }` | A missing alias target (including `{group}` and `{}`), or a missing or malformed `$extends` target. `path` is the referring token or group, `target` the reference as written |
 | `Projection { path, message }` | A projected token is missing or does not convert, or `ResolvedToken::typed` cannot convert a value |
-| `InvalidEnvelope { resource, message }` | A `.tokeneditor` envelope lacks an object `data` member or has the wrong version |
 | `InvalidReference { resource, reference, message }` | A reference breaks `LocalReferencePolicy` |
 | `InvalidInput { message }` | `selection_from_json` got something other than an object of strings |
 | `UnknownModifier { modifier, known }` | A selection names a modifier no reached resolver declares, or one matching several declared names; `known` lists them in declaration order, root first |
@@ -119,7 +118,6 @@ fn location(error: &DtcgError) -> (Option<&ResourceId>, Option<&str>) {
         DtcgError::Projection { path, .. } => (None, Some(path)),
         DtcgError::InvalidJson { resource, .. }
         | DtcgError::InvalidDocument { resource, .. }
-        | DtcgError::InvalidEnvelope { resource, .. }
         | DtcgError::InvalidReference { resource, .. } => (Some(resource), None),
         DtcgError::UnknownDocument(resource) | DtcgError::DuplicateDocument(resource) => {
             (Some(resource), None)
@@ -150,7 +148,7 @@ A `path` is a dotted token or group path; it is empty for an error about a sourc
 ## State after an error
 
 - **Reading methods never change the runtime.** `resolve`, `project`, `modifiers`, `normalize_selection`, the validation methods and the inspection methods take `&self`.
-- **Catalog mutations are atomic.** A failed `provide_json`, `provide_requested_json`, `provide_json_batch`, `replace_json`, `replace_envelope` or `remove_document` leaves documents and revision as they were.
+- **Catalog mutations are atomic.** A failed `provide_json`, `provide_requested_json`, `provide_json_batch`, `replace_json` or `remove_document` leaves documents and revision as they were.
 - **Affected resolution rolls back.** `replace_json_and_resolve_affected` restores the previous text unless the result is `Ready`; see [Rollback](./incremental.md#rollback).
 
 Next: [Troubleshooting](./troubleshooting.md), or [Limits and diagnostics](./limits.md).

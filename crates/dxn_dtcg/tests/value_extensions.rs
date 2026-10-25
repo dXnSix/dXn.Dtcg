@@ -18,10 +18,10 @@ fn blur() -> Value {
     json!({"kind": "layer", "radius": {"value": 4, "unit": "px"}})
 }
 
-/// A document using both RayX extensions: a typography token whose
+/// A document using both value extensions: a typography token whose
 /// `lineHeight` aliases a dimension token, a literal dimension `lineHeight`,
 /// and a blur token.
-fn rayx_document() -> Value {
+fn extension_document() -> Value {
     json!({
         "line": {"$type": "dimension", "$value": {"value": 40, "unit": "px"}},
         "heading": {"$type": "typography", "$value": typography(json!("{line}"))},
@@ -40,9 +40,9 @@ fn resolve(runtime: &DtcgRuntime) -> Result<ResolvedTokens, DtcgError> {
 fn validation_is_strict_by_default() {
     assert_eq!(
         ValueExtensions::default(),
-        ValueExtensions::rayx()
+        ValueExtensions::all()
             .with_line_height_dimension(false)
-            .with_rayx_blur(false)
+            .with_blur(false)
     );
     validate_value("typography", &typography(json!(1.5))).expect("number line height");
     assert_eq!(
@@ -73,7 +73,7 @@ fn each_extension_flag_is_independent() {
     .expect("dimension line height");
     assert!(validate_value_with(BLUR_TYPE, &blur(), &line_height).is_err());
 
-    let blur_only = ValueExtensions::default().with_rayx_blur(true);
+    let blur_only = ValueExtensions::default().with_blur(true);
     validate_value_with(BLUR_TYPE, &blur(), &blur_only).expect("blur");
     assert!(
         validate_value_with(
@@ -86,8 +86,8 @@ fn each_extension_flag_is_independent() {
 }
 
 #[test]
-fn a_default_runtime_rejects_the_rayx_shapes() {
-    let runtime = DtcgRuntime::from_json("tokens.json", rayx_document().to_string()).unwrap();
+fn a_default_runtime_rejects_the_extension_shapes() {
+    let runtime = DtcgRuntime::from_json("tokens.json", extension_document().to_string()).unwrap();
     let error = resolve(&runtime).unwrap_err();
     assert!(
         matches!(&error, DtcgError::TokenType { path, message, .. }
@@ -116,8 +116,8 @@ fn a_default_runtime_rejects_the_rayx_shapes() {
 }
 
 #[test]
-fn the_rayx_profile_accepts_the_extensions_through_every_constructor() {
-    let options = RuntimeOptions::default().with_extensions(ValueExtensions::rayx());
+fn the_full_profile_accepts_the_extensions_through_every_constructor() {
+    let options = RuntimeOptions::default().with_extensions(ValueExtensions::all());
     let expect_ready = |runtime: &DtcgRuntime| {
         let tokens = resolve(runtime).unwrap();
         assert_eq!(
@@ -132,7 +132,7 @@ fn the_rayx_profile_accepts_the_extensions_through_every_constructor() {
 
     let runtime = DtcgRuntime::from_json_with_options(
         "tokens.json",
-        rayx_document().to_string(),
+        extension_document().to_string(),
         options.clone(),
     )
     .unwrap();
@@ -141,25 +141,10 @@ fn the_rayx_profile_accepts_the_extensions_through_every_constructor() {
 
     let mut runtime = DtcgRuntime::with_options(options.clone());
     runtime
-        .provide_json("tokens.json", rayx_document().to_string())
+        .provide_json("tokens.json", extension_document().to_string())
         .unwrap();
     runtime.set_root("tokens.json").unwrap();
     expect_ready(&runtime);
-
-    let envelope = json!({"data": {
-        "version": "2025.10",
-        "resolutionOrder": [{"type": "set", "name": "base", "sources": [rayx_document()]}]
-    }});
-    let (runtime, _) = DtcgRuntime::from_envelope_with_options(
-        "project.tokeneditor",
-        &envelope.to_string(),
-        options.clone(),
-    )
-    .unwrap();
-    expect_ready(&runtime);
-    let (strict, _) =
-        DtcgRuntime::from_envelope("project.tokeneditor", &envelope.to_string()).unwrap();
-    assert!(resolve(&strict).is_err());
 
     let limited = DtcgRuntime::with_limits(RuntimeLimits::default().with_max_tokens(7));
     assert_eq!(limited.options().extensions, ValueExtensions::default());
@@ -167,8 +152,8 @@ fn the_rayx_profile_accepts_the_extensions_through_every_constructor() {
 }
 
 #[test]
-fn the_rayx_profile_keeps_every_other_rule_strict() {
-    let options = RuntimeOptions::default().with_extensions(ValueExtensions::rayx());
+fn the_full_profile_keeps_every_other_rule_strict() {
+    let options = RuntimeOptions::default().with_extensions(ValueExtensions::all());
     for (document, path) in [
         (
             json!({"line": {"$type": "duration", "$value": {"value": 1, "unit": "s"}},
@@ -184,7 +169,7 @@ fn the_rayx_profile_keeps_every_other_rule_strict() {
             "overlay",
         ),
         (
-            json!({"other": {"$type": "dev.rayx.other", "$value": 1}}),
+            json!({"other": {"$type": "dxn.dtcg.other", "$value": 1}}),
             "other",
         ),
         (

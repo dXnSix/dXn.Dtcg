@@ -221,7 +221,7 @@ Affected re-resolution relies on the caller for a few points:
 - **Keep the snapshot in step with the catalog.** The comparison is against the catalog as it is
   when the call starts, so merge each affected result into a full resolution of the same selection
   taken after the previous change. After any other mutation (`provide_json`, `replace_json`,
-  `remove_document`, `replace_envelope`), resolve fully.
+  `remove_document`), resolve fully.
 - **Use the snapshot's selection.** Merge an affected result only into a full resolution of the
   same selection.
 - **One document per call.** Edits to several documents need one call each, applied in order, or a

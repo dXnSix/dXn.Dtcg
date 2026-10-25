@@ -278,15 +278,15 @@ fn composite_and_unit_types_convert() {
 }
 
 #[test]
-fn the_rayx_extension_types_need_their_flags() {
+fn the_extension_types_need_their_flags() {
     let document = json!({
-        "blur": {"$type": "dev.rayx.blur", "$value": {"kind": "background", "radius": px(8.0)}},
+        "blur": {"$type": "dxn.dtcg.blur", "$value": {"kind": "background", "radius": px(8.0)}},
         "heading": {"$type": "typography", "$value": {"fontFamily": "Inter", "fontSize": px(16.0), "fontWeight": 400, "letterSpacing": px(0.0), "lineHeight": px(24.0)}}
     });
     let tokens = DtcgRuntime::from_json_with_options(
         "tokens.json",
         document.to_string(),
-        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+        RuntimeOptions::default().with_extensions(ValueExtensions::all()),
     )
     .unwrap()
     .resolve(&[])
@@ -295,7 +295,7 @@ fn the_rayx_extension_types_need_their_flags() {
     .unwrap();
     let blur = tokens.get("blur").unwrap();
     assert_eq!(
-        blur.typed(&ValueExtensions::rayx()).unwrap(),
+        blur.typed(&ValueExtensions::all()).unwrap(),
         TypedValue::Blur(Blur {
             kind: BlurKind::Background,
             radius: Dimension {
@@ -309,8 +309,7 @@ fn the_rayx_extension_types_need_their_flags() {
         Err(DtcgError::Projection { path, .. }) if path == "blur"
     ));
     let heading = tokens.get("heading").unwrap();
-    let TypedValue::Typography(typography) = heading.typed(&ValueExtensions::rayx()).unwrap()
-    else {
+    let TypedValue::Typography(typography) = heading.typed(&ValueExtensions::all()).unwrap() else {
         panic!()
     };
     assert_eq!(

@@ -141,7 +141,7 @@ wrong shape fails with a `Projection` error naming the token path.
 The typed models apply the consumer rules of the specification: a color without `alpha` has alpha
 `1`, font-weight keywords become numbers (`FontWeight(700.0)` for `bold`), a single shadow object is
 one layer whose `inset` defaults to `false`, and gradient stop positions are clamped to `[0, 1]`.
-`Dimension::to_px(rem_base)` and `Duration::to_millis()` normalize units. The RayX extension shapes
+`Dimension::to_px(rem_base)` and `Duration::to_millis()` normalize units. The value extension shapes
 (`Blur`, a dimension `LineHeight`) are accepted because the runtime already validated the value
 with its own [value extensions](05-value-types.md). For converting any token by its type, see also
 `ResolvedToken::typed(&extensions)`.

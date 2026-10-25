@@ -50,7 +50,7 @@ Because aliases resolve after the merge, a theme only overrides the few palette 
 - **Deterministic.** JSON member order is preserved, so token order is the authored order, never hash order. Missing-document requests are sorted. The same catalog, options and selection give the same result or the same error.
 - **Bounded.** `RuntimeLimits` caps documents, reference depth, alias chains, copied JSON nodes and token count; value depth and path depth are fixed at 128. Hostile input ends in an error, not in a stack overflow. See [Limits and diagnostics](./limits.md).
 - **Strict.** Unknown `$` properties, malformed tokens, unsupported types, wrong value shapes, aliases at disallowed positions and dangling references are errors. Errors name the document and token path.
-- **Atomic catalog.** A failed `provide_json`, `replace_json`, batch or envelope change leaves documents and revision as they were.
+- **Atomic catalog.** A failed `provide_json`, `replace_json` or batch leaves documents and revision as they were.
 - **Thread-safe reads.** `DtcgRuntime`, `ResolvedTokens`, `ResolvedToken` and `DtcgError` are `Send + Sync`. Resolution takes `&self`, so threads can resolve against one runtime at once; mutation takes `&mut self`. Cloning a runtime is cheap because documents are `Arc<str>`.
 
 ## Caching is yours

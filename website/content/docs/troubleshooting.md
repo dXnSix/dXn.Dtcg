@@ -19,7 +19,7 @@ Find your message, read the cause, apply the fix. Messages are matched by their 
 
 ### `unsupported DTCG type <type> for final 2025.10`
 
-`TokenType`. Only the 13 DTCG types are valid. The old `string` type is gone (use `fontFamily`), reverse-DNS custom types are not accepted, and type names are case-sensitive. `dev.rayx.blur` is accepted only with `ValueExtensions::rayx()`; see [Value types](./value-types.md#strict-values-and-the-rayx-extensions).
+`TokenType`. Only the 13 DTCG types are valid. The old `string` type is gone (use `fontFamily`), reverse-DNS custom types are not accepted, and type names are case-sensitive. `dxn.dtcg.blur` is accepted only with the `blur` value extension (`ValueExtensions::all()` or `with_blur(true)`); see [Value types](./value-types.md#strict-values-and-the-value-extensions).
 
 ### `reference type mismatch: expected <A>, found <B>`
 

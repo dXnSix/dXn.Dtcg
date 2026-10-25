@@ -1,6 +1,6 @@
 ---
 title: Value types
-description: The 13 DTCG value types and their exact validation rules, strict defaults, the opt-in RayX extensions and the typed values module.
+description: The 13 DTCG value types and their exact validation rules, strict defaults, the opt-in value extensions and the typed values module.
 group: Concepts
 order: 70
 ---
@@ -31,7 +31,7 @@ Every resolved token is checked against its effective type after aliases resolve
 | `shadow` | a shadow object, or a non-empty array of them |
 | `gradient` | a non-empty array of `{ "color", "position": number }` |
 | `typography` | `{ "fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight" }` |
-| `dev.rayx.blur` | `{ "kind": "layer" \| "background", "radius": dimension }` (opt-in extension) |
+| `dxn.dtcg.blur` | `{ "kind": "layer" \| "background", "radius": dimension }` (opt-in extension) |
 
 ## color
 
@@ -125,16 +125,18 @@ All five members are required:
 
 Strings such as `"auto"` or `"40px"` are rejected, and an alias at `lineHeight` must target a `number` token. Many design systems store line heights in pixels; that needs the extension below.
 
-## Strict values and the RayX extensions
+## Strict values and the value extensions
 
-The crate is UI-neutral, but it carries two value shapes that the RayX UI toolkit uses. Both are **off by default**, so other users never see them.
+`ValueExtensions` enables two value shapes beyond DTCG 2025.10. Both are **off by default**, so validation follows the specification strictly unless you opt in.
 
 | Flag | Setter | Effect |
 |---|---|---|
 | `line_height_dimension` | `with_line_height_dimension(bool)` | Typography `lineHeight` may be a `dimension` or alias a `dimension` token |
-| `rayx_blur` | `with_rayx_blur(bool)` | The `dev.rayx.blur` type is accepted |
+| `blur` | `with_blur(bool)` | The `dxn.dtcg.blur` type is accepted |
 
-`ValueExtensions::rayx()` turns both on. Extensions reach a runtime through `RuntimeOptions`, which also carries the [limits](./limits.md#runtime-limits): `DtcgRuntime::with_options`, `from_json_with_options` and `from_envelope_with_options`. `DtcgRuntime::options()` returns them.
+Design tools commonly export line heights as pixel dimensions that text styles alias; `line_height_dimension` accepts them. The blur type models layer and background blur effects, such as Figma's blur effect styles.
+
+`ValueExtensions::all()` turns every value extension on. Extensions reach a runtime through `RuntimeOptions`, which also carries the [limits](./limits.md#runtime-limits): `DtcgRuntime::with_options` and `from_json_with_options`. `DtcgRuntime::options()` returns them.
 
 ```rust
 use dxn_dtcg::{BLUR_TYPE, DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
@@ -152,7 +154,7 @@ const TOKENS: &str = r##"{
     }
   },
   "frost": {
-    "$type": "dev.rayx.blur",
+    "$type": "dxn.dtcg.blur",
     "$value": { "kind": "background", "radius": { "value": 20, "unit": "px" } }
   }
 }"##;
@@ -165,24 +167,24 @@ fn main() -> Result<(), DtcgError> {
         "token `body` in `tokens.json`: reference type mismatch: expected number, found dimension"
     );
 
-    // The RayX profile accepts both extensions.
-    let rayx = DtcgRuntime::from_json_with_options(
+    // With every value extension on, both shapes are accepted.
+    let extended = DtcgRuntime::from_json_with_options(
         "tokens.json",
         TOKENS,
-        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+        RuntimeOptions::default().with_extensions(ValueExtensions::all()),
     )?;
-    let tokens = rayx.resolve(&[])?.ready().unwrap();
+    let tokens = extended.resolve(&[])?.ready().unwrap();
     assert_eq!(tokens.get("body").unwrap().value["lineHeight"]["value"], 24);
     assert_eq!(tokens.get("frost").unwrap().token_type.as_deref(), Some(BLUR_TYPE));
     Ok(())
 }
 ```
 
-Each flag is independent: `ValueExtensions::default().with_line_height_dimension(true)` accepts dimension line heights but not the blur type. Other `dev.rayx.*` names are never recognized.
+Each flag is independent: `ValueExtensions::default().with_line_height_dimension(true)` accepts dimension line heights but not the blur type. Other `dxn.dtcg.*` names are never recognized.
 
 ## Unsupported types
 
-A token must end up with one of the 13 types (or `dev.rayx.blur` with the extension). Everything else fails with ``unsupported DTCG type `x` for final 2025.10``: the pre-2025 `string` type (use `fontFamily` for font names), custom reverse-DNS types, and misspellings (`colour`, `fontweight`; names are case-sensitive). To carry custom data, put it in `$extensions` and give the token a supported type.
+A token must end up with one of the 13 types (or `dxn.dtcg.blur` with the extension). Everything else fails with ``unsupported DTCG type `x` for final 2025.10``: the pre-2025 `string` type (use `fontFamily` for font names), custom reverse-DNS types, and misspellings (`colour`, `fontweight`; names are case-sensitive). To carry custom data, put it in `$extensions` and give the token a supported type.
 
 ## Validating values directly
 
@@ -202,7 +204,7 @@ fn main() {
         validate_value(BLUR_TYPE, &blur),
         Err(ValueValidationError::UnsupportedType(BLUR_TYPE.into()))
     );
-    assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::rayx()).is_ok());
+    assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::all()).is_ok());
 
     assert_eq!(
         validate_value("dimension", &json!({ "value": 4, "unit": "em" })),
@@ -230,7 +232,7 @@ fn main() {
 | `shadow` | `Shadow(Vec<ShadowLayer>)` | a single object is one layer; `inset` defaults to `false` |
 | `gradient` | `Gradient(Vec<GradientStop>)` | positions clamped to [0, 1] |
 | `typography` | `Typography { font_family, font_size, font_weight, letter_spacing, line_height }` | `LineHeight::Multiplier(f64)`, or `LineHeight::Dimension` with the extension |
-| `dev.rayx.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}` |
+| `dxn.dtcg.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}` |
 
 ```rust
 use dxn_dtcg::values::{

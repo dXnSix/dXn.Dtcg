@@ -22,8 +22,6 @@ The entry point: a document catalog, a root id, `RuntimeOptions` and a `TypeRegi
 | `fn with_options(options: RuntimeOptions) -> Self` | An empty runtime with the given limits and value extensions |
 | `fn from_json(resource_id, json) -> Result<Self, DtcgError>` | One document, which is also the root |
 | `fn from_json_with_options(resource_id, json, options) -> Result<Self, DtcgError>` | `from_json` with `options` |
-| `fn from_envelope(resource_id, json: &str) -> Result<(Self, ResolverEnvelope), DtcgError>` | Root is the resolver inside a `.tokeneditor` envelope |
-| `fn from_envelope_with_options(resource_id, json, options) -> Result<(Self, ResolverEnvelope), DtcgError>` | `from_envelope` with `options` |
 
 `resource_id` is `impl AsRef<str>` and `json` is `impl Into<Arc<str>>` (`&str`, `String` and `Arc<str>` work).
 
@@ -46,7 +44,6 @@ Options are fixed at construction.
 | `fn provide_requested_json(&mut self, request: &DocumentRequest, json) -> Result<(), DtcgError>` | `provide_json` for `request.resource_id` |
 | `fn provide_json_batch(&mut self, documents: impl IntoIterator<Item = (Id, Json)>) -> Result<(), DtcgError>` | Inserts several documents atomically as one revision |
 | `fn replace_json(&mut self, resource_id, json) -> Result<(), DtcgError>` | Replaces an existing document |
-| `fn replace_envelope(&mut self, resource_id, json: &str) -> Result<ResolverEnvelope, DtcgError>` | Re-parses an envelope and replaces the stored resolver of an existing document |
 | `fn remove_document(&mut self, resource_id) -> Result<(), DtcgError>` | Removes an existing document |
 | `fn contains_document(&self, resource_id) -> Result<bool, DtcgError>` | Whether a document is present; `Err` only for an invalid id |
 | `fn catalog_revision(&self) -> u64` | Goes up on every successful mutation |
@@ -138,7 +135,7 @@ source: ResourceId                 document of the winning definition
 |---|---|
 | `RuntimeOptions` (`#[non_exhaustive]`, `Default`) | `limits: RuntimeLimits`, `extensions: ValueExtensions`; `with_limits(..)`, `with_extensions(..)` |
 | `RuntimeLimits` (`#[non_exhaustive]`, `Default`) | `max_documents` (256), `max_reference_depth` (64), `max_alias_depth` (64), `max_value_nodes` (4,000,000), `max_tokens` (100,000); `with_max_*` setters. See [Limits](./limits.md) |
-| `ValueExtensions` (`#[non_exhaustive]`, `Default`) | `line_height_dimension: bool`, `rayx_blur: bool` (both `false`); `rayx()` turns both on; `with_line_height_dimension(bool)`, `with_rayx_blur(bool)` |
+| `ValueExtensions` (`#[non_exhaustive]`, `Default`) | `line_height_dimension: bool`, `blur: bool` (both `false`); `all()` turns every value extension on; `with_line_height_dimension(bool)`, `with_blur(bool)` |
 
 ## Documents and references
 
@@ -147,7 +144,6 @@ source: ResourceId                 document of the winning definition
 | `ResourceId` (`Clone`, `Eq`, `Ord`, `Hash`, `Display`) | `parse(value) -> Result<Self, DtcgError>`, `resolve(&self, value) -> Result<DocumentReference, DtcgError>`, `as_str() -> &str` |
 | `DocumentReference` | `resource_id() -> &ResourceId`, `fragment() -> Option<&str>` (without `#`, as written), `original() -> &str` |
 | `DocumentCatalog` (`Clone`, `Default`) | `new()`, `len()`, `is_empty()` only; a runtime's catalog is managed through `DtcgRuntime` |
-| `ResolverEnvelope` (`Clone`, `Debug`) | `parse(resource: &ResourceId, json: &str)`, `name() -> Option<&str>`, `resolver_json() -> &Arc<str>` |
 | `LocalReferencePolicy` | `check(resource: &ResourceId, reference: &str) -> Result<(), DtcgError>`, `check_resolver(resource, &Value) -> Result<(), DtcgError>` |
 
 ## Modifiers and selections
@@ -179,7 +175,7 @@ fn join_token_path(root: &str, path: &str) -> String
 ```rust
 fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValidationError>
 fn validate_value_with(token_type: &str, value: &Value, extensions: &ValueExtensions) -> Result<(), ValueValidationError>
-const BLUR_TYPE: &str = "dev.rayx.blur"
+const BLUR_TYPE: &str = "dxn.dtcg.blur"
 enum ValueValidationError { UnsupportedType(String), InvalidValue(String) }   // non_exhaustive, std::error::Error
 ```
 

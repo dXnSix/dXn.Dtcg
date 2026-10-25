@@ -231,8 +231,8 @@ fn main() -> Result<(), DtcgError> {
 ```
 
 `$type` must be a string. Any type other than the 13 DTCG 2025.10 types fails during validation,
-including the legacy `string` type and custom reverse-DNS types. The RayX extension type
-`dev.rayx.blur` is accepted only by a runtime created with it. See [Value types](05-value-types.md).
+including the legacy `string` type and custom reverse-DNS types. The extension type
+`dxn.dtcg.blur` is accepted only by a runtime created with it. See [Value types](05-value-types.md).
 
 ## Root tokens: `$root`
 

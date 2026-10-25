@@ -85,10 +85,9 @@ a release tag, never on a branch or a path. `dxn_dtcg` re-exports the derive mac
 not depend on `dxn_dtcg_derive` directly. The one optional feature, `diagnostics`, adds
 redacted error diagnostics and resolution counters for test harnesses.
 
-Releases up to `v1.0.0` were published as `dtcg_runtime` and `dtcg_runtime_derive` from
-`rayx-ui/RayX.Dtcg`. From `v1.1.0` they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`:
-rename the dependency and replace `dtcg_runtime::` paths with `dxn_dtcg::`; the API is otherwise
-unchanged.
+Releases up to `v1.0.0` were published as `dtcg_runtime` and `dtcg_runtime_derive`. From `v1.1.0`
+they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`: rename the dependency and replace
+`dtcg_runtime::` paths with `dxn_dtcg::`; the API is otherwise unchanged.
 
 ## Examples
 
@@ -374,7 +373,7 @@ The full technical documentation is in [`docs/`](docs/README.md):
    metadata, export
 4. [Aliases and references](docs/04-aliases-and-references.md): curly aliases, where they may
    appear, JSON Pointers, type determination
-5. [Value types](docs/05-value-types.md): the 13 DTCG types, strict validation, RayX extensions,
+5. [Value types](docs/05-value-types.md): the 13 DTCG types, strict validation, value extensions,
    typed values
 6. [Resolvers and modifiers](docs/06-resolvers-and-modifiers.md): sets, contexts, selections
 7. [Document loading](docs/07-document-loading.md): the catalog, resource ids, lazy loading
@@ -386,37 +385,35 @@ The full technical documentation is in [`docs/`](docs/README.md):
 13. [API reference](docs/13-api-reference.md)
 14. [Architecture and contributing](docs/14-architecture-and-contributing.md)
 
-## RayX extensions
+## Value extensions
 
-The crate is UI-neutral, but it supports a few additions used by the
-[RayX](https://github.com/rayx-ui) UI toolkit: the `dev.rayx.blur` value type, typography
-`lineHeight` given as a dimension, and the Token Editor's `.tokeneditor` project envelope.
-
-Validation is strict DTCG 2025.10 by default. The two value extensions are opt-in, so other users
-never see them; RayX and the RayX Token Editor enable them when they create the runtime:
+Validation is strict DTCG 2025.10 by default. Two value shapes beyond the specification are opt-in:
+the `dxn.dtcg.blur` type for layer and background blur effects, and typography `lineHeight` given as
+a dimension, the form design tools commonly export. A runtime accepts them only when it is created
+with them:
 
 ```rust
 use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
 
 fn main() -> Result<(), DtcgError> {
-    let json = r#"{ "frost": { "$type": "dev.rayx.blur",
+    let json = r#"{ "frost": { "$type": "dxn.dtcg.blur",
                      "$value": { "kind": "background", "radius": { "value": 20, "unit": "px" } } } }"#;
 
-    // Strict by default: `dev.rayx.blur` is an unsupported type.
+    // Strict by default: `dxn.dtcg.blur` is an unsupported type.
     assert!(DtcgRuntime::from_json("tokens.json", json)?.resolve(&[]).is_err());
 
     let runtime = DtcgRuntime::from_json_with_options(
         "tokens.json",
         json,
-        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+        RuntimeOptions::default().with_extensions(ValueExtensions::all()),
     )?;
     assert!(runtime.resolve(&[])?.is_ready());
     Ok(())
 }
 ```
 
-See [value types](docs/05-value-types.md#strict-values-and-the-rayx-extensions) and
-[conformance](docs/12-conformance.md#strict-by-default-rayx-extensions-on-request).
+See [value types](docs/05-value-types.md#strict-values-and-the-value-extensions) and
+[conformance](docs/12-conformance.md#strict-by-default-value-extensions-on-request).
 
 ## Development
 

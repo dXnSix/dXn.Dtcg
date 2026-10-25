@@ -2,8 +2,8 @@ use std::{fmt, sync::Arc};
 
 use crate::{
     AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, ModifierAxis,
-    Resolution, ResolvedTokens, ResolverEnvelope, ResourceId, RuntimeLimits, RuntimeOptions,
-    SourceOccurrence, TypeRegistry,
+    Resolution, ResolvedTokens, ResourceId, RuntimeLimits, RuntimeOptions, SourceOccurrence,
+    TypeRegistry,
     catalog::parse_document,
     resolver, selection,
     source_discovery::{self, required_root},
@@ -44,7 +44,7 @@ impl DtcgRuntime {
     }
 
     /// Creates an empty runtime with `options`, for example
-    /// `RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`.
+    /// `RuntimeOptions::default().with_extensions(ValueExtensions::all())`.
     pub fn with_options(options: RuntimeOptions) -> Self {
         Self {
             catalog: DocumentCatalog::default(),
@@ -83,48 +83,6 @@ impl DtcgRuntime {
         runtime.provide_json(resource_id.as_ref(), json)?;
         runtime.root = Some(ResourceId::parse(resource_id)?);
         Ok(runtime)
-    }
-
-    /// Creates a runtime whose root is the resolver inside a `.tokeneditor`
-    /// envelope (see [`ResolverEnvelope`]); referenced documents resolve
-    /// against the envelope's resource id.
-    pub fn from_envelope(
-        resource_id: impl AsRef<str>,
-        json: &str,
-    ) -> Result<(Self, ResolverEnvelope), DtcgError> {
-        Self::from_envelope_with_options(resource_id, json, RuntimeOptions::default())
-    }
-
-    /// Like [`DtcgRuntime::from_envelope`], with `options`.
-    pub fn from_envelope_with_options(
-        resource_id: impl AsRef<str>,
-        json: &str,
-        options: RuntimeOptions,
-    ) -> Result<(Self, ResolverEnvelope), DtcgError> {
-        let resource = ResourceId::parse(resource_id.as_ref())?;
-        let envelope = ResolverEnvelope::parse(&resource, json)?;
-        let runtime = Self::from_json_with_options(
-            resource.as_str(),
-            envelope.resolver_json().clone(),
-            options,
-        )?;
-        Ok((runtime, envelope))
-    }
-
-    /// Re-parses a `.tokeneditor` envelope with the same checks as
-    /// [`DtcgRuntime::from_envelope`] and replaces the stored resolver of the
-    /// already-provided document `resource_id`. Later resolutions use the new
-    /// resolver. An invalid envelope leaves the catalog unchanged.
-    pub fn replace_envelope(
-        &mut self,
-        resource_id: impl AsRef<str>,
-        json: &str,
-    ) -> Result<ResolverEnvelope, DtcgError> {
-        let resource = ResourceId::parse(resource_id.as_ref())?;
-        let envelope = ResolverEnvelope::parse(&resource, json)?;
-        self.catalog
-            .replace(resource, envelope.resolver_json().clone())?;
-        Ok(envelope)
     }
 
     pub fn provide_json(

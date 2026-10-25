@@ -2,8 +2,8 @@ use serde_json::Value;
 
 use crate::{DtcgError, ResourceId};
 
-/// The document-reference policy shared by RayX themes and the Token Editor: a
-/// resolver may only reference relative local documents. Absolute paths,
+/// An opt-in document-reference policy for hosts that load documents from a
+/// local tree: a resolver may only reference relative local documents. Absolute paths,
 /// backslashes and URI schemes are rejected before any document is requested.
 pub struct LocalReferencePolicy;
 

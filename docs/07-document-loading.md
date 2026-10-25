@@ -2,8 +2,8 @@
 
 `dxn_dtcg` performs no I/O. Documents enter the runtime as strings, under logical names, and
 the runtime tells you which ones it still needs. This chapter covers the catalog, resource ids and
-fragments, the request/provide protocol, loader patterns, limits, caching, path safety and Token
-Editor envelopes.
+fragments, the request/provide protocol, loader patterns, limits, caching, path safety and the
+local reference policy.
 
 - [The catalog](#the-catalog)
 - [Resource ids](#resource-ids)
@@ -14,7 +14,6 @@ Editor envelopes.
 - [Limits](#limits)
 - [Caching and sharing](#caching-and-sharing)
 - [Path safety](#path-safety)
-- [Token Editor envelopes](#token-editor-envelopes)
 - [`LocalReferencePolicy`](#localreferencepolicy)
 
 ## The catalog
@@ -27,7 +26,7 @@ revision counter and the id of the root document.
   accepted and reported when a resolution reaches it.
 - **On resolve**, the documents involved are parsed and processed from their text. Nothing parsed
   is kept between calls.
-- **The root** is the document that resolution starts from. `from_json` and `from_envelope` set it;
+- **The root** is the document that resolution starts from. `from_json` sets it;
   otherwise call `set_root`. The root does not have to be in the catalog yet; if it is not, the first
   `resolve` requests it.
 
@@ -380,8 +379,6 @@ fn main() -> Result<(), DtcgError> {
 |---|---|---|
 | `DtcgRuntime::default()` / `with_limits(limits)` / `with_options(options)` | An empty runtime with no root; see [limits](#limits) | 0 |
 | `DtcgRuntime::from_json(id, json)` / `from_json_with_options(id, json, options)` | An empty runtime, then `provide_json(id, json)` and `set_root(id)` | 1 |
-| `DtcgRuntime::from_envelope(id, json)` / `from_envelope_with_options(id, json, options)` | See [Token Editor envelopes](#token-editor-envelopes) | 1 |
-| `replace_envelope(id, json)` | Replaces the resolver stored under `id` with the one in a new envelope | +1 |
 | `set_root(id)` | Names the root document. It need not be provided yet. | unchanged |
 | `provide_json(id, json)` | Inserts the document, replacing any previous text for `id` | +1 |
 | `provide_requested_json(&request, json)` | `provide_json` keyed by `request.resource_id` | +1 |
@@ -393,7 +390,7 @@ fn main() -> Result<(), DtcgError> {
 | `catalog_revision()` | The current revision (`u64`) | n/a |
 
 **Atomicity.** A mutation that fails, because of an invalid id, malformed JSON, a duplicate in a
-batch, an unknown document or an invalid envelope, changes nothing: neither the documents nor the
+batch or an unknown document, changes nothing: neither the documents nor the
 revision. The revision increases on every successful mutation, even if the new text is identical to
 the old.
 
@@ -447,10 +444,10 @@ fn main() -> Result<(), DtcgError> {
     // Limits and value extensions together.
     let options = RuntimeOptions::default()
         .with_limits(RuntimeLimits::default().with_max_alias_depth(16))
-        .with_extensions(ValueExtensions::rayx());
+        .with_extensions(ValueExtensions::all());
     let runtime = DtcgRuntime::with_options(options);
     assert_eq!(runtime.limits().max_alias_depth, 16);
-    assert!(runtime.options().extensions.rayx_blur);
+    assert!(runtime.options().extensions.blur);
     Ok(())
 }
 ```
@@ -543,90 +540,10 @@ A loader that reads files should still check each request:
 
 `RuntimeLimits` bounds the work a hostile document set can cause; see [limits](#limits).
 
-## Token Editor envelopes
-
-The RayX Token Editor saves projects as `.tokeneditor` files: a JSON envelope whose `data` member is
-a 2025.10 resolver. `DtcgRuntime::from_envelope` unwraps the envelope, checks it, and makes the
-resolver the root, **under the envelope's own resource id**, so relative references resolve next to
-the project file.
-
-```rust
-use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
-
-fn main() -> Result<(), DtcgError> {
-    let (runtime, envelope) = DtcgRuntime::from_envelope(
-        "projects/acme.tokeneditor",
-        r##"{
-          "data": {
-            "version": "2025.10",
-            "name": "Acme",
-            "sets": { "base": { "sources": [{ "$ref": "tokens/base.json" }] } },
-            "resolutionOrder": [{ "$ref": "#/sets/base" }]
-          }
-        }"##,
-    )?;
-    assert_eq!(envelope.name(), Some("Acme"));
-
-    let Resolution::Missing(requests) = runtime.resolve(&[])? else { unreachable!() };
-    assert_eq!(requests[0].resource_id.as_str(), "projects/tokens/base.json");
-    Ok(())
-}
-```
-
-`ResolverEnvelope::parse` (and so `from_envelope`) requires:
-
-- an object `data` member;
-- `data.version` equal to `"2025.10"`;
-- every `$ref` in `data.sets.*.sources` and `data.modifiers.*.contexts.*` to pass
-  `LocalReferencePolicy::check`;
-- `data` to be a valid resolver, with the same
-  [structure rules](06-resolvers-and-modifiers.md#resolver-structure) as any other: only allowed
-  members, a non-empty `resolutionOrder` and at least two contexts per modifier.
-
-Failures are `DtcgError::InvalidEnvelope` (no object `data`, wrong version),
-`DtcgError::InvalidReference` (reference policy) or `DtcgError::InvalidDocument` (resolver
-structure). `envelope.name()` returns `data.name`, and `envelope.resolver_json()` the resolver as a
-JSON string.
-
-When the project file changes, `replace_envelope(id, json)` parses the new envelope with the same
-checks and replaces the resolver stored under `id`, which must already be in the catalog
-(`UnknownDocument` otherwise). Later resolutions use the new resolver; an invalid envelope leaves
-the catalog unchanged.
-
-```rust
-use dxn_dtcg::{DtcgError, DtcgRuntime};
-
-fn envelope(gap: u32) -> String {
-    format!(
-        r#"{{ "data": {{
-          "version": "2025.10",
-          "name": "Acme",
-          "resolutionOrder": [{{ "type": "set", "name": "base", "sources": [
-            {{ "gap": {{ "$type": "number", "$value": {gap} }} }}
-          ] }}]
-        }} }}"#
-    )
-}
-
-fn main() -> Result<(), DtcgError> {
-    let (mut runtime, _) = DtcgRuntime::from_envelope("acme.tokeneditor", &envelope(8))?;
-    runtime.replace_envelope("acme.tokeneditor", &envelope(12))?;
-    assert_eq!(runtime.resolve(&[])?.ready().unwrap().get("gap").unwrap().value, 12);
-
-    // The resolver inside an envelope follows the resolver structure rules.
-    let invalid = r#"{ "data": { "version": "2025.10", "resolutionOrder": [] } }"#;
-    assert!(matches!(
-        runtime.replace_envelope("acme.tokeneditor", invalid),
-        Err(DtcgError::InvalidDocument { .. })
-    ));
-    assert_eq!(runtime.resolve(&[])?.ready().unwrap().get("gap").unwrap().value, 12);
-    Ok(())
-}
-```
-
 ## `LocalReferencePolicy`
 
-The relative-local reference rule shared by RayX themes and the Token Editor.
+An opt-in document-reference policy for hosts that load documents from a local tree: a resolver may
+only reference relative local documents.
 
 - `LocalReferencePolicy::check(resource, reference)` validates one authored reference. It rejects:
   an empty reference; a path that starts with `/`; a path containing `\`; and a path that starts
@@ -638,4 +555,4 @@ The relative-local reference rule shared by RayX themes and the Token Editor.
   `resolutionOrder` and nested resolvers are not walked; check those when you load them.
 
 `from_json` and `resolve` do not apply the policy, since many callers load from sources where it
-does not matter. Apply it in your loader, or use `from_envelope`.
+does not matter. Apply it in your loader.

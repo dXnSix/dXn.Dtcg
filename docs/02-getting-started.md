@@ -97,9 +97,9 @@ The `button` tokens have no `$type` of their own. A token whose whole value is a
 type of its target. `token.typed(&runtime.options().extensions)` converts a value into a typed
 Rust model such as `values::Dimension`; see [Value types](05-value-types.md#reading-values-in-rust).
 
-Validation is strict DTCG 2025.10 by default. RayX applications, which use a dimension
-typography `lineHeight` and the `dev.rayx.blur` type, opt in to those extensions when they create
-the runtime:
+Validation is strict DTCG 2025.10 by default. Applications that use a dimension typography
+`lineHeight` or the `dxn.dtcg.blur` type opt in to those value extensions when they create the
+runtime:
 
 ```rust
 use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
@@ -107,9 +107,9 @@ use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, ValueExtensions};
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json_with_options(
         "tokens.json",
-        r#"{ "frost": { "$type": "dev.rayx.blur",
+        r#"{ "frost": { "$type": "dxn.dtcg.blur",
              "$value": { "kind": "layer", "radius": { "value": 8, "unit": "px" } } } }"#,
-        RuntimeOptions::default().with_extensions(ValueExtensions::rayx()),
+        RuntimeOptions::default().with_extensions(ValueExtensions::all()),
     )?;
     assert!(runtime.resolve(&[])?.is_ready());
     Ok(())

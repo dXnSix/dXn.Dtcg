@@ -14,10 +14,9 @@ The crate has one entry point, `DtcgRuntime`, and a handful of methods that diff
 | One token document, or one resolver with inline sources, as a string | `DtcgRuntime::from_json(id, json)` |
 | A resolver that references other files | `DtcgRuntime::default()` then `set_root(id)`, and load on demand |
 | All documents up front (embedded assets, tests) | `from_json` for the root, then `provide_json_batch([...])` |
-| A RayX Token Editor `.tokeneditor` project file | `DtcgRuntime::from_envelope(id, json)` |
-| Custom limits, or the RayX value extensions | the `*_with_options` variants or `DtcgRuntime::with_options(options)` |
+| Custom limits, or the value extensions | the `*_with_options` variants or `DtcgRuntime::with_options(options)` |
 
-Options are fixed at construction. `default()`, `from_json` and `from_envelope` use default limits and strict DTCG 2025.10 values.
+Options are fixed at construction. `default()` and `from_json` use default limits and strict DTCG 2025.10 values.
 
 ## Getting tokens out
 

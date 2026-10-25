@@ -5,7 +5,7 @@
 //! color `alpha` is `1` (Color §4.1), gradient stop positions are clamped to
 //! `[0, 1]` (Format §9.7), font-weight keywords map to numbers (Format §8.4),
 //! and a single shadow object is one layer whose `inset` defaults to `false`.
-//! [`Blur`] and the dimension form of [`LineHeight`] model the RayX value
+//! [`Blur`] and the dimension form of [`LineHeight`] model the value
 //! extensions enabled by [`ValueExtensions`].
 //!
 //! ```
@@ -283,14 +283,14 @@ pub struct Typography {
     pub line_height: LineHeight,
 }
 
-/// The kind of a RayX blur effect.
+/// The kind of a blur effect.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum BlurKind {
     Layer,
     Background,
 }
 
-/// A RayX `dev.rayx.blur` value ([`ValueExtensions::rayx_blur`]).
+/// A `dxn.dtcg.blur` value ([`ValueExtensions::blur`]).
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Blur {
     pub kind: BlurKind,
@@ -366,13 +366,13 @@ fn projection(token: &ResolvedToken, message: String) -> DtcgError {
 }
 
 /// Implements `FromDtcgValue` for a model type: the value must have the
-/// shape of `token_type` (the RayX extension shapes are accepted, because the
+/// shape of `token_type` (the extension shapes are accepted, because the
 /// runtime already validated the value with its own extensions).
 macro_rules! from_dtcg_value {
     ($model:ty, $token_type:expr, $parse:expr) => {
         impl FromDtcgValue for $model {
             fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError> {
-                validate_value_with($token_type, &token.value, &ValueExtensions::rayx())
+                validate_value_with($token_type, &token.value, &ValueExtensions::all())
                     .map_err(|_| projection(token, format!("expected a {} value", $token_type)))?;
                 Ok($parse(&token.value))
             }
@@ -407,7 +407,7 @@ impl FromDtcgValue for LineHeight {
 
 impl FromDtcgValue for TypedValue {
     fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError> {
-        token.typed(&ValueExtensions::rayx())
+        token.typed(&ValueExtensions::all())
     }
 }
 

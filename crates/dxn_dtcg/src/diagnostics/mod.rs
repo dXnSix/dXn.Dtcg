@@ -22,7 +22,6 @@ pub enum DtcgDiagnosticCode {
     /// [`DtcgError::UnresolvedReference`]: a missing alias or `$extends` target.
     UnresolvedReference,
     Projection,
-    Envelope,
     Reference,
     Selection,
     /// [`DtcgError::InvalidInput`]: malformed resolver inputs.
@@ -120,12 +119,6 @@ impl DtcgDiagnostic {
                 DtcgDiagnosticCode::Projection,
                 None,
                 Some(path.clone()),
-                message.clone(),
-            ),
-            DtcgError::InvalidEnvelope { resource, message } => (
-                DtcgDiagnosticCode::Envelope,
-                Some(resource.clone()),
-                None,
                 message.clone(),
             ),
             DtcgError::InvalidReference {

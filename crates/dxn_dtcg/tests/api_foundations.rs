@@ -173,56 +173,6 @@ fn source_occurrences_name_their_document() {
     assert_eq!(occurrences[0].resource().as_str(), "base.json");
 }
 
-fn envelope(value: i64) -> String {
-    json!({
-        "data": {
-            "name": format!("project-{value}"),
-            "version": "2025.10",
-            "resolutionOrder": [{"type": "set", "name": "base", "sources": [{"x": number(value)}]}]
-        }
-    })
-    .to_string()
-}
-
-#[test]
-fn replace_envelope_swaps_the_root_resolver() {
-    let (mut runtime, first) =
-        DtcgRuntime::from_envelope("project.tokeneditor", &envelope(1)).unwrap();
-    assert_eq!(first.name(), Some("project-1"));
-    let before = runtime.resolve(&[]).unwrap().ready().unwrap();
-    assert_eq!(before.get("x").unwrap().value, json!(1));
-
-    let second = runtime
-        .replace_envelope("project.tokeneditor", &envelope(2))
-        .unwrap();
-    assert_eq!(second.name(), Some("project-2"));
-    let after = runtime.resolve(&[]).unwrap().ready().unwrap();
-    assert_eq!(after.get("x").unwrap().value, json!(2));
-
-    let revision = runtime.catalog_revision();
-    let invalid = runtime.replace_envelope(
-        "project.tokeneditor",
-        &json!({"data": {"version": "2024", "resolutionOrder": []}}).to_string(),
-    );
-    assert!(matches!(invalid, Err(DtcgError::InvalidEnvelope { .. })));
-    assert_eq!(runtime.catalog_revision(), revision);
-    assert_eq!(
-        runtime
-            .resolve(&[])
-            .unwrap()
-            .ready()
-            .unwrap()
-            .get("x")
-            .unwrap()
-            .value,
-        json!(2)
-    );
-    assert!(matches!(
-        runtime.replace_envelope("other.tokeneditor", &envelope(3)),
-        Err(DtcgError::UnknownDocument(_))
-    ));
-}
-
 #[test]
 fn fingerprints_and_equality_ignore_object_member_order() {
     let resolve = |document: &str| {

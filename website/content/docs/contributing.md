@@ -51,7 +51,7 @@ All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the p
 | `resolver.rs` | Result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected` |
 | `value.rs`, `values.rs` | `validate_value(_with)`, `BLUR_TYPE`; the public typed models, `TypedValue`, `ResolvedToken::typed` |
 | `dtcg_tokens.rs`, `dtcg_component_tokens.rs`, `from_dtcg_value.rs`, `type_registry.rs` | Projection traits and built-in conversions |
-| `envelope.rs`, `local_reference.rs`, `affected_resolution.rs`, `error.rs`, `diagnostics/mod.rs` | `ResolverEnvelope`, `LocalReferencePolicy`, `AffectedResolution`, `DtcgError`, `DtcgDiagnostic` (feature `diagnostics`) |
+| `local_reference.rs`, `affected_resolution.rs`, `error.rs`, `diagnostics/mod.rs` | `LocalReferencePolicy`, `AffectedResolution`, `DtcgError`, `DtcgDiagnostic` (feature `diagnostics`) |
 
 `dxn_dtcg_derive/src/lib.rs` parses `#[dtcg(...)]` strictly with `syn` and emits a `DtcgTokens` implementation (and `DtcgComponentTokens`). The generated code refers to `::dxn_dtcg::...` and `::core::...` paths only, which is why applications use the macros through `dxn_dtcg`.
 
@@ -68,7 +68,7 @@ A resolution runs four stages: **discover** the active sources, **fold** them in
 
 These come from the design decisions in `.agentx/memory/decisions/`. Changes must keep them.
 
-- **I/O-free and UI-neutral.** No dependency on RayX or any UI toolkit, and no file system, network or async runtime. Loading belongs to the caller through `Resolution::Missing`.
+- **I/O-free and UI-neutral.** No dependency on any UI toolkit, and no file system, network or async runtime. Loading belongs to the caller through `Resolution::Missing`.
 - **Strict by default.** Every value shape beyond DTCG 2025.10 is a `ValueExtensions` flag, off by default, with a pinned test group.
 - **One merged structure; resolve after merging.** Types, `$extends`, deprecation, pointers and aliases are evaluated only on the complete merge of the active selection. Tokens are replaced whole; composite values are never merged.
 - **One owner per rule.** Resolver structure lives in `resolver_definition.rs`, pointer syntax in `json_pointer.rs`, alias positions in `reference_positions.rs`, so every API agrees.
@@ -118,9 +118,9 @@ Each feature has its own integration-test file, selectable with `--test <name>`.
 | `official_test_suite` | The official corpus (250 fixtures, `KNOWN_GAPS` ratchet), line endings, `$schema` |
 | `vertical_slice`, `api_foundations` | End to end (missing documents, resolve, project); limit setters, redacted `Debug`, comparable errors, `Resolution` helpers |
 | `dtcg_2025_10_conformance`, `format_structure`, `type_determination`, `reference_positions`, `merged_resolution`, `extensions_merge`, `token_metadata` | Format rules, types, alias positions, merging, metadata |
-| `document_export`, `typed_values`, `value_extensions`, `rayx_export_types` | `to_document`, the `values` models, strict defaults and extensions |
+| `document_export`, `typed_values`, `value_extensions`, `value_extension_types` | `to_document`, the `values` models, strict defaults and extensions |
 | `resolver_2025_10`, `resolver_document_validation`, `resolution_step_consistency`, `input_selection`, `alias_overlay` | Resolvers, inputs and aliases against the final set |
-| `bounded_expansion`, `bounded_references`, `lazy_catalog`, `resource_id_*` | Limits, hostile input, the missing-document protocol, id normalization |
+| `bounded_expansion`, `bounded_references`, `lazy_catalog`, `resource_id_*`, `local_reference_policy` | Limits, hostile input, the missing-document protocol, id normalization, `LocalReferencePolicy` |
 | `incremental_resolution`, `incremental_consistency` | Affected resolution, rollback, that every patched snapshot equals a full resolution |
 | `source_inspection`, `source_reference_bounds`, `source_reference_parity` | Inspection, previews, reference sites and their bounds |
 | `derive_projection`, `diagnostics` | Derives through the runtime crate; feature gating and redaction |

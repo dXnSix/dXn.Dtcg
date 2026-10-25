@@ -1,4 +1,4 @@
-use dxn_dtcg::{DtcgError, DtcgRuntime, ResolverEnvelope, ResourceId};
+use dxn_dtcg::{DtcgError, DtcgRuntime};
 use serde_json::{Value, json};
 
 fn two_contexts() -> Value {
@@ -114,7 +114,7 @@ fn an_empty_resolution_order_and_single_context_modifiers_are_rejected() {
 }
 
 #[test]
-fn nested_resolvers_and_envelopes_follow_the_same_rules() {
+fn nested_resolvers_follow_the_same_rules() {
     let mut nested = resolver();
     nested["sets"]["base"]["extra"] = json!(1);
     let mut runtime = DtcgRuntime::from_json(
@@ -134,20 +134,6 @@ fn nested_resolvers_and_envelopes_follow_the_same_rules() {
         Err(DtcgError::InvalidDocument { message, .. })
             if message == "unknown resolver member `extra` in set `base`"
     ));
-
-    let id = ResourceId::parse("project.tokeneditor").unwrap();
-    let mut data = resolver();
-    data["$extensions"] = json!({});
-    let error = ResolverEnvelope::parse(&id, &json!({"data": data}).to_string()).unwrap_err();
-    assert!(
-        matches!(&error, DtcgError::InvalidDocument { message, .. }
-            if message == "unknown resolver member `$extensions` in the resolver root"),
-        "{error:?}"
-    );
-    let mut empty = resolver();
-    empty["resolutionOrder"] = json!([]);
-    assert!(ResolverEnvelope::parse(&id, &json!({"data": empty}).to_string()).is_err());
-    assert!(ResolverEnvelope::parse(&id, &json!({"data": resolver()}).to_string()).is_ok());
 }
 
 #[test]

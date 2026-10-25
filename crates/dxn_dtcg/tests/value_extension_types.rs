@@ -1,12 +1,12 @@
-// Value shapes the RayX Figma export relies on beyond plain DTCG 2025.10: typography `lineHeight`
-// as a `dimension` (design-system line heights are px tokens aliased by text styles) and the
-// `dev.rayx.blur` extension type. Both are opt-in: these cases validate with
-// `ValueExtensions::rayx()`; `tests/value_extensions.rs` pins their rejection without it.
+// Value shapes beyond plain DTCG 2025.10: typography `lineHeight` as a `dimension` (design tools
+// commonly export line heights as px tokens aliased by text styles) and the `dxn.dtcg.blur`
+// extension type. Both are opt-in: these cases validate with `ValueExtensions::all()`;
+// `tests/value_extensions.rs` pins their rejection without it.
 use dxn_dtcg::{BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value_with};
 use serde_json::{Value, json};
 
 fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValidationError> {
-    validate_value_with(token_type, value, &ValueExtensions::rayx())
+    validate_value_with(token_type, value, &ValueExtensions::all())
 }
 
 fn typography(line_height: serde_json::Value) -> serde_json::Value {
@@ -73,5 +73,5 @@ fn blur_extension_type_accepts_layer_and_background_blurs() {
             "must reject {value}"
         );
     }
-    assert!(validate_value("dev.rayx.other", &json!(1)).is_err());
+    assert!(validate_value("dxn.dtcg.other", &json!(1)).is_err());
 }

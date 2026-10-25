@@ -6,20 +6,21 @@ use crate::RuntimeLimits;
 #[non_exhaustive]
 pub struct ValueExtensions {
     /// Typography `lineHeight` may be a `dimension`, and a `lineHeight` alias
-    /// may target a `dimension` token. RayX design-system line heights are px
-    /// tokens that text styles alias.
+    /// may target a `dimension` token: design tools commonly export line
+    /// heights as pixel dimensions that text styles alias.
     pub line_height_dimension: bool,
-    /// The RayX `dev.rayx.blur` type (`{ "kind": "layer" | "background",
-    /// "radius": <dimension> }`) for Figma blur effect styles.
-    pub rayx_blur: bool,
+    /// The `dxn.dtcg.blur` type (`{ "kind": "layer" | "background",
+    /// "radius": <dimension> }`) for layer and background blur effects, such
+    /// as Figma's blur effect styles.
+    pub blur: bool,
 }
 
 impl ValueExtensions {
-    /// The profile RayX and RayX.TokenEditor use: every RayX extension on.
-    pub fn rayx() -> Self {
+    /// Every value extension on.
+    pub fn all() -> Self {
         Self {
             line_height_dimension: true,
-            rayx_blur: true,
+            blur: true,
         }
     }
 
@@ -29,9 +30,9 @@ impl ValueExtensions {
         self
     }
 
-    /// Sets [`ValueExtensions::rayx_blur`].
-    pub fn with_rayx_blur(mut self, enabled: bool) -> Self {
-        self.rayx_blur = enabled;
+    /// Sets [`ValueExtensions::blur`].
+    pub fn with_blur(mut self, enabled: bool) -> Self {
+        self.blur = enabled;
         self
     }
 }

@@ -63,15 +63,15 @@ fn main() -> Result<(), DtcgError> {
     // Limits and value extensions together.
     let options = RuntimeOptions::default()
         .with_limits(RuntimeLimits::default().with_max_alias_depth(16))
-        .with_extensions(ValueExtensions::rayx());
+        .with_extensions(ValueExtensions::all());
     let runtime = DtcgRuntime::with_options(options);
     assert_eq!(runtime.limits().max_alias_depth, 16);
-    assert!(runtime.options().extensions.rayx_blur);
+    assert!(runtime.options().extensions.blur);
     Ok(())
 }
 ```
 
-`from_json` and `from_envelope` use the default limits; `from_json_with_options` and `from_envelope_with_options` take `RuntimeOptions`.
+`from_json` uses the default limits; `from_json_with_options` takes `RuntimeOptions`.
 
 :::tip Resolving untrusted documents
 On a server that resolves documents from users, lower the limits (documents, tokens, value nodes) to what your largest legitimate design system needs, load only through a loader that applies `LocalReferencePolicy` and a base-directory check ([path safety](./loading.md#path-safety)), and treat every `DtcgError` as a user-facing validation failure. Raise `max_documents` for systems assembled from many small sources.
@@ -121,7 +121,6 @@ fn main() {
 | `Token` | `Token` and `TokenType` | resource | token path | message |
 | `UnresolvedReference` | `UnresolvedReference` | resource | referring path | ``unresolved reference `<target>`: <message>`` |
 | `Projection` | `Projection` | none | token path | message |
-| `Envelope` | `InvalidEnvelope` | resource | none | message |
 | `Reference` | `InvalidReference` | resource | the reference | message |
 | `Selection` | `UnknownModifier`, `UnknownContext` | none | the modifier | the full `Display` text |
 | `InvalidInput` | `InvalidInput` | none | none | message |

@@ -480,7 +480,7 @@ fn main() -> Result<(), DtcgError> {
 
 ## Build an editor feature
 
-Token editors and linters combine three groups of APIs, each with its own page.
+Editors and linters for token files combine three groups of APIs, each with its own page.
 
 | Feature | APIs | Page |
 |---|---|---|

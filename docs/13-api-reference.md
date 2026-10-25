@@ -7,7 +7,7 @@ Signatures are shown in simplified form, without `pub`.
 - [Runtime](#runtime): `DtcgRuntime`
 - [Results](#results): `Resolution`, `DocumentRequest`, `ResolvedTokens`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
 - [Configuration](#configuration): `RuntimeOptions`, `RuntimeLimits`, `ValueExtensions`
-- [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `ResolverEnvelope`, `LocalReferencePolicy`
+- [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
 - [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `selection_from_json`, `selection_refs`
 - [Projection](#projection): `DtcgTokens`, `DtcgComponentTokens`, `FromDtcgValue`, `TypeRegistry`, `join_token_path`, derive macros
 - [Values](#values): `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, the `values` module
@@ -45,8 +45,6 @@ never document bodies.
 | `fn with_options(options: RuntimeOptions) -> Self` | An empty runtime with the given limits and value extensions |
 | `fn from_json(resource_id: impl AsRef<str>, json: impl Into<Arc<str>>) -> Result<Self, DtcgError>` | A runtime with default options and one document, which is also the root |
 | `fn from_json_with_options(resource_id: impl AsRef<str>, json: impl Into<Arc<str>>, options: RuntimeOptions) -> Result<Self, DtcgError>` | `from_json` with `options` |
-| `fn from_envelope(resource_id: impl AsRef<str>, json: &str) -> Result<(Self, ResolverEnvelope), DtcgError>` | A runtime with default options whose root is the resolver inside a `.tokeneditor` envelope, stored under `resource_id` |
-| `fn from_envelope_with_options(resource_id: impl AsRef<str>, json: &str, options: RuntimeOptions) -> Result<(Self, ResolverEnvelope), DtcgError>` | `from_envelope` with `options` |
 
 #### Configuration
 
@@ -67,7 +65,6 @@ Options are fixed at construction.
 | `fn provide_requested_json(&mut self, request: &DocumentRequest, json: impl Into<Arc<str>>) -> Result<(), DtcgError>` | `provide_json` for `request.resource_id` |
 | `fn provide_json_batch<I, Id, Json>(&mut self, documents: I) -> Result<(), DtcgError>` where `I: IntoIterator<Item = (Id, Json)>, Id: AsRef<str>, Json: Into<Arc<str>>` | Inserts several documents atomically, as one revision |
 | `fn replace_json(&mut self, resource_id: impl AsRef<str>, json: impl Into<Arc<str>>) -> Result<(), DtcgError>` | Replaces an existing document |
-| `fn replace_envelope(&mut self, resource_id: impl AsRef<str>, json: &str) -> Result<ResolverEnvelope, DtcgError>` | Re-parses a `.tokeneditor` envelope with the same checks as `from_envelope` and replaces the stored resolver of the existing document `resource_id`. `UnknownDocument` if it was never provided; an invalid envelope leaves the catalog unchanged. |
 | `fn remove_document(&mut self, resource_id: impl AsRef<str>) -> Result<(), DtcgError>` | Removes an existing document |
 | `fn contains_document(&self, resource_id: impl AsRef<str>) -> Result<bool, DtcgError>` | Whether a document is in the catalog. `Err` only for an invalid id. |
 | `fn catalog_revision(&self) -> u64` | A counter that goes up on every successful mutation |
@@ -276,7 +273,7 @@ impl RuntimeOptions {
 ```
 
 How a runtime bounds its work and validates values. All fields are public. Pass it to
-`DtcgRuntime::with_options`, `from_json_with_options` or `from_envelope_with_options`.
+`DtcgRuntime::with_options` or `from_json_with_options`.
 
 ### `RuntimeLimits`
 
@@ -312,25 +309,25 @@ limits](11-errors-limits-and-diagnostics.md#runtime-limits).
 #[non_exhaustive]
 struct ValueExtensions {
     line_height_dimension: bool, // typography lineHeight may be (or alias) a dimension
-    rayx_blur: bool,             // the dev.rayx.blur type
+    blur: bool,                  // the dxn.dtcg.blur type
 }
 
 impl ValueExtensions {
-    fn rayx() -> Self; // both on: the RayX and Token Editor profile
+    fn all() -> Self; // every value extension on
     fn with_line_height_dimension(self, enabled: bool) -> Self;
-    fn with_rayx_blur(self, enabled: bool) -> Self;
+    fn with_blur(self, enabled: bool) -> Self;
 }
 ```
 
-All fields are public and default to `false`. See [Strict by default, RayX extensions on
-request](12-conformance.md#strict-by-default-rayx-extensions-on-request).
+All fields are public and default to `false`. See [Strict by default, value extensions on
+request](12-conformance.md#strict-by-default-value-extensions-on-request).
 
 ```rust
 use dxn_dtcg::{DtcgRuntime, RuntimeLimits, RuntimeOptions, ValueExtensions};
 
 let options = RuntimeOptions::default()
     .with_limits(RuntimeLimits::default().with_max_tokens(10_000))
-    .with_extensions(ValueExtensions::default().with_rayx_blur(true));
+    .with_extensions(ValueExtensions::default().with_blur(true));
 let runtime = DtcgRuntime::with_options(options.clone());
 
 assert_eq!(runtime.options(), &options);
@@ -376,19 +373,6 @@ struct DocumentCatalog { /* … */ }
 
 `fn new() -> Self`, `fn len(&self) -> usize`, `fn is_empty(&self) -> bool`. The runtime's catalog is
 managed through `DtcgRuntime`. This type exposes no other public operations.
-
-### `ResolverEnvelope`
-
-```rust,ignore
-#[derive(Clone, Debug)]
-struct ResolverEnvelope { /* … */ }
-```
-
-| Signature | Description |
-|---|---|
-| `fn parse(resource: &ResourceId, json: &str) -> Result<Self, DtcgError>` | Parses `{ "data": <resolver> }`, checks the version, applies `LocalReferencePolicy::check_resolver` and validates the resolver structure |
-| `fn name(&self) -> Option<&str>` | `data.name` |
-| `fn resolver_json(&self) -> &Arc<str>` | The resolver as JSON text, to provide as the root |
 
 ### `LocalReferencePolicy`
 
@@ -482,7 +466,7 @@ the typed models of the [`values`](#the-values-module) module and `TypedValue`. 
 `DtcgError::Projection` naming the token path, with `expected string value`,
 `expected numeric value`, `expected boolean value`, or `expected a <type> value` for the models.
 `f32` also fails for a number outside the finite `f32` range
-(`expected numeric value within f32 range`). The models accept the RayX extension shapes, because
+(`expected numeric value within f32 range`). The models accept the value extension shapes, because
 the runtime has already validated the value with its own options.
 
 ### `TypeRegistry`
@@ -555,7 +539,7 @@ fn validate_value_with(
 
 `validate_value` checks a resolved value against one of the 13 DTCG 2025.10 types, strictly.
 `validate_value_with` also accepts the shapes `extensions` enables: a `dimension` typography
-`lineHeight`, and the `dev.rayx.blur` type.
+`lineHeight`, and the `dxn.dtcg.blur` type.
 
 ```rust
 use dxn_dtcg::{BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value, validate_value_with};
@@ -566,7 +550,7 @@ assert_eq!(
     validate_value(BLUR_TYPE, &blur),
     Err(ValueValidationError::UnsupportedType(BLUR_TYPE.into()))
 );
-assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::rayx()).is_ok());
+assert!(validate_value_with(BLUR_TYPE, &blur, &ValueExtensions::all()).is_ok());
 ```
 
 ### `ValueValidationError`
@@ -585,7 +569,7 @@ impl std::error::Error for ValueValidationError
 ### `BLUR_TYPE`
 
 ```rust,ignore
-const BLUR_TYPE: &str = "dev.rayx.blur";
+const BLUR_TYPE: &str = "dxn.dtcg.blur";
 ```
 
 ### The `values` module
@@ -613,7 +597,7 @@ specification.
 | `GradientStop { color: Color, position: f64 }` | `position` clamped to [0, 1] |
 | `Typography { font_family, font_size, font_weight, letter_spacing, line_height: LineHeight }` | |
 | `LineHeight` | `Multiplier(f64)`, or `Dimension(Dimension)` with the `line_height_dimension` extension |
-| `Blur { kind: BlurKind, radius: Dimension }` | `BlurKind::{Layer, Background}`; the `dev.rayx.blur` extension |
+| `Blur { kind: BlurKind, radius: Dimension }` | `BlurKind::{Layer, Background}`; the `dxn.dtcg.blur` extension |
 
 #### `TypedValue`
 
@@ -733,7 +717,6 @@ enum DtcgError {
     UnresolvedReference { resource: ResourceId, path: String, target: String, message: String },
     Projection { path: String, message: String },
     TokenType { resource: ResourceId, path: String, message: String },
-    InvalidEnvelope { resource: ResourceId, message: String },
     InvalidReference { resource: ResourceId, reference: String, message: String },
     InvalidInput { message: String },
     UnknownModifier { modifier: String, known: Vec<String> },
@@ -768,7 +751,7 @@ struct DtcgDiagnostic { /* … */ }
 enum DtcgDiagnosticCode {
     InvalidResourceId, InvalidPointer, InvalidJson, InvalidDocument, UnknownDocument,
     DuplicateDocument, LimitExceeded, DocumentCycle, Token, UnresolvedReference, Projection,
-    Envelope, Reference, Selection, InvalidInput,
+    Reference, Selection, InvalidInput,
 }
 ```
 

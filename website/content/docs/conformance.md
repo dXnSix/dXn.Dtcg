@@ -59,9 +59,9 @@ When sources disagree, the runtime follows them in this order: the published spe
 | Inputs (5) with defaults | Supported; names match case-insensitively |
 | Resolved output as a token document (8) | `ResolvedTokens::to_document()` |
 
-## Strict by default, RayX extensions on request
+## Strict by default, value extensions on request
 
-With default `RuntimeOptions`, values are validated strictly against 2025.10, and `validate_value` is always strict. Two RayX value shapes are opt-in through `ValueExtensions`: typography `lineHeight` as a `dimension` (or an alias to one), and the `dev.rayx.blur` type. `ValueExtensions::rayx()` turns both on. Two further RayX conveniences do not change how standard documents behave: the `.tokeneditor` envelope for Token Editor project files, and the opt-in `LocalReferencePolicy`. See [Value types](./value-types.md#strict-values-and-the-rayx-extensions) and [Loading documents](./loading.md#token-editor-envelopes).
+With default `RuntimeOptions`, values are validated strictly against 2025.10, and `validate_value` is always strict. Two value shapes beyond 2025.10 are opt-in through `ValueExtensions`: typography `lineHeight` as a `dimension` (or an alias to one), and the `dxn.dtcg.blur` type. `ValueExtensions::all()` turns both on. The opt-in `LocalReferencePolicy`, which limits a resolver to relative local documents, does not change how standard documents behave; a host applies it in its own loader. See [Value types](./value-types.md#strict-values-and-the-value-extensions) and [Loading documents](./loading.md#path-safety).
 
 ## Implementation-defined choices
 
@@ -116,6 +116,6 @@ Run one group with `cargo test -p dxn_dtcg --all-features --test <group>`.
 | `format_structure.rs`, `type_determination.rs`, `reference_positions.rs` | Structure rules, effective types, alias positions and target types |
 | `merged_resolution.rs`, `extensions_merge.rs` | Merging sources, `$extends` across sources, recursive `$extensions` merge |
 | `resolver_2025_10.rs`, `resolver_document_validation.rs`, `input_selection.rs` | Resolver version, members, steps, overrides, case-insensitive and nested inputs |
-| `value_extensions.rs`, `rayx_export_types.rs` | Strict values and the opt-in extensions |
+| `value_extensions.rs`, `value_extension_types.rs` | Strict values and the opt-in extensions |
 
 Next: [Platforms and versions](./platforms.md).

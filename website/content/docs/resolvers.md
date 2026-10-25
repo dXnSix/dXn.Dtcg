@@ -56,7 +56,7 @@ Only the members Resolver section 4 defines are allowed; anything else fails wit
 | An inline modifier step | `type`, `name`, `contexts`, `default`, `description`, `$extensions` |
 | A `$ref` step or source reference | `$ref` plus any other members, which are overrides |
 
-The root does not accept `$extensions` or `x-*` members. Put shared JSON under `$defs` and reach it with `{ "$ref": "#/$defs/motion" }`. The same rules apply to nested resolvers and to the `data` of a Token Editor envelope.
+The root does not accept `$extensions` or `x-*` members. Put shared JSON under `$defs` and reach it with `{ "$ref": "#/$defs/motion" }`. The same rules apply to nested resolvers.
 
 ## Sets
 

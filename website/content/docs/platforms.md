@@ -24,7 +24,7 @@ order: 190
 
 | Crate | Kind | Contents |
 |---|---|---|
-| `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, envelopes, diagnostics |
+| `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, diagnostics |
 | `dxn_dtcg_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` |
 
 `dxn_dtcg` depends on the derive crate and re-exports both macros, so applications depend only on `dxn_dtcg`.
@@ -48,10 +48,10 @@ dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "v1.1.0" }
 
 ## Versioning
 
-Both crates share one version, one tag `vX.Y.Z` and one `CHANGELOG.md`. The crates stay on 1.x: no commit is marked breaking, and a breaking change is released as a minor version whose changelog entry carries a `Migration:` line for each affected consumer. Plan for it accordingly and read the changelog when you move to a new tag. Types marked `#[non_exhaustive]` (including `DtcgError`) may gain variants and fields in minor releases.
+Both crates share one version, one tag `vX.Y.Z` and one `CHANGELOG.md`. The crates stay on 1.x: no commit is marked breaking, and a breaking change is released as a minor or patch version whose changelog entry carries a `Migration:` line for each affected audience, such as token documents or the Rust API. Plan for it accordingly and read the changelog when you move to a new tag. Types marked `#[non_exhaustive]` (including `DtcgError`) may gain variants and fields in minor releases.
 
 :::note Renamed in v1.1.0
-Releases up to v1.0.0 were published as `dtcg_runtime` and `dtcg_runtime_derive` from the `rayx-ui/RayX.Dtcg` repository. From v1.1.0 they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`: rename the dependency and replace `dtcg_runtime::` paths with `dxn_dtcg::`. The API is otherwise unchanged.
+Releases up to v1.0.0 were published as `dtcg_runtime` and `dtcg_runtime_derive`. From v1.1.0 they are `dxn_dtcg` and `dxn_dtcg_derive` in `dXnSix/dXn.Dtcg`: rename the dependency and replace `dtcg_runtime::` paths with `dxn_dtcg::`. The API is otherwise unchanged.
 :::
 
 Next: [Contributing](./contributing.md).

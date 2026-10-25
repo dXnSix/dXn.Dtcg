@@ -22,7 +22,7 @@ pub(crate) enum Context {
     StrokeStyle,
     /// A `strokeStyle` `dashArray`.
     DashArray,
-    /// The RayX `dev.rayx.blur` extension type.
+    /// The `dxn.dtcg.blur` extension type.
     Blur,
     /// A value whose members admit no alias.
     Leaf,
@@ -77,7 +77,7 @@ const NUMBER_OR_DIMENSION: &[&str] = &["number", "dimension"];
 impl Position {
     /// The position of a member or element of the value at this position.
     /// `line_height_dimension` admits `dimension` targets for typography
-    /// `lineHeight` (the RayX value extension).
+    /// `lineHeight` (a value extension).
     pub(crate) fn child(self, step: Step<'_>, line_height_dimension: bool) -> Self {
         let context = match self {
             Self::Unchecked => return Self::Unchecked,

@@ -28,18 +28,18 @@ release-plz does the work (`release-plz.toml`, `.github/workflows/release-plz.ym
 
 `chore(agentx)`, `chore(release)` and `chore(deps)` commits are left out of the changelog.
 
-**1.x policy.** The owner is the only consumer, so the crates stay on 1.x. No commit is marked breaking: no `!` after the type and no `BREAKING CHANGE:` footer, because release-plz cannot cap a major bump. A breaking change is a `feat` (or a `fix`) whose body states the break and whose `Migration:` footers name each consumer's migration:
+**1.x policy.** The crates stay on 1.x. No commit is marked breaking: no `!` after the type and no `BREAKING CHANGE:` footer, because release-plz cannot cap a major bump. A breaking change is a `feat` (or a `fix`) whose body states the break and whose `Migration:` footers name each affected audience and its migration:
 
 ```text
 feat(resolver): return contexts in declaration order
 
 `ResolvedContexts::iter` no longer sorts by name; callers that relied on the order must sort.
 
-Migration: RayX: sort the contexts in crates/rayx_theme/src/loader.rs before building the picker
-Migration: RayX.TokenEditor: none needed, the editor already sorts
+Migration: Rust API: sort the contexts after `ResolvedContexts::iter` where the order matters
+Migration: token documents: none needed
 ```
 
-The changelog prints each `Migration:` footer under its entry, so it reaches the Release notes. `semver_check = false` for the same reason. The policy ends when a second consumer appears; then `!` and major bumps return.
+The changelog prints each `Migration:` footer under its entry, so it reaches the Release notes. `semver_check = false` for the same reason.
 
 ## Before merging a release pull request
 

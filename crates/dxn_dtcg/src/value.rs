@@ -37,7 +37,7 @@ pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValida
 
 /// Validates a resolved value against one of the 13 types in DTCG 2025.10 and
 /// the value shapes `extensions` enables: a `dimension` typography
-/// `lineHeight`, and the RayX extension type `dev.rayx.blur`.
+/// `lineHeight`, and the extension type `dxn.dtcg.blur`.
 pub fn validate_value_with(
     token_type: &str,
     value: &Value,
@@ -57,7 +57,7 @@ pub fn validate_value_with(
         "shadow" => shadow(value),
         "gradient" => gradient(value),
         "typography" => typography(value, extensions.line_height_dimension),
-        BLUR_TYPE if extensions.rayx_blur => blur(value),
+        BLUR_TYPE if extensions.blur => blur(value),
         unsupported => {
             return Err(ValueValidationError::UnsupportedType(unsupported.into()));
         }
@@ -278,8 +278,8 @@ fn gradient(value: &Value) -> bool {
 }
 
 /// DTCG 2025.10 typography. `lineHeight` is the spec's unitless multiplier or, with the
-/// `line_height_dimension` extension, a `dimension`: RayX design-system line heights are px
-/// tokens that text styles alias.
+/// `line_height_dimension` extension, a `dimension`: design tools commonly export line heights
+/// as pixel dimensions that text styles alias.
 fn typography(value: &Value, line_height_dimension: bool) -> bool {
     exact_object(
         value,
@@ -302,9 +302,9 @@ fn typography(value: &Value, line_height_dimension: bool) -> bool {
     })
 }
 
-/// RayX extension type for Figma layer/background blur effect styles, accepted only
-/// with [`ValueExtensions::rayx_blur`].
-pub const BLUR_TYPE: &str = "dev.rayx.blur";
+/// Extension type for layer and background blur effects, such as Figma's blur effect
+/// styles, accepted only with [`ValueExtensions::blur`].
+pub const BLUR_TYPE: &str = "dxn.dtcg.blur";
 
 /// `{ "kind": "layer" | "background", "radius": <dimension> }`.
 fn blur(value: &Value) -> bool {

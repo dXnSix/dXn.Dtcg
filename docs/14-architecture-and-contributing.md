@@ -11,7 +11,7 @@ pipeline is implemented, the invariants changes must keep, and how to test and r
 - [Test groups](#test-groups)
 - [CI](#ci)
 - [Releases](#releases)
-- [Working with RayX](#working-with-rayx)
+- [Consuming releases](#consuming-releases)
 
 ## Repository layout
 
@@ -64,7 +64,6 @@ All modules of `dxn_dtcg` are private except `values`; `lib.rs` re-exports the p
 | `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
 | `values.rs` | The public `values` module: typed models, `TypedValue`, `ResolvedToken::typed` and their `FromDtcgValue` implementations |
 | `dtcg_tokens.rs`, `dtcg_component_tokens.rs`, `from_dtcg_value.rs`, `type_registry.rs` | Projection traits, built-in conversions, `join_token_path` |
-| `envelope.rs` | `ResolverEnvelope` |
 | `local_reference.rs` | `LocalReferencePolicy` |
 | `affected_resolution.rs` | `AffectedResolution` |
 | `error.rs` | `DtcgError` |
@@ -174,11 +173,11 @@ discovery with a caller-supplied source appended in the root's scope. The previe
 These rules come from the design decisions recorded in `.agentx/memory/decisions/`. Changes must
 keep them:
 
-- **I/O-free and UI-neutral.** No dependency on RayX, gpux or GPUI, and no file system, network or
-  async runtime. Loading belongs to the caller through `Resolution::Missing`.
+- **I/O-free and UI-neutral.** No dependency on a UI toolkit or an application, and no file system,
+  network or async runtime. Loading belongs to the caller through `Resolution::Missing`.
 - **Strict by default.** Default options validate DTCG 2025.10 exactly. Every value shape beyond
-  it is a `ValueExtensions` flag, off by default, with a doc comment naming its consumer and a
-  pinned test group (`tests/value_extensions.rs`, `tests/rayx_export_types.rs`).
+  it is a `ValueExtensions` flag, off by default, with a doc comment stating its use case and a
+  pinned test group (`tests/value_extensions.rs`, `tests/value_extension_types.rs`).
 - **One merged structure.** All active sources fold into one structure before types, `$extends`,
   deprecation and pointers are evaluated. Groups merge; tokens are replaced whole; composite values
   are never merged.
@@ -190,7 +189,7 @@ keep them:
   cannot disagree.
 - **Bounded work.** Every loop and recursion is bounded by a `RuntimeLimits` field or a fixed
   bound; new code that follows references or copies values must charge the existing budgets.
-- **Atomic mutations.** Invalid ids, references, JSON, envelopes or requests leave the catalog
+- **Atomic mutations.** Invalid ids, references, JSON or requests leave the catalog
   unchanged. Affected resolution restores the previous document unless it is `Ready`.
 - **One ordering pass.** Fix the token order once per resolution. Do not reintroduce per-override
   scans.
@@ -289,7 +288,8 @@ behavior change gets a new group.
 | `dxn_dtcg/tests/document_export.rs` | `to_document` and its round trip |
 | `dxn_dtcg/tests/typed_values.rs` | The `values` models and `TypedValue` |
 | `dxn_dtcg/tests/value_extensions.rs` | Strict defaults and the `ValueExtensions` flags through every constructor |
-| `dxn_dtcg/tests/rayx_export_types.rs` | The RayX value shapes |
+| `dxn_dtcg/tests/value_extension_types.rs` | The value extension shapes |
+| `dxn_dtcg/tests/local_reference_policy.rs` | `LocalReferencePolicy` for single references and resolvers |
 | `dxn_dtcg/tests/resolver_2025_10.rs` | Resolver version, inputs, inline steps, overrides, set references |
 | `dxn_dtcg/tests/resolver_document_validation.rs` | Allowed resolver members, empty `resolutionOrder`, single-context modifiers |
 | `dxn_dtcg/tests/resolution_step_consistency.rs` | One effective step definition for every API |
@@ -361,14 +361,11 @@ dev-dependency on `dxn_dtcg` is path-only on purpose, which breaks the runtime â
 dependency cycle in a packaged crate, and `dxn_dtcg` excludes
 `tests/fixtures/dtcg-test-suite/**` from the package, so the corpus never ships.
 
-## Working with RayX
+## Consuming releases
 
-[RayX](https://github.com/rayx-ui) depends on a release tag of this repository,
-`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`. A change RayX
-needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
-Test Suite specs. RayX's `rayx_theme` crate is the main consumer. It projects one generated theme
-model with `nested` fields and `with` converters for gpux types, and loads `.tokeneditor` projects
-through the envelope constructors. RayX and the RayX Token Editor rely on dimension line heights
-and `dev.rayx.blur`, which strict default options reject, so they must construct their runtimes with
-`RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`, for example through
-`from_envelope_with_options`.
+Consumers depend on a release tag of this repository,
+`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`, and move to a new
+release by changing the tag. A change a consumer needs is released here first. A consumer whose
+documents use dimension line heights or `dxn.dtcg.blur` constructs its runtimes with the matching
+[value extensions](05-value-types.md#strict-values-and-the-value-extensions), for example
+`RuntimeOptions::default().with_extensions(ValueExtensions::all())`.

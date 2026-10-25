@@ -132,9 +132,9 @@ these positions, and it must reference a token of the listed type:
 | `shadow` | an element of a shadow array | `shadow` |
 | `gradient` | a stop's `color` / `position` | `color` / `number` |
 | `gradient` | an element of the gradient array | `gradient` |
-| `typography` | `fontFamily` / `fontSize`, `letterSpacing` / `fontWeight` / `lineHeight` | `fontFamily` / `dimension` / `fontWeight` / `number` (also `dimension` with the RayX line-height extension) |
+| `typography` | `fontFamily` / `fontSize`, `letterSpacing` / `fontWeight` / `lineHeight` | `fontFamily` / `dimension` / `fontWeight` / `number` (also `dimension` with the line-height value extension) |
 | `strokeStyle` (also as a border `style`) | an element of `dashArray` | `dimension` |
-| `dev.rayx.blur` (RayX extension) | `radius` | `dimension` |
+| `dxn.dtcg.blur` (value extension) | `radius` | `dimension` |
 
 Everywhere else an alias fails with `DtcgError::Token` and the message
 ``curly-brace references are not allowed inside <type> values``. That covers color `colorSpace`,

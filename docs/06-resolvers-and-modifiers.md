@@ -77,9 +77,8 @@ The root does not accept `$extensions` or `x-*` members. Put shared JSON under `
 reach it with local pointer sources such as `{ "$ref": "#/$defs/motion" }`. `$schema` is accepted
 and ignored.
 
-The same rules apply to the root, to [nested resolvers](#nested-resolvers) and to the `data` of a
-[Token Editor envelope](07-document-loading.md#token-editor-envelopes). A resolver is checked when
-discovery reaches it, which means on every call that involves it.
+The same rules apply to the root and to [nested resolvers](#nested-resolvers). A resolver is checked
+when discovery reaches it, which means on every call that involves it.
 
 ```rust
 use dxn_dtcg::{DtcgError, DtcgRuntime};

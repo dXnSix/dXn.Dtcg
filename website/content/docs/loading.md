@@ -1,6 +1,6 @@
 ---
 title: Loading documents
-description: The catalog, resource ids and fragments, the request/provide protocol, loader patterns for disk, HTTP and embedded assets, caching, path safety and Token Editor envelopes.
+description: The catalog, resource ids and fragments, the request/provide protocol, loader patterns for disk, HTTP and embedded assets, caching and path safety.
 group: Concepts
 order: 90
 ---
@@ -13,7 +13,7 @@ Each `DtcgRuntime` owns a catalog mapping `ResourceId`s to document text (`Arc<s
 
 - **On insert** the runtime checks that the id is valid and the text is well-formed JSON, nothing more. A valid JSON document that is wrong DTCG is accepted and reported when a resolution reaches it.
 - **On resolve** the documents involved are parsed from their text; nothing parsed is kept between calls.
-- **The root** is where resolution starts. `from_json` and `from_envelope` set it; otherwise call `set_root`. The root need not be in the catalog yet; if it is not, the first `resolve` requests it.
+- **The root** is where resolution starts. `from_json` sets it; otherwise call `set_root`. The root need not be in the catalog yet; if it is not, the first `resolve` requests it.
 
 ## Resource ids
 
@@ -274,19 +274,17 @@ fn main() -> Result<(), DtcgError> {
 |---|---|---|
 | `DtcgRuntime::default()` / `with_limits(limits)` / `with_options(options)` | An empty runtime with no root | 0 |
 | `from_json(id, json)` / `from_json_with_options(..)` | Empty runtime, then `provide_json` and `set_root` | 1 |
-| `from_envelope(id, json)` / `from_envelope_with_options(..)` | See [envelopes](#token-editor-envelopes) | 1 |
 | `set_root(id)` | Names the root; need not be provided yet | unchanged |
 | `provide_json(id, json)` | Inserts the document, replacing any previous text | +1 |
 | `provide_requested_json(&request, json)` | `provide_json` keyed by `request.resource_id` | +1 |
 | `provide_json_batch(iter)` | Inserts several documents, all or nothing; a repeated id is `DuplicateDocument` | +1 |
 | `replace_json(id, json)` | Like `provide_json`, but the document must exist (`UnknownDocument`) | +1 |
-| `replace_envelope(id, json)` | Replaces the resolver stored under `id` with the one in a new envelope | +1 |
 | `replace_json_and_resolve_affected(..)` | See [Incremental resolution](./incremental.md) | +1, or +2 on rollback |
 | `remove_document(id)` | Removes a document, which must exist | +1 |
 | `contains_document(id)` | `Ok(true)` if present; `Err` only for an invalid id | unchanged |
 | `catalog_revision()` | The current revision (`u64`) | n/a |
 
-A mutation that fails (invalid id, malformed JSON, duplicate in a batch, unknown document, invalid envelope) changes nothing, revision included. The revision increases on every successful mutation, even if the new text equals the old. `Debug` for `DtcgRuntime` prints the root, options, revision and document ids, never document text.
+A mutation that fails (invalid id, malformed JSON, duplicate in a batch, unknown document) changes nothing, revision included. The revision increases on every successful mutation, even if the new text equals the old. `Debug` for `DtcgRuntime` prints the root, options, revision and document ids, never document text.
 
 ## Caching and sharing
 
@@ -303,35 +301,6 @@ A loader that reads files should still check each request:
 1. `LocalReferencePolicy::check(&request.referenced_from, &request.original_reference)` rejects absolute paths, backslashes and anything starting like a URI scheme. The runtime does not produce such requests, so this is a second line of defense.
 2. To also refuse symlinks that lead elsewhere, canonicalize the joined path and check it is under the canonical base directory, as the file loader above does.
 
-`from_json` and `resolve` do not apply `LocalReferencePolicy` themselves; apply it in your loader or use `from_envelope`. `LocalReferencePolicy::check_resolver(resource, &value)` applies `check` to every `$ref` in a resolver's `sets.*.sources` and `modifiers.*.contexts.*`; inline `resolutionOrder` steps and nested resolvers are not walked.
-
-## Token Editor envelopes
-
-The RayX Token Editor saves projects as `.tokeneditor` files: a JSON envelope whose `data` member is a 2025.10 resolver. `DtcgRuntime::from_envelope` unwraps it, checks it and makes the resolver the root **under the envelope's own resource id**, so relative references resolve next to the project file.
-
-```rust
-use dxn_dtcg::{DtcgError, DtcgRuntime, Resolution};
-
-fn main() -> Result<(), DtcgError> {
-    let (runtime, envelope) = DtcgRuntime::from_envelope(
-        "projects/acme.tokeneditor",
-        r##"{
-          "data": {
-            "version": "2025.10",
-            "name": "Acme",
-            "sets": { "base": { "sources": [{ "$ref": "tokens/base.json" }] } },
-            "resolutionOrder": [{ "$ref": "#/sets/base" }]
-          }
-        }"##,
-    )?;
-    assert_eq!(envelope.name(), Some("Acme"));
-
-    let Resolution::Missing(requests) = runtime.resolve(&[])? else { unreachable!() };
-    assert_eq!(requests[0].resource_id.as_str(), "projects/tokens/base.json");
-    Ok(())
-}
-```
-
-`ResolverEnvelope::parse` (and so `from_envelope`) requires an object `data` member, `data.version` equal to `"2025.10"`, every `$ref` in `data.sets.*.sources` and `data.modifiers.*.contexts.*` to pass `LocalReferencePolicy::check`, and `data` to be a valid resolver. Failures are `InvalidEnvelope`, `InvalidReference` or `InvalidDocument`. `replace_envelope(id, json)` re-parses a changed project file with the same checks and swaps the stored resolver; an invalid envelope leaves the catalog unchanged.
+`LocalReferencePolicy` is an opt-in document-reference policy for hosts that load documents from a local tree: a resolver may only reference relative local documents, and absolute paths, backslashes and URI schemes are rejected before any document is requested. `from_json` and `resolve` do not apply it; apply it in your loader. `LocalReferencePolicy::check_resolver(resource, &value)` applies `check` to every `$ref` in a resolver's `sets.*.sources` and `modifiers.*.contexts.*`; inline `resolutionOrder` steps and nested resolvers are not walked. Both fail with `InvalidReference`.
 
 Next: [Typed projection](./typed-projection.md), or the [Cookbook](./cookbook.md).

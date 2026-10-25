@@ -10,7 +10,7 @@ the runtime is organized, and the principles behind its design.
 - [Design principles](#design-principles)
 - [Crates and features](#crates-and-features)
 - [Platform support](#platform-support)
-- [RayX-specific conveniences (opt-in)](#rayx-specific-conveniences-opt-in)
+- [Opt-in additions](#opt-in-additions)
 - [Glossary](#glossary)
 
 ## What the runtime does
@@ -194,7 +194,7 @@ projected token can alias an unprojected one. See [Typed projection](08-typed-pr
 
 | Crate | Kind | Contents |
 |---|---|---|
-| `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, envelopes, diagnostics |
+| `dxn_dtcg` | library | `DtcgRuntime`, catalog, resolver, value validation, projection traits, source inspection, diagnostics |
 | `dxn_dtcg_derive` | proc-macro | `#[derive(DtcgTokens)]`, `#[derive(DtcgComponentTokens)]` |
 
 `dxn_dtcg` depends on the derive crate and re-exports both macros, so applications depend only
@@ -230,26 +230,23 @@ at once. Mutating methods take `&mut self`; to update while others read, use a l
 copy-on-write handle. `DtcgRuntime` is `Clone`, and cloning is cheap because document bodies are
 reference-counted.
 
-## RayX-specific conveniences (opt-in)
+## Opt-in additions
 
-The crate is UI-neutral and does not depend on RayX. It does carry a few conveniences that RayX
-needs and other users can ignore. The two value extensions are **off by default**; a runtime
-accepts them only when created with
-`RuntimeOptions::default().with_extensions(ValueExtensions::rayx())`, as RayX and the RayX Token
-Editor do ([value types](05-value-types.md#strict-values-and-the-rayx-extensions)):
+The crate is UI-neutral. A few additions beyond the specification are available on request and
+never affect users who do not ask for them. The two value extensions are **off by default**; a
+runtime accepts them only when created with
+`RuntimeOptions::default().with_extensions(ValueExtensions::all())` or the individual flags
+([value types](05-value-types.md#strict-values-and-the-value-extensions)):
 
-- the `dev.rayx.blur` value type, `{ "kind": "layer" | "background", "radius": <dimension> }`, used
-  by the RayX Figma export ([value types](05-value-types.md#devrayxblur-rayx-extension));
-- typography `lineHeight` given as a `dimension` as well as the standard unitless number.
+- the `dxn.dtcg.blur` value type, `{ "kind": "layer" | "background", "radius": <dimension> }`, for
+  layer and background blur effects such as Figma's blur effect styles
+  ([value types](05-value-types.md#dxndtcgblur-extension));
+- typography `lineHeight` given as a `dimension` as well as the standard unitless number, the form
+  design tools commonly export.
 
-The other conveniences need no options:
-
-- `ResolverEnvelope`, `DtcgRuntime::from_envelope` (or `from_envelope_with_options`) and
-  `DtcgRuntime::replace_envelope` for the Token Editor's `.tokeneditor` project files; after an
-  edit, `replace_envelope` re-parses the envelope with the same checks and replaces the stored
-  resolver ([document loading](07-document-loading.md#token-editor-envelopes));
-- `LocalReferencePolicy`, the relative-local-reference rule shared by RayX themes and the Token
-  Editor.
+`LocalReferencePolicy` needs no options: a host that loads documents from a local tree applies it
+in its loader to allow only relative local references
+([document loading](07-document-loading.md#localreferencepolicy)).
 
 ## Glossary
 
