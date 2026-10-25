@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 0,
-  "planRevision": 1,
+  "revision": 1,
+  "planRevision": 2,
   "specHashes": {
-    "requirements": "9b3d201113759ab31d63835311c100cd21b63702fad5c06f493dafb2f564e6bd",
+    "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "2c595bb2249a4406870742378063099b4efeb532b13b90b66d3cf87f1af0117a"
+    "plan": "4d7ff37bfd72c9c4fb4c6f032b978e0e8f5b85bb2da45412254db5fccef13a8e"
   },
   "tasks": {
     "t01-feature-format": {
