@@ -480,8 +480,9 @@ fn from_xyz(space: ColorSpace, xyz: Vector) -> Vector {
     match space {
         ColorSpace::Srgb => multiply(&XYZ_TO_SRGB, xyz).map(srgb_encoded),
         ColorSpace::SrgbLinear => multiply(&XYZ_TO_SRGB, xyz),
-        ColorSpace::Hsl => srgb_to_hsl(from_xyz(ColorSpace::Srgb, xyz)),
-        ColorSpace::Hwb => srgb_to_hwb(from_xyz(ColorSpace::Srgb, xyz)),
+        // HSL and HWB describe the sRGB gamut: clipped into it first.
+        ColorSpace::Hsl => srgb_to_hsl(from_xyz(ColorSpace::Srgb, xyz).map(|v| v.clamp(0.0, 1.0))),
+        ColorSpace::Hwb => srgb_to_hwb(from_xyz(ColorSpace::Srgb, xyz).map(|v| v.clamp(0.0, 1.0))),
         ColorSpace::DisplayP3 => multiply(&XYZ_TO_P3, xyz).map(srgb_encoded),
         ColorSpace::A98Rgb => multiply(&XYZ_TO_A98, xyz).map(a98_encoded),
         ColorSpace::Rec2020 => multiply(&XYZ_TO_REC2020, xyz).map(rec2020_encoded),
@@ -530,10 +531,23 @@ fn powerless(space: ColorSpace, c: Vector) -> bool {
     }
 }
 
-/// Coordinates with a powerless hue written as 0.
+/// Whether coordinates in a cylindrical `space` have no chroma at all, up
+/// to rounding noise: zeroing such a hue moves the color by less than the
+/// noise, so round trips stay exact.
+fn chromaless(space: ColorSpace, c: Vector) -> bool {
+    const NOISE: f64 = 1e-10;
+    match space {
+        ColorSpace::Hsl => c[1].abs() < NOISE || c[2] <= NOISE || c[2] >= 100.0 - NOISE,
+        ColorSpace::Hwb => c[1] + c[2] >= 100.0 - NOISE,
+        ColorSpace::Lch | ColorSpace::Oklch => c[1] < NOISE,
+        _ => false,
+    }
+}
+
+/// Coordinates with the hue of a color without chroma written as 0.
 fn settle_hue(space: ColorSpace, mut c: Vector) -> Vector {
     if let Some(index) = hue_index(space)
-        && powerless(space, c)
+        && chromaless(space, c)
     {
         c[index] = 0.0;
     }
@@ -776,9 +790,11 @@ impl Color {
         to_xyz(self.color_space, self.coordinates())[1]
     }
 
-    /// The WCAG 2.x contrast ratio with `other`, from 1 to 21.
+    /// The WCAG 2.x contrast ratio with `other`, from 1 to 21: WCAG
+    /// defines it on sRGB, so both colors are clipped into sRGB first.
     pub fn contrast(&self, other: &Color) -> f64 {
-        let (a, b) = (self.luminance().max(0.0), other.luminance().max(0.0));
+        let clipped = |color: &Color| color.convert(ColorSpace::Srgb).luminance().clamp(0.0, 1.0);
+        let (a, b) = (clipped(self), clipped(other));
         let (lighter, darker) = if a >= b { (a, b) } else { (b, a) };
         (lighter + 0.05) / (darker + 0.05)
     }
