@@ -20,7 +20,9 @@ use serde_json::{Number, Value};
 
 use super::{
     ExpressionOptions, builtins,
-    compile::{CompileError, Compiled, Position, check_expression, compile, position_at},
+    compile::{
+        CompileError, Compiled, FREEZE_MODULE, Position, check_expression, compile, position_at,
+    },
     format::{Expression, Import},
     format::{Language, is_relative},
     modules::{DocumentModules, import_reference, is_reserved},
@@ -218,6 +220,24 @@ struct ModuleEntry {
     loaded: bool,
 }
 
+impl ModuleEntry {
+    /// The code QuickJS declares for the module `name`, once compiled: a
+    /// JavaScript or TypeScript module ends by freezing its values; a
+    /// native module's wrapper exports frozen values already.
+    fn code(&self, name: &str) -> Option<String> {
+        let compiled = self.compiled.as_ref()?;
+        Some(match &self.origin {
+            Origin::Native(_) => compiled.code.clone(),
+            Origin::Host(specifier) => compiled.module_code(specifier),
+            Origin::Document(_) => {
+                // A relative self-import resolves against the module itself.
+                let file = name.rsplit('/').next().unwrap_or(name);
+                compiled.module_code(&format!("./{file}"))
+            }
+        })
+    }
+}
+
 /// The modules a session can import, by the name QuickJS knows them by: a
 /// host module by its specifier, a document module by `./` and its
 /// resource id (no bare specifier starts with `./`).
@@ -235,7 +255,7 @@ impl ModuleTable {
     /// relative specifiers resolve against a document module's resource
     /// id, bare ones through the registrations and declarations.
     fn resolve(&self, base: &str, name: &str) -> Result<String, String> {
-        if name == NATIVE_BRIDGE && self.natives.contains(base) {
+        if (name == NATIVE_BRIDGE && self.natives.contains(base)) || name == FREEZE_MODULE {
             return Ok(name.to_owned());
         }
         if !is_relative(name) {
@@ -298,9 +318,7 @@ impl loader::Loader for TableLoader {
                 .ok_or_else(|| JsError::new_loading_message(name, "unknown module"))?;
             entry.loaded = true;
             entry
-                .compiled
-                .as_ref()
-                .map(|compiled| compiled.code.clone())
+                .code(name)
                 .ok_or_else(|| JsError::new_loading_message(name, "not compiled"))?
         };
         Module::declare(ctx.clone(), name, code)
@@ -407,6 +425,7 @@ impl Session {
         .map_err(|error| failed(&guard, error.to_string()))?;
         let (deep_freeze, drain, object_prototype) = context
             .with(|ctx| {
+                update_stack_top(&ctx);
                 let object_prototype = ctx
                     .globals()
                     .get::<_, Object>("Object")?
@@ -423,6 +442,20 @@ impl Session {
                     .1
                     .finish::<()>()?;
                 ctx.globals().remove(BRIDGE_GLOBAL)?;
+                // The internal module that freezes module values and checks
+                // caught values for stack overflows; its check reaches the
+                // guard through a global that is gone before any other code
+                // runs.
+                let trip = Rc::clone(&guard);
+                ctx.globals().set(
+                    TRIP_GLOBAL,
+                    Function::new(ctx.clone(), move || trip.trip_stack())?,
+                )?;
+                Module::declare(ctx.clone(), FREEZE_MODULE, FREEZE_SOURCE)?
+                    .eval()?
+                    .1
+                    .finish::<()>()?;
+                ctx.globals().remove(TRIP_GLOBAL)?;
                 let helpers: rquickjs::Array = ctx.eval(HARDEN)?;
                 let deep_freeze: Function = helpers.get(0)?;
                 let drain: Function = helpers.get(1)?;
@@ -494,8 +527,8 @@ impl Session {
         max_nodes: usize,
     ) -> Result<Value, Failure> {
         let precision = self.precision;
-        self.guard.begin();
         let result = self.context.with(|ctx| {
+            begin(&self.guard, &ctx);
             let function = compiled.function.clone().restore(&ctx).catch(&ctx);
             let deep_freeze = self.deep_freeze.clone().restore(&ctx).catch(&ctx);
             let object_prototype = self.object_prototype.clone().restore(&ctx).catch(&ctx);
@@ -523,6 +556,7 @@ impl Session {
                 .call_arg::<JsValue>(args)
                 .catch(&ctx)
                 .map_err(|error| {
+                    self.note_overflow(&error);
                     Failure::Message(caught_message(&error, Some(compiled.locator())))
                 })?;
             let mut converter = Converter {
@@ -703,13 +737,13 @@ impl Session {
             return Ok(());
         }
         self.drain_counter();
-        self.guard.begin();
         let result = self.context.with(|ctx| {
+            begin(&self.guard, &ctx);
             let code = {
                 let mut table = self.modules.borrow_mut();
                 let entry = table.modules.get_mut(root.as_str()).expect("a module");
                 entry.loaded = true;
-                entry.compiled.as_ref().expect("compiled").code.clone()
+                entry.code(root).expect("compiled")
             };
             let evaluated = Module::declare(ctx.clone(), root.as_str(), code)
                 .and_then(Module::eval)
@@ -726,6 +760,7 @@ impl Session {
                     "top-level `await` is not available in expression modules".into(),
                 )),
                 Err(error) => {
+                    self.note_overflow(&error);
                     let stack = match &error {
                         CaughtError::Exception(exception) => exception.stack().unwrap_or_default(),
                         _ => String::new(),
@@ -744,6 +779,22 @@ impl Session {
         match self.guard.end() {
             Some(trip) => Err(Failure::Limit(trip)),
             None => result,
+        }
+    }
+
+    /// Records a stack overflow that reached the engine uncaught, whether
+    /// or not an allocation past the stack threshold noticed it.
+    fn note_overflow(&self, error: &CaughtError<'_>) {
+        if let CaughtError::Exception(exception) = error {
+            let name = exception.get::<_, Option<String>>("name").ok().flatten();
+            let message = exception.message();
+            if matches!(
+                (name.as_deref(), message.as_deref()),
+                (Some("RangeError"), Some(STACK_OVERFLOW))
+                    | (Some("SyntaxError"), Some(REGEXP_STACK_OVERFLOW))
+            ) {
+                self.guard.trip_stack();
+            }
         }
     }
 
@@ -795,8 +846,8 @@ impl Session {
             .map_err(|error| Failure::Message(authored_error(&error, span)))?;
         let name = format!("dxn.dtcg/expression/{path}");
         self.load_modules(&name, &compiled.imports)?;
-        self.guard.begin();
         let function = self.context.with(|ctx| {
+            begin(&self.guard, &ctx);
             let locator = Locator {
                 name: &name,
                 compiled: &compiled,
@@ -813,7 +864,10 @@ impl Session {
                     module.get::<_, Function>("default")
                 })
                 .catch(&ctx)
-                .map_err(|error| Failure::Message(caught_message(&error, Some(locator))))?;
+                .map_err(|error| {
+                    self.note_overflow(&error);
+                    Failure::Message(caught_message(&error, Some(locator)))
+                })?;
             Ok(Persistent::save(&ctx, function))
         });
         if let Some(trip) = self.guard.end() {
@@ -958,9 +1012,10 @@ fn frame_position(stack: &str, locator: Locator<'_>) -> Option<Position> {
             .or_else(|| line.find(&bare).map(|index| &line[index + bare.len()..]))?;
         let location = location.strip_suffix(')').unwrap_or(location);
         let (line, column) = location.split_once(':')?;
+        let line = line.parse().ok()?;
         let generated = Position {
-            line: line.parse().ok()?,
-            column: column.parse().ok()?,
+            line,
+            column: locator.compiled.char_column(line, column.parse().ok()?),
         };
         locator
             .span
@@ -1092,11 +1147,148 @@ fn number(value: f64, precision: Option<u32>) -> Option<Value> {
     Number::from_f64(value).map(Value::Number)
 }
 
+/// Starts an evaluation in the current frame: the guard's stack base and
+/// QuickJS's stack top mark the same place, so QuickJS's own stack limit
+/// and the guard's threshold measure the same depth. rquickjs moves the
+/// stack top only with its `parallel` feature, so it would otherwise stay
+/// where the session was created.
+fn begin(guard: &Guard, ctx: &Ctx<'_>) {
+    guard.begin();
+    update_stack_top(ctx);
+}
+
+/// Makes the current frame QuickJS's stack top.
+fn update_stack_top(ctx: &Ctx<'_>) {
+    // SAFETY: `ctx` is a live context of this session's runtime, used on
+    // the thread that owns it inside `Context::with`.
+    unsafe {
+        rquickjs::qjs::JS_UpdateStackTop(rquickjs::qjs::JS_GetRuntime(ctx.as_raw().as_ptr()));
+    }
+}
+
 /// How many of a session's native modules are built in.
 const BUILTIN_MODULES: usize = 2;
 
 /// The internal module only native module wrappers import.
 const NATIVE_BRIDGE: &str = "dxn.dtcg/native";
+
+/// The internal module that freezes a module's values after its top-level
+/// code: every value reachable from its arguments, functions, accessors
+/// and prototypes included. A module namespace refuses freezing (its
+/// bindings stay live), and a binding still uninitialized in an import
+/// cycle is skipped: its own module freezes it.
+const FREEZE_SOURCE: &str = r#"
+const trip = globalThis.__dxn_dtcg_trip;
+const { freeze, getOwnPropertyDescriptor, getPrototypeOf } = Object;
+const { ownKeys } = Reflect;
+const { get } = Reflect;
+const rangeError = RangeError.prototype;
+const syntaxError = SyntaxError.prototype;
+// Every `catch` and `finally` of compiled code passes what it caught here
+// first: a stack overflow (of calls, or of the regular expression
+// compiler) stops the evaluation instead of being handled.
+const check = (caught) => {
+  if (typeof caught !== "object" || caught === null) return;
+  const prototype = getPrototypeOf(caught);
+  const message = prototype === rangeError || prototype === syntaxError ? get(caught, "message") : undefined;
+  if ((prototype === rangeError && message === "Maximum call stack size exceeded")
+      || (prototype === syntaxError && message === "stack overflow")) {
+    trip();
+  }
+};
+const { defineProperty } = Object;
+const TypeErrorConstructor = TypeError;
+const objectPrototype = Object.prototype;
+const arrayPrototype = Array.prototype;
+const functionPrototype = Function.prototype;
+const done = new WeakSet();
+const isObject = (value) => (typeof value === "object" && value !== null) || typeof value === "function";
+// A frozen object that other objects inherit from would make assigning one
+// of its properties on an inheriting object fail. Its data properties become
+// accessors whose setter gives the assigned object its own property, as the
+// built-ins' are.
+const tame = (object) => {
+  for (const key of ownKeys(object)) {
+    const descriptor = getOwnPropertyDescriptor(object, key);
+    if (!("value" in descriptor) || !descriptor.configurable) continue;
+    const value = descriptor.value;
+    const accessors = {
+      get() { return value; },
+      set(next) {
+        if (this === object) throw new TypeErrorConstructor("'" + String(key) + "' is read-only");
+        defineProperty(this, key, { value: next, writable: true, enumerable: true, configurable: true });
+      },
+    };
+    freeze(accessors.get);
+    freeze(accessors.set);
+    defineProperty(object, key, { get: accessors.get, set: accessors.set, enumerable: descriptor.enumerable, configurable: false });
+  }
+};
+const freezeAll = (...roots) => {
+  // First every value reachable (the list is also the work queue), and
+  // which of them others inherit from; then taming and freezing, so taming
+  // runs before an object freezes.
+  const found = [];
+  const prototypes = new Set();
+  const add = (value) => {
+    if (!done.has(value)) { done.add(value); found.push(value); }
+  };
+  for (const root of roots) {
+    if (isObject(root)) add(root);
+  }
+  for (let index = 0; index < found.length; index++) {
+    const value = found[index];
+    // A proxy may throw, and a module namespace throws for a binding still
+    // uninitialized in an import cycle: what that one key holds is skipped.
+    let keys;
+    try { keys = ownKeys(value); } catch (caught) { check(caught); continue; }
+    for (const key of keys) {
+      let descriptor;
+      try { descriptor = getOwnPropertyDescriptor(value, key); } catch (caught) { check(caught); continue; }
+      if (descriptor === undefined) continue;
+      if ("value" in descriptor) {
+        const child = descriptor.value;
+        if (isObject(child)) {
+          if (key === "prototype" && typeof value === "function") prototypes.add(child);
+          add(child);
+        }
+      } else {
+        if (descriptor.get !== undefined) add(descriptor.get);
+        if (descriptor.set !== undefined) add(descriptor.set);
+      }
+    }
+    let prototype;
+    try { prototype = getPrototypeOf(value); } catch (caught) { check(caught); continue; }
+    if (prototype !== null && prototype !== objectPrototype && prototype !== arrayPrototype
+        && prototype !== functionPrototype) {
+      prototypes.add(prototype);
+      add(prototype);
+    }
+  }
+  for (const value of found) {
+    try {
+      if (prototypes.has(value)) tame(value);
+      freeze(value);
+    } catch (caught) {
+      check(caught);
+    }
+  }
+};
+freeze(check);
+freeze(freezeAll);
+export { check, freezeAll };
+"#;
+
+/// The global that hands the guard's stack trip to [`FREEZE_SOURCE`]
+/// during setup.
+const TRIP_GLOBAL: &str = "__dxn_dtcg_trip";
+
+/// The message of QuickJS's stack overflow `RangeError`.
+const STACK_OVERFLOW: &str = "Maximum call stack size exceeded";
+
+/// The message of the `SyntaxError` QuickJS's regular expression compiler
+/// throws when a pattern nests deeper than the stack allows.
+const REGEXP_STACK_OVERFLOW: &str = "stack overflow";
 
 /// The global that hands the bridge function to [`BRIDGE_SOURCE`] during
 /// setup.

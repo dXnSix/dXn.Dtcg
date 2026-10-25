@@ -163,3 +163,62 @@ fn a_token_converts_a_color_with_the_color_module() {
         json!({ "colorSpace": "oklch", "components": [0.551803, 0.201484, 264.262273] })
     );
 }
+
+#[wasm_bindgen_test]
+fn caught_recursion_fails_however_deep_the_evaluation_starts() {
+    // An earlier expression token starts the session; `deep` evaluates
+    // after 32 alias hops, deeper on the stack.
+    let mut document = serde_json::Map::new();
+    document.insert(
+        "early".into(),
+        computed("number", json!(0), json!({ "js": "1" })),
+    );
+    for hop in 0..32 {
+        let next = if hop == 31 {
+            "deep".to_owned()
+        } else {
+            format!("c{}", hop + 1)
+        };
+        document.insert(
+            format!("c{hop}"),
+            json!({ "$type": "number", "$value": format!("{{{next}}}") }),
+        );
+    }
+    document.insert(
+        "deep".into(),
+        computed(
+            "number",
+            json!(0),
+            json!({ "js": "(() => { let depth = 0; const f = () => { depth++; f(); }; try { f(); } catch (e) {} return depth; })()" }),
+        ),
+    );
+    let error = resolve(Value::Object(document)).unwrap_err();
+    assert!(
+        matches!(&error, DtcgError::Expression { message, .. } if message.contains("stack overflow")),
+        "{error:?}"
+    );
+}
+
+#[wasm_bindgen_test]
+fn module_values_are_frozen() {
+    let js = "(() => { try { box.n += 1; } catch (e) {} return box.n; })()";
+    let tokens = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        json!({
+            "a": computed("number", json!(0), json!({ "imports": { "lib/shared": ["box"] }, "js": js })),
+            "b": computed("number", json!(0), json!({ "imports": { "lib/shared": ["box"] }, "js": js })),
+        })
+        .to_string(),
+        RuntimeOptions::default().with_expressions(ExpressionOptions::default().with_module(
+            "lib/shared",
+            dxn_dtcg::expressions::ExpressionModule::javascript("export const box = { n: 0 };"),
+        )),
+    )
+    .unwrap()
+    .resolve(&[])
+    .unwrap()
+    .ready()
+    .unwrap();
+    assert_eq!(tokens.get("a").unwrap().value, json!(0));
+    assert_eq!(tokens.get("b").unwrap().value, json!(0));
+}

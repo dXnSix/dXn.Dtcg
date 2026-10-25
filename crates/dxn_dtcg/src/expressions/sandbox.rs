@@ -105,6 +105,11 @@ impl Guard {
         self.draining.set(true);
     }
 
+    /// Records a stack overflow QuickJS reported as an exception.
+    pub(crate) fn trip_stack(&self) {
+        self.trip(Trip::Stack);
+    }
+
     fn trip(&self, trip: Trip) {
         if self.tripped.get().is_none() {
             self.tripped.set(Some(trip));

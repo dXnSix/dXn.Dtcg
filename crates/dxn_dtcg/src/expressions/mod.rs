@@ -91,6 +91,12 @@ pub struct ExpressionOptions {
     /// overflow). The limit must leave room on the stack of the thread that
     /// resolves: a limit near that stack's size lets QuickJS overflow it
     /// before its own check, which aborts the process.
+    ///
+    /// Unoptimized QuickJS uses several times more stack per call, so in
+    /// debug builds the same limit allows much shallower recursion. Build
+    /// the engine optimized in every profile with
+    /// `[profile.dev.package.quickjs-jit-sys] opt-level = 3` in the
+    /// workspace's `Cargo.toml`, as this repository does.
     pub stack_limit: usize,
     /// Decimal places every non-integral number of a result is rounded to
     /// (default 6); `None` keeps results unrounded. Rounding keeps results

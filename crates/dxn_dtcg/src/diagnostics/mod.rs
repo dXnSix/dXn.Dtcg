@@ -182,6 +182,19 @@ impl DtcgDiagnostic {
     }
 }
 
+/// The error names of the JavaScript built-ins.
+const STANDARD_ERRORS: &[&str] = &[
+    "Error",
+    "AggregateError",
+    "EvalError",
+    "InternalError",
+    "RangeError",
+    "ReferenceError",
+    "SyntaxError",
+    "TypeError",
+    "URIError",
+];
+
 /// The kind of an expression failure and its authored position, without
 /// the JavaScript message, which may quote document text or thrown values:
 /// `TypeError at line 2, column 5`, `invalid expression object`.
@@ -202,11 +215,20 @@ fn redacted_expression_message(message: &str) -> String {
                 })
         })
         .unwrap_or_default();
+    // Expression code sets an error's name, so only the standard names are
+    // kept; any other `…Error` name could carry document text.
     let class = message
         .split_once(':')
         .map(|(head, _)| head)
         .filter(|head| {
             head.ends_with("Error") && head.bytes().all(|byte| byte.is_ascii_alphanumeric())
+        })
+        .map(|head| {
+            STANDARD_ERRORS
+                .iter()
+                .find(|name| **name == head)
+                .copied()
+                .unwrap_or("Error")
         });
     let kind = match class {
         Some(class) => class,

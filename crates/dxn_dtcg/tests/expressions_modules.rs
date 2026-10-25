@@ -342,17 +342,22 @@ fn a_color_library_works_unmodified_as_a_host_module() {
 
 fn cycle(a_extra: &str, b_extra: &str) -> ExpressionOptions {
     ExpressionOptions::default()
-        .with_module("lib/log", ExpressionModule::javascript("export const log = [];"))
+        // Module values are frozen once their module ran, so the order is
+        // observed through a counter rather than a shared array.
+        .with_module(
+            "lib/log",
+            ExpressionModule::javascript("let next = 0;\nexport function tick(name) { next += 1; return name + next; }"),
+        )
         .with_module(
             "lib/a",
             ExpressionModule::javascript(format!(
-                "import {{ log }} from 'lib/log';\nimport {{ b }} from 'lib/b';\nlog.push('a');\n{a_extra}\nexport const a = 1;"
+                "import {{ tick }} from 'lib/log';\nimport {{ b }} from 'lib/b';\nexport const ranA = tick('a');\n{a_extra}\nexport const a = 1;"
             )),
         )
         .with_module(
             "lib/b",
             ExpressionModule::javascript(format!(
-                "import {{ log }} from 'lib/log';\nimport {{ a }} from 'lib/a';\nlog.push('b');\n{b_extra}\nexport const b = 2;"
+                "import {{ tick }} from 'lib/log';\nimport {{ a }} from 'lib/a';\nexport const ranB = tick('b');\n{b_extra}\nexport const b = 2;"
             )),
         )
 }
@@ -362,12 +367,12 @@ fn an_import_cycle_evaluates_in_es_module_order() {
     // Entered at `lib/a`, the cycle evaluates `lib/b` first, as ES modules do.
     let order = |options: ExpressionOptions| {
         let document = json!({ "computed": computed("fontFamily", json!("x"), json!({
-            "imports": { "lib/a": ["a"], "lib/log": ["log"] },
-            "js": "log.join()"
+            "imports": { "lib/a": ["ranA"], "lib/b": ["ranB"] },
+            "js": "[ranB, ranA].join()"
         })) });
         resolve(&document, options).map(|tokens| tokens.get("computed").unwrap().value.clone())
     };
-    assert_eq!(order(cycle("", "")).unwrap(), json!("b,a"));
+    assert_eq!(order(cycle("", "")).unwrap(), json!("b1,a2"));
     // `lib/b` reads `a` before `lib/a` ran: the error is `lib/b`'s.
     let (_, path, text) = message(order(cycle("", "a;")));
     assert_eq!(path, "computed");
