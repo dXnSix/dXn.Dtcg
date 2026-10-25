@@ -52,18 +52,18 @@ cannot compute a next version. From `v1.1.0` on it finds them again.
 
 `chore(agentx)`, `chore(release)` and `chore(deps)` commits are left out of the changelog.
 
-**1.x policy.** The owner is the only consumer, so the crates stay on `1.x`. No commit is marked
-breaking: no `!` after the type or scope and no `BREAKING CHANGE:` footer. A breaking change is a
-`feat` (or a `fix`, when it is one) whose body states the break and whose `Migration:` footers name
-each consumer's migration (RayX, RayX.TokenEditor, token files):
+**1.x policy.** The crates stay on `1.x` until a 2.0 release is deliberately decided. No commit is
+marked breaking: no `!` after the type or scope and no `BREAKING CHANGE:` footer. A breaking change
+is a `feat` (or a `fix`, when it is one) whose body states the break and whose `Migration:` footers
+name each affected audience, such as token documents or the Rust API:
 
 ```text
 feat(resolver): return contexts in declaration order
 
 `ResolvedContexts::iter` no longer sorts by name; callers that relied on the order must sort.
 
-Migration: RayX: sort the contexts in crates/rayx_theme/src/loader.rs before building the picker
-Migration: RayX.TokenEditor: none needed, the editor already sorts
+Migration: Rust API: sort the contexts yourself where the order matters
+Migration: token documents: none needed
 ```
 
 The changelog prints each `Migration:` footer under its entry, so the migration reaches the GitHub
@@ -71,8 +71,8 @@ Release notes. `semver_check = false` in `release-plz.toml` because release-plz 
 bump: a `!`, a `BREAKING CHANGE:` footer or an API break found by cargo-semver-checks would all
 propose `2.0.0`.
 
-The policy ends when a second consumer appears; then `!` and major bumps return, and
-`semver_check` is turned back on.
+The policy has no end condition. `!`, major bumps and `semver_check` return only when a 2.0
+release is deliberately decided.
 
 ## Before merging a release pull request
 
@@ -160,8 +160,8 @@ dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }
 
 `Cargo.lock` records the exact commit. Bump the tag by hand to take a new release; the latest one is
 on the repository's Releases page. `dxn_dtcg` re-exports the derive macros, and
-`dxn_dtcg_derive` resolves from the same tag. A change RayX needs is released here first; then
-RayX bumps its tag and validates its affected crates and Test Suite specs.
+`dxn_dtcg_derive` resolves from the same tag. A change a consumer needs is released here first;
+the consumer then bumps its tag.
 
 ## Pushing to `main`
 

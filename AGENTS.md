@@ -1,8 +1,10 @@
 # dXn.Dtcg contributor guidance
 
 Rust runtime for DTCG 2025.10 design-token documents: `crates/dxn_dtcg` (resolution, typed
-values, diagnostics) and `crates/dxn_dtcg_derive` (projection derives). The crates are
-UI-neutral and must not depend on RayX or gpux.
+values, diagnostics) and `crates/dxn_dtcg_derive` (projection derives). The crates are a
+standalone, UI-neutral library: they depend on no UI toolkit or application, and features are
+designed from DTCG and general library needs, never named after, justified by or modeled on a
+consumer. Library-defined extension identifiers use the `dxn.dtcg.*` namespace.
 
 ## Validation
 
@@ -24,10 +26,9 @@ gets a new group.
 
 ## Consumers
 
-Consumers, RayX (`../../RayX/RayX.Old`) first among them, depend on a release tag:
-`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`. A change RayX
-needs is released here first; then RayX bumps its tag by hand and validates its affected crates and
-Test Suite specs.
+Consumers depend on a release tag:
+`dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`, and move to a new
+release by changing the tag. A change a consumer needs is released here first.
 
 ## Commits
 
@@ -40,9 +41,9 @@ release-plz releases both crates under one version and one tag `vX.Y.Z`; see
 
 - Conventional Commits drive the version: `fix`/`perf` → patch, `feat` → minor; other types ride
   along in the next release.
-- 1.x policy: never write `!` or a `BREAKING CHANGE:` footer. A breaking change is a `feat` (or
-  `fix`) whose body states the break, with a `Migration:` footer per affected consumer
-  (`Migration: RayX: …`). The policy ends when a second consumer appears.
+- 1.x policy, with no end condition: never write `!` or a `BREAKING CHANGE:` footer. A breaking
+  change is a `feat` (or `fix`) whose body states the break, with a `Migration:` footer per
+  affected audience (`Migration: token documents: …`, `Migration: Rust API: …`).
 - `CHANGELOG.md` is written by release-plz; do not edit it in feature commits.
 - A release is the merge of release-plz's release pull request, after checking that it proposes a
   `1.x` version and changes only `Cargo.toml`, `Cargo.lock` and `CHANGELOG.md`.
