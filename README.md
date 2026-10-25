@@ -4,6 +4,8 @@
 ![Rust 1.95+](https://img.shields.io/badge/rust-1.95%2B-blue)
 ![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)
 
+**Documentation:** https://dxnsix.github.io/dXn.Dtcg/
+
 A Rust runtime for [Design Tokens Community Group](https://www.designtokens.org/) (DTCG)
 **2025.10** documents. It reads design-token files and resolver documents, applies themes and
 other modifiers, resolves aliases, checks every value against its DTCG type, and projects the
