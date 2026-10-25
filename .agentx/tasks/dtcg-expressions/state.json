@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 34,
-  "planRevision": 4,
+  "revision": 46,
+  "planRevision": 5,
   "specHashes": {
     "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "7b1ac6b5adb5e7e0437eb6f137a61238c7db0e8b2e521b1e6ce848a8efba465f"
+    "plan": "2d4900cc594d080aacd513644da88753b60ffb55ed92418f3575e12c0b08b7b1"
   },
   "tasks": {
     "t01-feature-format": {
@@ -64,19 +64,34 @@
       ]
     },
     "t10-native-builder": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t11-color": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t12-dtcg-module": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t13-macro": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t14-declarations": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t15-wasm-complete": {
       "status": "pending"
@@ -121,6 +136,15 @@
         }
       },
       "recordedAt": "2026-10-25T16:50:27Z"
+    },
+    "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e": {
+      "snapshot": {
+        "specHash": "686d64bd4a7b7719b41af2cf3ba079732db6ea2167d75761804767653ddc5701",
+        "repositories": {
+          "dtcg": "ad25299c3afd9455d04e8b3807cdb758192a5e0b7de7501a75bb2ce58029db2f"
+        }
+      },
+      "recordedAt": "2026-10-25T17:10:30Z"
     }
   },
   "checkResults": {
@@ -327,6 +351,125 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s3-modules-final-db0d5dbb956b.log",
       "logSha256": "42bb54934a2ece00a7e0b80e121ddb9b78c974429354d1388527b03ae7ee31d7",
       "inputsHash": "66b954de42af1850f7c3c3f20733afe2d1520cfe8e1f285745ef522b8ddb82e2"
+    },
+    "s4-native/check-expr-native/final": {
+      "checkId": "check-expr-native",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "5384ba33eca491bf01017218870bc3f396d54f9ba0716717e1680e03552433c4",
+      "basisHash": "285ae724796386c552687dbf8289d00095481e7eb68afa5723d59de04b2b5069",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 10,
+      "durationSeconds": 2.665,
+      "recordedAt": "2026-10-25T17:10:22Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-53686bbd4131.log",
+      "logSha256": "91625c371e2c714286639be52260ffb0cbb96d85bba930eda11c663047b24b23",
+      "inputsHash": "9544290a4b179fe31d87e25e84ec2ee677947aa8c94fdec2703cf9b1d4e0f8aa"
+    },
+    "s4-native/check-color-values/final": {
+      "checkId": "check-color-values",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "99362a691033da2f2d90b82aff5b91eebbdbe9e8e1eeb9000c353a4898778e89",
+      "basisHash": "79573a88861d3b422192650fa1388769ddd8dbf56da4686263288f6cd97a4bc7",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 16,
+      "durationSeconds": 1.0125,
+      "recordedAt": "2026-10-25T17:10:23Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-428c6b12db9a.log",
+      "logSha256": "dbbd9cc4de34f7701638ae512501080a1cf35c36d2e5439934f3148ef335f8da",
+      "inputsHash": "36df12f94f9e32fe0638859be6f2c3ee22ba374ac6f3654ef8cce205928f2a7d"
+    },
+    "s4-native/check-expr-color/final": {
+      "checkId": "check-expr-color",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "fc2b20189fdd40de56a854acf6e0a1e6bb9fe5301a6d6f7220a89e35cdca62c3",
+      "basisHash": "f3523621de46ddd8e42c6104a4fecab14c63ac76e47fbd8b625f9873021829e7",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 0.8272,
+      "recordedAt": "2026-10-25T17:10:24Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-a36482c2d095.log",
+      "logSha256": "b657176a7eefafb176f71ded6e9d3b85988496366c9211d22896413d7fe5d3b2",
+      "inputsHash": "e1a52728c98549e984addd74862b83ea4e75742eb52e89f1b8a2a54c90a1d68b"
+    },
+    "s4-native/check-expr-builtin/final": {
+      "checkId": "check-expr-builtin",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "d2005add7707ed9fe718a48a9e56f159ec4b61d1d8306312421ba8daf05b29bb",
+      "basisHash": "083ce786a705957b70ca399d381137244d8ebe072912776552fc0dac9b173395",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.8331,
+      "recordedAt": "2026-10-25T17:10:25Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-4a2c33522fd1.log",
+      "logSha256": "56a6104161d848d62b2379c565fb14ccc319e5def951217bd6d30b2c3a4e956d",
+      "inputsHash": "6a79e25b2b7399e11033afea6095edd67f37fc9bd70932c8e202b5ab8620e102"
+    },
+    "s4-native/check-expr-macro/final": {
+      "checkId": "check-expr-macro",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "997875b7a32dade18595b1a219690f8c12497e4a43f98fb4a6ddd9a4a3c9609e",
+      "basisHash": "e84ac1819112198cf9d59061e831d3265bf9bd207fe0990392d0d43791171f7a",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 3.0391,
+      "recordedAt": "2026-10-25T17:10:28Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-91584d7ea080.log",
+      "logSha256": "91682cc605aea349d37068bf609a35238fade8368c4845e4ed19f9f9b5291de6",
+      "inputsHash": "33bcb599a546b623ebef4f9ee2c77b59b08073a6a2270a6daf16cab13ffe7d32"
+    },
+    "s4-native/check-expr-declarations/final": {
+      "checkId": "check-expr-declarations",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "4da130654fedc5c345acf806a9d0c055048ce8becbeac66063bac9b29a87ee4d",
+      "basisHash": "f4b4f44f420227faf5a44d92ffceb66611c83536e29adaf9e9009129012c05d0",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 0.9757,
+      "recordedAt": "2026-10-25T17:10:29Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-f72050099512.log",
+      "logSha256": "047a12ec8e96b6522c2541ee814cdd2f9d7749ffd7b16b7b1460386d405cf6d2",
+      "inputsHash": "1cd5b99536cf5d8cfe3d9d03dd797510e3d1613f28692ee17cc6fae1dbd3caf3"
+    },
+    "s4-native/check-value-serde/final": {
+      "checkId": "check-value-serde",
+      "boundaryId": "s4-native",
+      "phase": "final",
+      "batchId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "definitionHash": "608d926603c0c722ae7292c8ec2b7a2e2f5614bf9484903156689a50e2a1beca",
+      "basisHash": "8370c65aa2996166a1e2100d9903756a1232a20547a17b72183ea854b1a4ccc2",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 0.5471,
+      "recordedAt": "2026-10-25T17:10:30Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s4-native-final-a78457390c59.log",
+      "logSha256": "91cc623b2216b3daf0dba7ce47f45083dcd0265379f9fcfc78ec830b852d4978",
+      "inputsHash": "e92dc60d5e34b20c2c0b3e58a0ed09f9a48faff82373bc402ec606e012b26769"
     }
   },
   "reviews": {
@@ -755,6 +898,249 @@
         "S3-F3"
       ],
       "recordedAt": "2026-10-25T16:50:58Z"
+    },
+    "s4-native": {
+      "reviewerId": "reviewer-s4-native-independent",
+      "snapshotId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "criterionIds": [
+        "MOD-5",
+        "NAT-1",
+        "NAT-2",
+        "NAT-3",
+        "NAT-4",
+        "NAT-5"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "MOD-5",
+            "NAT-3"
+          ],
+          "sha256": "7e7b62083f3402904264e436788fbad3d7b59b61f422481639b154dcf19109bd"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/native.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-3"
+          ],
+          "sha256": "38f39790d18e98beca56c8e1fb5f8c302a71e9b91db4e0e9f7a14b27270ed98f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-3",
+            "NAT-5"
+          ],
+          "sha256": "2c5be95bb24e526cf960f64f18ec3f9ee06d16e9420aed543bf79fc91320a1be"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native.rs",
+          "kind": "test",
+          "criterionIds": [
+            "MOD-5",
+            "NAT-3"
+          ],
+          "sha256": "66f1e8b857aad83dc4d5aa07feca480d48d30b38e7c61da5efdfeb332856d6c1"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/builtins.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-1",
+            "NAT-2"
+          ],
+          "sha256": "1a1375a94fdd78121ac3c7206d0b59f7770f861bb0eeded5ac8b557415562261"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_builtin.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-1"
+          ],
+          "sha256": "b5368fbec1b7e2d0a26b06705eeb67c8bf3ce4cb06dbb3a413daf33a54d1a2c9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "18ca42d789b93d6d7caa3e58ca092e1d4c1c8a38c5d52aa47613a7eee598b69d"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/values.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2",
+            "NAT-3"
+          ],
+          "sha256": "4995ec959ce2de3db250859f4c29d8f36423a1a5670632837996839d37c73ebf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "473c63bcfec546511a6c5d8b3dd8f5100f3d49d8172d9e462d2fc3819ee2fdb7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_color.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "0142bfd1aca1f5c1da52c3ede79ed4662b034c0c8886e167fa85e3db3451a6cf"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg_derive/src/expression_module.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "850739d3c5801f5fced71985eaa30332c3606a24c411d20dfbf7824905a5930b"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg_derive/src/lib.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "d98688ceb79f154a7b0e6793c462ffbad48d1ed677b29df11bcd98cfc49a4c1e"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native_macro.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "abc62b546b9fbc5a1b8d4f8876a60ebbe1a6500e79bd8cd2108225a06c1eae04"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/receiver.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "9d28169745e83563d513b0ed94dadade1b79d8e70782ec6f91de59b99f4b1f48"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/async_fn.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "f0b3c08ce2adbbd535200b9f8d39efd94c0ea2f67863dd64cc3edbd76792e5e3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/generic.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "2f98828054fe8273064b396ebd4c4240aae178637870b8024b7b8d36947546dd"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/unknown_key.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4"
+          ],
+          "sha256": "658baa4d4c98168c4ded438b08323bcb1d2629f631e286098a0ed8664c3eb612"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/declarations.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-5"
+          ],
+          "sha256": "7ea8372366766f3c78ab2d2f4a3282b682ee962351365ad1e049aecd3c9b4835"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_declarations.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-5"
+          ],
+          "sha256": "8579a1f67715282d8817c4ca7b77463a0743cd937287ebc5293a6bf7c41befe6"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/value_serde.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-3",
+            "NAT-4"
+          ],
+          "sha256": "9d07d04426ded31d85191c5d5efc92fd755b26e7b9041aed3fc6956d37b72019"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/reserved_name.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4",
+            "NAT-5"
+          ],
+          "sha256": "d454cc0ba7e2ff5a70b01336e81381043e84fe42453cf69542846950548438b3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expression_module_ui/invalid_name.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-4",
+            "NAT-5"
+          ],
+          "sha256": "60f1e4c3ba0b0aa492aa9c4e04fb06d4e237ce82ca90f2e4c3505bf03844e87d"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/format.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-3",
+            "NAT-5"
+          ],
+          "sha256": "6e6baab9377e27f213fcb33888a02ccbf3dda1d499b577620300198642326a6d"
+        }
+      ],
+      "summaryMarkdown": "**Verdict: passed** (full re-review of plan revision 5). All 8 findings are resolved, and the repairs were checked by independent probes as well as the new tests.\n\n**Color API (NAT-2)**\n- Conversions still match colorjs.io 0.7.1 to 3.7e-12 across 1,680 components.\n- Mixes with white, black or gray now take the other color's hue in oklch, lch, hsl and hwb, and match colorjs exactly.\n- The gamut test runs on linear light, so shared primaries count as in gamut.\n- Boundary colors round-trip within 1e-9.\n- Non-finite inputs give valid colors.\n\n**Native modules and the macro (NAT-3, NAT-4, NAT-5)**\n- Export names are validated in both the builder (panic) and the macro (compile error), so the declarations parse for every accepted name.\n- All 12 value models (de)serialize as validated DTCG JSON and map to their TypeScript names.\n- `Json<T>` covers any other serializable return.\n- Built-in TypeErrors carry one prefix.\n\n**Unchanged since the first review:** the bridge sandbox (the bridge is unreachable, exports and constants are frozen, setup leaves no global) and MOD-5.\n\n**Residual, noted under S4-F3:** an A98 RGB component below about 4e-7, or a Rec. 2020 component below about 1.5e-6, now reads as 0. That breaks the literal 1e-9 round-trip bound by at most that amount, and is documented only on a private constant. The owner may want to state it on `Color::convert` or in the NAT-2 wording.",
+      "findingIds": [
+        "S4-F1",
+        "S4-F2",
+        "S4-F3",
+        "S4-F4",
+        "S4-F5",
+        "S4-F6",
+        "S4-F7",
+        "S4-F8"
+      ],
+      "recordedAt": "2026-10-25T17:13:43Z"
     }
   },
   "checkpoints": {
@@ -781,6 +1167,14 @@
       },
       "reviewHash": "5781c9530740236ffa35994eff23b9fb75e742f97eb2c04039edda2d4e632df8",
       "recordedAt": "2026-10-25T16:51:22Z"
+    },
+    "s4-native": {
+      "snapshotId": "b96986cccb6e160b73b4587913871fbed3f4b34a4dd07b4cb250989aed62016e",
+      "commits": {
+        "dtcg": "8ad2465463133c0cc0fb8758fb2be845f090d46b"
+      },
+      "reviewHash": "18b1a011f9757593e02653607a16772d009263414a9fde931573cb430beb9a76",
+      "recordedAt": "2026-10-25T17:14:54Z"
     }
   },
   "findings": [
@@ -1128,6 +1522,205 @@
         }
       ],
       "boundaryId": "s3-modules"
+    },
+    {
+      "id": "S4-F1",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-2"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Mixing in a cylindrical space ignores powerless hues.**\n\nExpected (CSS Color 4 §12.4, and colorjs.io 0.7.1, the source of the epic's reference values): when an endpoint is achromatic in the interpolation space (OKLCH/LCH chroma about 0, HSL saturation 0, HWB whiteness + blackness >= 100), its hue counts as missing and the other color's hue is used. For example `mix(white, blue, 0.5)` in OKLCH is `oklch(0.72601, 0.15661, 264.052)`, or `#74a3ff`; black + red in OKLCH keeps hue 29.234 (`#630000`); white + blue in HSL is `[240, 50, 75]`.\n\nObserved: `Color::convert` gives white an OKLCH hue of 180 (from `atan2` of rounding noise), so `Color::mix(white, blue, 0.5)` returns hue 222.026, which is `#00baec` (cyan). Black + red returns hue 14.617 (`#62001c`), and HSL white + blue returns `[270, 75, 75]`. `dxn.dtcg/color` `mix` returns the same values (`toHex(mix(white, blue))` is `#00baec`). Tinting and shading, the most common uses of mixing, produce visibly wrong hues. The tests mix only chromatic endpoints, so they do not catch this.\n\nRepair: in `Color::mix_in`, treat the hue of an endpoint that is achromatic in `space` as missing and use the other endpoint's hue (0 when both are achromatic). Use thresholds like colorjs's. Also write powerless hues as 0 in conversion output so that grays convert deterministically. Add cases to `tests/color_conversion.rs` against colorjs references: white, black and gray mixed with chromatic colors in oklch, lch, hsl and hwb. Add one such case through `dxn.dtcg/color` `mix` in `tests/expressions_color.rs`.\n\n**Re-review (snapshot b96986cc):** Verified against colorjs.io 0.7.1. White + blue gives `#74a3ff` in oklch, `#af89ff` in lch, `[240,50,75]` in hsl and `[240,50,0]` in hwb. Black + red and gray + red (0.25) also match in all four spaces.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "symbol": "Color::mix_in"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "a_powerless_hue_takes_the_other_colors_hue_when_mixing"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "conversions_write_powerless_hues_as_zero"
+        }
+      ]
+    },
+    {
+      "id": "S4-F2",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-2"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**`in_gamut` reports in-gamut colors as out of gamut on a shared primary or a gamut boundary.**\n\nExpected: sRGB red `[1,0,0]` and blue `[0,0,1]` lie in the A98 RGB gamut, because A98 RGB shares sRGB's red and blue primaries (colorjs `inGamut('a98rgb')` returns true). A color that lies exactly on an RGB space's boundary is in that space's gamut.\n\nObserved: `srgb(1,0,0).in_gamut(A98Rgb)` and `srgb(0,0,1).in_gamut(A98Rgb)` return `false`. So does `Color::new(A98Rgb, [1,0,0]).convert(Srgb).in_gamut(A98Rgb)`, and `inGamut({srgb red}, 'a98-rgb')` in `dxn.dtcg/color`. The cause: the test runs on encoded coordinates. The pure power transfer function (exponent 1/2.2) turns linear rounding noise of about -1e-17 into about -1e-8, which is outside the 1e-9 tolerance. Rec. 2020 has the same pure-power transfer, so its boundary colors are exposed in the same way.\n\nRepair: test the gamut on linear-light coordinates (`multiply(XYZ_TO_*, xyz)`, before encoding) with the 1e-9 tolerance. Every transfer function is monotonic and maps 0 and 1 to themselves, so the result is the same as testing the encoded coordinates without the noise amplification. Add tests: the sRGB primaries, secondaries and white are in the gamut of `display-p3`, `a98-rgb`, `prophoto-rgb` and `rec2020`, and every RGB space's own primaries remain in its gamut after a round trip through each other space.\n\n**Re-review (snapshot b96986cc):** Verified. `in_gamut` now tests linear light. sRGB red, blue, white and black are in the gamut of a98-rgb, rec2020, display-p3, prophoto-rgb, hsl and hwb. Display P3 green is outside the sRGB and HSL gamuts.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "symbol": "Color::in_gamut"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "colors_on_a_shared_gamut_boundary_are_in_both_gamuts"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "gamut_tests_and_clamping_cover_the_rgb_spaces"
+        }
+      ]
+    },
+    {
+      "id": "S4-F3",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**The criterion's 1e-9 round-trip bound does not hold on gamut boundaries, and the test hides how large the error is there.**\n\nExpected: NAT-2 says that in-gamut round trips through every space return the input within 1e-9, with no exception for boundary colors.\n\nObserved: the test uses only interior colors. Its comment gives the boundary error as about 1e-8. Measured: `a98-rgb [1,0,0]` through `oklch` comes back with g = 1.02e-7, and `rec2020 [0,1,0]` through `oklch` comes back with b = 4.19e-7. Reviewer judgement: the error is inherent to f64 arithmetic with pure power transfer functions. colorjs itself gives 8.15e-9 for sRGB red in A98. Restricting the 1e-9 bound to interior colors is therefore an acceptable reading only if the criterion says so and the boundary behaviour is pinned by a test.\n\nRepair: the coordinator amends NAT-2 (with the owner's agreement) to state the 1e-9 bound for colors inside every RGB gamut and an explicit looser bound for boundary colors, for example 1e-6. Add a test that holds every RGB space's primaries and secondaries to that bound through every space. Correct the magnitude in the test comment, and note the limitation in the `Color::convert` docs.\n\n**Re-review (snapshot b96986cc):** Verified. Every primary, secondary, white and black of each RGB space, and sRGB boundary colors expressed in all 14 spaces, now round-trip within 1e-9 through every space in whose gamut they lie. A residual remains: an A98 RGB component in (0, about 4e-7), or a Rec. 2020 component in (0, about 1.5e-6), now encodes as 0. For example a98 `[0.3, 1e-7, 0.6]` returns g = 0, an error of 1e-7. Some band near 0 must fail at f64 precision with a pure power curve, so the reviewer accepts this as meeting NAT-2 in substance. The band is documented only on the private `NOISE` constant.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "symbol": "NOISE"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "round_trips_of_gamut_boundary_colors_return_the_input"
+        }
+      ]
+    },
+    {
+      "id": "S4-F4",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-4",
+        "NAT-5"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Export names that are reserved words, or not identifiers, produce invalid declarations, and `default` silently becomes the module's default export.**\n\nExpected: NAT-5 requires the declarations to parse without diagnostics for every registered native module. NAT-4 requires a clear compile error for misuse.\n\nObserved:\n- `#[expression_module]` on `pub fn new(value: f64)` renders `export const new: (value: number) => number;`. oxc reports \"'new' is a reserved word\". `new` is a common Rust function name; `delete` and `default` fail the same way.\n- `NativeModule::new(..).function(\"my-fn\", ..)` renders `export const my-fn: …`, which also fails to parse.\n- At run time the wrapper still exports these names (`Object.keys` gives `default,delete,new`). `default` becomes the namespace's `default` export.\n\n`every_declared_export_exists_at_run_time` cannot see any of this, because its fixtures use only identifier names.\n\nRepair, either of:\n- (a) Validate export names. In the macro, an exported name that is not a JS IdentifierName usable as a binding (a reserved word, `default`, or a non-identifier) is a compile error that points to `#[expression(name = \"…\")]`. For builder registrations, return a `DtcgError::Expression` that names the module and the export when the session starts, or panic as documented in `function`/`constant`.\n- (b) Render every export as `const __export_n: T; export { __export_n as \"name\" };` inside `declare module`, and still reject `default`.\n\nAdd a trybuild case for `pub fn new`, and a declarations test whose modules use such names.\n\n**Re-review (snapshot b96986cc):** Verified. The builder panics with a documented message for `new`, `default`, `delete`, `my-fn`, the empty name and `1a`. The macro reports a compile error (trybuild cases `reserved_name`, `invalid_name`). Declarations for 41 TypeScript contextual keywords and other edge names (`type`, `declare`, `module`, `async`, `constructor`, `__proto__`, `satisfies`, …) parse without oxc diagnostics, and all 41 plus a `Json` export are callable at run time. The runtime and macro reserved-word lists are identical.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/native.rs",
+          "symbol": "NativeModule::raw_export"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg_derive/src/expression_module.rs",
+          "symbol": "export_problem"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native.rs",
+          "symbol": "export_names_must_be_javascript_identifiers"
+        }
+      ]
+    },
+    {
+      "id": "S4-F5",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-3",
+        "NAT-4"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "**Only 4 of the `dxn_dtcg::values` models can be used as native function types.**\n\nExpected: NAT-4 maps `dxn_dtcg::values` models to their DTCG value type names, and NAT-3 lets closures take and return serde types. The declarations (d-declarations) declare `Shadow`, `Typography`, `Border`, `Transition`, `Gradient`, `StrokeStyle`, `FontFamily` and `FontWeight` to editors.\n\nObserved: `Serialize`/`Deserialize` (`serde_with_json!`), `NativeReturn` (`plain_returns!`) and the macro's `VALUE_MODELS` cover only `Color`, `Dimension`, `Duration` and `CubicBezier`. A host function such as `pub fn soften(shadow: Shadow) -> Shadow` does not compile, and if it did, its signature would map to `unknown`, although editors see a declared `Shadow` type.\n\nRepair: give each remaining DTCG 2025.10 model a DTCG JSON `to_json` and a validated serde implementation, as the four existing ones have. Add them to `plain_returns!` and `VALUE_MODELS`. Cover a composite model (a shadow and a typography value) in `tests/expressions_native_macro.rs`. Alternatively, the coordinator records an owner-approved amendment that limits NAT-4 to the four models.\n\n**Re-review (snapshot b96986cc):** Verified. A macro module taking and returning Shadow (one layer and an array of layers), Typography, Border (with a dash array), Gradient, Transition, StrokeStyle, FontFamily and FontWeight round-trips through expressions. Its declarations use the DTCG type names and parse cleanly, and an invalid fontWeight throws a TypeError.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/values.rs",
+          "symbol": "serde_with_json"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/value_serde.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native_macro.rs"
+        }
+      ]
+    },
+    {
+      "id": "S4-F6",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-3"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Plain returns accept only a fixed list of types, while the docs say any serializable value.**\n\nExpected: NAT-3 says closures return serde-serializable types. The doc of `NativeModule::function` says the closure returns \"a serializable value, or `Result<T, E>`\".\n\nObserved: a closure that returns a host `#[derive(Serialize)]` struct (for example `|p: Pair| Pair { .. }`) does not compile. It needs `Ok::<_, Infallible>(…)` (the test `swap` does this). Plain returns are limited to the primitives, `String`, `Value`, `Vec`, `Option`, `[T; N]`, `BTreeMap<String, T>` and the four models. A blanket implementation would overlap with the `Result` implementation, so this is a coherence limit rather than an oversight.\n\nRepair: add a public wrapper (for example `expressions::Json<T: Serialize>` implementing `NativeReturn`), or document exactly which types are accepted as plain returns and show the `Ok::<_, Infallible>` form in a doctest. In either case, ask the coordinator to align the NAT-3 wording. The macro already wraps plain returns, so it is not affected.\n\n**Re-review (snapshot b96986cc):** Verified. `Json<T>` is public, and a closure returning `Json(P { a })` works from expressions. The `.function` docs list the supported returns.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/native.rs",
+          "symbol": "Json"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native.rs",
+          "symbol": "json_wraps_any_serializable_result"
+        }
+      ]
+    },
+    {
+      "id": "S4-F7",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-1"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**Built-in `TypeError` messages repeat the function name.**\n\nExpected: a single prefix that names the function, for example `dxn.dtcg.px: argument 1 must be a number`.\n\nObserved: `dxn.dtcg.px: px: argument 1 must be a number` and `dxn.dtcg.dimension: dimension: unit `em` is not one of px, rem`. The bridge prefixes `<specifier>.<name>:`, and `builtins::type_error` adds `<name>:` again. The same happens in `dxn.dtcg/color`.\n\nRepair: remove the function-name prefix from `builtins::type_error`, and make `tests/expressions_builtin.rs` and `tests/expressions_color.rs` assert the full message after the prefix.\n\n**Re-review (snapshot b96986cc):** Verified. `builtins::type_error` adds no inner prefix. The tests assert full messages such as `dxn.dtcg/color.mix: argument 2 is not a valid color: …`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/builtins.rs",
+          "symbol": "type_error"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_builtin.rs"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_color.rs"
+        }
+      ]
+    },
+    {
+      "id": "S4-F8",
+      "boundaryId": "s4-native",
+      "criterionIds": [
+        "NAT-2"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "**The Rust color API returns invalid DTCG colors for non-finite inputs.**\n\nExpected: NAT-2 says results are valid DTCG colors.\n\nObserved:\n- `red.lighten(f64::NAN)` serializes as `components: [null, null, null]`.\n- `red.mix(&blue, f64::NAN)` gives null components and a null `alpha`.\n- `red.with_alpha(f64::NAN)` gives `alpha: null`.\n- `Color::new` accepts out-of-range or NaN components unchecked, and `to_json`/`Serialize` then emit invalid DTCG JSON.\n\nThe JavaScript bridge avoids most of these cases, because `JSON.stringify` turns NaN into null and the builtins reject null. A host that calls the public Rust API, or a native function that returns a `Color`, does not get that protection.\n\nRepair: handle non-finite amounts and alpha in `mix_in`, `lighten`/`darken` and `with_alpha`, either by treating NaN as no change and clamping infinities, or by documenting a panic. Document that `Color::new` does not validate, or have it clamp into range, and add unit tests in `tests/color_conversion.rs`.\n\n**Re-review (snapshot b96986cc):** Verified. `lighten(NaN)`, `mix(.., NaN)` and `with_alpha(NaN)` return valid colors. `Color::new(srgb, [2, NaN, -1], inf)` returns `srgb [1, 0, 0]` with alpha 1.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "symbol": "Color::new"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
+          "symbol": "non_finite_inputs_give_valid_colors"
+        }
+      ]
     }
   ],
   "handoffMarkdown": "",

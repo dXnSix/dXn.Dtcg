@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 4,
+  "revision": 5,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -714,6 +714,36 @@
       "expected": {
         "exitCode": 0
       }
+    },
+    {
+      "id": "check-value-serde",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "NAT-3"
+      ],
+      "descriptionMarkdown": "Serde for every value model through its DTCG JSON form, without the `expressions` feature.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--test",
+        "value_serde"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/value_serde.rs"
+      ]
     }
   ],
   "finalCheckIds": [
@@ -1100,7 +1130,7 @@
         {
           "id": "t10-native-builder",
           "title": "Host native modules and the JSON bridge",
-          "descriptionMarkdown": "Per d-native-modules: `NativeModule::new`, `.function`, `.constant`, typed-closure adaptation through serde, `ExpressionOptions::with_native_module`, identity-based `PartialEq`/`Debug`, the generated wrapper modules over a frozen hidden registry, error and panic mapping (`catch_unwind`), `TypeError` for argument conversion. The planning spike's JSON-text bridge avoids rquickjs's higher-ranked closure lifetimes.\n\nNew group `tests/expressions_native.rs` covering NAT-3 and MOD-5 (a module whose top level calls a counting native function, imported by several tokens, across two resolution calls).",
+          "descriptionMarkdown": "Per d-native-modules: `NativeModule::new`, `.function`, `.constant`, typed-closure adaptation through serde, `ExpressionOptions::with_native_module`, identity-based `PartialEq`/`Debug`, the generated wrapper modules over a frozen hidden registry, error and panic mapping (`catch_unwind`), `TypeError` for argument conversion. The planning spike's JSON-text bridge avoids rquickjs's higher-ranked closure lifetimes.\n\nNew group `tests/expressions_native.rs` covering NAT-3 and MOD-5 (a module whose top level calls a counting native function, imported by several tokens, across two resolution calls).\n\nEvery value model of `values` implements `Serialize`/`Deserialize` through its DTCG JSON form (validated with every value extension), so native functions take and return any of them; any other serializable result goes through the public `Json<T>` wrapper. Export names must be JavaScript identifiers that are not reserved words: the builder panics with a documented message, the macro reports a compile error. New group `tests/value_serde.rs`. (Review findings S4-F4, S4-F5, S4-F6.)",
           "criterionIds": [
             "NAT-3",
             "MOD-5"
@@ -1111,7 +1141,8 @@
           ],
           "dependsOn": [],
           "checkIds": [
-            "check-expr-native"
+            "check-expr-native",
+            "check-value-serde"
           ],
           "sourceRefs": [
             {
