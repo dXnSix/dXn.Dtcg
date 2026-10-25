@@ -1,28 +1,43 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 1,
-  "planRevision": 2,
+  "revision": 15,
+  "planRevision": 3,
   "specHashes": {
     "requirements": "fb2c55d0990385e53161c9350e35af418068094fed8ef87ef08eee65ed7768b7",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "4d7ff37bfd72c9c4fb4c6f032b978e0e8f5b85bb2da45412254db5fccef13a8e"
+    "plan": "754b1d1b1a2f392b4f7df01fb78a88fdbc569e9f227bf720f17a66cfe9751c7a"
   },
   "tasks": {
     "t01-feature-format": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t02-evaluation": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t03-sandbox": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t04-typescript": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t05-apis": {
-      "status": "pending"
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     },
     "t06-wasm-core": {
       "status": "pending"
@@ -58,21 +73,641 @@
       "status": "pending"
     }
   },
-  "validationBatches": {},
-  "checkResults": {},
-  "reviews": {},
-  "checkpoints": {},
-  "findings": [],
+  "validationBatches": {
+    "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da": {
+      "snapshot": {
+        "specHash": "d5f52ac9a31b4650e7e0a25bc978e6ab7496cd3889b3fc424c965357c4633b24",
+        "repositories": {
+          "dtcg": "22c6ec36b20a5d4193999a070ea6bb03725dbe3e4dbda7ff4b5640ce50518c27"
+        }
+      },
+      "recordedAt": "2026-10-25T16:20:21Z"
+    }
+  },
+  "checkResults": {
+    "s1-core/check-expr-disabled-off/final": {
+      "checkId": "check-expr-disabled-off",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "04f18a3daa13919df5317309dd09390a3478b435b7f521e43b261150156532eb",
+      "basisHash": "67cf763ce6cf172366c0c40cefdb8be6e881f29cca87977f0af87527e90a2cb8",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.8834,
+      "recordedAt": "2026-10-25T16:20:19Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-7a43adf416f3.log",
+      "logSha256": "a493d960f5e9e2a78c59f83c7c530dd8b7b41a5d6962fb5ea3aa5eb6cde677dd",
+      "inputsHash": "df9e896d79e551ca8df40d2991586a9b7fc5fe200d92eeb059835b1e01a028cb"
+    },
+    "s1-core/check-expr-disabled-on/final": {
+      "checkId": "check-expr-disabled-on",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "31cf002bcfb6cdcc33a1d1ac14350ef127b6ddf7ff01c9972452fed89eb044cd",
+      "basisHash": "0a4fcd2551df3e6330dd54038aa1e4371c327bf619cf7dc0afa5360a8a7329a5",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 5,
+      "durationSeconds": 0.1003,
+      "recordedAt": "2026-10-25T16:20:19Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-1ac2ef2a82dd.log",
+      "logSha256": "f1bba46271d10bbcd2e29996ee7e387dbd4b56c636df6cc501592d6bc4c6e431",
+      "inputsHash": "df9e896d79e551ca8df40d2991586a9b7fc5fe200d92eeb059835b1e01a028cb"
+    },
+    "s1-core/check-expr-format/final": {
+      "checkId": "check-expr-format",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "b26ac3ae76218d0815117a290c3a6c6ee166d85e5fcd0b5b9252b98e3c613523",
+      "basisHash": "0983a62dcd9dc9c6d1fe68dcca0c2cd4e783919663bd7bc1e5c51606dad1e34a",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.0814,
+      "recordedAt": "2026-10-25T16:20:19Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-e83eb8cd6d53.log",
+      "logSha256": "88cd41ed7481f785ec39f5e5028005861b724061a5f5e0b451997e65ce466d13",
+      "inputsHash": "51675553d1c5a57bf9c518c894ce40ab2c1d3a67066efb613e118c682e43fe85"
+    },
+    "s1-core/check-default-graph/final": {
+      "checkId": "check-default-graph",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "543b38b1289f1ede774fdbb3001ccd7939f27cc67ee65e49ff69ebbc3c3cbbff",
+      "basisHash": "4d5a0d471cfd45f25fe7305dfa8ed823e9946eb6e4ea726d64676fdd9b1bc448",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.3366,
+      "recordedAt": "2026-10-25T16:20:19Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-b2f064128455.log",
+      "logSha256": "2ec3753ca8678d55d2242cc25553cd7e9c485a7f1280b1aa4b07653d46089950",
+      "inputsHash": "63c3cbe93bdeec7cbd3482bdc05c9546bd1a167409babfce081b9364af744be1"
+    },
+    "s1-core/check-expr-evaluation/final": {
+      "checkId": "check-expr-evaluation",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "f8586e3a4754d13d3f91878803d5d5db15063a8b8991834f3ce8d734b8aca694",
+      "basisHash": "2a9bfd469d1257cd6995544f6f35d2deec61b2ea871bd0c397db68a3d40f1e2c",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 19,
+      "durationSeconds": 0.1146,
+      "recordedAt": "2026-10-25T16:20:20Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-4b076af80f46.log",
+      "logSha256": "56b56b6ddf77f881abbaef8e650dcbb11ee7ed6e1f4c88be6b2cce6872984989",
+      "inputsHash": "481117f9acc1ffa510a88e6727fe5b2c38466f61f4b70185a310f388dbe72663"
+    },
+    "s1-core/check-expr-sandbox/final": {
+      "checkId": "check-expr-sandbox",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "461bc5dd398e5a9742434c88b2bc8d391bf40ce3e3957a5f5674b7bb348675ba",
+      "basisHash": "f2d60b42cab463725365ba64a5f5400a51967d48df1b976f70d9a0c1fbf53801",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 22,
+      "durationSeconds": 1.0913,
+      "recordedAt": "2026-10-25T16:20:21Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-408ec1348c45.log",
+      "logSha256": "3e5e66064d87260e4e358634fe061355aa24e14a8b8b93f0b651db9d20e9910e",
+      "inputsHash": "2d028504d91462911595d338bedebd3901554d9e1931852d63965e068774b3f5"
+    },
+    "s1-core/check-expr-typescript/final": {
+      "checkId": "check-expr-typescript",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "4c61449c72268938b198cdc15b5d673cf030b3474de1d5263f5a04c582cc8a83",
+      "basisHash": "fa6818df73e14bd38d393f774d74e38573d56a99ed6c4b894c225ce8233d54b6",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 8,
+      "durationSeconds": 0.0924,
+      "recordedAt": "2026-10-25T16:20:21Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-5915abc2b4cc.log",
+      "logSha256": "5b1e9aca665a3226c5d39dddd6a2c1b9c4bda4a7930d5c78f4c5fd64d9524568",
+      "inputsHash": "6b50c7b0f68a7f19a7bf615bdbb174c50609cc1df1ee4f94b3f86e04eda42789"
+    },
+    "s1-core/check-expr-apis/final": {
+      "checkId": "check-expr-apis",
+      "boundaryId": "s1-core",
+      "phase": "final",
+      "batchId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "definitionHash": "006469f12c6e84853b3c17b05cd495d30714016a033d63dbe13b0d22a4b17d60",
+      "basisHash": "46a0db100e967047887877983937d8127ca8a01cb7be6854688c80e68ed8bf0b",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.0939,
+      "recordedAt": "2026-10-25T16:20:21Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s1-core-final-912e625a7ce8.log",
+      "logSha256": "c296b57a4ce7180651d319cb0754006a3218fcb725521040f0c206d2ad76fa95",
+      "inputsHash": "2a569db8d414f7a97ae3fd7937cfafb106b5052ae5f2b1a327217c012110e82a"
+    }
+  },
+  "reviews": {
+    "s1-core": {
+      "reviewerId": "reviewer-s1-core-independent",
+      "snapshotId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "criterionIds": [
+        "EXP-1",
+        "EXP-2",
+        "PLT-1",
+        "EVAL-1",
+        "EVAL-2",
+        "EVAL-3",
+        "EVAL-4",
+        "EVAL-5",
+        "SBX-1",
+        "SBX-2",
+        "SBX-3"
+      ],
+      "verdict": "passed",
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-1"
+          ],
+          "sha256": "947985a76cf75f7dcdc09741c05bc8ac2ec09d1d4ceafeb3359553f5eb56a43c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/Cargo.toml",
+          "kind": "source",
+          "criterionIds": [
+            "PLT-1",
+            "EXP-1"
+          ],
+          "sha256": "762ad303939f98d015b69644350634bf4a8ff3884bccf5bf3946b6f362c8264f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/options.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1"
+          ],
+          "sha256": "43994727f6b19addd71f3c033c30092e6862b1fcbdbcc74bcb7047865868f801"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expression_extension.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1",
+            "EXP-2"
+          ],
+          "sha256": "74f638f18f9f2dd5a3002fceb1c0edaa608668f7be735d5ea5f34e3b2449d2aa"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/error.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-2",
+            "EVAL-4"
+          ],
+          "sha256": "3a9b7d36ea8c5ee4f0b90186bafaf054b39c3b2a5edc1700a9e91ea1b2b55713"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/diagnostics/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-4"
+          ],
+          "sha256": "6886e53117faef528933a80c91db43d8bba70d78fb4853212b0fa34bd2cb6d54"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1",
+            "SBX-2",
+            "EVAL-3"
+          ],
+          "sha256": "bc8aa0b40a7ffeca63fe5da580bb88afe0e1ea80e41bb998158aa4d81333317f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/format.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-2"
+          ],
+          "sha256": "3b553b9a8006235e085f7d1798ffa55ea8926a0ee9cdebddc45d891612824d75"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-1",
+            "EVAL-2",
+            "EVAL-3",
+            "EVAL-4",
+            "SBX-1",
+            "SBX-2",
+            "SBX-3"
+          ],
+          "sha256": "ef4e41389ddc7babd0a6f4e0b2c2122882abf8bed76d2a202fa05fe2c757cea7"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-1",
+            "SBX-2",
+            "SBX-3"
+          ],
+          "sha256": "f126d41dace33de8f893c293ce03988ff458edb48ed67526d834479f8d0a0c7a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-4",
+            "SBX-1"
+          ],
+          "sha256": "76feb0409cd0ef913a50caefef99dd96fc1274eb6e33bbdabd9fca0d8d7e892a"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1",
+            "EVAL-1",
+            "EVAL-2",
+            "EVAL-3",
+            "EVAL-5"
+          ],
+          "sha256": "1ced9109ab6267c9279ffdb0282fe16a6a625c700f74bf18ded60da44a63d325"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EXP-1",
+            "EVAL-1",
+            "EVAL-5",
+            "SBX-3"
+          ],
+          "sha256": "fe85d4c314990af63690ced419219e1affde96fa5ee58e9cec54df8e174ba2c9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_disabled.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-1"
+          ],
+          "sha256": "5a32fce3bb2344e34fa307f972a116cdf5546917b09eea39c09c69fe957b1f06"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_format.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EXP-2"
+          ],
+          "sha256": "75b4ff034e71c3388cfc88ca67193c8347717b0ba3a3f2c5c82751f3d5a0e587"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_evaluation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-1",
+            "EVAL-2",
+            "EVAL-3"
+          ],
+          "sha256": "cf76af7f6cc25e70c23a6332615fdcdbe0068eccfec80776a4b6412a4a2807cb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-4"
+          ],
+          "sha256": "5ce0a73372b4d8c0a475c59783ccfbfe5a9be85ceff51698dd13f74e387bf416"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_apis.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-5"
+          ],
+          "sha256": "90aa00a61300f48137b3ec4f38e5434e85ca11b2748efd0a28ffbdf5e64d3efe"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-1",
+            "SBX-2",
+            "SBX-3"
+          ],
+          "sha256": "d6f7ec2ef05a3f03646ae6584d2b2f792fd48c05d90a0de064b1c03b2a50e580"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "Cargo.lock",
+          "kind": "runtime",
+          "criterionIds": [
+            "PLT-1"
+          ],
+          "sha256": "2ca35c98f66456861caa2fe1395b0b164ee8982c6d85c54b77cfb0fbf316b53b"
+        }
+      ],
+      "deltaSummaryMarkdown": "Inspected the reworked `nesting.rs` (cost units per construct, the regex group cap, TypeScript postfix `!`, the fail-closed coarse bound with its short-source fast path) and the step-budget minimum in `engine.rs`, `mod.rs` and `token_resolution.rs`, plus the new tests named in each finding.\n\nI rebuilt the throwaway probe under `artifacts-temp/agentx/dtcg-expressions/probe` and probed with it:\n- every earlier crash case and new bypass attempts, in release on an 8 MiB thread;\n- a binary search of the deepest accepted source for 53 constructs, in debug on a 1 MiB thread;\n- the step-budget-0 sweep.\n\nNo input crashed or hung. I relied on the coordinator's passing check evidence and reran no test group.\n\nS1-F1 and S1-F9 are resolved; S1-F2..F8 stay resolved. No findings remain open.\n\nResidual note, not a finding: the accepted depths are calibrated for unoptimized code on a 1 MiB stack, so hosts resolving on much smaller threads keep less margin. The `stack_limit` doc already warns to leave room on the resolving thread's stack, and wasm32 is sprint 2's PLT-2.",
+      "reattestedFrom": "37583003b07036fb228f6a9f18f37c053e85aaab79f11bc52209c88663ee4891",
+      "summaryMarkdown": "EXP-1, PLT-1, EVAL-1..3 and EVAL-5 hold in source and tests (snapshot/type order, inputs through `resolve_value` at `Position::Unchecked` with cycle detection, integral/rounding/depth/node rules, dependency collection of inputs, export round trip); memory, stack and step trips are uncatchable as tested, Atomics cannot block, ReDoS stops at the step budget. The sprint fails on four major defects found by probes: oxc stack overflow aborts the host on deeply nested expression text (S1-F1), unfrozen shared intrinsics (tamed members, Promise, iterator helpers) let expressions affect each other (S1-F2), the step budget depends on prior evaluations through QuickJS's interrupt counter (S1-F3), and QuickJS-only syntax errors lack positions (S1-F4); plus four minor ones (S1-F5..F8).",
+      "findingIds": [
+        "S1-F1",
+        "S1-F2",
+        "S1-F3",
+        "S1-F4",
+        "S1-F5",
+        "S1-F6",
+        "S1-F7",
+        "S1-F8",
+        "S1-F9"
+      ],
+      "recordedAt": "2026-10-25T16:23:16Z"
+    }
+  },
+  "checkpoints": {
+    "s1-core": {
+      "snapshotId": "2321ad68512a10b0c7d8096432a4d9353f4931c9be60a0c6488610273ae5a0da",
+      "commits": {
+        "dtcg": "5b06e9aa263cca93aa1803156859e9e0568b1130"
+      },
+      "reviewHash": "0972b6979370c3f9ddf698892d1e664556901650b2b306d7ce5c8401f8f1833e",
+      "recordedAt": "2026-10-25T16:23:43Z"
+    }
+  },
+  "findings": [
+    {
+      "id": "S1-F1",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "SBX-2",
+        "EVAL-4",
+        "SBX-1"
+      ],
+      "severity": "major",
+      "status": "resolved",
+      "descriptionMarkdown": "Resolved. `nesting.rs` now bounds the depth of the syntax tree in cost units and fails closed.\n\nAll three gaps from the reattestation are rejected with `the source nests too deeply at line …, column …`, in about 10 ms each (release build, 8 MiB thread):\n- 100k-term `+`, `||`, `.length`, `()` and `[0]` chains, in `js` and `ts`;\n- 30k nested `(?:` in a regex literal;\n- the TypeScript `(0)! / 2 + ((((…` case.\n\nFurther bypass attempts were rejected too:\n- the original 100k parentheses and unary chains;\n- an unterminated string, a regex and a comment each hiding the nesting that follows;\n- a hashbang, an HTML comment, U+3000 whitespace and a U+2028 line break before the nesting;\n- 1 MB of ambiguous `(1)/1/` division chains and mixed regex/division readings;\n- alternating function/class/object/arrow/template nesting.\n\nOn a 1 MiB debug thread I binary-searched the deepest source the check accepts for 53 constructs (functions, classes, generators, getters, switch, try, labels, else-if, do-while, destructuring, default parameters, spread, `new`, optional chains, tagged templates, regex classes and lookaheads, and 16 TypeScript type forms). Every deepest accepted source compiled and evaluated without overflowing. A flat 1 MB array literal is accepted and evaluates in 0.3 s, so the pass is not quadratic.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/nesting.rs",
+          "symbol": "check"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "deeply_nested_source_text_fails_without_overflowing_the_stack"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "the_deepest_accepted_sources_compile_on_a_one_mebibyte_stack"
+        }
+      ]
+    },
+    {
+      "id": "S1-F2",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "SBX-1",
+        "SBX-3"
+      ],
+      "descriptionMarkdown": "Resolved. Every probe from the original finding now fails with `TypeError: object is not extensible` in the first token; the second token observes nothing. The probes covered:\n- tamed `toString`/`hasOwnProperty`;\n- the `Promise` constructor and prototype reached through `(async()=>{})()`;\n- the iterator-helper and `Iterator.from` wrapper prototypes.\n\nFurther probes also passed: the async function constructor, `Array.fromAsync(...).constructor`, `DisposableStack`, array/Map entry iterators, `Iterator.concat`, and the `arguments` prototype. A walk over every global reports all objects frozen. `Promise.prototype.constructor` now throws. Async functions still create promises that never settle, as documented.",
+      "severity": "major",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "symbol": "HARDEN"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "tamed_members_promises_iterators_and_stack_hooks_are_frozen"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "a_write_through_shared_built_ins_never_reaches_another_expression"
+        }
+      ]
+    },
+    {
+      "id": "S1-F3",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "SBX-2",
+        "SBX-3",
+        "EVAL-5"
+      ],
+      "descriptionMarkdown": "Resolved for expression calls. The retry after a drain is sound: with a carried counter the evaluation can only reach as many or more interrupt checks than with a fresh one, so a pass with a carried counter implies a pass with a fresh one, and a failure is re-run from a full counter. I swept step budgets 0 and 1 against iteration counts 100–15,000, with and without a preceding token: the outcome matched the token evaluated alone in every case except one. That exception is the step-budget-0 compile path, recorded as S1-F9.",
+      "severity": "major",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "symbol": "Session::evaluate"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "symbol": "Guard"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "the_step_budget_does_not_depend_on_what_ran_before"
+        }
+      ]
+    },
+    {
+      "id": "S1-F4",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "EVAL-4"
+      ],
+      "descriptionMarkdown": "Resolved. Each case now reports its authored position:\n- the lexical redeclaration: `Identifier `a` has already been declared at line 3, column 6`;\n- the strict-mode octal: `… at line 1, column 8`;\n- the duplicate regex group: `Invalid regular expression: Duplicated capturing group names at line 1, column 19`.\n\nQuickJS compile errors are now mapped through the locator. Note: the regex validation this repair enabled opened the S1-F1 regex-nesting crash.",
+      "severity": "major",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "symbol": "compile_unguarded"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
+          "symbol": "early_errors_name_their_authored_line_and_column"
+        }
+      ]
+    },
+    {
+      "id": "S1-F5",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "EXP-2",
+        "EVAL-4"
+      ],
+      "descriptionMarkdown": "Resolved. `\"1), (2\"` and the top-level `await`/`export` injection both fail with `SyntaxError: Unexpected token at line 1, column 2`. `check_expression` parses the authored text alone, as exactly one expression running to the end of input.",
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "symbol": "check_expression"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_format.rs",
+          "symbol": "the_text_is_exactly_one_expression"
+        }
+      ]
+    },
+    {
+      "id": "S1-F6",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "EXP-2"
+      ],
+      "descriptionMarkdown": "Resolved. `a²` now fails with `` `inputs`: `a²` is not a JavaScript identifier ``. Validation uses oxc's `is_identifier_start` and `is_identifier_part`.",
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/format.rs",
+          "symbol": "check_identifier"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_format.rs",
+          "symbol": "local_names_follow_the_javascript_identifier_grammar"
+        }
+      ]
+    },
+    {
+      "id": "S1-F7",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "EVAL-4"
+      ],
+      "descriptionMarkdown": "Resolved. The diagnostic message keeps only a kind and the authored position: an error class (only when it is ASCII alphanumeric and ends in `Error`) or one of the fixed categories. Thrown values and source quotes are dropped. A user-defined error class name still passes through; it is an authored identifier, which is acceptable.",
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/diagnostics/mod.rs",
+          "symbol": "redacted_expression_message"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
+          "symbol": "diagnostics_keep_the_error_kind_and_position_but_no_message_text"
+        }
+      ]
+    },
+    {
+      "id": "S1-F8",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "SBX-2"
+      ],
+      "descriptionMarkdown": "Resolved. `with_stack_limit(0)` now evaluates (`\"ok\"`), because values below 16 KiB count as 16 KiB. The doc of `ExpressionOptions::stack_limit` states that the limit must leave room on the resolving thread's stack, and that a limit near that stack's size aborts the process.",
+      "severity": "minor",
+      "status": "resolved",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "symbol": "ExpressionOptions::stack_limit"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "a_stack_limit_below_the_minimum_counts_as_the_minimum"
+        }
+      ]
+    },
+    {
+      "id": "S1-F9",
+      "boundaryId": "s1-core",
+      "criterionIds": [
+        "SBX-2",
+        "SBX-3"
+      ],
+      "severity": "minor",
+      "status": "resolved",
+      "descriptionMarkdown": "Resolved. A budget of 0 now counts as 1, in `Session::new` and in the reported `LimitExceeded` limit. My probe (`a` with 4,996 iterations, then `b` with none, at `with_step_budget(0)`) now passes. I swept `a` from 9,900 to 9,998 iterations: whenever `a` passes alone, `a` then `b` also passes, and the first failures (9,998 and above) come from `a` itself exceeding the budget.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "symbol": "Session::new"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "symbol": "a_step_budget_below_one_counts_as_one"
+        }
+      ]
+    }
+  ],
   "handoffMarkdown": "",
   "protectedPaths": {
     "dtcg": {
       "crates/dxn_dtcg/tests/fixtures/dtcg-test-suite/**": "fdf7d386264082891173de43e921ac005096fe1177837134ea83c82a8aff2e34",
-      "CHANGELOG.md": "ada0abd8eaaf025785cafd10f63e85612534fc5f163eb7d7b2d2a410b6331726",
+      "CHANGELOG.md": "6acada9ab16b329ae32fef8f6bc573f5c2104119bf2ace40acd24e26c05319f5",
       "release-plz.toml": "3e8a9e3fad40ab4fbc30260aae5c38569da70f8c00aeb17026b3a4dd5a6f6758",
       "rust-toolchain.toml": "0d90a9379fbd97a36c5f715cd8bc24e5c96d2a78db903645b227c83fa3a54c16",
       ".github/workflows/release-plz.yml": "8e14cdc62d012ecf9e8e8aacc72f11903f0ee57c729ac5ba7c45fb7ddfff490c",
       "LICENSE-APACHE": "1d39282f42adc0ef965c88cac88e9b39aa332f31fecfd8615eb0e359f84fa663",
-      "LICENSE-MIT": "13c3326d5ad827218788303fa4c9b091b94d3e3ec235b46650239eff71576fba"
+      "LICENSE-MIT": "13c3326d5ad827218788303fa4c9b091b94d3e3ec235b46650239eff71576fba",
+      "docs/releasing.md": "d85b4a33038167f08096df4f0a632bbaabe1de0d431825cd12a81021d3cd27e5",
+      "website/content/docs/releasing.md": "46e83b1ee3ce3bf84f7f09117aac20566ce6d503b98d931d35c14e800423350f"
     }
   }
 }

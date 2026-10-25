@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 2,
+  "revision": 3,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -27,7 +27,9 @@
       "rust-toolchain.toml",
       ".github/workflows/release-plz.yml",
       "LICENSE-APACHE",
-      "LICENSE-MIT"
+      "LICENSE-MIT",
+      "docs/releasing.md",
+      "website/content/docs/releasing.md"
     ]
   },
   "checks": [
