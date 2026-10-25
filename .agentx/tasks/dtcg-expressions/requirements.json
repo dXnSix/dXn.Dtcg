@@ -87,6 +87,11 @@
           "id": "SBX-4",
           "verification": "automated",
           "descriptionMarkdown": "Resolving the same catalog, selection and options twice yields equal `ResolvedTokens` and equal fingerprints, independent of the order tokens are evaluated in; one expression cannot affect another through globals, built-ins, its inputs or the values of the modules it imports (a module's namespace and top-level values are deep-frozen once its top-level code has run), and nothing carries over between resolution calls. Exception (owner decisions, 2026-10-25): module state that any code changes, token expressions included, is shared within one resolution: module-level variables that module functions reassign, variables a closure keeps, and the contents of `Map`s, `Set`s, typed arrays, `ArrayBuffer`s and `DataView`s a module holds; results that depend on such writes are not guaranteed to be independent of evaluation order, and the documentation requires module functions to be pure. A resolution without expression tokens never starts the JavaScript engine (verifiable because it succeeds even with a memory limit too small to create one). Supersedes SBX-3."
+        },
+        {
+          "id": "SBX-5",
+          "verification": "automated",
+          "descriptionMarkdown": "Each evaluation (an expression call or a module's top-level evaluation) has a deterministic step budget counted in QuickJS interrupt ticks, and each resolution a memory limit and a stack limit; all three have documented defaults configurable in `ExpressionOptions`. An infinite loop fails with `LimitExceeded { kind: \"expression steps\" }`, exhausting memory with `LimitExceeded { kind: \"expression memory\" }` and runaway recursion with `DtcgError::Expression` (stack overflow); expression code cannot catch any of them, and afterwards the same runtime resolves again successfully. Exception (owner decision, 2026-10-25): a stack overflow inside an iterator's `return` method that is not written as a `return` method in source (installed with `Object.defineProperty`, a reference to a function defined elsewhere, a prototype assignment, a bound built-in), which JavaScript discards while closing the iterator after a throw, is not detected, and whether it occurs can depend on the remaining stack. Supersedes SBX-2."
         }
       ]
     },

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 9,
+  "revision": 15,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -845,6 +845,137 @@
         "crates/dxn_dtcg_derive/src/**",
         "crates/dxn_dtcg/tests/expressions_diagnostic_names.rs"
       ]
+    },
+    {
+      "id": "check-expr-async-overflow",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "SBX-2",
+        "SBX-4",
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Stack overflows uncatchable through async functions and wrapped errors; async built-ins removed.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_async_overflow"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_async_overflow.rs"
+      ]
+    },
+    {
+      "id": "check-expr-shared-compilation",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "SBX-4",
+        "EVAL-6"
+      ],
+      "descriptionMarkdown": "Shared expression modules are named from their text; affected equals full.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_shared_compilation"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_shared_compilation.rs"
+      ]
+    },
+    {
+      "id": "check-expr-native-finite",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "NAT-1",
+        "NAT-2",
+        "NAT-3"
+      ],
+      "descriptionMarkdown": "NaN and Infinity in native calls are TypeErrors.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--features",
+        "expressions",
+        "--test",
+        "expressions_native_finite"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/expressions_native_finite.rs"
+      ]
+    },
+    {
+      "id": "check-color-gamut-contrast",
+      "repositoryId": "dtcg",
+      "kind": "test",
+      "criterionIds": [
+        "NAT-2"
+      ],
+      "descriptionMarkdown": "HSL/HWB clip into sRGB, contrast on sRGB, near-gray round trips.",
+      "argv": [
+        "cargo",
+        "test",
+        "-p",
+        "dxn_dtcg",
+        "--test",
+        "color_gamut_contrast"
+      ],
+      "cwd": ".",
+      "expected": {
+        "exitCode": 0,
+        "minimumTests": 1
+      },
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/dxn_dtcg/Cargo.toml",
+        "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg_derive/src/**",
+        "crates/dxn_dtcg/tests/color_gamut_contrast.rs"
+      ]
     }
   ],
   "finalCheckIds": [
@@ -1605,6 +1736,185 @@
             "t17-stack-top",
             "t18-module-state",
             "t19-diagnostic-names"
+          ],
+          "checkIds": [
+            "check-expr-doctests",
+            "check-docs-index"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/15-expressions.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s7-final-repair-2",
+      "title": "Second final-review repairs: async overflows, shared compilation, color, docs",
+      "dependsOn": [
+        "s6-final-repair"
+      ],
+      "memoryScopes": [
+        "runtime",
+        "runtime/projection"
+      ],
+      "checkIds": [
+        "check-expr-async-overflow",
+        "check-expr-shared-compilation",
+        "check-expr-native-finite",
+        "check-color-gamut-contrast",
+        "check-expr-sandbox",
+        "check-expr-stack-top",
+        "check-expr-apis",
+        "check-color-values",
+        "check-expr-color",
+        "check-expr-builtin",
+        "check-expr-wasm",
+        "check-expr-doctests",
+        "check-docs-index"
+      ],
+      "tasks": [
+        {
+          "id": "t22-async-overflow",
+          "title": "Keep stack overflows uncatchable through async code and wrapped errors",
+          "descriptionMarkdown": "Second final-review finding E2-F1 and sprint review findings S7-F1..F7: stack overflows escaped through async functions, parameter defaults, iterators closed by a throw and wrapped errors. QuickJS-jit serves small objects from 4 KiB arenas, so the error it throws at its limit reaches the guard's allocator only sometimes; detection therefore does not rely on it. An async function's rejection goes through QuickJS's host promise rejection tracker, which trips on a stack overflow (unwrapped like `check`); the body of every plain `return` method or arrow (what closing an iterator calls, discarding what it throws) runs through `checked`, an arrow wrapper that keeps `this`, `arguments` and scoping; the catch/finally check stays; `note_overflow` unwraps `SuppressedError`/`AggregateError`. The regular expression compiler reports its overflow only after unwinding, so patterns built at run time (`RegExp`, string patterns of `match`/`matchAll`/`search`) nest at most 20 groups and classes like literals (a class nests in another only with the `v` flag, in both the wrapper and the literal bound), `RegExp(re)` returns `re`, and `RegExp.prototype.compile` is removed. The guard's threshold lies a quarter of the limit (at most 64 KiB) below QuickJS's limit. HARDEN removes `Array.fromAsync` and `AsyncDisposableStack`. New group `tests/expressions_async_overflow.rs`; `expressions_stack_top` pins the deterministic pattern error. Parameters the wrapped `return` body redeclares with `var` or a function are passed through the arrow, so they keep sharing their binding (S7-F8).",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "SBX-2",
+            "SBX-4"
+          ],
+          "designIds": [
+            "d-engine-sessions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-async-overflow",
+            "check-expr-sandbox",
+            "check-expr-stack-top"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/sandbox.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/compile.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/nesting.rs"
+            }
+          ]
+        },
+        {
+          "id": "t23-shared-compilation",
+          "title": "Name shared expression modules from their text",
+          "descriptionMarkdown": "Second final-review finding E2-F2: tokens with the same expression text share one compiled module, which was named after the first token to compile it, so stack traces and `apply_affected` depended on evaluation order. The module is named from a SHA-256 digest of its text. New group `tests/expressions_shared_compilation.rs`.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "SBX-4",
+            "EVAL-6"
+          ],
+          "designIds": [
+            "d-engine-sessions"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-shared-compilation",
+            "check-expr-apis"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            }
+          ]
+        },
+        {
+          "id": "t24-color-and-finite-arguments",
+          "title": "Clip HSL/HWB and contrast into sRGB, keep near-gray hues, reject non-finite native arguments",
+          "descriptionMarkdown": "Second final-review finding E2-F4: HSL and HWB clip sRGB into `[0, 1]` before deriving; `contrast` uses the luminance of the colors clipped into sRGB; a converted hue is zeroed only when chroma is rounding noise, so near-gray round trips stay within 1e-9 (mixing keeps colorjs's powerless thresholds); the native bridge throws `TypeError` (`argument N must be a finite number`) for NaN and infinities instead of passing `null`. New groups `tests/color_gamut_contrast.rs` and `tests/expressions_native_finite.rs`; `expressions_builtin` expects the bridge's message for `dtcg.s(NaN)`.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "NAT-1",
+            "NAT-2",
+            "NAT-3"
+          ],
+          "designIds": [
+            "d-color",
+            "d-native-modules"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-color-gamut-contrast",
+            "check-expr-native-finite",
+            "check-color-values",
+            "check-expr-color",
+            "check-expr-builtin"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/color.rs"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            }
+          ]
+        },
+        {
+          "id": "t26-stack-overflow-contract",
+          "title": "Stack overflows as the owner decided",
+          "descriptionMarkdown": "Per the owner's decision on sprint review finding S7-F3 (option A, 2026-10-25): SBX-5 supersedes SBX-2 with the exception for stack overflows inside iterator `return` methods not written as `return` methods in source, which JavaScript discards while closing an iterator after a throw and whose occurrence can depend on the remaining stack. Chapter 15 and the website `expressions` page name the exception in their stack bullets. Evidence: `expressions_sandbox`, `expressions_stack_top` and `expressions_async_overflow`.",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "designIds": [
+            "d-engine-sessions"
+          ],
+          "dependsOn": [
+            "t22-async-overflow"
+          ],
+          "checkIds": [
+            "check-expr-sandbox",
+            "check-expr-stack-top",
+            "check-expr-async-overflow"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": "docs/15-expressions.md"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "website/content/docs/expressions.md"
+            }
+          ]
+        },
+        {
+          "id": "t25-repair-docs-2",
+          "title": "Qualify the remaining guarantees in the docs",
+          "descriptionMarkdown": "Second final-review finding E2-F3 and the docs of t22-t24: qualify `apply_affected` (doc comment, chapters 09 and 13, website `api`, `incremental` and landing page) and the isolation and determinism statements of chapter 15 and the website page with the module-state exception; fix the comments in `compile.rs` and `expressions_module_state.rs`; add the new test groups to the contributor tables; name `BTreeMap<String, T>` among native returns; document async bodies and wrapped errors in the stack bullet, non-finite native arguments, and the color changes.",
+          "criterionIds": [],
+          "supportingCriterionIds": [
+            "DOC-1"
+          ],
+          "designIds": [
+            "d-docs-release"
+          ],
+          "dependsOn": [
+            "t22-async-overflow",
+            "t23-shared-compilation",
+            "t24-color-and-finite-arguments",
+            "t26-stack-overflow-contract"
           ],
           "checkIds": [
             "check-expr-doctests",

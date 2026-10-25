@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 78,
-  "planRevision": 9,
+  "revision": 104,
+  "planRevision": 15,
   "specHashes": {
-    "requirements": "a800ef4f9e90940bf349e0230867a0851837d37ce25018aaf9049bcc1a1b8dc3",
+    "requirements": "739aaef2a1ae3fb80d84bcecde8f600cb8acb9dce7b1a3d6441a351a2194600a",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "6eec6fb763eb7a4cadc0cdf289cba68481b8e775e57e716781360e3e5ffc2a54"
+    "plan": "6025157d3dfd5fd0125cef0066730feffbc0a1ea8092b6381ad3f027840f38d1"
   },
   "tasks": {
     "t01-feature-format": {
@@ -134,6 +134,36 @@
       "workerIds": [
         "2f1b140b-7235-45bc-a43e-b1446b24c69b"
       ]
+    },
+    "t22-async-overflow": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
+    },
+    "t23-shared-compilation": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
+    },
+    "t24-color-and-finite-arguments": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
+    },
+    "t25-repair-docs-2": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
+    },
+    "t26-stack-overflow-contract": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     }
   },
   "validationBatches": {
@@ -207,7 +237,25 @@
           "dtcg": "e65b754581ddfe436eb7ce4b160609b6fe8b1d8f3dff52845ee051fc37d25281"
         }
       },
-      "recordedAt": "2026-10-25T18:28:40Z"
+      "recordedAt": "2026-10-25T18:32:23Z"
+    },
+    "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568": {
+      "snapshot": {
+        "specHash": "735f0a7ced2202be449c8eddffbfefd8fa8c40fe5d0167670b4f6ef7618ece88",
+        "repositories": {
+          "dtcg": "0e6ea56252ef5dd2c1f17a5484e6007d48e0baa56be42ed7786cf4b6ec618720"
+        }
+      },
+      "recordedAt": "2026-10-25T19:37:56Z"
+    },
+    "88cf855953b42e2dc567e43909f718b5431b92e5e468bd4ed8d5217326c58431": {
+      "snapshot": {
+        "specHash": "4a4a0df0fbb54616df18cd9931b7b831178d03a2648a627d5004a292aa9be5c3",
+        "repositories": {
+          "dtcg": "0e6ea56252ef5dd2c1f17a5484e6007d48e0baa56be42ed7786cf4b6ec618720"
+        }
+      },
+      "recordedAt": "2026-10-25T19:38:08Z"
     }
   },
   "checkResults": {
@@ -589,154 +637,154 @@
       "checkId": "check-expr-disabled-off",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "04f18a3daa13919df5317309dd09390a3478b435b7f521e43b261150156532eb",
-      "basisHash": "ec5145a16769798aa74a657ca6a5d912b2577df9f52913e02e0d8d6e877f1179",
+      "basisHash": "8d9897c50d653a90a358d4194191331e8fd0d7e6b6a3a50b14b8a8a56ccc3923",
       "status": "passed",
       "exitCode": 0,
       "testCount": 4,
-      "durationSeconds": 1.5474,
-      "recordedAt": "2026-10-25T17:27:56Z",
+      "durationSeconds": 1.0616,
+      "recordedAt": "2026-10-25T18:32:09Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-2828fca43a71.log",
-      "logSha256": "b1ff881945b4a27ebfcfe7ae015f9c5a6d03f8f75c0b6aee10449148aebb3f39",
-      "inputsHash": "854c6601b6873adf828ca47a8d3a8e0d9350d53f884d0edfef5f220e101af824"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-7ef1a4486d35.log",
+      "logSha256": "bbc670d98f17f7b89278de1562e19313260aba22f6e948fc4b5d03e7e3df260c",
+      "inputsHash": "4db808f20aa3e7386d8c8fbf0f871bb2d517aba8b3b069f35f13ab9600efc307"
     },
     "final/check-expr-disabled-on/final": {
       "checkId": "check-expr-disabled-on",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "31cf002bcfb6cdcc33a1d1ac14350ef127b6ddf7ff01c9972452fed89eb044cd",
-      "basisHash": "54cbf52c68a09aa03c4c98a223dd51b3f374306ff938f13f6c2b279557d23d43",
+      "basisHash": "e80beed4b62f36021cba3de618cf353bab0a69d5212e379d192f03b8c5038f95",
       "status": "passed",
       "exitCode": 0,
       "testCount": 5,
-      "durationSeconds": 0.9989,
-      "recordedAt": "2026-10-25T17:27:57Z",
+      "durationSeconds": 0.1133,
+      "recordedAt": "2026-10-25T18:32:09Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d01a6cb961cb.log",
-      "logSha256": "f63f689747f0a7130e7debb3efd576fe018cb125ea3864de0a25534844c4f754",
-      "inputsHash": "854c6601b6873adf828ca47a8d3a8e0d9350d53f884d0edfef5f220e101af824"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-321e176051cd.log",
+      "logSha256": "ca973ac4f649dfa0c1757cedd1929db527cb86faff1a83d989c3b763cd7295a5",
+      "inputsHash": "4db808f20aa3e7386d8c8fbf0f871bb2d517aba8b3b069f35f13ab9600efc307"
     },
     "final/check-expr-format/final": {
       "checkId": "check-expr-format",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "b26ac3ae76218d0815117a290c3a6c6ee166d85e5fcd0b5b9252b98e3c613523",
-      "basisHash": "07cd10ae7e30e51eab26cc63b92d84c15c71ba6e6632e9daec447945f966446b",
+      "basisHash": "e56f0adb4cc09be03a1a832afe9aa23e25b9b4f47e9af0f49b658d7ec31fb111",
       "status": "passed",
       "exitCode": 0,
       "testCount": 11,
-      "durationSeconds": 0.8306,
-      "recordedAt": "2026-10-25T17:27:58Z",
+      "durationSeconds": 0.0977,
+      "recordedAt": "2026-10-25T18:32:10Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-736395177d3c.log",
-      "logSha256": "c301aa21b7354f19ab9baaad28cd3c3bde5ee1a95004ba7eb7952e94157f87c3",
-      "inputsHash": "17a8844b819d5fd88063a0a510a7fa6b1db85de078952caf01ad329e934c8687"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-2884e1712457.log",
+      "logSha256": "625774924b676efa923d65183977f568e7d260096800a11e32176c22a3554e44",
+      "inputsHash": "2f5b6f2059e32b7cd72a18e17667c24c0a04403e74df83cb70eab5ff08143aca"
     },
     "final/check-default-graph/final": {
       "checkId": "check-default-graph",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "543b38b1289f1ede774fdbb3001ccd7939f27cc67ee65e49ff69ebbc3c3cbbff",
-      "basisHash": "61f621febb69cc49c98094a6b51cf903d781db988064e7b28ce97d62dc84654c",
+      "basisHash": "4e1649e2b5797e19516551bfb500a1729492f41c4cf5111fd60435053263077d",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.6008,
-      "recordedAt": "2026-10-25T17:27:59Z",
+      "durationSeconds": 0.0914,
+      "recordedAt": "2026-10-25T18:32:10Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-32ff8181bec5.log",
-      "logSha256": "8debc356895a6b7a83ada7e6186f672e120e4f96ac7bc3b515859a59efa2f788",
-      "inputsHash": "5aed8d9a2a6413a21e73b6d951404c02bf1ffe5a907f1b15d0517153784ecaf4"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-8a9d213a0b6e.log",
+      "logSha256": "81ecea0632531fad52f36e69f9c88bbff93c6dceb13197e69b2ee349d34c80d5",
+      "inputsHash": "f4c935d83ea259e131ceae1ea993bb209de67b9f4efbac56355d05f72adb0a50"
     },
     "final/check-expr-evaluation/final": {
       "checkId": "check-expr-evaluation",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "f8586e3a4754d13d3f91878803d5d5db15063a8b8991834f3ce8d734b8aca694",
-      "basisHash": "95c30f79e7f265d89ca5d0a56302425d023d2d9dff595edb9df497c37daf2bea",
+      "basisHash": "494bdce16303b7119e8201945884cddf2ffdce89f769dd4d39ea841e890bf357",
       "status": "passed",
       "exitCode": 0,
       "testCount": 19,
-      "durationSeconds": 0.9721,
-      "recordedAt": "2026-10-25T17:28:00Z",
+      "durationSeconds": 0.1138,
+      "recordedAt": "2026-10-25T18:32:10Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-55ef43481fa3.log",
-      "logSha256": "7d0267f0f4680fcca12dcdb6d3aa6936e568bb2ca18b7f624ba4ea308ebd50d7",
-      "inputsHash": "9e1ca3b91f9294e5614ee1c8dba5bcdbdd3ccf60b3d5766c8b915541ffdb38d5"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-6008a44d1c5c.log",
+      "logSha256": "40679fef08087e76a0213df854acc710b98f9fba0fb63f43cf87be8ed3754398",
+      "inputsHash": "e6661e8486f5a0c4b3769d2f7e45c67ab8bfa569a9f3eccc4a60fd2876beee5e"
     },
     "final/check-expr-sandbox/final": {
       "checkId": "check-expr-sandbox",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "461bc5dd398e5a9742434c88b2bc8d391bf40ce3e3957a5f5674b7bb348675ba",
-      "basisHash": "15760c18dbcb39bdd5e718f051c0bc141e2ebf997bfcd465fed6afffbed3148c",
+      "basisHash": "40c051cbf56f6cbb4485a45d52c5bdf049cedc8bdcc1615e395a4bd6caa9fe84",
       "status": "passed",
       "exitCode": 0,
       "testCount": 22,
-      "durationSeconds": 2.0587,
-      "recordedAt": "2026-10-25T17:28:02Z",
+      "durationSeconds": 1.1667,
+      "recordedAt": "2026-10-25T18:28:35Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-17fe96009dae.log",
-      "logSha256": "026ce5d515099972379107e650c096b208cd03a610b63e32be375125faed5e7c",
-      "inputsHash": "6c4d797f910aa8db823d0368bb8c95f7715929efcdad1d645d51bc3dcd9b39ba"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-046133840a93.log",
+      "logSha256": "8debddf31908711947d9bfbd6209bcf389c0253aedbc4cd1df562e0a29899c8e",
+      "inputsHash": "c3c71b428ac7b07df16596b994c2f55b7a1ad066138d5215f1b25b923e145b40"
     },
     "final/check-expr-typescript/final": {
       "checkId": "check-expr-typescript",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "4c61449c72268938b198cdc15b5d673cf030b3474de1d5263f5a04c582cc8a83",
-      "basisHash": "4ea1bb1471b4058e9728878e3d5342fa82cd3220c4f1bd4e7d50a2d66a68f3ad",
+      "basisHash": "0bc9ace9bdf40c27e925259a25afa704ef6d372081a43933dac6372b4bdfc32a",
       "status": "passed",
       "exitCode": 0,
       "testCount": 8,
-      "durationSeconds": 0.8435,
-      "recordedAt": "2026-10-25T17:28:02Z",
+      "durationSeconds": 0.1115,
+      "recordedAt": "2026-10-25T18:32:10Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-8e19a72953fb.log",
-      "logSha256": "84fb08e6a96e5330db6220610ac59e9cd46b1312c2ea4f4a39a94198ee94e6f8",
-      "inputsHash": "d22ba6528e6a5d01b134b30a35d8073796cf26a3052fe08d1ac7f10ad2827ebf"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-1c485065b02a.log",
+      "logSha256": "e36e62520c43140f50ecc9f77acc27cc41acd6db5449e74bfd54070ab59331fc",
+      "inputsHash": "4c37810bcd3c17c567221ec332988a11c63420a9a33e36510fd359ec7055f369"
     },
     "final/check-expr-apis/final": {
       "checkId": "check-expr-apis",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "006469f12c6e84853b3c17b05cd495d30714016a033d63dbe13b0d22a4b17d60",
-      "basisHash": "689e3b6dd645a4fd9707e18424ea9d672319efcf9ba182a2fe7a503846f3c5f2",
+      "basisHash": "54caad865efabe1238d780dd6d58ec3da1291db7c33115a763714cdcc8f77b1c",
       "status": "passed",
       "exitCode": 0,
       "testCount": 6,
-      "durationSeconds": 0.8762,
-      "recordedAt": "2026-10-25T17:28:03Z",
+      "durationSeconds": 0.1061,
+      "recordedAt": "2026-10-25T18:28:35Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-70192590347d.log",
-      "logSha256": "cf1a4d92842de81c934140aef28396192776d1ca386fa65380b127d064265aaf",
-      "inputsHash": "f0454ebb7ce04fefc3c61ee1213a9693449f7abbee20fc2f74f3ab9f3aed5a7b"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-7f0cfb9e90dc.log",
+      "logSha256": "f99b8d79d61fd07bd7610db451515d1f1db159bd946b302618bc1db4f1ccbe2c",
+      "inputsHash": "07774c27f96631837b2508b343381f518ee3747f65bf849e1e213220641f66f0"
     },
     "final/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
-      "basisHash": "dcbbed46be575dbc28ad5a220f41aa4a41190bccb258958f97f9e01949102966",
+      "basisHash": "84826a32e23bdf5937b965d2eee010e5f68beeaec50aefbdd6163a1591b32569",
       "status": "passed",
       "exitCode": 0,
-      "testCount": 7,
-      "durationSeconds": 3.8284,
-      "recordedAt": "2026-10-25T17:28:07Z",
+      "testCount": 9,
+      "durationSeconds": 3.0376,
+      "recordedAt": "2026-10-25T18:32:13Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-0a429511f736.log",
-      "logSha256": "c215de7e2f1a41f2d80cba36abc1fa8e8cefe8be061bf96ec5eb98bf326fb025",
-      "inputsHash": "e23fec8d27583b73cedda4177e33da490a84aa7b2dc6d4fcfde41565dbe8ee58"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b13a8cc68062.log",
+      "logSha256": "e0323a8043b22277de078a6d41549fb5dcd6a4c8a1935fc579284e923e6aecdb",
+      "inputsHash": "e4201a281b13da89e784e551ea9a3e070ad4445edbad1d7c9e710e832c75e799"
     },
     "final/check-ci-workflow/final": {
       "checkId": "check-ci-workflow",
@@ -759,252 +807,252 @@
       "checkId": "check-expr-modules",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "b839124c91ede60d17bec46f6414c4ddecd8df889dfcb7d42ef708026970967d",
-      "basisHash": "173b0f866eb3054ce44bbfa5d7a4d59b8f138ab09dcb33832b090226501187d4",
+      "basisHash": "d1fca4822bac9924c61de9ea4639db86967e3618397ffeccc3a8da1fb47d96a6",
       "status": "passed",
       "exitCode": 0,
       "testCount": 11,
-      "durationSeconds": 0.8622,
-      "recordedAt": "2026-10-25T17:28:08Z",
+      "durationSeconds": 0.1096,
+      "recordedAt": "2026-10-25T18:28:38Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-93ff67f55aae.log",
-      "logSha256": "511f98b824a2c4359acb583af5e86ab7b58033303b2d85baa6a71acc81707838",
-      "inputsHash": "4f48263fed9e75d41d7d135deb27a0b51ce17130a75dbaf020f110307ce5cda0"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-ad9a7dd113d5.log",
+      "logSha256": "4c2b751657aae6e3ae37f73a4e5ee59e5f0799f4aa55c51447cdbefc4c05a9a2",
+      "inputsHash": "b0f31ca2b4e3dc21ab578b1a0f9fcd51b8f3a5f4ad1963cd6da7a4523a26fce8"
     },
     "final/check-expr-document-modules/final": {
       "checkId": "check-expr-document-modules",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "499e1952546c871cd3b749e807c3b3716556c1ded19cdd37ca0c26ddee4a8531",
-      "basisHash": "80723ff7f01a5e0757211cab2c2c0dbe434e9de95a505bb85005326372318aa0",
+      "basisHash": "9077d9d1078ffcaef04ab9279dfdb904bae3a28a0cd26b2503d0ca053dbd7b64",
       "status": "passed",
       "exitCode": 0,
       "testCount": 18,
-      "durationSeconds": 0.1062,
-      "recordedAt": "2026-10-25T17:28:08Z",
+      "durationSeconds": 0.0982,
+      "recordedAt": "2026-10-25T18:32:13Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-4cc35bb948e2.log",
-      "logSha256": "53e1a64e3c0202f1535f7882c433ad6a789d4e36f456cf0c18ef4e92279ec54c",
-      "inputsHash": "75b6af3354a74b7ba3360bf9a4e37eebc663208ab7ab8dedcc58a0d8a2371aa4"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-3182efcf293f.log",
+      "logSha256": "fa2f7a50712bd87750ac0660353aa0b0efced072eb10490f20c78ab33f0fdc8c",
+      "inputsHash": "094c11bf6fe14a80768cced73450cbdf23b35cbfdfed993dbbcb56bae5fe1c40"
     },
     "final/check-expr-native/final": {
       "checkId": "check-expr-native",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "5384ba33eca491bf01017218870bc3f396d54f9ba0716717e1680e03552433c4",
-      "basisHash": "4ab5c7b3fcab95d962012e2cfe92d867e2a8a5e24892ff68e726f894a3cf7016",
+      "basisHash": "1e927ebac7a1e7062d3d2b8b636c5b4b641e5a58bd3e6df5d0f329e308f91921",
       "status": "passed",
       "exitCode": 0,
       "testCount": 10,
-      "durationSeconds": 0.9131,
-      "recordedAt": "2026-10-25T17:28:09Z",
+      "durationSeconds": 0.1023,
+      "recordedAt": "2026-10-25T18:32:13Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-2b011c825707.log",
-      "logSha256": "1ee1456f0ddcb5302ef1cda25716bf595518ecb1c6cefab989eb1ddf7aaa93e1",
-      "inputsHash": "de9a86c09c7cf20c6d3539b4bee66c5c7b8fa6139350e5dfffc05fcb96abeaec"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-9e24c0e18cb5.log",
+      "logSha256": "4a194779f7fb1a10cf9f5fb5a7272118e6d63d4f159978d860c606191570f27b",
+      "inputsHash": "408651abb7e5738289e0279ca5bf929b98c354d368d0844c8781844d275aabb1"
     },
     "final/check-color-values/final": {
       "checkId": "check-color-values",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "99362a691033da2f2d90b82aff5b91eebbdbe9e8e1eeb9000c353a4898778e89",
-      "basisHash": "7bb989faa008bfd9c4db8764feeba4491206a18607584b03415d6594d008e89f",
+      "basisHash": "54fad9a18c1b34c7237bcd85ddaa1aba6145a7119f5559679bcf89a749e48659",
       "status": "passed",
       "exitCode": 0,
       "testCount": 16,
-      "durationSeconds": 0.608,
-      "recordedAt": "2026-10-25T17:28:10Z",
+      "durationSeconds": 0.6089,
+      "recordedAt": "2026-10-25T18:32:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-16faeab7de69.log",
-      "logSha256": "8103939a0c02955ae196be5024d8a97cd3bf0875e41dfff35f21f94c2d2204a4",
-      "inputsHash": "33a19d3761f6668330b29b3c0f3b71cfd7af43be9dc5fa98fa0f6b7b10b0d101"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-4122f51a0f59.log",
+      "logSha256": "ae04d2f72a113c2b4e679639afa46fab51cecab8be06064bcb782af917a77583",
+      "inputsHash": "01d377796cdbe3943b2e68d0a20c168cce9e182cb8693721823c51c205d70b71"
     },
     "final/check-expr-color/final": {
       "checkId": "check-expr-color",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "fc2b20189fdd40de56a854acf6e0a1e6bb9fe5301a6d6f7220a89e35cdca62c3",
-      "basisHash": "393703605a92ead27cf1047a8c69542398b26c2d5795a549aa3690bf26b2fefe",
+      "basisHash": "5b1f20bc524fc410a88bfd29383bdadd1b339722b11399be29fca41e21fbd547",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.8556,
-      "recordedAt": "2026-10-25T17:28:11Z",
+      "durationSeconds": 0.1437,
+      "recordedAt": "2026-10-25T18:32:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-9e4125448461.log",
-      "logSha256": "cfb08f3c7dc018ed3515bdc73262664b22e962e5804cd8afeb51f8d45b76394c",
-      "inputsHash": "589779a8497310f562f38d868b5c58efa74d8a2aa73591efc66f8e3e7066872c"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-97ffee50809a.log",
+      "logSha256": "d975a7f91fdf099def3666be9d58c4171391ecf60298a9dc342b0ae5189f084e",
+      "inputsHash": "9e45a368bd6741ec605e6ec4fa91868e20c0ce3e5dce7eaac8278ddc4fdc89d1"
     },
     "final/check-expr-builtin/final": {
       "checkId": "check-expr-builtin",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "d2005add7707ed9fe718a48a9e56f159ec4b61d1d8306312421ba8daf05b29bb",
-      "basisHash": "2efed0b568647776a9a770787fbcbc30674673d6fcd0ee98e32a4ddddbbab958",
+      "basisHash": "79053706e076fecb04e742814e6f4795159260fc9bb470d064cfbc2efcd686e6",
       "status": "passed",
       "exitCode": 0,
       "testCount": 4,
-      "durationSeconds": 0.8499,
-      "recordedAt": "2026-10-25T17:28:11Z",
+      "durationSeconds": 0.1193,
+      "recordedAt": "2026-10-25T18:32:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-6e04c0ae04cb.log",
-      "logSha256": "085c8fbcfd44a9d71c87b9261f6cd74fe6667a36f039f0eb1c8f8fa412cd0a50",
-      "inputsHash": "24901e62b078cea198a44583de3883dffe39aabaa80ebaba5962dec6d1f7d183"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-a7ab9bc5a56b.log",
+      "logSha256": "9ee276931d7f217c37ae321db7c1a60e72ae6fd9086b3f41c323052cb21aaa34",
+      "inputsHash": "388b5f0d1b1f32740829effb4c5b5864e5f7087cb22ee2fdb340970a0bf1ea1a"
     },
     "final/check-expr-macro/final": {
       "checkId": "check-expr-macro",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "997875b7a32dade18595b1a219690f8c12497e4a43f98fb4a6ddd9a4a3c9609e",
-      "basisHash": "69f223a8fed55f1356b41fce1a9f4b7139571992018c27f7733cb4196f7c04ce",
+      "basisHash": "6f4811b78ff2e09e2b6366d77252df997d642d3121b8c4a44be05012b176cf81",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 2.2221,
-      "recordedAt": "2026-10-25T17:28:14Z",
+      "durationSeconds": 0.4232,
+      "recordedAt": "2026-10-25T18:32:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-daceb904ecb3.log",
-      "logSha256": "4641681dc872f716aa8348b954fcc98f81cb449892b0e48021d4772f62cdd78d",
-      "inputsHash": "6647ff42e4c4a02c267f5bf736d40c9cb400f9f97bbac249830e2d6957a71d76"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-f5f0548fc77f.log",
+      "logSha256": "b390bf9241f4d9f0fd783ebd3dc73f596f91d5736fb720684c79470c796e020d",
+      "inputsHash": "591c9233a98b8869271d2c7a53194044f1d54c2105a3f6b192ef0c4316c63879"
     },
     "final/check-expr-declarations/final": {
       "checkId": "check-expr-declarations",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "4da130654fedc5c345acf806a9d0c055048ce8becbeac66063bac9b29a87ee4d",
-      "basisHash": "bbc52e2bba8619fe6a2d8ba65fa3bacab26b0ac852cbac70ac9b459275f2ffa2",
+      "basisHash": "f4961b5eb990dd180b1b6beb18b2dab7831f71d3ba6bbd5052d11c6b27d1db26",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.8667,
-      "recordedAt": "2026-10-25T17:28:15Z",
+      "durationSeconds": 0.1039,
+      "recordedAt": "2026-10-25T18:32:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-f06523b79e35.log",
-      "logSha256": "19930c3cbd27c796b6f4e73782f42198e2ddfda7c356f80664e55e4eb33c2fe0",
-      "inputsHash": "8fda677e1c12cc093761c10fad651d5cd5c1cc542b2edf368f6944ff43c64927"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-3edd8c96f784.log",
+      "logSha256": "d599ba58e70ee025d02b146c2f13b22a26ac49d5be7a882120b8f8bf2715ca0e",
+      "inputsHash": "45568705eb90daf55e7c3b11c27d707215dca44a48bb461083203cdede5165c6"
     },
     "final/check-expr-doctests/final": {
       "checkId": "check-expr-doctests",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "729cc52d3cceed00d96829a5b0c930537d44a77ffa9b7b12efc6e8abaf6be4bc",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "139e730f78a9a3f034fa3c51bca315cdef5d35fdc1b2e20ee897a7fb1cebfabf",
-      "basisHash": "3a2f596bcc739b759acc9cb51361908b0540c1e6a1ef450d376a1ed7cea1be97",
+      "basisHash": "082764dc358742d6b02a25e6fd9a64bd1657e0ef206f795608173cd9c664eba7",
       "status": "passed",
       "exitCode": 0,
       "testCount": 7,
-      "durationSeconds": 1.8302,
-      "recordedAt": "2026-10-25T17:25:46Z",
+      "durationSeconds": 1.3411,
+      "recordedAt": "2026-10-25T18:28:39Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/s5-finish-final-9f83ced96172.log",
-      "logSha256": "ba651f00a82ee1c069e4f3d8de9da4846ae953e69b313f6825fa31f0dc62bbbe",
-      "inputsHash": "68ada3de8d128b0805003d4043068236715b60b55d868a3f3d67553478da5dac"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-598f96f6dbb5.log",
+      "logSha256": "36d3d7e588fea04769ddf1c0c973abed5e74a50ba4fcb662df35b621fd0cf1b6",
+      "inputsHash": "7180debd7067ea9395c5ef460fc7e5accbd88ff540231ecf5aeee4d20db6da75"
     },
     "final/check-docs-index/final": {
       "checkId": "check-docs-index",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "e52e7289336bdd61962dc492eee50dc429cdee648d1062673f5e06c59471e60e",
-      "basisHash": "9660d5c301f3dca8501d352c68fcda62d81d8ea4745c17d21777ce34ce6e1452",
+      "basisHash": "34c06ffffb5e6adbf9cba2dfb9d94e737d3467c12f26c5c6b8377f261c8267eb",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0173,
-      "recordedAt": "2026-10-25T17:27:01Z",
+      "durationSeconds": 0.0231,
+      "recordedAt": "2026-10-25T18:28:39Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/s5-finish-final-831fe13ab74b.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-0ae375510218.log",
       "logSha256": "e65830437d3bfb37b33333dda924825bbb9514f5fe391524952cacc44648b6c7",
-      "inputsHash": "5b36bddff9cb4179e6b7d2866315049cfbec90681ee6337bec8c2de1425fedbc"
+      "inputsHash": "0bd51427873eb5ecc0e6e0552693f30904160c14441f605a1a3bf29fd82050fc"
     },
     "final/check-value-serde/final": {
       "checkId": "check-value-serde",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "608d926603c0c722ae7292c8ec2b7a2e2f5614bf9484903156689a50e2a1beca",
-      "basisHash": "46145a1d4391d60d01b135b9a6250d89bdfd804b313515235407eb7abfb76f6e",
+      "basisHash": "8aafe0546d92b7013f383b902d3114c2ba24946eb93a2e9245b292ffe2c1cbc5",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.5397,
-      "recordedAt": "2026-10-25T17:28:15Z",
+      "durationSeconds": 0.5671,
+      "recordedAt": "2026-10-25T18:32:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-7c43ab19391d.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-80c06eb36dbd.log",
       "logSha256": "58632a8dca524832ecd4659dbaae8203d283ad2097142d9dd966f81a3143b3ef",
-      "inputsHash": "091a2337e90cce19b7daf5adab790454750d0869d10a2b596ef47f04f048b8e5"
+      "inputsHash": "2cac2037e3542ffc3c4081b21f72313d6e1c9d4f4b3c73a50bbda675837017ae"
     },
     "final/final-fmt/final": {
       "checkId": "final-fmt",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "1a6f66da2f1dee6b1855e17f8c0e47a46511a4de45d9d028e5e4ec71a302c777",
-      "basisHash": "cf510cc53cd0ca214ea2abe8c8730bfbdf77c96b2ae67653d94dc3e5e319a65c",
+      "basisHash": "6098c0ce141a2bc31e77078fdc76aae8ef05274fd8bc909bf41b4c9d06bdaaae",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.1866,
-      "recordedAt": "2026-10-25T17:28:15Z",
+      "durationSeconds": 0.1655,
+      "recordedAt": "2026-10-25T18:32:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-132d27b369f3.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-61b7fc0dc062.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "final/final-clippy/final": {
       "checkId": "final-clippy",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "531a67fae9bcea4038242b5b35ff1462a955c21158ff9ca84776cc471644789e",
-      "basisHash": "885c09cfedcf48d755c4b5909327bce264f20d5b8fc4f7eed506ef5dd3291d9d",
+      "basisHash": "dfaa2103254e8879cb067027a7114beb8fbff17ad117176e0fada070c452f871",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.3296,
-      "recordedAt": "2026-10-25T17:28:16Z",
+      "durationSeconds": 0.1557,
+      "recordedAt": "2026-10-25T18:32:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-dc2829d74bd0.log",
-      "logSha256": "141b65dd5139549fdc650cd397a5d6ef53f96fec14074e67569f6a2cb840c833"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-32b85c5ddba8.log",
+      "logSha256": "4cf86278c1e6d659943a46a3d7e3da429ac15be90f0f17742e24ef85228e7d3e"
     },
     "final/final-wasm-default/final": {
       "checkId": "final-wasm-default",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "b681bff9c4fb5aaf934ca616a1ec38ab144605c5e54e32b721f0d35090e32a3a",
-      "basisHash": "4511f6fdc865b378e0d0b7db294135aa35cae75343b3524b31f334a2f096df0c",
+      "basisHash": "9eb2088e43b8939d7d407a772457eff7b362e33264c10eafb11c575b0ba2114b",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.8822,
-      "recordedAt": "2026-10-25T17:28:17Z",
+      "durationSeconds": 0.0685,
+      "recordedAt": "2026-10-25T18:32:16Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-abdaed6b1296.log",
-      "logSha256": "c2ec7d4e54f1903c32ea0027ed0a9cb46af268a6314d02cc0d82e7a600a81baa"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-8437e63e19c2.log",
+      "logSha256": "02db5a66fa0c60ca8618bd08aac556eac4f3ec863e8630a0d353dba6a0f6e126"
     },
     "final/final-package/final": {
       "checkId": "final-package",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "62bde17f5b3109bf88be86bd0504acf6ef18930b3875b207b6b5b8aa5cce683e",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
       "definitionHash": "9234df311b3ef66915f2ac2efdc255ea93eff9f838e4d6e02c9e4e3e2ab0bc58",
-      "basisHash": "c49cae0ceac73f58a236e79900c316c8e77ee3dde3b28e7d463865ff2565f28b",
+      "basisHash": "97b608dc979e12e4fcd3f7fd2f8aa635626a6063c603c9663524d1b4414b1e78",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 8.8162,
-      "recordedAt": "2026-10-25T17:28:25Z",
+      "durationSeconds": 7.4521,
+      "recordedAt": "2026-10-25T18:32:23Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-945992a6bc4a.log",
-      "logSha256": "31c022fe62f5d154aa634adb27f33b92236e59e46cb707a15b3268a81825b596"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-a455083d6a34.log",
+      "logSha256": "cb1519255dae2eecd475913f9380b1cfbd95b4d1ea4fe96952899bbb566654a6"
     },
     "s6-final-repair/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
@@ -1158,6 +1206,278 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-7f0cfb9e90dc.log",
       "logSha256": "f99b8d79d61fd07bd7610db451515d1f1db159bd946b302618bc1db4f1ccbe2c",
       "inputsHash": "07774c27f96631837b2508b343381f518ee3747f65bf849e1e213220641f66f0"
+    },
+    "final/check-expr-stack-top/final": {
+      "checkId": "check-expr-stack-top",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
+      "definitionHash": "1de40c4d1e525892ab0ac0ca4c1dffa6c9e9550652d953d0dcbfce5da7c2da4b",
+      "basisHash": "c1cb6ee1a510640d82039d6336bb87473f38c34838dd68ac4fdfa41ede3de662",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.1445,
+      "recordedAt": "2026-10-25T18:28:39Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-b12d43d4baf6.log",
+      "logSha256": "1af24bc8c2575cd900c52f33cd80a44f17cb8ef32f883b475922c246747499d1",
+      "inputsHash": "471a996e91cfc0ddc5f97cf73b9bfd2a5a0ac6af751821ed6368304f0e96c475"
+    },
+    "final/check-expr-module-state/final": {
+      "checkId": "check-expr-module-state",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
+      "definitionHash": "9251be6ef978aa9dd39fb63ca79a93dfaae3cbab3f261c1e59a0a08be7377b98",
+      "basisHash": "366e31cade5ca3f48ce23e1821e57dd24426a17c2879d2912118d5173588039f",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.1379,
+      "recordedAt": "2026-10-25T18:28:39Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-7b3b7a7117cd.log",
+      "logSha256": "22b358475b49d28f92d057ce0d10da53a8394be0f294198dc648434700e9a8ac",
+      "inputsHash": "2f22c0f6276dacbdabd027552b5258e0d3121f93e813d0162cdcb276e21215fb"
+    },
+    "final/check-expr-diagnostic-names/final": {
+      "checkId": "check-expr-diagnostic-names",
+      "boundaryId": "final",
+      "phase": "final",
+      "batchId": "d4f191ba52f9297ab3e294d3364a0c0ac4f07988ebeaaadc85e3a9d599cc4a6e",
+      "definitionHash": "fa350b62c561b805addeb2106b17851e7be4a5ffb1c8b715548f992450a9f25f",
+      "basisHash": "73e79f8e4666f454f01ab59aae3c4cc95121d39636646184df98ba0c3801e856",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 2,
+      "durationSeconds": 0.1042,
+      "recordedAt": "2026-10-25T18:28:40Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s6-final-repair-final-da6f96611da6.log",
+      "logSha256": "b7ebcec43f2bf89cdd28be4b0158da9c428d9c9f48bad1cf2883905f46914916",
+      "inputsHash": "40b8e7761ef9e24b9dce982dc15cc700304c86cabcd722b9cd982f3695484cf0"
+    },
+    "s7-final-repair-2/check-expr-sandbox/final": {
+      "checkId": "check-expr-sandbox",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "461bc5dd398e5a9742434c88b2bc8d391bf40ce3e3957a5f5674b7bb348675ba",
+      "basisHash": "ec4ea4eac1e6eeceb00d15347377da9dab5f6bceb67885e1bbed1393d11e4a0c",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 22,
+      "durationSeconds": 1.14,
+      "recordedAt": "2026-10-25T19:37:48Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-f1445b3e7b53.log",
+      "logSha256": "5457e535fb3e82937eab41428a198c169d5f192021b3d3a0964ea57b4efd2e40",
+      "inputsHash": "dcb39aa76b6465460ad63a9d19e4475fb25c3d9e11fde439664c54715d8acbfb"
+    },
+    "s7-final-repair-2/check-expr-apis/final": {
+      "checkId": "check-expr-apis",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "006469f12c6e84853b3c17b05cd495d30714016a033d63dbe13b0d22a4b17d60",
+      "basisHash": "5d707f226c7b0390ac6dda784ab5adf954ddf9c048200e6ee2b16eda034c76ed",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 6,
+      "durationSeconds": 0.0819,
+      "recordedAt": "2026-10-25T19:37:49Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-5612bcc83499.log",
+      "logSha256": "ae7b7826cca337f11fc5fe2829fb5ec035be7218a4e0d941900851bdfe8e6b71",
+      "inputsHash": "2c0717ab57758e5df034f27982b12540fc4ddcfcfca9ef8dadb8d4f1c2727c9c"
+    },
+    "s7-final-repair-2/check-expr-wasm/final": {
+      "checkId": "check-expr-wasm",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "88cf855953b42e2dc567e43909f718b5431b92e5e468bd4ed8d5217326c58431",
+      "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
+      "basisHash": "7d731ab51d55f883bf93eae175243c3c8e7951d5ac2f8adf4e09121d11e6c4f8",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 3.1227,
+      "recordedAt": "2026-10-25T19:38:08Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-1fd2d88aead9.log",
+      "logSha256": "db1177ea223ef8616d7bbd787e8292eb67259294d4dda72d53ea510986791fd9",
+      "inputsHash": "33ec4d8d596733013184e439e83bb972da57c2e2de879149a1a8dc7d8b5f6ef0"
+    },
+    "s7-final-repair-2/check-color-values/final": {
+      "checkId": "check-color-values",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "99362a691033da2f2d90b82aff5b91eebbdbe9e8e1eeb9000c353a4898778e89",
+      "basisHash": "723ba5fceacb9ea0394c74f62491e2d96a6c3112f0804574a90f654508a4cd7a",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 16,
+      "durationSeconds": 0.0837,
+      "recordedAt": "2026-10-25T19:37:53Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-27c418934cdb.log",
+      "logSha256": "e78c4010c0c996d08e50a856a95f00269d4d2c2af92b2431f34e42fe6ecfd717",
+      "inputsHash": "3a67c3f1c66f1768f1dd429998f12d5584c1179d4e12cb95eff47a76f801967f"
+    },
+    "s7-final-repair-2/check-expr-color/final": {
+      "checkId": "check-expr-color",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "fc2b20189fdd40de56a854acf6e0a1e6bb9fe5301a6d6f7220a89e35cdca62c3",
+      "basisHash": "2b4cd63ebad0ca9b02d58bc2855aba025f21dafc6c9f3130e897f78b1697172b",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 0.1232,
+      "recordedAt": "2026-10-25T19:37:53Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-ae2b3fae75fe.log",
+      "logSha256": "267a924647640860e130a16020ba325ecc9664a037183128348ee5895e0c3c7b",
+      "inputsHash": "ee07af03668b95d438b268d224bd11a10f7bec4673573e997f530cb7075115bd"
+    },
+    "s7-final-repair-2/check-expr-builtin/final": {
+      "checkId": "check-expr-builtin",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "d2005add7707ed9fe718a48a9e56f159ec4b61d1d8306312421ba8daf05b29bb",
+      "basisHash": "985951c84c16711e529ffd4c087de6a9f3f33606330188850f2676188cb9f4f1",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 4,
+      "durationSeconds": 0.1291,
+      "recordedAt": "2026-10-25T19:37:53Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-0e61a3bb0833.log",
+      "logSha256": "9ee276931d7f217c37ae321db7c1a60e72ae6fd9086b3f41c323052cb21aaa34",
+      "inputsHash": "35b1bd97ecf7b30c2e0b9c272c522f331e9e4b8a52ddfa0d914626bef84f7dcb"
+    },
+    "s7-final-repair-2/check-expr-doctests/final": {
+      "checkId": "check-expr-doctests",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "139e730f78a9a3f034fa3c51bca315cdef5d35fdc1b2e20ee897a7fb1cebfabf",
+      "basisHash": "579200a622a50fa18a6066c5121b8bb0a4ba56cf02f0c18aaebc865c58d1e70b",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 7,
+      "durationSeconds": 1.7191,
+      "recordedAt": "2026-10-25T19:37:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-6e3fedcfeacd.log",
+      "logSha256": "28063768da6631d500ae6b968d9917309b0375558151cfeeb63acbda058e4e35",
+      "inputsHash": "aede042b9f022716a811676e26e8ae8ff9cb62ac7588e561d483755a6d62e1c9"
+    },
+    "s7-final-repair-2/check-docs-index/final": {
+      "checkId": "check-docs-index",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "e52e7289336bdd61962dc492eee50dc429cdee648d1062673f5e06c59471e60e",
+      "basisHash": "2df718784619ec1d8568dabd67a708aea5dfafbb2598f221cb012ad8b78e7b8e",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0227,
+      "recordedAt": "2026-10-25T19:37:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-566bddd07269.log",
+      "logSha256": "e65830437d3bfb37b33333dda924825bbb9514f5fe391524952cacc44648b6c7",
+      "inputsHash": "12542b00757ad89ee2667060fcae1bd1b185021fec14aa41960fb6671e0770fd"
+    },
+    "s7-final-repair-2/check-expr-stack-top/final": {
+      "checkId": "check-expr-stack-top",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "1de40c4d1e525892ab0ac0ca4c1dffa6c9e9550652d953d0dcbfce5da7c2da4b",
+      "basisHash": "669c00e1e7b3451f732cc5e5ee32bf1a20b4bbe3c4ddb7e313ef6754a63f3b08",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 9,
+      "durationSeconds": 0.147,
+      "recordedAt": "2026-10-25T19:37:55Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-483a8b456d29.log",
+      "logSha256": "c2261b71b2c1120a34daea2a840791ac9c7773f412941afbcdef4fdf40b4904f",
+      "inputsHash": "8367197b284f87a53c6b9f9ae4d42c01932e9009cb768e79fc35de8286401c7f"
+    },
+    "s7-final-repair-2/check-expr-async-overflow/final": {
+      "checkId": "check-expr-async-overflow",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "65aad9fdff5f47e491d79a03a1a163952c475fdb043646f266cfcef44a0d97a0",
+      "basisHash": "cc607b8036aac29517776b4112975e64832c34adbfd40b3b2c6fd1e90127fdbd",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 11,
+      "durationSeconds": 0.2115,
+      "recordedAt": "2026-10-25T19:37:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-12d7535cf225.log",
+      "logSha256": "57f92f16975e0eca71e2cf7c55cd6541711a7139378c6b046f66c8d295473249",
+      "inputsHash": "1ae5a79b035b4862faebf2b8abe67cb0e0f2ef7bab663aa875c79f6fff558904"
+    },
+    "s7-final-repair-2/check-expr-shared-compilation/final": {
+      "checkId": "check-expr-shared-compilation",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "b563b56e117b927b0463237f7a57129b22d7a9d849a52a0303967743e84a8012",
+      "basisHash": "89f45c1ee85e49ef3b7cc57e1e8f2d55473d1b96b0a94f75c2ff763e621d4802",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 1,
+      "durationSeconds": 0.0996,
+      "recordedAt": "2026-10-25T19:37:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-e046c6eba401.log",
+      "logSha256": "a9e80bc0bb7051fc4431ba5557d6e529340e83ff683cab11f11fd57394243b3a",
+      "inputsHash": "3b9097cc286e3ca3dbd94ee7d08a47dee41f93e695fdd2a924fc02d7dc882c91"
+    },
+    "s7-final-repair-2/check-expr-native-finite/final": {
+      "checkId": "check-expr-native-finite",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "35429f782261c1c192e78ce46572150769483e118de709b6312e2e089d9e0032",
+      "basisHash": "ddaef75b470caec9b6581999a4b26332a19af1dbd256d880d471aec8860f9c66",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 1,
+      "durationSeconds": 0.1123,
+      "recordedAt": "2026-10-25T19:37:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-471b5ce2b860.log",
+      "logSha256": "600901121a0c4287566530282ec4ad035e880d7ae6806c6256e4b845f9762c15",
+      "inputsHash": "408326296da6c4efc03adc435ebfa7ee08dda29da754bf66316ea86716426c01"
+    },
+    "s7-final-repair-2/check-color-gamut-contrast/final": {
+      "checkId": "check-color-gamut-contrast",
+      "boundaryId": "s7-final-repair-2",
+      "phase": "final",
+      "batchId": "adc40cb30f561be9cb4936b1908bd9ef5711ae710e204fa9d988f4bf07722568",
+      "definitionHash": "685c5f716ebe2d7053a2816f1a4c2e95f3c2a7d9eda3bb7cde9587239a157d60",
+      "basisHash": "d098aaacfb3c00f4adea3a6a2c6d09d0dabea9db25ded3e11cd2713fd33bc6a4",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 3,
+      "durationSeconds": 0.0745,
+      "recordedAt": "2026-10-25T19:37:56Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s7-final-repair-2-final-85f01485f280.log",
+      "logSha256": "f9d3345165b13b984dd15cc06ef765bdbcdd2f51183935fe29f0cd4e3ee932af",
+      "inputsHash": "adc1bf0cff7973f6331c840e8cdb3fdd1ee15bbca3f997f0a22c9929975d43c7"
     }
   },
   "reviews": {
@@ -2175,6 +2495,307 @@
         "S6-F6"
       ],
       "recordedAt": "2026-10-25T18:31:27Z"
+    },
+    "s7-final-repair-2": {
+      "reviewerId": "reviewer-s7-final-repair-2-independent",
+      "snapshotId": "88cf855953b42e2dc567e43909f718b5431b92e5e468bd4ed8d5217326c58431",
+      "criterionIds": [
+        "EVAL-6",
+        "SBX-4",
+        "SBX-5",
+        "NAT-1",
+        "NAT-2",
+        "NAT-3",
+        "DOC-1"
+      ],
+      "verdict": "passed",
+      "acknowledgedDispositions": [
+        "criterion:SBX-2"
+      ],
+      "anchors": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "c55b0c4d44f4e63f1e51bbc6b5530adbd7ef0aaf1de219030cac17bb26c922eb"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-6",
+            "NAT-1",
+            "NAT-3",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "0858423b4357861af3175c65a55f00e174e0e78acdae8b063c437ab0fbaa02d8"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "sha256": "6946221c5482ae597fa929924c747d49e464310a0247540a95219e31187f8a53"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/color.rs",
+          "kind": "source",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/resolver.rs",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6"
+          ],
+          "sha256": "41e1db8f56f78502c18adcde37754a9a047c7aea0b38845aabb51f6478e0092c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/token_resolution.rs",
+          "kind": "source",
+          "criterionIds": [
+            "EVAL-6"
+          ],
+          "sha256": "91394997d944d32d1b6531ad7f8d065741c2f7ba8da88fa55836266bcaf95589"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6",
+            "NAT-3",
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "5e8d05bff3e4034819a041630cb2c994d0f759a38ae9cf82f411ecaa63a514b2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/09-incremental-resolution.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6"
+          ],
+          "sha256": "bae0bcc08583542414390d437b51df3ae01d8d6ed2f4b39a916553490317d760"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/13-api-reference.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "EVAL-6"
+          ],
+          "sha256": "347a79b1f0ad9c1e0e1015de970ff31dc2732f03f871642b1c63d0a01a99d8d5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/14-architecture-and-contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "17242aabe73913282248f8a4240ba347f8add90a078a2e404c8c588e622921f4"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/05-value-types.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1",
+            "NAT-2"
+          ],
+          "sha256": "c781c610502c7c2c6e6604c4b094771a91fdb5172beaf23675d0094a43783470"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/expressions.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "baa9bc8bfc05eb5fe4ed468b23684d21c6ef8c369432bcc6479893e57ad4ba57"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/incremental.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "6660ec484e36d174c23df8b87ea80fee7207d9c13cb13383310f057dce9705e9"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/api.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "0e5415fd6d67c41418b635effc170fce9dd17c4903beff84d82be8a67edd7f73"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/contributing.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "cd7c90f613f8ea7b8d206567b1b53569992a3297c6fc7a87437d886ed900a25f"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/value-types.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "77dfa4f98272dab91bac747abd6e73b7a4627c494126db2d098092aab725c592"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/index.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "5f6c47a5011414ae4196c9b481b293df80e912de3fedef0517adf2d92ada5dde"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-4",
+            "SBX-5"
+          ],
+          "sha256": "875c046b45de4dd10977e4bb7c167d7994d278a45a2e89250c97551571a1fd78"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_shared_compilation.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-6",
+            "SBX-4"
+          ],
+          "sha256": "c2cbce54ed599295f81c1297d57f4ccef3507c73416a164136217a6b9f35e272"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_native_finite.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-1",
+            "NAT-3"
+          ],
+          "sha256": "6dc55d36c59e192796c8ce41dd576cab68c70e508c59ba832dc825535c52c127"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_builtin.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-1"
+          ],
+          "sha256": "f5a29a64125c3c60d6305ecf1116e2a1b38000154c91aee28cb34efd0efeda93"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/color_gamut_contrast.rs",
+          "kind": "test",
+          "criterionIds": [
+            "NAT-2"
+          ],
+          "sha256": "1845c0e2c2c97b35cd7e8a37b190b363a426c554ab71b9c6a195ef0411131a3c"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_module_state.rs",
+          "kind": "test",
+          "criterionIds": [
+            "EVAL-6",
+            "SBX-4"
+          ],
+          "sha256": "cb0711097637ad2f1b71c94672e2744572f52e2e0dbf6961a456819692759c74"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_stack_top.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "sha256": "46fb0c55eabdc093da74a4cdf76169d328e17917a4f420335175ca0c035c5fa5"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md",
+          "kind": "test",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "5e8d05bff3e4034819a041630cb2c994d0f759a38ae9cf82f411ecaa63a514b2"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/nesting.rs",
+          "kind": "source",
+          "criterionIds": [
+            "SBX-5"
+          ],
+          "sha256": "5e18538f5195003e813bfac5fe28ca14be19be54db35371887e98008a491a303"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/limits.md",
+          "kind": "source",
+          "criterionIds": [
+            "DOC-1"
+          ],
+          "sha256": "95b181e1fc71fdf9dbee665eecf039ee1c3a3ff2766649afdad6cfab785069a3"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
+          "kind": "test",
+          "criterionIds": [
+            "SBX-5",
+            "SBX-4"
+          ],
+          "sha256": "d6f7ec2ef05a3f03646ae6584d2b2f792fd48c05d90a0de064b1c03b2a50e580"
+        }
+      ],
+      "summaryMarkdown": "Passed (fourth pass).\n\n**Findings:** S7-F1 to S7-F8 are all resolved: S7-F3 by the owner's option A (SBX-5 supersedes SBX-2), S7-F8 by passing redeclared parameters through.\n\n**Disposition:** `criterion:SBX-2` (superseded, decided by the owner) matches the recorded decision. SBX-5 repeats SBX-2 in full plus the precisely named exception, and t26 owns it with the stack/sandbox/async-overflow groups.\n\n**Behavior re-probed** (`artifacts-temp/agentx/dtcg-expressions/s7-probe` `cases1` to `cases10`, against HEAD via `s7-probe-head`):\n- Overflows fail in async bodies, async parameters, every syntactic `return` close, wrapped errors and uncaught `SuppressedError`. The only non-failures are the excepted `return` forms and deterministic outcomes (the pattern-nesting `SyntaxError`, `then` callbacks that never run).\n- RegExp compatibility matches HEAD. Module names are digests. The color and non-finite-argument repairs hold.\n- Docs describe the mechanisms and the exception accurately.",
+      "findingIds": [
+        "S7-F1",
+        "S7-F2",
+        "S7-F3",
+        "S7-F4",
+        "S7-F5",
+        "S7-F6",
+        "S7-F7",
+        "S7-F8"
+      ],
+      "recordedAt": "2026-10-25T19:39:37Z"
     }
   },
   "checkpoints": {
@@ -2225,6 +2846,14 @@
       },
       "reviewHash": "52fc200ad02789b051aa54a81c66834bc6cff8c7473bdba7d86bf386712126e1",
       "recordedAt": "2026-10-25T18:32:03Z"
+    },
+    "s7-final-repair-2": {
+      "snapshotId": "88cf855953b42e2dc567e43909f718b5431b92e5e468bd4ed8d5217326c58431",
+      "commits": {
+        "dtcg": "15f27721b712bf34532b73ef28eb060115be7c10"
+      },
+      "reviewHash": "eb7be807e22e75a17028dd1281938ba80e3e6fd029741bc936a620f6f92af1be",
+      "recordedAt": "2026-10-25T19:39:56Z"
     }
   },
   "findings": [
@@ -2881,46 +3510,87 @@
       "id": "E-F1",
       "boundaryId": "final",
       "severity": "major",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
-        "SBX-3",
-        "EVAL-5",
+        "SBX-4",
+        "EVAL-6",
         "DOC-1"
       ],
-      "descriptionMarkdown": "**Expressions share mutable state through imported module objects, so one expression changes what another computes and affected resolution diverges from a full resolution.**\n\nExpected (SBX-3, EVAL-5): one expression cannot affect another; results do not depend on evaluation order; `apply_affected` equals a full resolution. The docs repeat this: `docs/15-expressions.md` says globals and built-ins are frozen \"so no expression can change what another sees\" and Determinism says results are equal \"in any evaluation order\". `ResolvedTokens::apply_affected` is documented as equal to a full resolution.\n\nObserved: each session evaluates a module once (MOD-5) and hands every importing token the same live objects. Only native exports and inputs are frozen (`engine.rs` `native_wrapper`, `sandbox.rs` `deepFreeze`). Host and document JS/TS module exports are not. Probe (`artifacts-temp/agentx/dtcg-expressions/final-probe`, host module `shared` = `export const box = { n: 0 };`, tokens `a` and `b` both `(box.n += 1, box.n)`, and `b` also has an input `{src}`):\n- full resolution gives `a=1, b=2`;\n- after editing `src` with `replace_json_and_resolve_affected`, the affected result gives `b=1`, but a full resolution of the edited document gives `b=2`, so `tokens == full` is `false`.\n\nThe step-budget retry in `Session::evaluate` re-runs a call that tripped after it may already have written to such objects, which adds order dependence. The Determinism section's last sentence (\"modules should keep no state that tokens change\") puts the burden on module authors, but it is the document's expressions that write here. No test covers module-exported objects (`expressions_sandbox.rs` covers only `globalThis` and the prototypes).\n\nRepair: deep-freeze each JS/TS module's namespace export values after the module's top-level evaluation, or freeze imported values in the generated wrapper, so expression writes fail as they do for built-ins. Module-internal `let` state stays the module author's responsibility, as documented. Add a test group case: a token's write to an imported object is a caught or uncaught `TypeError`, other tokens see the original, and `apply_affected` equals a full resolution with an imported host module. Also update `docs/15-expressions.md` (sandbox bullet and Determinism), `docs/09-incremental-resolution.md` and the website mirror. If the owner instead accepts shared module objects, amend SBX-3/EVAL-5 and the docs and `apply_affected` doc comment to state the exception explicitly."
+      "descriptionMarkdown": "**Expressions share mutable state through imported module objects.** Resolved by the owner decision of 2026-10-25 (option A, widened to state that any code changes, token expressions included): SBX-3/EVAL-5 are superseded by SBX-4/EVAL-6.\n\nImplementation checked:\n- `Compiled::module_code` with `FREEZE_SOURCE` `freezeAll` deep-freezes each JS/TS module's namespace and top-level bindings after its top-level code. Inheritors keep accepting assignments through tamed accessors.\n- The internal module cannot be imported (`ImportScan::internal`, `ModuleTable::resolve`).\n- `tests/expressions_module_state.rs` covers frozen exports and internals, `apply_affected` equal to a full resolution for frozen modules, document modules, and shared collections.\n\nThe remaining unqualified statements in the docs and the `apply_affected` doc comment are tracked as E2-F3.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_module_state.rs",
+          "symbol": "affected_resolution_equals_a_full_resolution"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_module_state.rs",
+          "symbol": "collections_a_module_holds_are_shared_within_a_resolution"
+        }
+      ]
     },
     {
       "id": "E-F3",
       "boundaryId": "final",
       "severity": "major",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
         "SBX-2",
-        "SBX-3",
+        "SBX-4",
         "EVAL-2"
       ],
-      "descriptionMarkdown": "**QuickJS's stack limit is anchored where the session was created, not where each evaluation runs. Stack overflow becomes catchable, the recursion allowance depends on evaluation order, and a trivial expression can fail.**\n\nExpected (SBX-2, SBX-3): runaway recursion fails with `DtcgError::Expression` (stack overflow) that expression code cannot catch. Equal documents give equal results in any evaluation order. A token reached through aliases evaluates like any other (EVAL-2).\n\nObserved: `Context::with` calls `update_stack_top`, which is a no-op without rquickjs's `parallel` feature (`quickjs-jit-core-0.14.1/src/runtime/raw.rs:303`). So `JS_UpdateStackTop` runs only in `JS_NewRuntime`, that is in `Session::new`, at the stack depth of the first expression token. `Guard` measures its threshold from each evaluation's `begin()`. When a later evaluation runs deeper on the Rust stack (resolver recursion through alias hops or nested expression inputs), QuickJS throws its ordinary, catchable `RangeError` before `Guard` trips, or it cannot run at all. Probe (`final-probe`, `CHAIN=…`), token `deep` reached through `k` alias hops, with or without an earlier expression token `early`:\n- test profile (as the repo's tests build): `[1,2,3].map(x=>x*2).reduce(...)` gives `12` without `early`, but `Error: Maximum call stack size exceeded` at 32 and 63 hops with `early`;\n- release: `(() => { let d = 0; const f = () => { d++; f(); }; try { f() } catch (e) {} return d })()` without `early` fails uncatchably (\"stack overflow: the evaluation exceeded the stack limit\") at every depth. With `early`, the same expression catches the overflow and resolves to `227` (8 hops), `157` (32 hops) or `67` (63 hops). The result depends on which token started the session.\n- independently of depth, `String(deeplyNestedArray)`, `.join()` and template literals over nested arrays throw a catchable `RangeError: Maximum call stack size exceeded` in the test profile even at the top level (`try { String(o) } catch {}` returns normally).\n\nRepair: re-anchor QuickJS at every evaluation. Inside each `context.with` that starts an evaluation (`call`, `compile_expression`, `evaluate_component`, `drain_counter`), call `rquickjs::qjs::JS_UpdateStackTop(JS_GetRuntime(ctx.as_raw()))` right after `Guard::begin()`. Keep `Guard`'s threshold relative to the same point, and make sure any QuickJS stack-overflow exception trips `Trip::Stack` (for example by also tripping when the caught exception is QuickJS's stack-overflow `RangeError`), not only when an allocation crosses the threshold. Add test cases to the sandbox group: an earlier expression token followed by an expression reached through 63 alias hops (and through nested expression inputs) evaluates a trivial expression, and its recursion fails with the same uncatchable error and allowance as without the earlier token; `try { String(nested) } catch {}` and the join and template cases fail uncatchably. Run the case on wasm32 too (PLT-2)."
+      "descriptionMarkdown": "**QuickJS's stack limit was anchored at session creation.** Resolved:\n- `engine.rs` `begin()` calls `JS_UpdateStackTop` with `Guard::begin` at every evaluation, module evaluation and compile.\n- `check`/`note_overflow` trip on QuickJS's call-stack `RangeError` and the regexp compiler's `SyntaxError: stack overflow` in every instrumented `catch`/`finally` form.\n- Rerun (`expressions_stack_top.rs` cases and probe mode `async`): alias depth 0-63 with or without an earlier token, nested inputs, and nested `String`/`join`/template, all through `catch`.\n\nA residual catch path through async functions and `SuppressedError` is new finding E2-F1.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_stack_top.rs",
+          "symbol": "caught_recursion_fails_however_deep_the_evaluation_starts"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_stack_top.rs",
+          "symbol": "no_catch_or_finally_form_handles_a_stack_overflow"
+        }
+      ]
     },
     {
       "id": "E-F2",
       "boundaryId": "final",
       "severity": "minor",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
         "EVAL-4",
         "DOC-1"
       ],
-      "descriptionMarkdown": "**The redacted expression diagnostic can carry document or input text through the error class name.**\n\nExpected (runtime/source-inspection rule \"Diagnostics must never retain document text or JSON values\"; `docs/15-expressions.md` says the diagnostic keeps only the error's kind and position, \"never its text\"): `DtcgDiagnostic::from_error` for `DtcgError::Expression` reports a fixed kind.\n\nObserved: `redacted_expression_message` (`crates/dxn_dtcg/src/diagnostics/mod.rs`) keeps any message head that is alphanumeric and ends with `Error`. That head is the thrown error's `name`, which expression code controls. Probe: input `secret = \"Hunter2\"`, `js` = `(() => { const e = new Error(\"x\"); e.name = secret + \"Error\"; throw e; })()`, gives the diagnostic message `Hunter2Error at line 1, column 24`.\n\nRepair: map the head only when it is one of the standard error names (`Error`, `TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`, `AggregateError`, `InternalError`), and use `Error` otherwise. Add a case to the TypeScript/diagnostics group with a custom error name built from an input."
+      "descriptionMarkdown": "**The redacted diagnostic carried text through the error name.** Resolved: `redacted_expression_message` (`diagnostics/mod.rs`) keeps only the names in `STANDARD_ERRORS`, otherwise `Error`. Positions are digits only.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_diagnostic_names.rs"
+        }
+      ]
     },
     {
       "id": "E-F4",
       "boundaryId": "final",
       "severity": "minor",
-      "status": "open",
+      "status": "resolved",
       "criterionIds": [
         "DOC-1"
       ],
-      "descriptionMarkdown": "**The docs do not tell consumers that an unoptimized QuickJS shrinks what the default stack limit allows.**\n\nExpected (DOC-1, \"the sandbox and limits\"): the documented stack behavior holds for consumers' builds.\n\nObserved: the workspace sets `[profile.dev.package.quickjs-jit-sys] opt-level = 3`. Its own comment says unoptimized QuickJS \"uses several kilobytes of stack per JavaScript call\", and the setting exists so the default limit allows the same recursion as releases. Profiles do not propagate to dependents, so a consumer's debug build runs QuickJS unoptimized and gets far less recursion than its release build. The chapter, the website `limits`/`platforms` pages and the API docs of `ExpressionOptions::stack_limit` never mention this.\n\nRepair: state in `docs/15-expressions.md` (sandbox and limits, WebAssembly), the website mirror and the `stack_limit` doc comment that dependents should add the same `[profile.dev.package.quickjs-jit-sys] opt-level = 3` override, or else expect a lower recursion allowance in debug builds."
+      "descriptionMarkdown": "**Debug builds of QuickJS get a lower recursion allowance.** Resolved: the `ExpressionOptions::stack_limit` doc comment (`expressions/mod.rs`), `docs/15-expressions.md`, `docs/11` and the website `limits`/`expressions` pages tell dependents to set `[profile.dev.package.quickjs-jit-sys] opt-level = 3`, or else expect shallower recursion in debug builds.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
+          "symbol": "ExpressionOptions::stack_limit"
+        }
+      ]
     },
     {
       "id": "S6-F1",
@@ -3034,6 +3704,202 @@
           "symbol": "columns_count_characters_after_non_ascii_text"
         }
       ]
+    },
+    {
+      "id": "E2-F1",
+      "boundaryId": "final",
+      "severity": "major",
+      "status": "open",
+      "criterionIds": [
+        "SBX-2",
+        "SBX-4",
+        "DOC-1"
+      ],
+      "descriptionMarkdown": "**A stack overflow is still catchable through async functions and through `DisposableStack`/`using` (`SuppressedError`), so expression code can survive it and its result depends on how much stack the build gives.**\n\nExpected (SBX-2, docs/15 'The sandbox and its limits': a stack overflow 'stops the evaluation even when the code catches it'): runaway recursion, the regexp compiler's overflow and engine recursion fail with `DtcgError::Expression` (stack overflow) however the code handles them.\n\nObserved: the guard trips only (a) when an allocation crosses the threshold, which QuickJS's regexp compiler and nested-array `toString` do not reliably do, or (b) when instrumented `catch`/`finally` code passes the caught value to `check`, which matches only a bare `RangeError`/`SyntaxError`. Two built-in handling paths bypass both. Probe `artifacts-temp/agentx/dtcg-expressions/f2-probe` (release, `opt-level = 3` for quickjs-jit-sys; run `f2probe <mode>`):\n- Async functions catch into a promise that never settles; side effects before the throw stay visible. `(() => { (async () => new RegExp('(?:'.repeat(5000) + ')'.repeat(5000)))(); return 7 })()` gives `7` (mode `async`, A4). With a 100000-deep array `a`, `(async () => String(a))()` gives `7` (A5), and `let x = 0; (async () => { String(a); x = 1 })(); return x` gives `0` (mode `r2`, D1). Plain call recursion in an async function is caught only because its allocations cross the threshold (A1, A6). `Array.fromAsync`, async generators and `AsyncDisposableStack` take the same path.\n- `DisposableStack.prototype.dispose` (and `using` declarations, which work: D5) wrap the overflow in a `SuppressedError`, which `check` ignores. `try { const s = new DisposableStack(); s.defer(() => new RegExp(deep)); s.defer(() => { throw 1 }); s.dispose() } catch (e) { return 'caught ' + e.name + ' / ' + e.error }` returns `caught SuppressedError / SyntaxError: stack overflow` (D3). The same with `String(a)` returns `... / RangeError: Maximum call stack size exceeded` (D4), already at 100 nesting levels (mode `r5`, E2).\n\nThese are the S6-F1/E-F3 failure class through handlers the instrumentation does not see. Whether such code returns normally depends on frame sizes (debug, release, wasm32), so equal documents can give different values across builds.\n\nRepair:\n1. Make `check` (FREEZE_SOURCE) unwrap `SuppressedError` (`error` and `suppressed`, recursively, prototype-checked) and `AggregateError.errors`.\n2. Close the async path. Either reject `async` functions, async generators and `await` at compile time (async code is out of scope), or instrument every async function body with the same check-and-rethrow `try`.\n3. Remove `Array.fromAsync` and `AsyncDisposableStack` in `HARDEN`, or cover them by step 2.\n4. Add cases to `tests/expressions_stack_top.rs`: the async regexp/`String(nested)` cases with an observable side effect, and the `DisposableStack` and `using` cases with call recursion, the regexp compiler and nested `String`. Each must fail as a stack overflow.\n5. If async functions become a compile error, update the SBX-1 test of `(async () => 'x')()` and the docs."
+    },
+    {
+      "id": "E2-F2",
+      "boundaryId": "final",
+      "severity": "minor",
+      "status": "open",
+      "criterionIds": [
+        "SBX-4",
+        "EVAL-6"
+      ],
+      "descriptionMarkdown": "**Tokens with identical expression text share one compiled module named after whichever token compiled it first. Error stacks expose that name, so a result depends on evaluation order and on which tokens a resolution evaluates. This involves no module state, so it is outside the owner's exception.**\n\nExpected (SBX-4, EVAL-6): apart from writes to module state, results do not depend on evaluation order, and `apply_affected` equals a full resolution.\n\nObserved: `Session::evaluate` caches compiled expressions by their generated wrapper source (`engine.rs`, `self.expressions`), but `compile_expression` names the module `dxn.dtcg/expression/{path}` of the first token. `new Error().stack` (or any caught error's `stack`) contains that name. Probe `artifacts-temp/agentx/dtcg-expressions/f2-probe` (release, `opt-level = 3` for quickjs-jit-sys; run `f2probe <mode>`):\n- Mode `stackleak`, L2: tokens `a` and `b` with `js` `new Error('m').stack` both resolve to `\"    at default (dxn.dtcg/expression/a:3:21)\\n\"`, and `b` alone resolves to `...expression/b...`.\n- Mode `r2`, L4: `a` (input `s: {src0}`) and `b` (input `s: {src}`) share the expression `(s, new Error('m').stack)`. After `replace_json_and_resolve_affected` edits `src`, the patched `b` names `expression/b` while a full resolution names `expression/a`, and `tokens == full` is `false`.\n\nRepair: key the cache by token path and source, or name generated modules independently of the token (for example by a digest of the wrapper source). Position mapping does not use the token name. Add a case to `tests/expressions_module_state.rs` or `tests/expressions_sandbox.rs`: two tokens with identical expression text return `new Error().stack`, and `apply_affected` after editing only one token's input equals a full resolution."
+    },
+    {
+      "id": "E2-F3",
+      "boundaryId": "final",
+      "severity": "minor",
+      "status": "open",
+      "criterionIds": [
+        "DOC-1",
+        "EVAL-6",
+        "SBX-4"
+      ],
+      "descriptionMarkdown": "**Several docs and doc comments still state the guarantees SBX-3/EVAL-5 had before the owner's decision, and the contributor tables miss the repair test groups.**\n\nExpected (DOC-1; the owner decision of 2026-10-25 behind SBX-4/EVAL-6): every statement of the isolation and `apply_affected` guarantees names the module-state exception. E-F1's repair asked for this explicitly, including the `apply_affected` doc comment. The architecture and contributing chapters list the new test groups.\n\nObserved:\n- **`ResolvedTokens::apply_affected` doc comment** (`crates/dxn_dtcg/src/resolver.rs:372-375`): 'The result equals a full resolution of the edited documents.'\n- **API references:** `docs/13-api-reference.md:159` and `website/content/docs/api.md:116` say the same.\n- **Incremental resolution:** the bold sentence at `docs/09-incremental-resolution.md:101-102`. `website/content/docs/incremental.md:52` repeats it, and that page never mentions modules or expressions: no 'module edits need a full resolve' bullet, and its full-resolve list omits `provide_module`/`replace_module`.\n- **Landing page:** `website/content/index.md:151` (`// equals a full resolve`).\n- **`docs/15-expressions.md:587-588` and the website mirror:** frozen built-ins mean 'no expression can change what another sees', with no qualifier.\n- **`docs/15:283-285`:** 'everything the module's namespace and top-level bindings reach is deep-frozen', although collection and buffer contents and closure variables are not.\n- **`docs/15:685-686` (Determinism):** opens with equal results 'in any evaluation order' before the exception.\n- **Source comments:** `compile.rs:72-74` ('none of them can change what another sees') and the header of `tests/expressions_module_state.rs:1-3` ('affected resolution equals a full one').\n- **Contributor tables:** `docs/14-architecture-and-contributing.md` and `website/content/docs/contributing.md` omit `expressions_module_state`, `expressions_stack_top` and `expressions_diagnostic_names`.\n- **Native return types:** `docs/15:438-441` says native functions may return 'maps'; only `BTreeMap<String, T>` implements `NativeReturn` (`native.rs`).\n\nRepair:\n- Qualify each sentence above with the module-state exception (results that depend on writes to module state, and module edits), linking to docs/15's module-state text.\n- Mirror docs/09's module bullet on `website/content/docs/incremental.md`.\n- Fix the two source comments and the `apply_affected` doc comment.\n- Add the three groups to both contributor tables.\n- Say `BTreeMap<String, T>` for native return types."
+    },
+    {
+      "id": "E2-F4",
+      "boundaryId": "final",
+      "severity": "minor",
+      "status": "open",
+      "criterionIds": [
+        "NAT-2",
+        "NAT-1"
+      ],
+      "descriptionMarkdown": "**The color API has three accuracy gaps against NAT-2 and its own docs, plus a silent non-finite argument in `dxn.dtcg/color`.**\n\nProbe: `artifacts-temp/agentx/dtcg-expressions/f2-probe` (release, `opt-level = 3` for quickjs-jit-sys; run `f2probe <mode>`) mode `color`; reference values were checked independently against the CSS Color 4 sample code (`artifacts-temp/agentx/dtcg-expressions/f2-color-probe`).\n\n1. **HSL and HWB ignore the sRGB gamut.** `convert`/`clamp_to_gamut` to `hsl`/`hwb` do not clip into the sRGB gamut that `in_gamut` uses for them. `color.rs` `from_xyz` derives HSL/HWB from unclipped sRGB, then clamps each component. Display-P3 `[1,0,0]` to `hsl` gives `[356.517, 100, 43.316]` (`#dd000d`), while to `srgb` it gives `#ff0000`. Expected: the sRGB-clipped color, `hsl(0, 100, 50)`. Repair: clip the sRGB coordinates to [0,1] before `srgb_to_hsl`/`srgb_to_hwb` when converting or clamping.\n2. **`contrast` can exceed its documented range.** `Color::contrast` is documented 'from 1 to 21', but `luminance` is unclamped Y, so `oklab [1,-0.3,0]` against black gives `23.3189`, in Rust and in JS `contrast`. Repair: take the luminance of the sRGB-clipped color, or clamp Y to [0,1].\n3. **Near-gray round trips miss the 1e-9 bound.** In-gamut near-gray colors do not round-trip within 1e-9 through `lch`/`oklch` (and `hsl`/`hwb` at smaller offsets). `powerless`/`settle_hue` write the hue as 0 below chroma 0.0025 (LCH) or 8e-6 (OKLCH) but keep the chroma. sRGB `[0.5, 0.5, 0.500003]` through `lch` comes back with error 2.7e-6, and through `oklch` 2.8e-6. The tests skip the hue below chroma 1e-4 and have no near-gray sample, and the `convert` doc lists only the A98/Rec. 2020 noise exception. Repair: zero the hue only at rounding-noise chroma in conversions, keeping the larger thresholds for powerless-hue handling in `mix`, and add a near-gray round-trip test. Otherwise amend NAT-2 and the `convert` docs to name this exception, as was done for the A98/Rec. 2020 floor.\n4. **Non-finite numbers pass through as `null`.** The JSON bridge turns `NaN`/`Infinity` into `null`, so `color.mix(a, b, NaN)` silently uses the default amount 0.5, while `lighten(c, NaN)` throws. Repair: reject a non-finite number argument with the function's `TypeError` consistently."
+    },
+    {
+      "id": "S7-F1",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "major",
+      "status": "resolved",
+      "criterionIds": [
+        "SBX-4",
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved: the async-body rewrite is removed (`compile.rs` instruments only `try`/`catch`/`finally`). `cases2.json` `var-fn-same-name`, `dup-fn` and `arrow-var-fn` give HEAD's values (1, 2, 1), and `cases1.json`/`cases5.json` match HEAD for every must-work case.\n\n---\nOriginal finding:\n\n**The async-body wrap rejects valid JavaScript: an async function or arrow whose body declares a `var` and a function of the same name, or the same function twice, now fails to compile.**\n\nExpected: instrumentation only inserts text and keeps every valid program valid with the same meaning (`compile.rs` `instrument`: \"Only text is inserted\"). In a function body `var g = 1; function g() {}` and duplicate function declarations are legal (module code is strict, but function-body top level allows them).\n\nObserved: `instrument` moves the whole body of every async function into a block (`{ try { ... } catch (x) { ... } }`). Inside a block a function declaration is lexical, so it now collides with a `var` of the same name or with a second declaration. Probe `artifacts-temp/agentx/dtcg-expressions/s7-probe` (`cases2.json`, release, `opt-level = 3`; same cases against HEAD with `s7-probe-head`):\n- `(async function () { var g = 1; function g() {} r = g; })()` gives `SyntaxError: invalid redefinition of a variable` (HEAD: `1`; the same body in a sync function: `1`).\n- `async () => { var g = 1; function g() {} ... }`: the same error.\n- `(async function () { function g() { return 1 } function g() { return 2 } r = g(); })()` gives `SyntaxError: invalid redefinition of lexical identifier` (HEAD: `2`).\nThe same happens in host and document modules, the bundled single-file libraries hosts are expected to provide, and in TypeScript (its output is re-instrumented). A module that worked before this sprint can now fail to load.\n\nRepair: do not detect overflows by moving async bodies into a block. Preferred: drop the async-body rewrite and register QuickJS's host promise rejection tracker (`Runtime::set_host_promise_rejection_tracker`, present in quickjs-jit 0.14.1), which sees every promise that rejects without a handler (async bodies, parameter initializers, `for await`, async generators). Pass its reason through the same unwrapping check, which trips the guard (this also resolves S7-F2). If the rewrite stays, it must keep the body's top-level declarations at function level. Add the cases above to `tests/expressions_async_overflow.rs` (expressions and a host module) as must-compile, must-evaluate cases.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "async_functions_keep_their_meaning"
+        }
+      ]
+    },
+    {
+      "id": "S7-F2",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "major",
+      "status": "resolved",
+      "criterionIds": [
+        "DOC-1",
+        "SBX-4",
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved, third pass: the host promise rejection tracker (`Session::new`) trips on an unhandled rejection whose reason is an overflow. `cases6.json` (nested-array `String(a)` in an async body and in async parameter defaults, at call depths 0 to 200, arrays 500 to 100000 deep) and the `cases1.json`/`cases2.json` async cases (`for await`, `await using`, class, TypeScript, module) now fail with the stack overflow. The remaining `cases1.json` results are deterministic: patterns over the nesting bound throw a catchable `SyntaxError`, and thenable and `then` callbacks never run.\n\n---\nOriginal finding:\n\n**Reopened after the second repair. A stack overflow raised during nested array-to-string conversion (`String(a)` / `join` of a nested array) is still not detected when QuickJS raises it. Async functions, async parameter defaults and iterator closing therefore still swallow it, and whether they do depends on call depth.**\n\nExpected (SBX-2; the coordinator's repair note; docs/15 and the website Stack bullet, which now say overflows are detected where QuickJS raises them, whatever catches, discards or awaits them afterwards): an overflow fails the evaluation in every form.\n\nObserved, release build with `opt-level = 3`, default 256 KiB limit; probe `artifacts-temp/agentx/dtcg-expressions/s7-probe`, `cases6.json` and `cases1.json`, with `a` a nested array (`for (...) a = [a]`):\n- `let x = 'swallowed'; (async () => { String(a); x = 'completed'; })(); return x` returns `\"swallowed\"` for nesting depths 1000, 2000, 3000, 5000, 10000 and 100000. The same `String(a)` in a sync `try`/`catch` fails with the stack overflow, so an overflow is what is swallowed.\n- Depth dependence (`async-depth`): with a 500-, 1000- or 2000-deep array, call depth 0, 100 and 200 return `\"swallowed\"`, while depth 50 fails with the stack overflow. The guard notices it only incidentally, so the outcome changes with frame sizes and builds.\n- `cases1.json`: `ov-arrow-str` (`(async () => String(a))(); return 7`) gives `7`, `ov-arrow-flag` gives `0`, `ov-class-async` gives `7`, `ov-for-await` gives `7`, `ov-default-param-str` gives `7`, `ov-await-using-async` gives `7`. In `cases2.json`, `ts-ov` and `module-async-ov` give `0`. These are E2-F1's original A5 and D1 cases.\n\n`tests/expressions_async_overflow.rs` covers only JavaScript call recursion (`const f = () => f() + 1`), which the threshold does catch.\n\nRepair:\n- Make raise-time detection cover the overflows QuickJS raises from native recursion (array/object `toString`/`join`, and similar C-level recursion such as `JSON.stringify` on deep values). Find out why the error allocation for this path does not trip the guard, for example a check that is not anchored where the guard's base is, or an error that is not freshly allocated. Then trip on it, or install QuickJS's host promise rejection tracker as a second net for async paths.\n- Add nested-array `String(a)` cases (async body, async parameter default, `for await`) to `tests/expressions_async_overflow.rs`. Sweep both the nesting depth and the starting call depth, as `expressions_stack_top` does.\n- Until it holds, the docs must not claim raise-time detection for every overflow.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "engine_overflows_cannot_be_swallowed_at_any_depth"
+        }
+      ]
+    },
+    {
+      "id": "S7-F3",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "major",
+      "status": "resolved",
+      "criterionIds": [
+        "DOC-1",
+        "SBX-4",
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved by the owner's decision (option A, 2026-10-25), recorded as the `criterion:SBX-2` disposition superseded by SBX-5 and owned by t26. SBX-5 keeps all of SBX-2 and names this exception. docs/15 and the website `expressions` Stack bullets state it, with the same examples. The fourth-pass probes (`cases8.json`, `cases9.json`) still discard overflows only in the excepted forms: a `return` installed with `defineProperty`, a referenced function, a prototype assignment, or an accessor (an accessor is not written as a `return` method, so the general clause covers it). Every syntactic `return` and every async path fails with the overflow (`cases6.json`: 0 swallowed).\n\n---\nOriginal finding:\n\n**Still open, third pass: an overflow in a `return` method that the source does not write as a `return` method or property is still discarded by iterator closing, so the result depends on call depth. Judged as the coordinator asked: this gap is not acceptable without an owner decision.**\n\nExpected (SBX-2): expression code cannot catch a stack overflow in any form. Results do not depend on frame sizes (SBX-4 across debug, release and wasm32).\n\nFixed: `compile.rs` runs the body of every syntactic plain `return` method, property, arrow or class field through `checked`. The rejection tracker covers async code. `cases6.json` (nested-array `String(a)` through async bodies, async parameter defaults, for-of, `Array.from`, `new Map` and iterator-helper close) now fails with the overflow at every depth.\n\nObserved (`artifacts-temp/agentx/dtcg-expressions/s7-probe`, `cases8.json`, `cases9.json`; nested array 3000 deep, default 256 KiB limit). Each case returns `\"swallowed\"`, a normal result after the overflow:\n- `Object.defineProperty(it, 'return', { value: () => { String(a); ... } })`.\n- `return: close`, where `close` is a function defined elsewhere.\n- `I.prototype.return = function () { ... }`, assigned to a class prototype.\nDepth dependence: a `return` installed through an accessor (`Object.defineProperty(it, 'return', { get() { return () => { String(a); ... } } })`) returns `\"swallowed\"` at call depths 0, 25 and 100, but fails with the overflow at 50 and 200. A built-in used as `return` (`return: Array.prototype.join.bind(a)`) has no source body to wrap, so wrapping by name cannot close the gap. It tripped here only by chance. The plain `it.return = function () {...}` case also tripped, but the scan does not cover that assignment, so it is equally incidental.\n\nJudgement: this still violates SBX-2's \"cannot catch any of them\", and results differ between builds. Wrapping by source shape cannot cover functions that are referenced, assigned, defined through descriptors or built in. The remaining options:\n- (a) Detect where QuickJS raises the overflow, with every allocation reaching the allocator. quickjs.c bypasses its arenas only under `__SANITIZE_ADDRESS__`/`FORCE_GC_AT_MALLOC` (`JS_ARENA_LARGE_BLOCKS_ONLY`), so this needs a patched or forked `quickjs-jit-sys`, which is a dependency decision.\n- (b) Instrument every plain function body. Built-ins and bound built-ins as `return` stay open, so (b) narrows the gap without closing it.\n- (c) An owner decision that amends SBX-2 (and the docs/15 and website Stack bullets) with this residual exception, stated precisely: a `return` method an iterator's closing calls, when it is not written in source as a plain `return` method or property, can discard a stack overflow.\n\nThe coordinator should get the owner's choice. Without (a), the criteria and docs must name the exception.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "docs/15-expressions.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "website/content/docs/expressions.md"
+        },
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "engine_overflows_cannot_be_swallowed_at_any_depth"
+        }
+      ]
+    },
+    {
+      "id": "S7-F4",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "minor",
+      "status": "resolved",
+      "criterionIds": [
+        "EVAL-6",
+        "SBX-4"
+      ],
+      "descriptionMarkdown": "Resolved: the test now uses inputs `{src0}`/`{src}` and edits only `src`. Run against HEAD's sources (`s7-head`), it fails with `expression/b` vs `expression/a`; it passes on the current code.\n\n---\nOriginal finding:\n\n**The E2-F2 regression test passes against the code before the repair, so it does not guard the module naming.**\n\nExpected (t23; E2-F2's repair asked for it): a test that fails when a shared expression module is named after the first token that compiled it.\n\nObserved: `tests/expressions_shared_compilation.rs` compares `new Error(...).stack.split('\\n')[1]`. QuickJS's `stack` holds only frames (`\"    at default (dxn.dtcg/expression/<name>:3:21)\\n\"`), so element 1 is always `\"\"`. Also, both tokens read the same input `{source}`, so the affected and the full resolution evaluate them in the same order anyway. Running the new test file against HEAD's sources (`artifacts-temp/agentx/dtcg-expressions/s7-head`, which still names modules `dxn.dtcg/expression/<path>`) passes: `1 passed`. The behavior itself is repaired: f2-probe mode `r2` on current code gives `[L4 equal] true`, and `L2` names both tokens `expression/aa704ac76a6d6b3f`.\n\nRepair: use E2-F2's scenario. Token `a` takes input `{src0}` and token `b` takes `{src}`, with the same expression text `(s, new Error('m').stack)` (or `.split('\\n')[0]`). Edit only `src`, then assert that `apply_affected` equals a full resolution and that `b` alone gives the same value as `b` next to `a`. Check that the test fails on HEAD's naming.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_shared_compilation.rs",
+          "symbol": "affected_resolution_matches_a_full_one_for_shared_expression_text"
+        }
+      ]
+    },
+    {
+      "id": "S7-F5",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "minor",
+      "status": "resolved",
+      "criterionIds": [
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved: `note_overflow` unwraps `SuppressedError`/`AggregateError`. `cases1.json` `ov-suppressed-uncaught` now fails with `stack overflow: the evaluation exceeded the stack limit`.\n\n---\nOriginal finding:\n\n**An uncaught wrapped stack overflow is not reported as one: `note_overflow` does not unwrap `SuppressedError`/`AggregateError` as `check` now does.**\n\nExpected (SBX-2): runaway recursion fails with `DtcgError::Expression` reporting a stack overflow, and the guard records the trip.\n\nObserved: `const s = new DisposableStack(); s.defer(() => { throw 1 }); s.defer(() => String(a)); s.dispose();` with no `catch` fails with `message: \"SuppressedError at line 1, column 231\"` (`cases1.json`, `ov-suppressed-uncaught`). The same overflow inside a `try`/`catch` gives `stack overflow: the evaluation exceeded the stack limit`. On a build whose stack lets `String(a)` succeed, the message is instead the thrown `1`. `engine.rs` `note_overflow` matches only a bare `RangeError`/`SyntaxError` by name and message.\n\nRepair: make `note_overflow` apply the same iterative unwrapping as `check` (`error`, `suppressed`, `errors`), or call `check` on the uncaught value before mapping it. Add an uncaught `DisposableStack`/`using` case to `tests/expressions_async_overflow.rs`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "an_uncaught_wrapped_stack_overflow_is_reported_as_one"
+        }
+      ]
+    },
+    {
+      "id": "S7-F6",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "minor",
+      "status": "resolved",
+      "criterionIds": [
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved: `RegExp(re) === re` is `true` again, and `new RegExp('[[]'.repeat(25))` compiles (`cases7.json`). The other wrapper behaviors (instanceof, name and length, species, subclassing, split, matchAll, string `match`/`search`, flags copy) match HEAD.\n\n---\nOriginal finding:\n\n**The run-time `RegExp` wrapper changes two standard behaviors.**\n\nExpected: wrapping `RegExp` keeps its observable behavior apart from the documented nesting bound.\n\nObserved (`artifacts-temp/agentx/dtcg-expressions/s7-probe`, `cases7.json`; HEAD via `s7-probe-head`):\n- `RegExp(re) === re` for `re = /a/g` is now `false` (HEAD: `true`). ECMA-262 `RegExp(pattern, flags)` returns `pattern` itself when called without `new`, `flags` is `undefined` and `pattern.constructor === RegExp`. The wrapper forwards to the original constructor, which compares against itself, not against the wrapper that `RegExp.prototype.constructor` now names.\n- `new RegExp('[[]'.repeat(25))` (a class containing a literal `[`, valid and shallow without the `v` flag) now throws `SyntaxError: ... the pattern nests too deeply` (HEAD: compiles). `checkPattern` counts every `[` inside a class as nesting, and a class's `]` only undoes one. The same rule already applies to literals (`nesting.rs`), so this matches literals but rejects valid patterns that cannot nest.\n\nRepair:\n- In the wrapper, return `pattern` unchanged in that case: `new.target === undefined`, `flags === undefined`, `pattern` passes the `IsRegExp` test and `pattern.constructor === WrappedRegExp`.\n- Count a `[` inside a class as nesting only under the `v` flag, in both `checkPattern` and `nesting.rs`. Otherwise document the rule.\n- Add both cases to `patterns_built_at_run_time_nest_no_deeper_than_literals`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "patterns_built_at_run_time_nest_no_deeper_than_literals"
+        }
+      ]
+    },
+    {
+      "id": "S7-F7",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "minor",
+      "status": "resolved",
+      "criterionIds": [
+        "DOC-1"
+      ],
+      "descriptionMarkdown": "Resolved: `crates/dxn_dtcg/tests/zz_probe.rs` is deleted.\n\n---\nOriginal finding:\n\n**A stray probe test sits in the crate's test directory.**\n\nExpected: only intended test groups under `crates/dxn_dtcg/tests/`, each documented in the contributor tables. The sprint's changes are the listed groups.\n\nObserved: untracked `crates/dxn_dtcg/tests/zz_probe.rs` (a `probe()` test that only prints stack results, asserting nothing) is in the working tree. Committing the sprint's working tree, as the previous sprints did, would add it to the suite and the package.\n\nRepair: delete it, or move it under `artifacts-temp/`, before the checkpoint commit.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs"
+        }
+      ]
+    },
+    {
+      "id": "S7-F8",
+      "boundaryId": "s7-final-repair-2",
+      "severity": "major",
+      "status": "resolved",
+      "criterionIds": [
+        "SBX-4",
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "Resolved: parameters the wrapped body redeclares are passed through the arrow. `artifacts-temp/agentx/dtcg-expressions/s7-probe` `cases10.json` matches HEAD in all 20 cases: `var` with simple, default, destructured and rest parameters, function declarations, closures in defaults, `arguments`, arrow, class-field and static forms, `name`/`length`, `this`/`super`, nested `return`s and comments in the parameter list. A redeclared-parameter `return` still trips on an overflow (`close-still-trips`). The TypeScript cases match HEAD; the TS `function x` redeclaration error is oxc's and also occurs at HEAD.\n\n---\nOriginal finding:\n\n**The new `return`-method wrap changes the meaning of a valid body: a `var` that redeclares a parameter now shadows it with `undefined`.**\n\nExpected: instrumentation only inserts text and keeps every valid program's meaning (the lesson of S7-F1, now applied to `return` methods).\n\nObserved: `instrument` moves a `return` method's body into an arrow (`{ return checked(() => { ... }); }`). The arrow has no parameters, so a body `var x` declares a new binding in the arrow instead of naming the parameter (`artifacts-temp/agentx/dtcg-expressions/s7-probe`, `cases8.json`, compared with HEAD via `s7-probe-head`):\n- `const o = { return(x) { var x; return x; } }; o.return(5)` returns `undefined` (HEAD: `5`).\n- `return(x = 1) { var x; return x; }` called with 5 returns `undefined` (HEAD: `5`).\nA `return: (x) => { var x; ... }` arrow has the same problem. Redeclaring parameters with `var` is legal and occurs in transpiled and minified code, including iterator helpers in polyfills, which is the code that defines `return(value)` methods. `this`, `arguments`, `super`, `new.target`, hoisting and expression bodies are preserved (`cases8.json` `sem-*`), and `iterator_return_methods_keep_their_meaning` does not cover parameter redeclaration.\n\nRepair: keep the body's bindings, for example by passing every bound name of the parameters through the arrow (`return checked((x) => { var x; ... }, x)`, including destructured names), or by wrapping the method value instead of its body. Add `var`-redeclares-parameter cases (simple and default parameters, method and arrow forms) to `iterator_return_methods_keep_their_meaning`.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
+          "symbol": "iterator_return_methods_keep_their_meaning"
+        }
+      ]
     }
   ],
   "handoffMarkdown": "",
@@ -3068,6 +3934,15 @@
       "decidedBy": "owner",
       "recordedAt": "2026-10-25T18:09:42Z",
       "successorId": "EVAL-6"
+    },
+    {
+      "type": "criterion",
+      "id": "SBX-2",
+      "disposition": "superseded",
+      "reasonMarkdown": "Owner decision on sprint review finding S7-F3 (2026-10-25), relayed by the starting session: option A, \"Document the exception\". \"Amend SBX-2 and the docs to name the exception precisely: an overflow inside an iterator `return` method that is not written as a `return` method in source, which JavaScript discards while closing the iterator after a throw, and whose occurrence can depend on the remaining stack. ... Keep the pinned `quickjs-jit =0.14.1` dependency; do not patch or fork `quickjs-jit-sys` (not option B).\" SBX-5 carries that wording and supersedes SBX-2; t26 owns it.",
+      "decidedBy": "owner",
+      "recordedAt": "2026-10-25T19:37:27Z",
+      "successorId": "SBX-5"
     }
   ]
 }

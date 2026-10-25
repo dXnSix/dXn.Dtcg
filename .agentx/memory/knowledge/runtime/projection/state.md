@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime/projection
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-25T20:00:00+02:00
+  updated: 2026-10-26T02:00:00+02:00
   topics:
     - projection
     - derive
@@ -27,7 +27,7 @@ Struct attributes: `#[dtcg(root = "...")]` and, for components, `#[dtcg(id = "..
 
 `dxn_dtcg::values` models every DTCG type (plus the extension `Blur` and dimension `LineHeight`) with the spec's consumer rules (alpha default 1, clamped gradient positions, font-weight keyword numbers, single-layer shadows); each implements `FromDtcgValue`, and `ResolvedToken::typed(&ValueExtensions)` converts by effective type. `f32` projection rejects numbers outside the finite `f32` range. `ResolvedTokens::to_document` exports a resolution as a DTCG document that re-resolves to the same tokens. Each model has `to_json`, and the twelve DTCG-type models implement `Serialize`/`Deserialize` through their DTCG JSON form (deserializing validates the type with `ValueExtensions::all()`).
 
-`values::Color` (math in `src/color.rs`, no feature) converts between the 14 DTCG color spaces with CSS Color 4 formulas (XYZ D65 hub, Bradford for D50 spaces, BT.1886 pure 2.4 power for Rec. 2020) and offers `mix`/`mix_in` (premultiplied alpha, shorter hue arc, powerless hues take the other color's), OKLCH `lighten`/`darken`, `with_alpha`, sRGB hex, WCAG luminance/contrast, and `in_gamut`/`clamp_to_gamut` in linear light (sRGB gamut for HSL/HWB). Results are always valid DTCG colors; references come from colorjs.io 0.7.1 within 1e-5 and in-gamut round trips hold within 1e-9 except components near 0 in A98 RGB/Rec. 2020 (`NOISE` = 1e-14 snapping).
+`values::Color` (math in `src/color.rs`, no feature) converts between the 14 DTCG color spaces with CSS Color 4 formulas (XYZ D65 hub, Bradford for D50 spaces, BT.1886 pure 2.4 power for Rec. 2020) and offers `mix`/`mix_in` (premultiplied alpha, shorter hue arc, powerless hues take the other color's), OKLCH `lighten`/`darken`, `with_alpha`, sRGB hex, WCAG luminance/contrast, and `in_gamut`/`clamp_to_gamut` in linear light (sRGB gamut for HSL/HWB; HSL/HWB conversions clip sRGB first; `contrast` uses the colors clipped into sRGB; a converted hue is zeroed only at rounding-noise chroma, while mixing keeps colorjs's powerless thresholds). Results are always valid DTCG colors; references come from colorjs.io 0.7.1 within 1e-5 and in-gamut round trips hold within 1e-9 except components near 0 in A98 RGB/Rec. 2020 (`NOISE` = 1e-14 snapping).
 
 `#[expression_module(specifier = "…")]` (`dxn_dtcg_derive/src/expression_module.rs`, re-exported from `dxn_dtcg::expressions`) turns an inherent `impl` block's `pub fn`s into a `NativeModule` with camelCase exports, TSDoc from doc comments and TypeScript types mapped by spelling; receivers, `async`, generics, trait impls, unknown keys and invalid or reserved export names are spanned compile errors.
 
