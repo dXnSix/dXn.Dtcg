@@ -381,13 +381,14 @@ impl Walker<'_> {
         if self.documents.contains_key(resource) {
             return Ok(true);
         }
-        let Some(json) = self.catalog.get(resource) else {
+        let Some(json) = self.catalog.json(resource)? else {
             self.missing
                 .entry(resource.clone())
                 .or_insert_with(|| DocumentRequest {
                     resource_id: resource.clone(),
                     referenced_from: from.clone(),
                     original_reference: reference.into(),
+                    kind: crate::DocumentKind::Json,
                 });
             return Ok(false);
         };

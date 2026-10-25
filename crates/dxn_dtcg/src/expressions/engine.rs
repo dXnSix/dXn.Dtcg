@@ -4,7 +4,13 @@
 //! generated ES module whose default export takes the inputs, calls it with
 //! the frozen inputs and converts the result to JSON.
 
-use std::{cell::RefCell, collections::HashMap, fmt::Write, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    fmt::Write,
+    rc::Rc,
+    sync::Arc,
+};
 
 use rquickjs::{
     CatchResultExt, CaughtError, Context, Ctx, Error as JsError, Function, Module, Object,
@@ -16,15 +22,94 @@ use super::{
     ExpressionOptions,
     compile::{CompileError, Compiled, Position, check_expression, compile, position_at},
     format::{Expression, Import},
+    format::{Language, is_relative},
+    modules::{DocumentModules, import_reference, is_reserved},
     sandbox::{CountingAllocator, Guard, HARDEN, Trip},
 };
-use crate::token_resolution::MAX_VALUE_DEPTH;
+use crate::{ResourceId, token_resolution::MAX_VALUE_DEPTH};
+
+/// The modules a session can import: the host's and the documents'.
+fn module_table(
+    options: &ExpressionOptions,
+    documents: Option<&DocumentModules>,
+) -> Result<ModuleTable, Failure> {
+    let mut table = ModuleTable::default();
+    for (specifier, module) in &options.modules {
+        if specifier.is_empty() || is_relative(specifier) {
+            return Err(Failure::Message(format!(
+                "host module `{specifier}` needs a bare specifier"
+            )));
+        }
+        if is_reserved(specifier) {
+            return Err(Failure::Message(format!(
+                "host module `{specifier}` is in the `dxn.dtcg` namespace, which is reserved for built-in modules"
+            )));
+        }
+        table
+            .specifiers
+            .insert(specifier.clone(), specifier.clone());
+        table.modules.insert(
+            specifier.clone(),
+            ModuleEntry {
+                origin: Origin::Host(specifier.clone()),
+                language: module.language,
+                source: Arc::clone(&module.source),
+                compiled: documents
+                    .and_then(|documents| documents.compiled.get(specifier).cloned()),
+                loaded: false,
+            },
+        );
+    }
+    if let Some(documents) = documents {
+        for (specifier, resource) in &documents.specifiers {
+            table
+                .specifiers
+                .insert(specifier.clone(), format!("./{resource}"));
+        }
+        for (resource, (language, source)) in &documents.sources {
+            table.modules.insert(
+                format!("./{resource}"),
+                ModuleEntry {
+                    origin: Origin::Document(resource.clone()),
+                    language: *language,
+                    source: Arc::clone(source),
+                    compiled: documents.compiled.get(&format!("./{resource}")).cloned(),
+                    loaded: false,
+                },
+            );
+        }
+    }
+    Ok(table)
+}
+
+/// The failure of a module from `origin`, imported as `specifier`.
+fn module_failure(origin: &Origin, specifier: &str, message: String) -> Failure {
+    match origin {
+        Origin::Host(host) => Failure::Module {
+            resource: None,
+            specifier: host.clone(),
+            message,
+        },
+        Origin::Document(resource) => Failure::Module {
+            resource: Some(resource.clone()),
+            specifier: specifier.to_owned(),
+            message,
+        },
+    }
+}
 
 /// Why an evaluation failed.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Failure {
     /// A syntax error, an uncaught exception or a result that is not JSON.
     Message(String),
+    /// A module that does not compile or evaluate: a document module
+    /// (`resource`) or a host module, and the specifier it was imported by.
+    Module {
+        resource: Option<ResourceId>,
+        specifier: String,
+        message: String,
+    },
     /// A step, memory or stack limit.
     Limit(Trip),
     /// The result nests deeper than [`MAX_VALUE_DEPTH`].
@@ -52,6 +137,15 @@ struct Span {
 }
 
 impl Span {
+    /// A module's own text: positions are authored positions.
+    const WHOLE: Self = Self {
+        header_lines: 0,
+        end: Position {
+            line: u32::MAX,
+            column: u32::MAX,
+        },
+    };
+
     /// The authored position of a position in the generated module; a
     /// position past the text (in the wrapper's closing lines) is its end.
     fn authored(self, position: Position) -> Option<Position> {
@@ -69,10 +163,59 @@ impl Span {
     }
 }
 
-/// The modules a session can import, by the name QuickJS knows them by.
+/// Where a module comes from: the host, or a document of the catalog.
+#[derive(Clone, Debug)]
+enum Origin {
+    Host(String),
+    Document(ResourceId),
+}
+
+struct ModuleEntry {
+    origin: Origin,
+    language: Language,
+    source: Arc<str>,
+    compiled: Option<Rc<Compiled>>,
+    /// Whether QuickJS has declared (and so evaluated) the module.
+    loaded: bool,
+}
+
+/// The modules a session can import, by the name QuickJS knows them by: a
+/// host module by its specifier, a document module by `./` and its
+/// resource id (no bare specifier starts with `./`).
 #[derive(Default)]
 struct ModuleTable {
-    sources: HashMap<String, String>,
+    /// Bare specifiers to module names.
+    specifiers: HashMap<String, String>,
+    modules: HashMap<String, ModuleEntry>,
+}
+
+impl ModuleTable {
+    /// The name of the module `name` imports from the module `base`:
+    /// relative specifiers resolve against a document module's resource
+    /// id, bare ones through the registrations and declarations.
+    fn resolve(&self, base: &str, name: &str) -> Result<String, String> {
+        if !is_relative(name) {
+            return self
+                .specifiers
+                .get(name)
+                .cloned()
+                .ok_or_else(|| format!("unknown module `{name}`"));
+        }
+        let Some(resource) = base.strip_prefix("./") else {
+            return Err(format!(
+                "relative import `{name}`: only modules a document declares import relatively"
+            ));
+        };
+        let target = ResourceId::parse(resource)
+            .and_then(|resource| resource.resolve(import_reference(name)))
+            .map_err(|error| format!("import `{name}`: {error}"))?;
+        let target = format!("./{}", target.resource_id());
+        if self.modules.contains_key(&target) {
+            Ok(target)
+        } else {
+            Err(format!("unknown module `{name}`"))
+        }
+    }
 }
 
 struct TableResolver(Rc<RefCell<ModuleTable>>);
@@ -86,15 +229,10 @@ impl loader::Resolver for TableResolver {
         name: &str,
         _attributes: Option<loader::ImportAttributes<'js>>,
     ) -> rquickjs::Result<String> {
-        if self.0.borrow().sources.contains_key(name) {
-            Ok(name.to_owned())
-        } else {
-            Err(JsError::new_resolving_message(
-                base,
-                name,
-                format!("unknown module `{name}`"),
-            ))
-        }
+        self.0
+            .borrow()
+            .resolve(base, name)
+            .map_err(|message| JsError::new_resolving_message(base, name, message))
     }
 }
 
@@ -105,15 +243,46 @@ impl loader::Loader for TableLoader {
         name: &str,
         _attributes: Option<loader::ImportAttributes<'js>>,
     ) -> rquickjs::Result<Module<'js, rquickjs::module::Declared>> {
-        let source = self
-            .0
-            .borrow()
-            .sources
-            .get(name)
-            .cloned()
-            .ok_or_else(|| JsError::new_loading_message(name, "unknown module"))?;
-        Module::declare(ctx.clone(), name, source)
+        // Every module an expression reaches is compiled before QuickJS
+        // loads any of them; the borrow ends before declaring, which loads
+        // the module's own imports.
+        let code = {
+            let mut table = self.0.borrow_mut();
+            let entry = table
+                .modules
+                .get_mut(name)
+                .ok_or_else(|| JsError::new_loading_message(name, "unknown module"))?;
+            entry.loaded = true;
+            entry
+                .compiled
+                .as_ref()
+                .map(|compiled| compiled.code.clone())
+                .ok_or_else(|| JsError::new_loading_message(name, "not compiled"))?
+        };
+        Module::declare(ctx.clone(), name, code)
     }
+}
+
+/// A module on the depth-first walk of an import graph, with its imports
+/// (module names and the specifiers that import them).
+struct Frame {
+    name: String,
+    children: Vec<(String, String)>,
+    next: usize,
+}
+
+/// The state of Tarjan's algorithm over an import graph.
+#[derive(Default)]
+struct Components {
+    index: HashMap<String, usize>,
+    low: HashMap<String, usize>,
+    stack: Vec<String>,
+    on_stack: HashSet<String>,
+    /// The specifier each module was first imported by.
+    specifiers: HashMap<String, String>,
+    /// The components, each after the components it imports, each led by
+    /// the member the walk reached first.
+    components: Vec<Vec<String>>,
 }
 
 pub(crate) struct Session {
@@ -124,7 +293,7 @@ pub(crate) struct Session {
     object_prototype: Persistent<Object<'static>>,
     context: Context,
     _runtime: Runtime,
-    _modules: Rc<RefCell<ModuleTable>>,
+    modules: Rc<RefCell<ModuleTable>>,
     guard: Rc<Guard>,
     precision: Option<u32>,
 }
@@ -134,8 +303,13 @@ pub(crate) struct Session {
 const MIN_STACK_LIMIT: usize = 16 * 1024;
 
 impl Session {
-    /// Starts QuickJS with the sandbox of `options`.
-    pub(crate) fn new(options: &ExpressionOptions) -> Result<Self, Failure> {
+    /// Starts QuickJS with the sandbox of `options`, able to import its
+    /// host modules and the `documents` modules.
+    pub(crate) fn new(
+        options: &ExpressionOptions,
+        documents: Option<&DocumentModules>,
+    ) -> Result<Self, Failure> {
+        let table = module_table(options, documents)?;
         let stack_limit = options.stack_limit.max(MIN_STACK_LIMIT);
         // An evaluation without top-level code meets at most one interrupt
         // check, so a budget of 1 lets it through whatever ran before.
@@ -150,7 +324,7 @@ impl Session {
             .map_err(|error| failed(&guard, error.to_string()))?;
         runtime.set_max_stack_size(stack_limit);
         runtime.set_interrupt_handler(Some(guard.interrupt_handler()));
-        let modules = Rc::new(RefCell::new(ModuleTable::default()));
+        let modules = Rc::new(RefCell::new(table));
         runtime.set_loader(
             TableResolver(Rc::clone(&modules)),
             TableLoader(Rc::clone(&modules)),
@@ -192,7 +366,7 @@ impl Session {
             object_prototype,
             context,
             _runtime: runtime,
-            _modules: modules,
+            modules,
             guard,
             precision: options.precision,
         })
@@ -304,6 +478,229 @@ impl Session {
         });
     }
 
+    /// Compiles every module the module `base` imports through `imports`,
+    /// transitively, and evaluates those not evaluated yet as ES module
+    /// evaluation orders them: every import cycle (a strongly connected
+    /// component of the import graph) after the modules it imports, entered
+    /// at the member the walk reached first. Each module, or each cycle as a
+    /// whole, gets its own step budget.
+    fn load_modules(&mut self, base: &str, imports: &[String]) -> Result<(), Failure> {
+        let mut roots = Vec::new();
+        for specifier in imports {
+            let name = self
+                .modules
+                .borrow()
+                .resolve(base, specifier)
+                .map_err(Failure::Message)?;
+            roots.push((name, specifier.clone()));
+        }
+        let mut walk = Components::default();
+        for (name, specifier) in roots {
+            self.connect(&name, &specifier, &mut walk)?;
+        }
+        for component in &walk.components {
+            self.evaluate_component(component, &walk.specifiers)?;
+        }
+        Ok(())
+    }
+
+    /// Whether the module `name` needs no evaluation: QuickJS has it, or it
+    /// is no module of the table (the native bridge).
+    fn is_evaluated(&self, name: &str) -> bool {
+        self.modules
+            .borrow()
+            .modules
+            .get(name)
+            .is_none_or(|entry| entry.loaded)
+    }
+
+    /// Tarjan's strongly connected components from `root`, without
+    /// recursion: completed components join `walk.components` after every
+    /// component they import.
+    fn connect(&self, root: &str, specifier: &str, walk: &mut Components) -> Result<(), Failure> {
+        if self.is_evaluated(root) || walk.index.contains_key(root) {
+            return Ok(());
+        }
+        let mut frames = Vec::new();
+        self.visit(root, specifier, walk, &mut frames)?;
+        while let Some(frame) = frames.last_mut() {
+            if let Some((child, child_specifier)) = frame.children.get(frame.next).cloned() {
+                frame.next += 1;
+                let parent = frame.name.clone();
+                if self.is_evaluated(&child) {
+                    continue;
+                }
+                if !walk.index.contains_key(&child) {
+                    self.visit(&child, &child_specifier, walk, &mut frames)?;
+                } else if walk.on_stack.contains(&child) {
+                    let low = walk.low[&parent].min(walk.index[&child]);
+                    walk.low.insert(parent, low);
+                }
+                continue;
+            }
+            let frame = frames.pop().expect("a frame");
+            if let Some(parent) = frames.last() {
+                let low = walk.low[&parent.name].min(walk.low[&frame.name]);
+                walk.low.insert(parent.name.clone(), low);
+            }
+            if walk.low[&frame.name] == walk.index[&frame.name] {
+                let mut component = Vec::new();
+                loop {
+                    let member = walk.stack.pop().expect("a member on the stack");
+                    walk.on_stack.remove(&member);
+                    let done = member == frame.name;
+                    component.push(member);
+                    if done {
+                        break;
+                    }
+                }
+                // The member reached first leads.
+                component.reverse();
+                walk.components.push(component);
+            }
+        }
+        Ok(())
+    }
+
+    /// Compiles the module `name`, imported as `specifier`, and enters it
+    /// into the walk with its imports.
+    fn visit(
+        &self,
+        name: &str,
+        specifier: &str,
+        walk: &mut Components,
+        frames: &mut Vec<Frame>,
+    ) -> Result<(), Failure> {
+        let compiled = self.compile_module(name, specifier)?;
+        let table = self.modules.borrow();
+        let mut children = Vec::with_capacity(compiled.imports.len());
+        for import in &compiled.imports {
+            let child = table.resolve(name, import).map_err(|message| {
+                module_failure(&table.modules[name].origin, specifier, message)
+            })?;
+            children.push((child, import.clone()));
+        }
+        let index = walk.index.len();
+        walk.index.insert(name.to_owned(), index);
+        walk.low.insert(name.to_owned(), index);
+        walk.stack.push(name.to_owned());
+        walk.on_stack.insert(name.to_owned());
+        walk.specifiers
+            .entry(name.to_owned())
+            .or_insert_with(|| specifier.to_owned());
+        frames.push(Frame {
+            name: name.to_owned(),
+            children,
+            next: 0,
+        });
+        Ok(())
+    }
+
+    /// The compiled module `name`, compiling it on first use.
+    fn compile_module(&self, name: &str, specifier: &str) -> Result<Rc<Compiled>, Failure> {
+        let mut table = self.modules.borrow_mut();
+        let entry = table.modules.get_mut(name).expect("a resolved module");
+        if let Some(compiled) = &entry.compiled {
+            return Ok(Rc::clone(compiled));
+        }
+        let compiled = compile(&entry.source, entry.language).map_err(|error| {
+            let message = match error.position {
+                Some(position) => format!("{} {}", error.message, at(position)),
+                None => error.message,
+            };
+            module_failure(&entry.origin, specifier, message)
+        })?;
+        let compiled = Rc::new(compiled);
+        entry.compiled = Some(Rc::clone(&compiled));
+        Ok(compiled)
+    }
+
+    /// Evaluates the top-level code of a module, or of an import cycle from
+    /// its leading member, with a full step budget. A failure names the
+    /// module of the innermost stack frame: the one that threw.
+    fn evaluate_component(
+        &self,
+        component: &[String],
+        specifiers: &HashMap<String, String>,
+    ) -> Result<(), Failure> {
+        let root = &component[0];
+        if self.is_evaluated(root) {
+            return Ok(());
+        }
+        self.drain_counter();
+        self.guard.begin();
+        let result = self.context.with(|ctx| {
+            let code = {
+                let mut table = self.modules.borrow_mut();
+                let entry = table.modules.get_mut(root.as_str()).expect("a module");
+                entry.loaded = true;
+                entry.compiled.as_ref().expect("compiled").code.clone()
+            };
+            let evaluated = Module::declare(ctx.clone(), root.as_str(), code)
+                .and_then(Module::eval)
+                .and_then(|(_, promise)| match promise.result::<JsValue>() {
+                    Some(result) => result.map(|_| None),
+                    None => Ok(Some(())),
+                })
+                .catch(&ctx);
+            match evaluated {
+                Ok(None) => Ok(()),
+                Ok(Some(())) => Err(self.module_error(
+                    root,
+                    specifiers,
+                    "top-level `await` is not available in expression modules".into(),
+                )),
+                Err(error) => {
+                    let stack = match &error {
+                        CaughtError::Exception(exception) => exception.stack().unwrap_or_default(),
+                        _ => String::new(),
+                    };
+                    let thrower = self.thrower(&stack).unwrap_or_else(|| root.clone());
+                    let compiled = self.modules.borrow().modules[&thrower].compiled.clone();
+                    let locator = compiled.as_deref().map(|compiled| Locator {
+                        name: &thrower,
+                        compiled,
+                        span: Span::WHOLE,
+                    });
+                    Err(self.module_error(&thrower, specifiers, caught_message(&error, locator)))
+                }
+            }
+        });
+        match self.guard.end() {
+            Some(trip) => Err(Failure::Limit(trip)),
+            None => result,
+        }
+    }
+
+    /// The module of the innermost stack frame that names one: frames read
+    /// `    at function (module:line:column)` or `    at module:line:column`.
+    fn thrower(&self, stack: &str) -> Option<String> {
+        let table = self.modules.borrow();
+        stack.lines().find_map(|line| {
+            let location = line
+                .trim()
+                .strip_prefix("at ")?
+                .rsplit_once(" (")
+                .map_or(line.trim().strip_prefix("at ")?, |(_, location)| location)
+                .trim_end_matches(')');
+            let mut parts = location.rsplitn(3, ':');
+            let (_, _, name) = (parts.next()?, parts.next()?, parts.next()?);
+            table.modules.contains_key(name).then(|| name.to_owned())
+        })
+    }
+
+    /// The failure of the module `name`, with the specifier that imported it.
+    fn module_error(
+        &self,
+        name: &str,
+        specifiers: &HashMap<String, String>,
+        message: String,
+    ) -> Failure {
+        let table = self.modules.borrow();
+        let specifier = specifiers.get(name).map_or(name, String::as_str);
+        module_failure(&table.modules[name].origin, specifier, message)
+    }
+
     /// Compiles and evaluates the generated module of an expression and
     /// keeps its default export.
     fn compile_expression(
@@ -322,6 +719,7 @@ impl Session {
         let compiled = compile(source, expression.language)
             .map_err(|error| Failure::Message(authored_error(&error, span)))?;
         let name = format!("dxn.dtcg/expression/{path}");
+        self.load_modules(&name, &compiled.imports)?;
         self.guard.begin();
         let function = self.context.with(|ctx| {
             let locator = Locator {

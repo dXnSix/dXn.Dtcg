@@ -34,10 +34,15 @@
 mod compile;
 mod engine;
 mod format;
+mod modules;
 mod nesting;
 mod sandbox;
 
+pub use modules::ExpressionModule;
+pub(crate) use modules::{DocumentModules, document_modules, validate_modules};
+
 pub(crate) use engine::{Failure, Session};
+
 pub(crate) use format::token_expression;
 pub(crate) use sandbox::Trip;
 
@@ -86,6 +91,8 @@ pub struct ExpressionOptions {
     /// (default 6); `None` keeps results unrounded. Rounding keeps results
     /// equal across platforms whose math libraries differ in the last bit.
     pub precision: Option<u32>,
+    /// Host modules by bare specifier.
+    pub(crate) modules: std::collections::BTreeMap<String, ExpressionModule>,
 }
 
 impl Default for ExpressionOptions {
@@ -95,6 +102,7 @@ impl Default for ExpressionOptions {
             memory_limit: 64 * 1024 * 1024,
             stack_limit: 256 * 1024,
             precision: Some(6),
+            modules: std::collections::BTreeMap::new(),
         }
     }
 }
@@ -122,5 +130,22 @@ impl ExpressionOptions {
     pub fn with_precision(mut self, precision: Option<u32>) -> Self {
         self.precision = precision;
         self
+    }
+
+    /// Registers `module` under the bare `specifier` (replacing an earlier
+    /// registration), for expressions to import through their `imports`
+    /// and for modules to import. A specifier in the reserved `dxn.dtcg`
+    /// namespace, or one a token document also declares, fails the
+    /// resolutions that evaluate expressions.
+    pub fn with_module(mut self, specifier: impl Into<String>, module: ExpressionModule) -> Self {
+        self.modules.insert(specifier.into(), module);
+        self
+    }
+
+    /// The host modules by specifier.
+    pub fn modules(&self) -> impl Iterator<Item = (&str, &ExpressionModule)> {
+        self.modules
+            .iter()
+            .map(|(specifier, module)| (specifier.as_str(), module))
     }
 }

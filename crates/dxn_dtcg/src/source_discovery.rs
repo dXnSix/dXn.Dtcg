@@ -210,13 +210,14 @@ impl<'a> Discovery<'a> {
         from: &ResourceId,
         reference: &str,
     ) -> Result<Option<SourceOccurrence>, DtcgError> {
-        let Some(json) = self.catalog.get(resource) else {
+        let Some(json) = self.catalog.json(resource)? else {
             self.missing
                 .entry(resource.clone())
                 .or_insert_with(|| DocumentRequest {
                     resource_id: resource.clone(),
                     referenced_from: from.clone(),
                     original_reference: reference.into(),
+                    kind: crate::DocumentKind::Json,
                 });
             self.check_count(self.missing.len())?;
             return Ok(None);

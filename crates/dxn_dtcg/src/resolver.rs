@@ -21,6 +21,32 @@ pub struct DocumentRequest {
     pub resource_id: ResourceId,
     pub referenced_from: ResourceId,
     pub original_reference: Arc<str>,
+    /// What to provide: a JSON document
+    /// ([`DtcgRuntime::provide_requested_json`](crate::DtcgRuntime::provide_requested_json))
+    /// or a JavaScript or TypeScript module
+    /// ([`DtcgRuntime::provide_requested_module`](crate::DtcgRuntime::provide_requested_module)).
+    pub kind: DocumentKind,
+}
+
+/// What a catalog document holds.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[non_exhaustive]
+pub enum DocumentKind {
+    /// A JSON document: a token document or a resolver.
+    Json,
+    /// The source text of a JavaScript or TypeScript ES module that token
+    /// expressions import (feature `expressions`); its language follows its
+    /// extension (`.js`/`.mjs` or `.ts`/`.mts`).
+    Module,
+}
+
+impl DocumentKind {
+    pub(crate) fn describe(self) -> &'static str {
+        match self {
+            Self::Json => "a JSON document",
+            Self::Module => "a module",
+        }
+    }
 }
 
 /// The result of an operation that may need documents the catalog lacks.
@@ -427,28 +453,38 @@ pub(crate) fn resolve(
     let Resolution::Ready(sources) = sources else {
         return Ok(sources.map(|_| unreachable!()));
     };
-    resolve_sources(&sources, options).map(Resolution::Ready)
+    resolve_sources(catalog, &sources, options)
 }
 
 pub(crate) fn resolve_sources(
+    catalog: &DocumentCatalog,
     sources: &[SourceOccurrence],
     options: &RuntimeOptions,
-) -> Result<ResolvedTokens, DtcgError> {
+) -> Result<Resolution<ResolvedTokens>, DtcgError> {
     let FlattenedSources {
         raw, order, groups, ..
     } = flatten_sources(sources, &options.limits)?;
+    #[cfg(feature = "expressions")]
+    let modules = match crate::expressions::document_modules(catalog, sources, &raw, options)? {
+        Resolution::Ready(modules) => modules,
+        Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+    };
+    #[cfg(not(feature = "expressions"))]
+    let _ = catalog;
     let mut resolver = Resolver::new(&raw, options);
+    #[cfg(feature = "expressions")]
+    resolver.with_document_modules(&modules);
     for path in &order {
         resolver.resolve_token(path)?;
     }
     let resolved = resolver.into_resolved();
     let fingerprint = fingerprint(&order, &resolved);
-    Ok(ResolvedTokens {
+    Ok(Resolution::Ready(ResolvedTokens {
         tokens: resolved,
         order,
         groups: resolved_groups(groups),
         fingerprint,
-    })
+    }))
 }
 
 fn write_group_metadata(members: &mut Map<String, Value>, group: &ResolvedGroup) {
@@ -522,6 +558,11 @@ pub(crate) fn resolve_affected(
         groups,
         has_extends,
     } = flatten_sources(&sources, limits)?;
+    #[cfg(feature = "expressions")]
+    let modules = match crate::expressions::document_modules(catalog, &sources, &raw, options)? {
+        Resolution::Ready(modules) => modules,
+        Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
+    };
 
     // Seeds: named tokens and every token under a named group, tokens whose
     // flattened definition changed or is new, and every token when the
@@ -596,6 +637,8 @@ pub(crate) fn resolve_affected(
     }
 
     let mut resolver = Resolver::new(&raw, options);
+    #[cfg(feature = "expressions")]
+    resolver.with_document_modules(&modules);
     for path in order.iter().filter(|path| affected.contains(*path)) {
         resolver.resolve_token(path)?;
     }
@@ -634,9 +677,16 @@ fn same_definition(before: &RawToken, after: &RawToken) -> bool {
 pub(crate) fn validate_complete(
     catalog: &DocumentCatalog,
     root: Option<&ResourceId>,
-    limits: &RuntimeLimits,
+    options: &RuntimeOptions,
 ) -> Result<Resolution<()>, DtcgError> {
-    match discover(catalog, required_root(root)?, limits, &[], true)? {
+    match discover(catalog, required_root(root)?, &options.limits, &[], true)? {
+        // With expressions, every module a source of any context declares,
+        // and what it imports, must be loaded too.
+        #[cfg(feature = "expressions")]
+        Resolution::Ready(sources) => {
+            crate::expressions::validate_modules(catalog, &sources, options)
+        }
+        #[cfg(not(feature = "expressions"))]
         Resolution::Ready(_) => Ok(Resolution::Ready(())),
         Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
     }

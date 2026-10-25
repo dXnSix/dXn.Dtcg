@@ -62,7 +62,13 @@ fn an_infinite_loop_exceeds_the_step_budget() {
     }))
     .unwrap_err();
     assert!(
-        matches!(error, DtcgError::LimitExceeded { kind: "expression steps", .. }),
+        matches!(
+            error,
+            DtcgError::LimitExceeded {
+                kind: "expression steps",
+                ..
+            }
+        ),
         "{error:?}"
     );
 }
@@ -78,7 +84,9 @@ fn runaway_recursion_is_an_expression_error() {
     }))
     .unwrap_err();
     match error {
-        DtcgError::Expression { message, .. } => assert!(message.contains("stack overflow"), "{message}"),
+        DtcgError::Expression { message, .. } => {
+            assert!(message.contains("stack overflow"), "{message}")
+        }
         other => panic!("{other:?}"),
     }
 }

@@ -64,6 +64,9 @@ pub(crate) struct Resolver<'a> {
     /// expression token.
     #[cfg(feature = "expressions")]
     session: Option<crate::expressions::Session>,
+    /// The document modules expressions may import.
+    #[cfg(feature = "expressions")]
+    document_modules: Option<&'a crate::expressions::DocumentModules>,
 }
 
 impl<'a> Resolver<'a> {
@@ -83,7 +86,18 @@ impl<'a> Resolver<'a> {
             expressions: options.expressions.as_ref(),
             #[cfg(feature = "expressions")]
             session: None,
+            #[cfg(feature = "expressions")]
+            document_modules: None,
         }
+    }
+
+    /// Lets expressions import `modules`.
+    #[cfg(feature = "expressions")]
+    pub(crate) fn with_document_modules(
+        &mut self,
+        modules: &'a crate::expressions::DocumentModules,
+    ) {
+        self.document_modules = Some(modules);
     }
 
     pub(crate) fn into_resolved(self) -> BTreeMap<String, ResolvedToken> {
@@ -228,6 +242,26 @@ impl<'a> Resolver<'a> {
                 path: path.into(),
                 message,
             },
+            // A document module names itself and the specifier it was
+            // imported by; a host module, the token that imported it.
+            Failure::Module {
+                resource: Some(resource),
+                specifier,
+                message,
+            } => DtcgError::Expression {
+                resource,
+                path: specifier,
+                message,
+            },
+            Failure::Module {
+                resource: None,
+                specifier,
+                message,
+            } => DtcgError::Expression {
+                resource: token.source.clone(),
+                path: path.into(),
+                message: format!("module `{specifier}`: {message}"),
+            },
             Failure::Limit(Trip::Steps) => DtcgError::LimitExceeded {
                 kind: "expression steps",
                 limit: options.step_budget.max(1),
@@ -255,9 +289,10 @@ impl<'a> Resolver<'a> {
         };
         let session = match &mut self.session {
             Some(session) => session,
-            None => self
-                .session
-                .insert(crate::expressions::Session::new(options).map_err(&failed)?),
+            None => self.session.insert(
+                crate::expressions::Session::new(options, self.document_modules)
+                    .map_err(&failed)?,
+            ),
         };
         let max_nodes = self
             .limits

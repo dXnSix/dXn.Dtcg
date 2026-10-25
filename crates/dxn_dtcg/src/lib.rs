@@ -42,8 +42,8 @@ pub use from_dtcg_value::FromDtcgValue;
 pub use local_reference::LocalReferencePolicy;
 pub use options::{RuntimeOptions, ValueExtensions};
 pub use resolver::{
-    Deprecation, DocumentRequest, Resolution, ResolvedGroup, ResolvedToken, ResolvedTokens,
-    RuntimeLimits,
+    Deprecation, DocumentKind, DocumentRequest, Resolution, ResolvedGroup, ResolvedToken,
+    ResolvedTokens, RuntimeLimits,
 };
 pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;

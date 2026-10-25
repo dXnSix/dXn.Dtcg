@@ -88,13 +88,31 @@ fn the_compiled_feature_evaluates_nothing_until_options_enable_it() {
     let tokens = resolve(&document(true), options);
     assert_eq!(tokens.get("large").unwrap().value, json!(16));
 
-    // Enabled, the same document evaluates `large` and rejects `accent`.
+    // Enabled, the same document rejects its invalid module declaration
+    // and, without it, evaluates `large` and rejects `accent`.
     let enabled = RuntimeOptions::default()
         .with_expressions(dxn_dtcg::expressions::ExpressionOptions::default());
-    let error =
-        DtcgRuntime::from_json_with_options("tokens.json", document(true).to_string(), enabled)
-            .unwrap()
-            .resolve(&[])
-            .unwrap_err();
+    let error = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        document(true).to_string(),
+        enabled.clone(),
+    )
+    .unwrap()
+    .resolve(&[])
+    .unwrap_err();
+    assert!(matches!(error, dxn_dtcg::DtcgError::Expression { ref path, .. } if path.is_empty()));
+    let mut without_declaration = document(true);
+    without_declaration
+        .as_object_mut()
+        .unwrap()
+        .remove("$extensions");
+    let error = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        without_declaration.to_string(),
+        enabled,
+    )
+    .unwrap()
+    .resolve(&[])
+    .unwrap_err();
     assert!(matches!(error, dxn_dtcg::DtcgError::Expression { ref path, .. } if path == "accent"));
 }

@@ -1,9 +1,9 @@
 use std::{fmt, sync::Arc};
 
 use crate::{
-    AffectedResolution, DocumentCatalog, DocumentRequest, DtcgError, DtcgTokens, ModifierAxis,
-    Resolution, ResolvedTokens, ResourceId, RuntimeLimits, RuntimeOptions, SourceOccurrence,
-    TypeRegistry,
+    AffectedResolution, DocumentCatalog, DocumentKind, DocumentRequest, DtcgError, DtcgTokens,
+    ModifierAxis, Resolution, ResolvedTokens, ResourceId, RuntimeLimits, RuntimeOptions,
+    SourceOccurrence, TypeRegistry,
     catalog::parse_document,
     resolver, selection,
     source_discovery::{self, required_root},
@@ -90,17 +90,69 @@ impl DtcgRuntime {
         resource_id: impl AsRef<str>,
         json: impl Into<Arc<str>>,
     ) -> Result<(), DtcgError> {
-        self.catalog
-            .provide(ResourceId::parse(resource_id)?, json.into())
+        self.catalog.provide(
+            ResourceId::parse(resource_id)?,
+            DocumentKind::Json,
+            json.into(),
+        )
     }
 
+    /// Provides the JSON document a request asks for. A request for a
+    /// module is a kind mismatch, and the catalog stays unchanged.
     pub fn provide_requested_json(
         &mut self,
         request: &DocumentRequest,
         json: impl Into<Arc<str>>,
     ) -> Result<(), DtcgError> {
+        check_request_kind(request, DocumentKind::Json)?;
         self.catalog
-            .provide(request.resource_id.clone(), json.into())
+            .provide(request.resource_id.clone(), DocumentKind::Json, json.into())
+    }
+
+    /// Stores the source text of a JavaScript (`.js`, `.mjs`) or TypeScript
+    /// (`.ts`, `.mts`) ES module that token expressions import (feature
+    /// `expressions`). The text is not checked until a resolution imports
+    /// it; an existing JSON document at the id is a kind mismatch, and the
+    /// catalog stays unchanged.
+    pub fn provide_module(
+        &mut self,
+        resource_id: impl AsRef<str>,
+        source: impl Into<Arc<str>>,
+    ) -> Result<(), DtcgError> {
+        self.catalog.provide(
+            ResourceId::parse(resource_id)?,
+            DocumentKind::Module,
+            source.into(),
+        )
+    }
+
+    /// Provides the module a request asks for. A request for a JSON
+    /// document is a kind mismatch, and the catalog stays unchanged.
+    pub fn provide_requested_module(
+        &mut self,
+        request: &DocumentRequest,
+        source: impl Into<Arc<str>>,
+    ) -> Result<(), DtcgError> {
+        check_request_kind(request, DocumentKind::Module)?;
+        self.catalog.provide(
+            request.resource_id.clone(),
+            DocumentKind::Module,
+            source.into(),
+        )
+    }
+
+    /// Replaces a module provided before. Affected resolution does not
+    /// follow module edits: resolve fully afterwards.
+    pub fn replace_module(
+        &mut self,
+        resource_id: impl AsRef<str>,
+        source: impl Into<Arc<str>>,
+    ) -> Result<(), DtcgError> {
+        self.catalog.replace(
+            ResourceId::parse(resource_id)?,
+            DocumentKind::Module,
+            source.into(),
+        )
     }
 
     pub fn provide_json_batch<I, Id, Json>(&mut self, documents: I) -> Result<(), DtcgError>
@@ -121,8 +173,11 @@ impl DtcgRuntime {
         resource_id: impl AsRef<str>,
         json: impl Into<Arc<str>>,
     ) -> Result<(), DtcgError> {
-        self.catalog
-            .replace(ResourceId::parse(resource_id)?, json.into())
+        self.catalog.replace(
+            ResourceId::parse(resource_id)?,
+            DocumentKind::Json,
+            json.into(),
+        )
     }
 
     /// Replaces one loaded document and resolves only the changed tokens and
@@ -152,7 +207,8 @@ impl DtcgRuntime {
         )
         .ok()
         .and_then(Resolution::ready);
-        self.catalog.replace(resource_id.clone(), json.into())?;
+        self.catalog
+            .replace(resource_id.clone(), DocumentKind::Json, json.into())?;
 
         let result = resolver::resolve_affected(
             &self.catalog,
@@ -166,10 +222,12 @@ impl DtcgRuntime {
             return result;
         }
 
-        self.catalog.replace(resource_id, previous)?;
+        self.catalog
+            .replace(resource_id, DocumentKind::Json, previous)?;
         result
     }
 
+    /// Removes a JSON document or a module.
     pub fn remove_document(&mut self, resource_id: impl AsRef<str>) -> Result<(), DtcgError> {
         self.catalog.remove(&ResourceId::parse(resource_id)?)
     }
@@ -205,11 +263,12 @@ impl DtcgRuntime {
     /// resolution order. A root that is a plain token document has no axes.
     pub fn modifiers(&self) -> Result<Resolution<Vec<ModifierAxis>>, DtcgError> {
         let root = required_root(self.root.as_ref())?;
-        let Some(json) = self.catalog.get(root) else {
+        let Some(json) = self.catalog.json(root)? else {
             return Ok(Resolution::Missing(vec![DocumentRequest {
                 resource_id: root.clone(),
                 referenced_from: root.clone(),
                 original_reference: root.as_str().into(),
+                kind: crate::DocumentKind::Json,
             }]));
         };
         selection::modifier_axes(root, &parse_document(root, json)?).map(Resolution::Ready)
@@ -248,7 +307,7 @@ impl DtcgRuntime {
     }
 
     pub fn validate_complete(&self) -> Result<Resolution<()>, DtcgError> {
-        resolver::validate_complete(&self.catalog, self.root.as_ref(), &self.options.limits)
+        resolver::validate_complete(&self.catalog, self.root.as_ref(), &self.options)
     }
 
     /// Inspect all authored resolver-source references, including dormant sets,
@@ -356,7 +415,6 @@ impl DtcgRuntime {
         };
         source_discovery::check_inputs(selection, &[&inspected.inputs, &base.inputs])?;
         self.preview_merged(base.sources, &inspected.sources)
-            .map(Resolution::Ready)
     }
 
     /// Preview one terminal occurrence returned by `inspect_source`, including a
@@ -390,7 +448,7 @@ impl DtcgRuntime {
             Resolution::Ready(sources) => sources,
             Resolution::Missing(requests) => return Ok(Resolution::Missing(requests)),
         };
-        self.preview_merged(sources, preview).map(Resolution::Ready)
+        self.preview_merged(sources, preview)
     }
 
     /// Resolves `sources` with the `preview` occurrences merged last.
@@ -398,7 +456,7 @@ impl DtcgRuntime {
         &self,
         mut sources: Vec<SourceOccurrence>,
         preview: &[SourceOccurrence],
-    ) -> Result<ResolvedTokens, DtcgError> {
+    ) -> Result<Resolution<ResolvedTokens>, DtcgError> {
         if sources.len().saturating_add(preview.len()) > self.options.limits.max_documents {
             return Err(DtcgError::LimitExceeded {
                 kind: "documents",
@@ -406,7 +464,7 @@ impl DtcgRuntime {
             });
         }
         sources.extend_from_slice(preview);
-        resolver::resolve_sources(&sources, &self.options)
+        resolver::resolve_sources(&self.catalog, &sources, &self.options)
     }
 
     pub fn project<T: DtcgTokens>(
@@ -418,4 +476,18 @@ impl DtcgRuntime {
             Resolution::Missing(requests) => Ok(Resolution::Missing(requests)),
         }
     }
+}
+
+fn check_request_kind(request: &DocumentRequest, kind: DocumentKind) -> Result<(), DtcgError> {
+    if request.kind == kind {
+        return Ok(());
+    }
+    Err(DtcgError::InvalidDocument {
+        resource: request.resource_id.clone(),
+        message: format!(
+            "the request asks for {}, not {}",
+            request.kind.describe(),
+            kind.describe()
+        ),
+    })
 }
