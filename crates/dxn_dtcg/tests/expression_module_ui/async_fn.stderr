@@ -1,0 +1,5 @@
+error: expression module functions are synchronous: remove `async`
+ --> tests/expression_module_ui/async_fn.rs:7:9
+  |
+7 |     pub async fn double(value: f64) -> f64 {
+  |         ^^^^^

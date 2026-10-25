@@ -1,0 +1,5 @@
+error: unknown `expression` attribute `rename`; expected one of name, ts
+ --> tests/expression_module_ui/unknown_key.rs:7:18
+  |
+7 |     #[expression(rename = "twice")]
+  |                  ^^^^^^

@@ -31,15 +31,20 @@
 //!
 //! [`EXPRESSION_EXTENSION`]: crate::EXPRESSION_EXTENSION
 
+mod builtins;
 mod compile;
+mod declarations;
 mod engine;
 mod format;
 mod modules;
+mod native;
 mod nesting;
 mod sandbox;
 
+pub use dxn_dtcg_derive::expression_module;
 pub use modules::ExpressionModule;
 pub(crate) use modules::{DocumentModules, document_modules, validate_modules};
+pub use native::{Json, NativeFunction, NativeModule, NativeReturn};
 
 pub(crate) use engine::{Failure, Session};
 
@@ -93,6 +98,8 @@ pub struct ExpressionOptions {
     pub precision: Option<u32>,
     /// Host modules by bare specifier.
     pub(crate) modules: std::collections::BTreeMap<String, ExpressionModule>,
+    /// Host native modules by specifier.
+    pub(crate) native_modules: std::collections::BTreeMap<String, NativeModule>,
 }
 
 impl Default for ExpressionOptions {
@@ -103,6 +110,7 @@ impl Default for ExpressionOptions {
             stack_limit: 256 * 1024,
             precision: Some(6),
             modules: std::collections::BTreeMap::new(),
+            native_modules: std::collections::BTreeMap::new(),
         }
     }
 }
@@ -140,6 +148,32 @@ impl ExpressionOptions {
     pub fn with_module(mut self, specifier: impl Into<String>, module: ExpressionModule) -> Self {
         self.modules.insert(specifier.into(), module);
         self
+    }
+
+    /// Registers a module of Rust functions and constants under its
+    /// specifier (replacing an earlier registration of it). Like a host
+    /// module, its specifier must be bare, outside the reserved `dxn.dtcg`
+    /// namespace, and neither registered as a JavaScript module nor
+    /// declared by a document.
+    pub fn with_native_module(mut self, module: NativeModule) -> Self {
+        self.native_modules
+            .insert(module.specifier().to_owned(), module);
+        self
+    }
+
+    /// The registered native modules by specifier.
+    pub fn native_modules(&self) -> impl Iterator<Item = &NativeModule> {
+        self.native_modules.values()
+    }
+
+    /// TypeScript declarations for editors: the DTCG value types, the
+    /// built-in modules `dxn.dtcg` and `dxn.dtcg/color`, and every
+    /// registered native module with its documentation, as one `.d.ts`
+    /// text. JavaScript and TypeScript modules are not declared: their
+    /// sources carry their own types.
+    pub fn typescript_declarations(&self) -> String {
+        let builtins = builtins::modules(&crate::ValueExtensions::default());
+        declarations::render(builtins.iter().chain(self.native_modules.values()))
     }
 
     /// The host modules by specifier.

@@ -19,21 +19,58 @@ use rquickjs::{
 use serde_json::{Number, Value};
 
 use super::{
-    ExpressionOptions,
+    ExpressionOptions, builtins,
     compile::{CompileError, Compiled, Position, check_expression, compile, position_at},
     format::{Expression, Import},
     format::{Language, is_relative},
     modules::{DocumentModules, import_reference, is_reserved},
+    native::{Export, NativeError, NativeFn, NativeModule},
     sandbox::{CountingAllocator, Guard, HARDEN, Trip},
 };
-use crate::{ResourceId, token_resolution::MAX_VALUE_DEPTH};
+use crate::{ResourceId, ValueExtensions, token_resolution::MAX_VALUE_DEPTH};
 
 /// The modules a session can import: the host's and the documents'.
 fn module_table(
     options: &ExpressionOptions,
     documents: Option<&DocumentModules>,
+    natives: &[NativeModule],
 ) -> Result<ModuleTable, Failure> {
     let mut table = ModuleTable::default();
+    for (index, module) in natives.iter().enumerate() {
+        let specifier = module.specifier();
+        // The first two are the built-in modules.
+        if index >= BUILTIN_MODULES {
+            if specifier.is_empty() || is_relative(specifier) {
+                return Err(Failure::Message(format!(
+                    "native module `{specifier}` needs a bare specifier"
+                )));
+            }
+            if is_reserved(specifier) {
+                return Err(Failure::Message(format!(
+                    "native module `{specifier}` is in the `dxn.dtcg` namespace, which is reserved for built-in modules"
+                )));
+            }
+            if options.modules.contains_key(specifier) {
+                return Err(Failure::Message(format!(
+                    "`{specifier}` is registered both as a JavaScript module and as a native module"
+                )));
+            }
+        }
+        table
+            .specifiers
+            .insert(specifier.to_owned(), specifier.to_owned());
+        table.natives.insert(specifier.to_owned());
+        table.modules.insert(
+            specifier.to_owned(),
+            ModuleEntry {
+                origin: Origin::Native(specifier.to_owned()),
+                language: Language::JavaScript,
+                source: native_wrapper(module).into(),
+                compiled: None,
+                loaded: false,
+            },
+        );
+    }
     for (specifier, module) in &options.modules {
         if specifier.is_empty() || is_relative(specifier) {
             return Err(Failure::Message(format!(
@@ -85,7 +122,7 @@ fn module_table(
 /// The failure of a module from `origin`, imported as `specifier`.
 fn module_failure(origin: &Origin, specifier: &str, message: String) -> Failure {
     match origin {
-        Origin::Host(host) => Failure::Module {
+        Origin::Host(host) | Origin::Native(host) => Failure::Module {
             resource: None,
             specifier: host.clone(),
             message,
@@ -168,6 +205,8 @@ impl Span {
 enum Origin {
     Host(String),
     Document(ResourceId),
+    /// A native module's generated wrapper (a built-in or the host's).
+    Native(String),
 }
 
 struct ModuleEntry {
@@ -187,6 +226,8 @@ struct ModuleTable {
     /// Bare specifiers to module names.
     specifiers: HashMap<String, String>,
     modules: HashMap<String, ModuleEntry>,
+    /// The native modules: the only importers of [`NATIVE_BRIDGE`].
+    natives: HashSet<String>,
 }
 
 impl ModuleTable {
@@ -194,6 +235,9 @@ impl ModuleTable {
     /// relative specifiers resolve against a document module's resource
     /// id, bare ones through the registrations and declarations.
     fn resolve(&self, base: &str, name: &str) -> Result<String, String> {
+        if name == NATIVE_BRIDGE && self.natives.contains(base) {
+            return Ok(name.to_owned());
+        }
         if !is_relative(name) {
             return self
                 .specifiers
@@ -308,8 +352,30 @@ impl Session {
     pub(crate) fn new(
         options: &ExpressionOptions,
         documents: Option<&DocumentModules>,
+        extensions: &ValueExtensions,
     ) -> Result<Self, Failure> {
-        let table = module_table(options, documents)?;
+        let natives = builtins::modules(extensions)
+            .into_iter()
+            .chain(options.native_modules.values().cloned())
+            .collect::<Vec<_>>();
+        let table = module_table(options, documents, &natives)?;
+        let registry = Arc::new(
+            natives
+                .iter()
+                .flat_map(|module| {
+                    module
+                        .exports()
+                        .iter()
+                        .filter_map(|export| match &export.export {
+                            Export::Function(function) => Some((
+                                (module.specifier().to_owned(), export.name.clone()),
+                                Arc::clone(function),
+                            )),
+                            Export::Constant(_) => None,
+                        })
+                })
+                .collect::<HashMap<_, _>>(),
+        );
         let stack_limit = options.stack_limit.max(MIN_STACK_LIMIT);
         // An evaluation without top-level code meets at most one interrupt
         // check, so a budget of 1 lets it through whatever ran before.
@@ -348,6 +414,15 @@ impl Session {
                 // Promises exist only because module evaluation needs them:
                 // expressions cannot create or await any.
                 ctx.globals().remove("Promise")?;
+                // The bridge to Rust reaches its module through a global
+                // that is gone before any other code runs.
+                ctx.globals()
+                    .set(BRIDGE_GLOBAL, native_call(&ctx, Arc::clone(&registry))?)?;
+                Module::declare(ctx.clone(), NATIVE_BRIDGE, BRIDGE_SOURCE)?
+                    .eval()?
+                    .1
+                    .finish::<()>()?;
+                ctx.globals().remove(BRIDGE_GLOBAL)?;
                 let helpers: rquickjs::Array = ctx.eval(HARDEN)?;
                 let deep_freeze: Function = helpers.get(0)?;
                 let drain: Function = helpers.get(1)?;
@@ -1015,4 +1090,107 @@ fn number(value: f64, precision: Option<u32>) -> Option<Value> {
         return Some(Value::from(value as i64));
     }
     Number::from_f64(value).map(Value::Number)
+}
+
+/// How many of a session's native modules are built in.
+const BUILTIN_MODULES: usize = 2;
+
+/// The internal module only native module wrappers import.
+const NATIVE_BRIDGE: &str = "dxn.dtcg/native";
+
+/// The global that hands the bridge function to [`BRIDGE_SOURCE`] during
+/// setup.
+const BRIDGE_GLOBAL: &str = "__dxn_dtcg_native_call";
+
+/// The bridge module: the Rust call function, JSON text in and out, and a
+/// deep freeze for constants.
+const BRIDGE_SOURCE: &str = r#"
+const native = globalThis.__dxn_dtcg_native_call;
+const { parse, stringify } = JSON;
+const freeze = (value) => {
+  if (((typeof value === "object" && value !== null) || typeof value === "function") && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const item of Object.values(value)) freeze(item);
+  }
+  return value;
+};
+const call = (specifier, name, args) => parse(native(specifier, name, stringify(args)));
+Object.freeze(native);
+export { call, freeze };
+"#;
+
+/// The ES module of a native module: each function export calls into Rust
+/// through the bridge, each constant is its frozen JSON value.
+fn native_wrapper(module: &NativeModule) -> String {
+    let specifier = Value::String(module.specifier().to_owned());
+    let mut source = format!("import {{ call, freeze }} from {:?};\n", NATIVE_BRIDGE);
+    for (index, export) in module.exports().iter().enumerate() {
+        let name = Value::String(export.name.clone());
+        match &export.export {
+            Export::Function(_) => {
+                let _ = writeln!(
+                    source,
+                    "const __export{index} = freeze((...args) => call({specifier}, {name}, args));"
+                );
+            }
+            Export::Constant(value) => {
+                let text = Value::String(value.to_string());
+                let _ = writeln!(
+                    source,
+                    "const __export{index} = freeze(JSON.parse({text}));"
+                );
+            }
+        }
+        let _ = writeln!(source, "export {{ __export{index} as {name} }};");
+    }
+    source
+}
+
+/// The Rust side of the bridge: calls the native function `name` of the
+/// module `specifier` with JSON arguments. An `Err` or a panic throws an
+/// `Error`, and arguments that do not convert a `TypeError`, each prefixed
+/// with `<specifier>.<name>:`.
+fn native_call<'js>(
+    ctx: &Ctx<'js>,
+    registry: Arc<HashMap<(String, String), NativeFn>>,
+) -> rquickjs::Result<Function<'js>> {
+    Function::new(
+        ctx.clone(),
+        move |ctx: Ctx<'_>, specifier: String, name: String, arguments: String| {
+            let qualified = format!("{specifier}.{name}");
+            let Some(function) = registry.get(&(specifier, name)) else {
+                return Err(rquickjs::Exception::throw_type(
+                    &ctx,
+                    &format!("{qualified}: no such native function"),
+                ));
+            };
+            let arguments: Vec<Value> = serde_json::from_str(&arguments).map_err(|error| {
+                rquickjs::Exception::throw_type(&ctx, &format!("{qualified}: {error}"))
+            })?;
+            let result =
+                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| function(&arguments)));
+            match result {
+                Ok(Ok(value)) => Ok(value.to_string()),
+                Ok(Err(NativeError::Type(message))) => Err(rquickjs::Exception::throw_type(
+                    &ctx,
+                    &format!("{qualified}: {message}"),
+                )),
+                Ok(Err(NativeError::Error(message))) => Err(rquickjs::Exception::throw_message(
+                    &ctx,
+                    &format!("{qualified}: {message}"),
+                )),
+                Err(panic) => {
+                    let message = panic
+                        .downcast_ref::<&str>()
+                        .map(|text| (*text).to_owned())
+                        .or_else(|| panic.downcast_ref::<String>().cloned())
+                        .unwrap_or_else(|| "the function panicked".into());
+                    Err(rquickjs::Exception::throw_message(
+                        &ctx,
+                        &format!("{qualified}: panicked: {message}"),
+                    ))
+                }
+            }
+        },
+    )
 }

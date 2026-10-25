@@ -1,0 +1,5 @@
+error: expression module functions cannot have generic parameters
+ --> tests/expression_module_ui/generic.rs:7:19
+  |
+7 |     pub fn double<T: Into<f64>>(value: T) -> f64 {
+  |                   ^^^^^^^^^^^^

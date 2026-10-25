@@ -290,7 +290,7 @@ impl<'a> Resolver<'a> {
         let session = match &mut self.session {
             Some(session) => session,
             None => self.session.insert(
-                crate::expressions::Session::new(options, self.document_modules)
+                crate::expressions::Session::new(options, self.document_modules, self.extensions)
                     .map_err(&failed)?,
             ),
         };

@@ -1,0 +1,5 @@
+error: unknown `expression_module` attribute `version`; expected specifier
+ --> tests/expression_module_ui/unknown_module_key.rs:5:42
+  |
+5 | #[expression_module(specifier = "brand", version = "1")]
+  |                                          ^^^^^^^

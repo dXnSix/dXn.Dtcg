@@ -210,7 +210,7 @@ const RESERVED: &[&str] = &[
 /// Checks that `name` can be a local binding: an ECMAScript identifier
 /// name (ID_Start or `$`/`_`, then ID_Continue, `$`, ZWNJ or ZWJ), written
 /// without escapes, that is not a reserved word.
-fn check_identifier(name: &str) -> Result<(), &'static str> {
+pub(crate) fn check_identifier(name: &str) -> Result<(), &'static str> {
     use oxc::syntax::identifier::{is_identifier_part, is_identifier_start};
 
     let mut chars = name.chars();

@@ -13,6 +13,28 @@ use syn::{
     PathArguments, Type, ext::IdentExt, parse_macro_input, spanned::Spanned,
 };
 
+mod expression_module;
+
+/// Turns the public functions of an inherent `impl` block into a native
+/// module for `dxn_dtcg` expressions (feature `expressions`): the block
+/// gains `fn expression_module() -> dxn_dtcg::expressions::NativeModule`.
+///
+/// `#[expression_module(specifier = "brand/math")]` names the module. Each
+/// `pub fn` becomes an export named in camelCase, or as
+/// `#[expression(name = "…")]` says; its doc comment becomes its TSDoc, and
+/// its TypeScript signature is mapped from the Rust types by their spelling
+/// (`#[expression(ts = "(value: number) => number")]` overrides it).
+/// Functions take no receiver, are not `async` and have no generic
+/// parameters. Arguments deserialize from JSON (`&str` arrives as a
+/// `String`, `&[T]` as a `Vec<T>`), results serialize, and a returned
+/// `Result` fails with its error's `Display` text.
+#[proc_macro_attribute]
+pub fn expression_module(attribute: TokenStream, item: TokenStream) -> TokenStream {
+    expression_module::expand(attribute.into(), item.into())
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
 #[proc_macro_derive(DtcgTokens, attributes(dtcg))]
 pub fn derive_dtcg_tokens(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

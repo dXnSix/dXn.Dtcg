@@ -264,6 +264,7 @@ pub(crate) fn document_modules(
 /// Whether the host registers `specifier` itself.
 fn host_registers(expressions: &ExpressionOptions, specifier: &str) -> bool {
     expressions.modules.contains_key(specifier)
+        || expressions.native_modules.contains_key(specifier)
 }
 
 /// The requests for every module any document among `sources` declares, in

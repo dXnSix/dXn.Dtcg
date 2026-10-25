@@ -1,0 +1,5 @@
+error: expression module functions take no `self`: they are called without a value
+ --> tests/expression_module_ui/receiver.rs:7:19
+  |
+7 |     pub fn double(&self, value: f64) -> f64 {
+  |                   ^^^^^

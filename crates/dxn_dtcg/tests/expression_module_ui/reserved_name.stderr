@@ -1,0 +1,5 @@
+error: `new` is a reserved word in JavaScript and cannot name an export; rename it with `#[expression(name = "…")]`
+ --> tests/expression_module_ui/reserved_name.rs:7:12
+  |
+7 |     pub fn new() -> f64 {
+  |            ^^^

@@ -1,0 +1,7 @@
+error: `#[expression_module]` needs a module specifier: `#[expression_module(specifier = "…")]`
+ --> tests/expression_module_ui/missing_specifier.rs:5:1
+  |
+5 | #[expression_module]
+  | ^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `expression_module` (in Nightly builds, run with -Z macro-backtrace for more info)

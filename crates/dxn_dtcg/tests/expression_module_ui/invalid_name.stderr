@@ -1,0 +1,5 @@
+error: `two words` is not a JavaScript identifier and cannot name an export; rename it with `#[expression(name = "…")]`
+ --> tests/expression_module_ui/invalid_name.rs:7:25
+  |
+7 |     #[expression(name = "two words")]
+  |                         ^^^^^^^^^^^
