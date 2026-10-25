@@ -620,7 +620,7 @@ Work is bounded by `ExpressionOptions`, and expression code cannot catch the lim
   prototype assignment, a bound built-in) is not checked, so a stack overflow inside it is
   discarded too, and whether one occurs can depend on the remaining stack. The
   limit must leave room on the stack of the thread that resolves: one near that stack's size
-  lets QuickJS overflow it before its own check, which aborts the process. Unoptimized QuickJS uses several times more stack per call, so a debug build allows much
+  lets QuickJS overflow it before its own check, which aborts the process. Unoptimized QuickJS uses several times more stack per call (and an MSVC build more than a Clang or GCC one), so a debug build allows much
   shallower recursion under the same limit. Build the engine optimized in every profile, as this
   repository does, in your workspace's `Cargo.toml`:
   `[profile.dev.package.quickjs-jit-sys] opt-level = 3`.

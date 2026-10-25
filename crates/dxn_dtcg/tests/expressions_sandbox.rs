@@ -223,12 +223,13 @@ fn runaway_recursion_is_a_stack_overflow_uncatchably() {
         let message = uncaught(js);
         assert!(message.contains("stack overflow"), "{js}: {message}");
     }
-    // Ordinary recursion fits the default limit on every platform (frames
-    // are larger on x86_64 than on aarch64).
-    let deep = "(() => { const f = (n) => n === 0 ? 0 : f(n - 1) + 1; return String(f(100)); })()";
+    // Ordinary recursion fits the default limit on every platform
+    // (QuickJS's frames are several times larger with MSVC than with
+    // Clang on aarch64).
+    let deep = "(() => { const f = (n) => n === 0 ? 0 : f(n - 1) + 1; return String(f(40)); })()";
     assert_eq!(
         text(deep, ExpressionOptions::default()).unwrap(),
-        json!("100")
+        json!("40")
     );
     let message = match text(
         deep,

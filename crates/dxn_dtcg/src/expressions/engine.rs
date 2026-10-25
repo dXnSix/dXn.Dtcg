@@ -419,7 +419,10 @@ impl Session {
         // An async function turns an error into a rejected promise nothing
         // awaits (no jobs run): a stack overflow among them still trips.
         let tracker = Rc::clone(&guard);
-        let overflow: OverflowTest = Rc::default();
+        let overflow: OverflowTest = Rc::new(OverflowCheck {
+            function: RefCell::new(None),
+            stack_limit,
+        });
         let test = Rc::clone(&overflow);
         runtime.set_host_promise_rejection_tracker(Some(Box::new(
             move |ctx, _promise, reason, handled| {
@@ -476,7 +479,7 @@ impl Session {
                 evaluated.finish::<()>()?;
                 ctx.globals().remove(TRIP_GLOBAL)?;
                 let test: Function = freeze_module.get("isOverflow")?;
-                *overflow.borrow_mut() = Some(Persistent::save(&ctx, test));
+                *overflow.function.borrow_mut() = Some(Persistent::save(&ctx, test));
                 let helpers: rquickjs::Array = ctx.eval(HARDEN)?;
                 let deep_freeze: Function = helpers.get(0)?;
                 let drain: Function = helpers.get(1)?;
@@ -1172,19 +1175,57 @@ fn number(value: f64, precision: Option<u32>) -> Option<Value> {
 }
 
 /// The internal module's `isOverflow`, once the session has set it up.
-type OverflowTest = Rc<RefCell<Option<Persistent<Function<'static>>>>>;
+struct OverflowCheck {
+    function: RefCell<Option<Persistent<Function<'static>>>>,
+    stack_limit: usize,
+}
+
+type OverflowTest = Rc<OverflowCheck>;
+
+/// Extra stack QuickJS may use while it runs `isOverflow` for the engine:
+/// the check follows an overflow, possibly at the stack limit, and needs
+/// room of its own (interpreter frames are large on some platforms).
+const CHECK_STACK_ROOM: usize = 64 * 1024;
+
+/// The messages of QuickJS's stack overflow errors: the `RangeError` of
+/// calls and the `SyntaxError` of the regular expression compiler.
+const STACK_OVERFLOW_MESSAGES: [(&str, &str); 2] = [
+    ("RangeError", "Maximum call stack size exceeded"),
+    ("SyntaxError", "stack overflow"),
+];
 
 /// Whether `value` is a stack overflow QuickJS reported, also one wrapped
 /// in `SuppressedError`s or `AggregateError`s, as the internal module's
 /// `isOverflow` decides (its walk runs under the step budget).
 fn is_stack_overflow<'js>(test: &OverflowTest, ctx: &Ctx<'js>, value: &JsValue<'js>) -> bool {
-    let Some(function) = test.borrow().clone() else {
+    let Some(function) = test.function.borrow().clone() else {
         return false;
     };
-    function
+    // SAFETY: `ctx` is a live context of this session's runtime, used on
+    // the thread that owns it; the limit is restored before returning.
+    let runtime = unsafe { rquickjs::qjs::JS_GetRuntime(ctx.as_raw().as_ptr()) };
+    unsafe {
+        rquickjs::qjs::JS_SetMaxStackSize(runtime, (test.stack_limit + CHECK_STACK_ROOM) as _)
+    };
+    let checked = function
         .restore(ctx)
-        .and_then(|function| function.call::<_, bool>((value.clone(),)))
-        .unwrap_or(false)
+        .and_then(|function| function.call::<_, bool>((value.clone(),)));
+    unsafe { rquickjs::qjs::JS_SetMaxStackSize(runtime, test.stack_limit as _) };
+    checked.unwrap_or_else(|_| {
+        // The check itself failed: clear its exception and look at the
+        // value alone.
+        let _ = ctx.catch();
+        value.as_object().is_some_and(|object| {
+            let name = object.get::<_, Option<String>>("name").ok().flatten();
+            let message = object.get::<_, Option<String>>("message").ok().flatten();
+            STACK_OVERFLOW_MESSAGES
+                .iter()
+                .any(|(expected_name, expected_message)| {
+                    name.as_deref() == Some(expected_name)
+                        && message.as_deref() == Some(expected_message)
+                })
+        })
+    })
 }
 
 /// Starts an evaluation in the current frame: the guard's stack base and
