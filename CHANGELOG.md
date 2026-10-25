@@ -6,6 +6,19 @@ crates share one version and one release tag `vX.Y.Z`. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
 
+## [1.2.0] - 2026-10-25
+
+### Build and CI
+- *(toolchain)* require Rust 1.97
+
+### Documentation
+- *(website)* add the documentation site and GitHub Pages workflow
+
+### Features
+- *(extensions)* move library extensions to dxn.dtcg.* and drop the project envelope
+  - Migration: token documents: set `"$type": "dxn.dtcg.blur"` on blur tokens
+  - Migration: Rust API: use `ValueExtensions::all()`, the `blur` field and `with_blur`; unwrap project files yourself, apply `LocalReferencePolicy::check_resolver` if needed and pass the resolver to `from_json_with_options`; drop `InvalidEnvelope` and `Envelope` match arms
+
 ## [1.1.0] - 2026-10-23
 
 ### Features
