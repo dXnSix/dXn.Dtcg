@@ -68,7 +68,7 @@ A fragment selects part of a document: `library.json#/palette` makes the `palett
 
 ## The request/provide protocol
 
-```text
+```rust
 // As defined by dxn_dtcg (simplified).
 pub enum Resolution<T> {
     Ready(T),

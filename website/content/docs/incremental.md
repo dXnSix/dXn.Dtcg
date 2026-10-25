@@ -24,7 +24,7 @@ Use it to skip a re-render when a reload produced identical tokens, to key cache
 
 ## Affected re-resolution
 
-```text
+```rust
 DtcgRuntime::replace_json_and_resolve_affected(
     &mut self,
     resource_id: impl AsRef<str>,

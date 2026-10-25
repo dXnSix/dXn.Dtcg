@@ -9,21 +9,18 @@ order: 40
 
 ## The resolve loop
 
-```text
-JSON strings ──provide──► catalog (ResourceId → document text)
-                              │
-                              ▼
-              discovery: resolutionOrder + selected contexts ──► Missing(requests)
-                              │                                        │
-                              │               you load them, provide them, resolve again
-                              ▼
-              merge: one document; groups merge, later tokens replace whole
-                              │
-                              ▼
-              aliases → effective types → value validation
-                              │
-                              ▼
-              ResolvedTokens ──► typed values, #[derive(DtcgTokens)] structs, to_document
+```mermaid
+flowchart TD
+    J["JSON strings"] -- "provide" --> C[("catalog<br/>ResourceId → document text")]
+    C --> D["discovery<br/>resolutionOrder + selected contexts"]
+    D -- "documents missing" --> M["Resolution::Missing(requests)"]
+    M -- "you load and provide them,<br/>then resolve again" --> C
+    D -- "all present" --> G["merge into one document<br/>groups merge, later tokens replace whole"]
+    G --> A["aliases → effective types → value validation"]
+    A --> R["ResolvedTokens"]
+    R --> T["typed values"]
+    R --> P["#[derive(DtcgTokens)] structs"]
+    R --> E["to_document"]
 ```
 
 Operations that need documents return `Result<Resolution<T>, DtcgError>`:

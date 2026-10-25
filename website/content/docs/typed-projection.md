@@ -38,7 +38,7 @@ fn main() -> Result<(), DtcgError> {
 
 Two traits do the work:
 
-```text
+```rust
 // Simplified from the crate.
 pub trait DtcgTokens: Sized {
     fn project_at(tokens: &ResolvedTokens, registry: &TypeRegistry, root: &str)

@@ -76,7 +76,7 @@ Options are fixed at construction.
 
 ### Resolution
 
-```text
+```rust
 enum Resolution<T> { Ready(T), Missing(Vec<DocumentRequest>) }   // Clone, Debug, PartialEq
 
 fn ready(self) -> Option<T>
@@ -154,14 +154,14 @@ source: ResourceId                 document of the winning definition
 
 `ModifierAxis` (`#[non_exhaustive]`): `name: String`, `contexts: Vec<String>` (authored order), `default: Option<String>`. Functions:
 
-```text
+```rust
 fn selection_from_json(inputs: &serde_json::Value) -> Result<Vec<(String, String)>, DtcgError>
 fn selection_refs(selection: &[(String, String)]) -> Vec<(&str, &str)>
 ```
 
 ## Projection
 
-```text
+```rust
 trait DtcgTokens: Sized {
     fn project_at(tokens: &ResolvedTokens, registry: &TypeRegistry, root: &str) -> Result<Self, DtcgError>;
     fn project(tokens: &ResolvedTokens, registry: &TypeRegistry) -> Result<Self, DtcgError>;   // root ""
@@ -176,7 +176,7 @@ fn join_token_path(root: &str, path: &str) -> String
 
 ## Values
 
-```text
+```rust
 fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValidationError>
 fn validate_value_with(token_type: &str, value: &Value, extensions: &ValueExtensions) -> Result<(), ValueValidationError>
 const BLUR_TYPE: &str = "dev.rayx.blur"
