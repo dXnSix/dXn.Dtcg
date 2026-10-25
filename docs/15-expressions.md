@@ -613,7 +613,7 @@ Work is bounded by `ExpressionOptions`, and expression code cannot catch the lim
   receives, and whatever an iterator's `return` method throws while a loop or built-in closes the
   iterator, to an internal check (which unwraps `SuppressedError` and `AggregateError`); an async
   function's rejection is checked as it rejects; and the guard also stops code that allocates
-  within a quarter of the limit (at most 64 KiB), so such code may fail as an overflow a little
+  within an eighth of the limit (at most 16 KiB), so such code may fail as an overflow a little
   early. One exception remains: JavaScript discards whatever an iterator's `return` method throws
   while a loop or built-in closes the iterator after a throw, and a `return` method not written
   as one in source (installed with `Object.defineProperty`, a function defined elsewhere, a

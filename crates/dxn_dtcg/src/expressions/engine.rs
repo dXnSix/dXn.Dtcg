@@ -362,6 +362,9 @@ pub(crate) struct Session {
     precision: Option<u32>,
 }
 
+/// The stack limit QuickJS has while a session sets up, at least.
+const SETUP_STACK_LIMIT: usize = 256 * 1024;
+
 /// The smallest stack limit QuickJS is given: below it, it cannot even
 /// start an evaluation.
 const MIN_STACK_LIMIT: usize = 16 * 1024;
@@ -408,7 +411,10 @@ impl Session {
         };
         let runtime = Runtime::new_with_alloc(CountingAllocator::new(Rc::clone(&guard)))
             .map_err(|error| failed(&guard, error.to_string()))?;
-        runtime.set_max_stack_size(stack_limit);
+        // Setup (hardening, the internal modules) gets a generous stack
+        // limit of its own: what it needs varies by platform, and a small
+        // `stack_limit` is for expression code only.
+        runtime.set_max_stack_size(stack_limit.max(SETUP_STACK_LIMIT));
         runtime.set_interrupt_handler(Some(guard.interrupt_handler()));
         // An async function turns an error into a rejected promise nothing
         // awaits (no jobs run): a stack overflow among them still trips.
@@ -481,6 +487,7 @@ impl Session {
                 ))
             })
             .map_err(|error| failed(&guard, error.to_string()))?;
+        runtime.set_max_stack_size(stack_limit);
         guard.enforce().map_err(Failure::Limit)?;
         Ok(Self {
             expressions: HashMap::new(),

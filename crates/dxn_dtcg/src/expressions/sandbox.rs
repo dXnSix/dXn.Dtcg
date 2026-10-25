@@ -28,8 +28,8 @@ pub(crate) struct Guard {
     memory_limit: usize,
     step_budget: usize,
     /// Stack bytes below [`Guard::stack_base`] past which an allocation
-    /// counts as a stack overflow: the QuickJS stack limit less a quarter
-    /// of it (at most 64 KiB), so code that allocates that close to the
+    /// counts as a stack overflow: the QuickJS stack limit less an eighth
+    /// of it (at most 16 KiB), so code that allocates that close to the
     /// limit fails as an overflow a little early. QuickJS serves small
     /// objects from its own arenas, so the error it throws at the limit
     /// reaches this allocator only sometimes; the internal `check` of
@@ -57,7 +57,7 @@ impl Guard {
         Rc::new(Self {
             memory_limit,
             step_budget,
-            stack_threshold: stack_limit - (stack_limit / 4).min(64 * 1024),
+            stack_threshold: stack_limit - (stack_limit / 8).min(16 * 1024),
             used: Cell::new(0),
             stack_base: Cell::new(0),
             ticks: Cell::new(0),
