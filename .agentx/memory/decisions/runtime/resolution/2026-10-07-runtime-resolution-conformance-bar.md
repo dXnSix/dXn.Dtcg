@@ -4,7 +4,7 @@ agentx:
   scope: decisions/runtime/resolution
   status: current
   created: 2026-10-07T12:00:00+02:00
-  updated: 2026-10-07T12:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - conformance
     - dtcg-2025-10
@@ -14,7 +14,7 @@ agentx:
 ---
 ## Decision: Judge conformance by spec text, then the official corpus, then recorded rulings
 
-### Context: DTCG 2025.10 (Format, Color, Resolver) contradicts itself in places, and the official corpus is schema-oriented with known bugs; [epic `dtcg-2025-10-conformance`](../../../../tasks/dtcg-2025-10-conformance/design.json), design `conformance-bar`.
+### Context: DTCG 2025.10 (Format, Color, Resolver) contradicts itself in places, and the official corpus is schema-oriented with known bugs.
 
 ### Alternatives considered: Treat the corpus as the sole definition of conformance; treat every SHOULD as an error; follow the JSON Schema where it differs from the text.
 

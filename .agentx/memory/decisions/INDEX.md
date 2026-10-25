@@ -4,7 +4,7 @@ agentx:
   scope: decisions
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-23T22:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - decisions
     - dtcg
@@ -13,7 +13,7 @@ agentx:
 ---
 # dXn.Dtcg Decision Index
 
-Durable architecture choices for the DTCG runtime. Current source remains the first evidence to inspect. Decisions dated before 2026-10-05 were made while the crates lived in RayX (epic `dtcg-runtime`, [tasks](../../tasks/dtcg-runtime/design.json)) and were promoted here by the [transplant decision](repository/agentx-memory/2026-10-05-repository-agentx-memory-taxonomy-transplant.md). Why the crates live in a sibling repository is RayX's [sibling repositories decision](../../../../../RayX/RayX.Old/.agentx/memory/decisions/runtime/workspace/2026-10-05-runtime-workspace-sibling-repositories.md).
+Durable architecture choices for the DTCG runtime. Current source remains the first evidence to inspect.
 
 ## Domains
 
@@ -27,8 +27,9 @@ Durable architecture choices for the DTCG runtime. Current source remains the fi
   - [Match inputs case-insensitively and validate them against the union of reached resolvers](runtime/resolution/2026-10-07-runtime-resolution-input-union-semantics.md)
 
 - repository
+  - [Keep the library standalone: no consumer-modeled code, `dxn.dtcg.*` extension ids, and a 1.x policy without an end condition](repository/packaging/2026-10-25-repository-packaging-standalone-library.md)
   - [Rename the crates to dxn_dtcg and dxn_dtcg_derive in dXnSix/dXn.Dtcg, released from v1.1.0](repository/packaging/2026-10-23-repository-packaging-dxn-rename.md)
-  - [Crate-area taxonomy transplanted from RayX](repository/agentx-memory/2026-10-05-repository-agentx-memory-taxonomy-transplant.md)
+  - [Organize the AgentX memory by crate area](repository/agentx-memory/2026-10-05-repository-agentx-memory-crate-area-taxonomy.md)
   - [Vendor the official DTCG corpus unmodified and ratchet its known gaps](repository/validation/2026-10-07-repository-validation-corpus-ratchet.md)
   - [Compile the README and every docs chapter as doctests; release-plz writes the changelog and migrations travel in `Migration:` footers](repository/validation/2026-10-18-repository-validation-doctests-and-generated-changelog.md) (supersedes the [2026-10-07 doctests and hand-written changelog decision](repository/validation/2026-10-07-repository-validation-docs-as-doctests.md))
   - [Release both crates as one git-tag unit with release-plz, stay on 1.x, and consume releases only by tag](repository/packaging/2026-10-18-repository-packaging-release-plz-git-tag-releases.md)

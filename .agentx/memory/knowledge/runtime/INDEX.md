@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/runtime
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-23T22:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - runtime
     - dtcg-runtime
@@ -19,6 +19,6 @@ The two published crates: `dxn_dtcg` (resolution, values, inspection, diagnostic
 
 ## Subdomains
 
-- [resolution](resolution/INDEX.md): document catalog, resource ids, resolver documents and selection, whole-token overlay, aliases, limits, affected resolution, `.tokeneditor` envelopes.
-- [projection](projection/INDEX.md): value validation and RayX extension types, `FromDtcgValue`/`TypeRegistry`, `DtcgTokens`/`DtcgComponentTokens` derives.
+- [resolution](resolution/INDEX.md): document catalog, resource ids, resolver documents and selection, whole-token overlay, aliases, limits, affected resolution, `LocalReferencePolicy`.
+- [projection](projection/INDEX.md): value validation and value extension types, `FromDtcgValue`/`TypeRegistry`, `DtcgTokens`/`DtcgComponentTokens` derives.
 - [source-inspection](source-inspection/INDEX.md): authored source references, occurrence inspection, preview, and the redacted `diagnostics` feature.

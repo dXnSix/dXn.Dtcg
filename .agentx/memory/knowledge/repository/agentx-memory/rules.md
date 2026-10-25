@@ -4,7 +4,7 @@ agentx:
   scope: knowledge/repository/agentx-memory
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-05T18:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - agentx-memory
   supersedes: []
@@ -12,5 +12,4 @@ agentx:
 ---
 # AgentX Memory Rules
 
-- Record runtime behavior here and RayX theme behavior in RayX; link across repositories instead of duplicating a fact.
-- Do not edit transplanted epic JSON to modernize paths; migrate or re-plan an epic before resuming it.
+- Record library behavior here; never record, name or model an application that consumes the library ([standalone library decision](../../../decisions/repository/packaging/2026-10-25-repository-packaging-standalone-library.md) (2026-10-25, current)).

@@ -4,7 +4,7 @@ agentx:
   scope: decisions/runtime/resolution
   status: current
   created: 2026-07-26T16:30:00+02:00
-  updated: 2026-10-05T18:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - resolution
     - overlay
@@ -14,7 +14,7 @@ agentx:
 ---
 ## Decision: Overlay whole tokens by path, then resolve aliases on the final graph
 
-### Context: DTCG 2025.10 resolvers combine sets and modifier contexts in `resolutionOrder`; the earlier RayX compiler merged overrides field by field (epic `dtcg-runtime`, DES-002).
+### Context: DTCG 2025.10 resolvers combine sets and modifier contexts in `resolutionOrder`; an earlier compiler merged overrides field by field.
 
 ### Alternatives considered: Deep-merge JSON objects or Serde structs; resolve aliases per source before overlay.
 

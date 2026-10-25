@@ -4,7 +4,7 @@ agentx:
   scope: decisions/runtime/resolution
   status: current
   created: 2026-10-07T12:00:00+02:00
-  updated: 2026-10-07T12:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - types
     - aliases
@@ -14,7 +14,7 @@ agentx:
 ---
 ## Decision: Determine a token type from its own type, then its whole-reference target, then its group
 
-### Context: The runtime let an inherited group `$type` win over an alias target type, against Format 5.2.2; [epic `dtcg-2025-10-conformance`](../../../../tasks/dtcg-2025-10-conformance/design.json), design `type-order`.
+### Context: The runtime let an inherited group `$type` win over an alias target type, against Format 5.2.2.
 
 ### Alternatives considered: Keep group-first inheritance; check value shapes instead of type names.
 

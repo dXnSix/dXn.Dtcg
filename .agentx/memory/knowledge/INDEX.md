@@ -4,7 +4,7 @@ agentx:
   scope: knowledge
   status: current
   created: 2026-10-05T18:00:00+02:00
-  updated: 2026-10-23T22:00:00+02:00
+  updated: 2026-10-25T16:00:00+02:00
   topics:
     - dtcg
     - taxonomy
@@ -18,7 +18,7 @@ Current source, tests and manifests establish behavior. This tree records durabl
 ## Domains
 
 - [runtime](runtime/INDEX.md): the `dxn_dtcg` and `dxn_dtcg_derive` crates: resolution, typed projection, source inspection.
-- [repository](repository/INDEX.md): workspace packaging and crates.io publishing, validation, RayX co-development, AgentX governance.
+- [repository](repository/INDEX.md): workspace packaging and git-tag releases, validation, AgentX governance.
 
 ## Source Anchors
 
