@@ -183,6 +183,16 @@
           "id": "PLT-3",
           "verification": "automated",
           "descriptionMarkdown": "The CI workflow builds and tests the feature natively on Ubuntu and Windows through its existing `--all-features` steps, keeps the default-feature wasm32 check, and adds an Ubuntu job that installs an LLVM clang, `llvm-ar` and the `wasm-bindgen-test-runner` matching the locked `wasm-bindgen`, then runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the wasm test group."
+        },
+        {
+          "id": "PLT-5",
+          "verification": "automated",
+          "descriptionMarkdown": "With the feature, `dxn_dtcg` builds for `wasm32-unknown-unknown` with an LLVM clang and `llvm-ar` (set through `CC_wasm32_unknown_unknown` and `AR_wasm32_unknown_unknown`); the test modules import nothing on QuickJS's behalf (its clock import is defined inside the crate, so instantiation under the wasm-bindgen runner succeeds); and the whole test suite runs on wasm32 under Node with the default wasm stack size, with the feature and without it, with the same results as natively. Among them: expressions with inputs and TypeScript evaluate, an infinite loop fails cleanly with `LimitExceeded { kind: \"expression steps\" }` and runaway recursion with `DtcgError::Expression`, and tokens import host modules, call host native modules and convert colors with `dxn.dtcg/color`. Native-only by necessity: the `trybuild` compile-fail cases and the tests that catch a panic (panics abort on wasm32); doctests run natively. Supersedes PLT-2 and PLT-4."
+        },
+        {
+          "id": "PLT-6",
+          "verification": "automated",
+          "descriptionMarkdown": "The CI workflow runs the whole test suite with the feature and without it on every platform: natively on Ubuntu, Windows and macOS, each reporting on its own (formatting, Clippy, tests, the default-feature wasm32 check, packaging), and on `wasm32-unknown-unknown` in a job that installs an LLVM clang, `llvm-ar` and the `wasm-bindgen-test-runner` matching the locked `wasm-bindgen`, then runs Clippy and the test suite for wasm32 under Node. Supersedes PLT-3."
         }
       ]
     },

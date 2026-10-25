@@ -1,12 +1,12 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 119,
-  "planRevision": 16,
+  "revision": 133,
+  "planRevision": 19,
   "specHashes": {
-    "requirements": "739aaef2a1ae3fb80d84bcecde8f600cb8acb9dce7b1a3d6441a351a2194600a",
+    "requirements": "ed421c2bde3657e4ee194f6704c1226b24553a6956a3c2131fec489b6c94d5f9",
     "design": "2450bdb2fd04f806ddd0913c8021d3b1d6b2516d45e44e22c80ce3b1161ca3ba",
-    "plan": "2aa8e266741ec133b9913457644854cc2ca516a0f1691fc6a8a373bb1e19b2f5"
+    "plan": "d56b6b14c3836bfdce2a1814ada6fb776853c8422e3b56111512df22a0829617"
   },
   "tasks": {
     "t01-feature-format": {
@@ -170,6 +170,12 @@
       "workerIds": [
         "2f1b140b-7235-45bc-a43e-b1446b24c69b"
       ]
+    },
+    "t28-full-platform-coverage": {
+      "status": "done",
+      "workerIds": [
+        "2f1b140b-7235-45bc-a43e-b1446b24c69b"
+      ]
     }
   },
   "validationBatches": {
@@ -272,23 +278,32 @@
       },
       "recordedAt": "2026-10-25T19:51:43Z"
     },
-    "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7": {
+    "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a": {
       "snapshot": {
-        "specHash": "bf0e5f81d544d69f3147efddca560b34ce1aef701ce24f166bd6209397ad9278",
+        "specHash": "0f1f575d5d064536dc12cd05dab6a7af00dba398ae8c3de96504e586122b469b",
         "repositories": {
-          "dtcg": "353d691dba0d1df9da467ed9d8bbdaa0a48e4a7d13155b23660937c9c5507161"
+          "dtcg": "c8cadff82c349de24124fea019e582d7cc12c8429f0155cc00ce47617ab5f655"
         }
       },
-      "recordedAt": "2026-10-25T20:28:24Z"
+      "recordedAt": "2026-10-25T21:08:09Z"
     },
-    "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e": {
+    "7627cbd59854c1810f1ba1efc0c593f6150a63daeb3d2f83b78af0bde1de8677": {
       "snapshot": {
-        "specHash": "bf0e5f81d544d69f3147efddca560b34ce1aef701ce24f166bd6209397ad9278",
+        "specHash": "cca5115c6820ee3998fef9ded039a506dec9c1b3a0dabe178cb70b168c142fd5",
         "repositories": {
-          "dtcg": "c3a0621d3739d2748311838cf8e07b734daad9640367524e5541c37e77aa78c4"
+          "dtcg": "a898d2b4ae655ec6b36244f9933a7d7ee7ca795c08dbfea7e515a6dfe89167e9"
         }
       },
-      "recordedAt": "2026-10-25T20:37:49Z"
+      "recordedAt": "2026-10-25T21:16:07Z"
+    },
+    "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725": {
+      "snapshot": {
+        "specHash": "e5427df33b3da8ceab5c54dc33b63b1a2fe0f3ffd1a1085b4c1c71fbf2e5ddef",
+        "repositories": {
+          "dtcg": "a898d2b4ae655ec6b36244f9933a7d7ee7ca795c08dbfea7e515a6dfe89167e9"
+        }
+      },
+      "recordedAt": "2026-10-25T21:36:02Z"
     }
   },
   "checkResults": {
@@ -670,422 +685,422 @@
       "checkId": "check-expr-disabled-off",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "04f18a3daa13919df5317309dd09390a3478b435b7f521e43b261150156532eb",
-      "basisHash": "c912bdd27db52cf314bc26b2ed3a1388b26162b7bbb52be979499e8b007dad75",
+      "basisHash": "bcd176c9e7562d81771948be71d927d0bddecb3b7bc2cbf04264ad638f880665",
       "status": "passed",
       "exitCode": 0,
       "testCount": 4,
-      "durationSeconds": 0.1169,
-      "recordedAt": "2026-10-25T20:28:06Z",
+      "durationSeconds": 7.4918,
+      "recordedAt": "2026-10-25T21:00:12Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-06a904f7afcf.log",
-      "logSha256": "0cec541dccc601d5e388d09ffb7992b4e383c20943ceb914d3c91d057bc9ab6d",
-      "inputsHash": "37aa7774a16a1dad8a27ca6840038035f757ce9abd574257b474d1ba4ab58a1f"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b3cef1c30de1.log",
+      "logSha256": "ffc314926556076730ac7f8f645584d4fc9a224a2b294e01d0288662d4d3444f",
+      "inputsHash": "79a906491f7e917cde3766e092cc69f58f959e36031012411de8f50703fee562"
     },
     "final/check-expr-disabled-on/final": {
       "checkId": "check-expr-disabled-on",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "31cf002bcfb6cdcc33a1d1ac14350ef127b6ddf7ff01c9972452fed89eb044cd",
-      "basisHash": "f2fe96de69fcf36054d279a0cb054380a8981a11f31f0d55f47f225f9dceb7fe",
+      "basisHash": "d32ac10854223e439310bcfa9663f1eb28df9ef541df6132083dd02a646ba8bf",
       "status": "passed",
       "exitCode": 0,
       "testCount": 5,
-      "durationSeconds": 0.0978,
-      "recordedAt": "2026-10-25T20:28:06Z",
+      "durationSeconds": 1.1204,
+      "recordedAt": "2026-10-25T21:00:13Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-8bc086ca5e97.log",
-      "logSha256": "a2c127eb9fb54d1600a32998223a1157cf3b3645aa03c86045045c33a8da66b0",
-      "inputsHash": "37aa7774a16a1dad8a27ca6840038035f757ce9abd574257b474d1ba4ab58a1f"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-7d1a82ace2f5.log",
+      "logSha256": "dd244cea477480268b6ad9b78ab76da3dec5644014fdcbed37c891c90377e949",
+      "inputsHash": "79a906491f7e917cde3766e092cc69f58f959e36031012411de8f50703fee562"
     },
     "final/check-expr-format/final": {
       "checkId": "check-expr-format",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "b26ac3ae76218d0815117a290c3a6c6ee166d85e5fcd0b5b9252b98e3c613523",
-      "basisHash": "7dde50ae0e66e83c2d74a6dcdab144ec41ba472b25c6d29766cd4a4739a1132f",
+      "basisHash": "5bcc67d7a72568991396587d6a9c9e4d7ec837c4f5d309ebd93745a197bf717a",
       "status": "passed",
       "exitCode": 0,
       "testCount": 11,
-      "durationSeconds": 0.1,
-      "recordedAt": "2026-10-25T20:28:06Z",
+      "durationSeconds": 1.0319,
+      "recordedAt": "2026-10-25T21:00:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-cdfa82821a9d.log",
-      "logSha256": "625774924b676efa923d65183977f568e7d260096800a11e32176c22a3554e44",
-      "inputsHash": "1a892123f76a1e399a235d60fa6f8f33028a536c33931f88fe59c5c7052b0a42"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-a6bf25041e4c.log",
+      "logSha256": "4ed073c6f81bb3028a4cdda197e68a7939a7d555f3ec6bc9c8cee24ff650bde9",
+      "inputsHash": "37d91c6d562f86f2bd5d2fcef0f8c29bc9180b75b5a013b98564374324d0a6e0"
     },
     "final/check-default-graph/final": {
       "checkId": "check-default-graph",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "543b38b1289f1ede774fdbb3001ccd7939f27cc67ee65e49ff69ebbc3c3cbbff",
-      "basisHash": "304f3468c3930f21effc612a85366f9fe9ee2a13eb3d3fd916795c7b11890018",
+      "basisHash": "330724cfeac6aaef84c1bb49c966960bf00961e7b156caf001cc6278f2cf80a1",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0946,
-      "recordedAt": "2026-10-25T20:28:07Z",
+      "durationSeconds": 0.115,
+      "recordedAt": "2026-10-25T21:00:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-20a286fc69f0.log",
-      "logSha256": "288efeee055ba849fd736bf7707df5bddb1b89f554af4ff48265a880ff5c5244",
-      "inputsHash": "bd88d4689cae7cd6515111c33d568b0c94b49a6b5b410868ee29c79a49189054"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-8be6cbbf072a.log",
+      "logSha256": "905b97d0782857bab90c9eb9e0f2b3e371e6528a4b6be03ec504fa164085d27a",
+      "inputsHash": "2bcecaa8eecfa2a99c83159945b93bff4e5f654e663b87f7e66b8b9f73d40c02"
     },
     "final/check-expr-evaluation/final": {
       "checkId": "check-expr-evaluation",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "f8586e3a4754d13d3f91878803d5d5db15063a8b8991834f3ce8d734b8aca694",
-      "basisHash": "ab400796378c7bb3e21b5ad524d9fed7c822818efa448a1ecbd8f2d3801da6cc",
+      "basisHash": "8b5d069b60d2dbc35a1bcee7dc5138308bc8d1a4bfb609e830e4a0e3833e7dbf",
       "status": "passed",
       "exitCode": 0,
       "testCount": 19,
-      "durationSeconds": 0.1164,
-      "recordedAt": "2026-10-25T20:28:07Z",
+      "durationSeconds": 1.0287,
+      "recordedAt": "2026-10-25T21:00:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-fd7ec51ec4a2.log",
-      "logSha256": "e25f48b68c895fd0e77a120a6b5859b7048a90f91269dc2e45d3f0c8ac15151f",
-      "inputsHash": "7f11982391c27a81dbc3cf6edf5912d93a3d9cc63db7dee445b17c2063317d06"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b483bbeb3e4a.log",
+      "logSha256": "d75410d5dcce350c2bb347bde741337914db83db8c2884ae7bd4dd8af241ac9a",
+      "inputsHash": "9b94151a2f216669f8641c8bd8ab5402d754670636ac13eff466be0bbd935398"
     },
     "final/check-expr-sandbox/final": {
       "checkId": "check-expr-sandbox",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "461bc5dd398e5a9742434c88b2bc8d391bf40ce3e3957a5f5674b7bb348675ba",
-      "basisHash": "17d8254c672fccc2b5c0bb16bbb0d1233d7c648c4b60564de3ba8e958ec0ccf9",
+      "basisHash": "e69b6c86e79372f0275e141baf77fee1e1f0bbaebf63414ae51260565652197b",
       "status": "passed",
       "exitCode": 0,
       "testCount": 22,
-      "durationSeconds": 1.1528,
-      "recordedAt": "2026-10-25T20:28:08Z",
+      "durationSeconds": 1.1823,
+      "recordedAt": "2026-10-25T21:00:16Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-cb0dc0ce935e.log",
-      "logSha256": "9f276866869a74573ef13e37ae1261ee2a286c14ca61aae7654c69bce1018ec1",
-      "inputsHash": "c47ee0d71c1a0657c3670c04f9c01bbcfbcfdbb91856f51861e3d67d7f221386"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c4d0000f0472.log",
+      "logSha256": "4725dadc02e091f03e1280e3ae9cc2a6cbb52fefe71ec7a18e2c4633fcefc877",
+      "inputsHash": "47a451b7a0bbc710d95327774635098373f760adf62a6adc68f3fd4deff15689"
     },
     "final/check-expr-typescript/final": {
       "checkId": "check-expr-typescript",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "4c61449c72268938b198cdc15b5d673cf030b3474de1d5263f5a04c582cc8a83",
-      "basisHash": "2ca4d2f0645230dc8c2ccbdb7340f82fff1d60d1ace47d374376f4cdcb52fae0",
+      "basisHash": "5f500e9133be282bf93f2107e0a348a4d6018546bdf0aab022fbe361b7d90e50",
       "status": "passed",
       "exitCode": 0,
       "testCount": 8,
-      "durationSeconds": 0.0799,
-      "recordedAt": "2026-10-25T20:28:08Z",
+      "durationSeconds": 0.9144,
+      "recordedAt": "2026-10-25T21:00:17Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-7e0f4fa0872c.log",
-      "logSha256": "211dd6cb6cbe7adf615196c02bb4eced55f7800847ca1001b143ca6fc05e74ec",
-      "inputsHash": "089c58c4b3cd4c8af04aef9aded0dba176a2f9ced00409d3d42cc245381e35d8"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-45fe65ab882c.log",
+      "logSha256": "19bd9244256a780dd47037f7fbef828287c67f86f981124ad700bb58ea76d1be",
+      "inputsHash": "83423ae9aeec10170755ba161e74d47d1fece67566139a9c87cc8ea4431b7a52"
     },
     "final/check-expr-apis/final": {
       "checkId": "check-expr-apis",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "006469f12c6e84853b3c17b05cd495d30714016a033d63dbe13b0d22a4b17d60",
-      "basisHash": "11e1cc782214d7d1beb342ab1e777cbd1efeb04bc144d9c2b10603ca1bf200de",
+      "basisHash": "0b3617b3671d4e3b3daf119592c5a2ec0cf03807ad09281016f2a07699342a25",
       "status": "passed",
       "exitCode": 0,
       "testCount": 6,
-      "durationSeconds": 0.1066,
-      "recordedAt": "2026-10-25T20:28:08Z",
+      "durationSeconds": 1.0556,
+      "recordedAt": "2026-10-25T21:00:18Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-463181ce1ffe.log",
-      "logSha256": "448ccc3b2726e3012cbc8a243f506b4382458d34dd8eb8ce7adef9f8a0163ca9",
-      "inputsHash": "c6f91d8a0d74eedcc63133aa8e4933592dbceae499109c94ce6921130ae2d18e"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-73815b5c00d0.log",
+      "logSha256": "216ccf55e94acced892f977c94657a2df294b6e0c1d12880722a39d8fddedb7c",
+      "inputsHash": "2bb44f3b53202b410409cd31c6045c946347bb5894aabb673f6a5f138bf31ad0"
     },
     "final/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
-      "definitionHash": "9cb972cc5b622ff900890ee6ba0824d73da1860f046f0531bc3bba06a3ef0d14",
-      "basisHash": "148ce0a753b95be0cf1ac08979ab59fffcd1fca289e3e89eb7c0b2d0804d3719",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "definitionHash": "21be5726d371ab0ed1f4fc9344de4fb15c6129cfa28a91db8c7b7e621f639c50",
+      "basisHash": "74e3b65f5d386ae24cb02e5a3aec60abcebd0683d8a42e793df7b35240c1b28c",
       "status": "passed",
       "exitCode": 0,
-      "testCount": 9,
-      "durationSeconds": 3.6748,
-      "recordedAt": "2026-10-25T20:37:44Z",
+      "testCount": 583,
+      "durationSeconds": 211.522,
+      "recordedAt": "2026-10-25T21:08:01Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-96e8f3ce8320.log",
-      "logSha256": "f920c167956ab09b86a1d566b7b84cbd073d3e3c999d54070f877bc7bfea94c3",
-      "inputsHash": "aa630170cb9e5a6ee792d4f13ce55a4c686a60dbf0648973d50ed317d8f1a5a7"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b6aafa166d49.log",
+      "logSha256": "594667ca690074319e0e47c2faa416bb54f1e4cddf0ed919f58666c075a18fac",
+      "inputsHash": "a3c9cf90ea7e5bd6f261c14acd5125f7332c35b8809e1600f1bf338da6162aa5"
     },
     "final/check-ci-workflow/final": {
       "checkId": "check-ci-workflow",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
-      "definitionHash": "c479057c24b1d1730f0cd38dbb28ca8b02e620d61df43dcd1cd590f9e31f66dc",
-      "basisHash": "9705785c14cbffc1fec7d057e05b2792db823bdda2be7a097b67ff344bc14755",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
+      "definitionHash": "71fa58be85d8759b9232027186445725e6fb3406c021133656b081cdf6ecb0e6",
+      "basisHash": "ed7ddc173126725c94a176f340683e2d5abb86feb927188acbf8270f097676e3",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.019,
-      "recordedAt": "2026-10-25T20:37:44Z",
+      "durationSeconds": 0.0256,
+      "recordedAt": "2026-10-25T21:03:55Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-19f787a59215.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-1a451a897039.log",
       "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
-      "inputsHash": "dce79d1e72d377b9a7485214e270c6349561df46bd006dd27b1b867e8f1bcb24"
+      "inputsHash": "ff84ee3e0abb7137275b93623c5269d893ccd4a115b50b7892f58eb713355a3d"
     },
     "final/check-expr-modules/final": {
       "checkId": "check-expr-modules",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "b839124c91ede60d17bec46f6414c4ddecd8df889dfcb7d42ef708026970967d",
-      "basisHash": "28438c804eb0b801febd7bab8bc333b6acbfa38d0d894c1bbd7cda76f5c0f31c",
+      "basisHash": "258cc6b9bdacefa29718fdacb657345e0e5cb45392f3522c209ffef0e91e0abb",
       "status": "passed",
       "exitCode": 0,
       "testCount": 11,
-      "durationSeconds": 0.1113,
-      "recordedAt": "2026-10-25T20:28:11Z",
+      "durationSeconds": 1.7842,
+      "recordedAt": "2026-10-25T21:03:57Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-0f124fb9b4d2.log",
-      "logSha256": "56dd48a579777eef13cf4b5b83c7102b0a3c077e94232b90c5911304237831d7",
-      "inputsHash": "dc200b39f273bc1103c07c03ab7af627b9890d649c8d8d42054f2c242e2df276"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-a080e8faed93.log",
+      "logSha256": "8326d472c061fd63ae385051cf79d574617928764ea334901bb5eec1d4d32cbd",
+      "inputsHash": "17ace3d7624adec59cb9e0217e2c7384b1234c24615363f556fb6811834811d8"
     },
     "final/check-expr-document-modules/final": {
       "checkId": "check-expr-document-modules",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "499e1952546c871cd3b749e807c3b3716556c1ded19cdd37ca0c26ddee4a8531",
-      "basisHash": "189a94840dc2735d1cbd127fa072346a3568b19150d3b8ffcb4c51cacd77a161",
+      "basisHash": "33ac3c504b718257dd9a9c74089325f9aef344450873345885e435befa5ad2f7",
       "status": "passed",
       "exitCode": 0,
       "testCount": 18,
-      "durationSeconds": 0.0989,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "durationSeconds": 1.1141,
+      "recordedAt": "2026-10-25T21:03:58Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-384632282368.log",
-      "logSha256": "98be430538b0d918af77a23263cee9cd6540f6883411a7dedf6f59577c1097c3",
-      "inputsHash": "ff608cef8a25f7a656fa015af21898edbd62dd888432ea4e024fe8eb11baf7f0"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-0f38631cc3f8.log",
+      "logSha256": "7e1fb379297fdeeaab007306e0c6b7f978aaaf367335246dff94b03200c73d53",
+      "inputsHash": "646b2ebbc93f923de65e337b0cdc369c4f04bb7f8f157b9d4325721590404c16"
     },
     "final/check-expr-native/final": {
       "checkId": "check-expr-native",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "5384ba33eca491bf01017218870bc3f396d54f9ba0716717e1680e03552433c4",
-      "basisHash": "fb7e38576c0aec14f5130f1acebd7b19553e7e6a400a87cb31cb50dca180825d",
+      "basisHash": "46fdfe9178aa952ab9598d8b79b457062cba69d977910dc9c8197ad5e5c24545",
       "status": "passed",
       "exitCode": 0,
-      "testCount": 10,
-      "durationSeconds": 0.1117,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "testCount": 11,
+      "durationSeconds": 1.1447,
+      "recordedAt": "2026-10-25T21:03:59Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-89a5da7d952b.log",
-      "logSha256": "e0bf02f83fbafc9d382377a352eea5c277f3aac517049bac9431f43e339f1dc4",
-      "inputsHash": "874f5a15b4a23810b2bf48ca4f981c64d55619dd9499fa9594048fecef01daa2"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-ef6030308e9d.log",
+      "logSha256": "353c9037dd067761d3d427e2271563a3dc8a1ce39c6b8bad8d0b9b48ba7530ff",
+      "inputsHash": "d2760b831f355bebea364099f5709d03f64d90f4bd0b9c52e1706500c9d4811f"
     },
     "final/check-color-values/final": {
       "checkId": "check-color-values",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "99362a691033da2f2d90b82aff5b91eebbdbe9e8e1eeb9000c353a4898778e89",
-      "basisHash": "bf80cfbe0df5b9ed93deda2081ded7f0607bcf462610326a612b0f62dc76b60b",
+      "basisHash": "bdacd56487e16f475fb6f9a014571234be0e2d060efae8b8eda8c941da14a029",
       "status": "passed",
       "exitCode": 0,
       "testCount": 16,
-      "durationSeconds": 0.0739,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "durationSeconds": 0.872,
+      "recordedAt": "2026-10-25T21:04:00Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-91e0db1c493d.log",
-      "logSha256": "345c3c5b7e45586b071eaf3c64b9eec8671239b8500a1266a96a905eafe42ab8",
-      "inputsHash": "61df0f57e972439bc40554031208a4e71ccc06b720e84794d9a293b5a8b5aa31"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d6a6c1d5f351.log",
+      "logSha256": "15785d2c160dbc79650fae28619153aaa9a2cd6069efab1e9cc93e4459d50918",
+      "inputsHash": "3b60f9f4b00b85912125b082b7b5a27a7943d7c020a6c003ca8a7ee10583c023"
     },
     "final/check-expr-color/final": {
       "checkId": "check-expr-color",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "fc2b20189fdd40de56a854acf6e0a1e6bb9fe5301a6d6f7220a89e35cdca62c3",
-      "basisHash": "d9491ec2660d7945d673f281e323e3a83a8004aa5f495ba5f785f7581d3a0018",
+      "basisHash": "1253d8a479c80582a551e34877f6e0478bda733f06032afae0fb844ac886d24e",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.1216,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "durationSeconds": 1.0159,
+      "recordedAt": "2026-10-25T21:04:01Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-30dd4ab41091.log",
-      "logSha256": "267a924647640860e130a16020ba325ecc9664a037183128348ee5895e0c3c7b",
-      "inputsHash": "a8381d99cecd0a3181e7788ce183a23bfdb3152f52d8e0d89ceec7f1757ba304"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c98324fea49d.log",
+      "logSha256": "075192e957f378f37e0383a8d69c9c83ef842b1005a4da2b49e11af093623dc7",
+      "inputsHash": "3fe88c4e1d1d91e0fbdf506c8af20f694bdd5d2629d03260b92869001e204860"
     },
     "final/check-expr-builtin/final": {
       "checkId": "check-expr-builtin",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "d2005add7707ed9fe718a48a9e56f159ec4b61d1d8306312421ba8daf05b29bb",
-      "basisHash": "5688db9c572e585a7e1102ef32d2616a3618325b253bb6a4920386e3d5960dea",
+      "basisHash": "4365f0a6ac20a2690a6ff384728d04a0ef82bdd3272d27845d564ef3b7b15ea8",
       "status": "passed",
       "exitCode": 0,
       "testCount": 4,
-      "durationSeconds": 0.1287,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "durationSeconds": 1.0166,
+      "recordedAt": "2026-10-25T21:04:02Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-ff99a18f2d93.log",
-      "logSha256": "9ee276931d7f217c37ae321db7c1a60e72ae6fd9086b3f41c323052cb21aaa34",
-      "inputsHash": "eee1f37263ab92ac0a9d34a9817aa9e332834b2db672aa648c6a9f659e159395"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-f1d746ea2129.log",
+      "logSha256": "b3605b132a5f8a2e1c1156f7502378c597c5f19dcec85e951061e3993764b7f8",
+      "inputsHash": "c6072ea488af7cfd5707e3336dc8955fef1c99bde2fac6654ff117ab9310ce2a"
     },
     "final/check-expr-macro/final": {
       "checkId": "check-expr-macro",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "997875b7a32dade18595b1a219690f8c12497e4a43f98fb4a6ddd9a4a3c9609e",
-      "basisHash": "64cd797a58d0e943e3d743cfb06795a6876fb764c777a0496a5969962a2bd883",
+      "basisHash": "69b04939df114bb2245d3593d2ac65c1bebffe7a57d730abeaa4bb31e37cc761",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.4546,
-      "recordedAt": "2026-10-25T20:28:12Z",
+      "durationSeconds": 1.5072,
+      "recordedAt": "2026-10-25T21:04:04Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-7ad18a9ee5a1.log",
-      "logSha256": "7eb8c2b19cb13945d67137c2d4b80a02b3f5f39fbc2e293b8331ad7427be0d12",
-      "inputsHash": "7473aca57c7b5b963c3d776aa82857f6281a418b94a966f7b75e6e4c5fbb33e8"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-5ce90994ce39.log",
+      "logSha256": "7b318ea9fbc42f1398a8bff5cd7b3a4756017fca7fba2a246fbb7fc3a37a8a74",
+      "inputsHash": "e704550e970cb1b38a3a34a45c1cb37f454a456f6954affdfe26904b6b5fab1b"
     },
     "final/check-expr-declarations/final": {
       "checkId": "check-expr-declarations",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "4da130654fedc5c345acf806a9d0c055048ce8becbeac66063bac9b29a87ee4d",
-      "basisHash": "c682a9b59d4be1c62307f04a0deb0e6319e5e963c38fdda01ca5fd365f41b5c4",
+      "basisHash": "c63b3441c38fcaade509b215345284d2e437ca33e026042ee3c0957e57242543",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.1085,
-      "recordedAt": "2026-10-25T20:28:13Z",
+      "durationSeconds": 1.0796,
+      "recordedAt": "2026-10-25T21:04:05Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-dd4515d51d75.log",
-      "logSha256": "d599ba58e70ee025d02b146c2f13b22a26ac49d5be7a882120b8f8bf2715ca0e",
-      "inputsHash": "95f5d5b7064f63748681b9da3cb7a5a6106be4501044b37ebb00ff510755826c"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-83d09a0e30e1.log",
+      "logSha256": "5d30100f1dd8f703d29c71f468de7e0bd40d5dba9866cdf999c738d6f71829b3",
+      "inputsHash": "f5579d10f3126108626492dba3fc21ed61f48ee2905d6a527d86593dbeb1395f"
     },
     "final/check-expr-doctests/final": {
       "checkId": "check-expr-doctests",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "139e730f78a9a3f034fa3c51bca315cdef5d35fdc1b2e20ee897a7fb1cebfabf",
-      "basisHash": "0c64110c6b60f9761bf08a4829ed700decfc08543cd22419e0b1a6aa489fd8e0",
+      "basisHash": "ee3bb6803ac76a8fafe687c5d6e267b33a96c6f2f9d3aae68aa9a247ae370412",
       "status": "passed",
       "exitCode": 0,
       "testCount": 7,
-      "durationSeconds": 1.7367,
-      "recordedAt": "2026-10-25T20:28:14Z",
+      "durationSeconds": 1.7231,
+      "recordedAt": "2026-10-25T21:04:06Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-384ff0ad8776.log",
-      "logSha256": "35cfaebaf6b5f9c6aaee0799241d37231b31e61a97c4eb058061814ee00b6fae",
-      "inputsHash": "c22f7a464d309d4d314327024c14328e836de30146d3f986b2898308bcdbe573"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-59aee5f347c8.log",
+      "logSha256": "62214bd5392fc78d6ea43521b222f5370d85957459b963911e9d5bbc65adfc19",
+      "inputsHash": "ff30710e35ccbc8252ef1774caf919555e5edfda675fdbdcc1f342f42b01f636"
     },
     "final/check-docs-index/final": {
       "checkId": "check-docs-index",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "e52e7289336bdd61962dc492eee50dc429cdee648d1062673f5e06c59471e60e",
-      "basisHash": "660f783812c24025b5dea50238aa06e4695f6e3ea46b88ed14f9a735ed2809cd",
+      "basisHash": "b76aa82e9c1a60f05d557b0a623ce15070a5c6b0408786c91f58d7b742354bc0",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0166,
-      "recordedAt": "2026-10-25T20:37:44Z",
+      "durationSeconds": 0.0211,
+      "recordedAt": "2026-10-25T21:04:06Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c75161d77c07.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-3900fd053357.log",
       "logSha256": "e65830437d3bfb37b33333dda924825bbb9514f5fe391524952cacc44648b6c7",
-      "inputsHash": "6d3cb95ac118be43f0277217ec92d8e42895bf28def376a4ea9137a841ff4fd4"
+      "inputsHash": "33bb642d75260bd828ee2292c4912fa3e810724d093c429981406b48beb8a001"
     },
     "final/check-value-serde/final": {
       "checkId": "check-value-serde",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "608d926603c0c722ae7292c8ec2b7a2e2f5614bf9484903156689a50e2a1beca",
-      "basisHash": "4e6c9ee8f2787cd971a726a15b0d29f5766d94d6d8f377049f3dcda986a1c13b",
+      "basisHash": "5ac081b18e32198b985dca3ea887b82a0fc81e565a4b63af40f06bb22b81e68b",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.0776,
-      "recordedAt": "2026-10-25T20:28:14Z",
+      "durationSeconds": 0.7103,
+      "recordedAt": "2026-10-25T21:04:07Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-c032b024c352.log",
-      "logSha256": "de7bf50b0aa9aec0d6b12bdf73799cfb72c803c706465cdc324380c30e7dcb51",
-      "inputsHash": "660bffd02536b95185e78ee96562fe3698ba1f1e8e34c5cb9a7c90fc75e7e58a"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-b93191c52beb.log",
+      "logSha256": "ba294b736ef93a8b04febf835eb322ae647d859c6b3fa8438649f66623b8b013",
+      "inputsHash": "a1b84315945fb4c72a8a1a960c84ba543bfa449e748d364a1daeea9960133fa6"
     },
     "final/final-fmt/final": {
       "checkId": "final-fmt",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "1a6f66da2f1dee6b1855e17f8c0e47a46511a4de45d9d028e5e4ec71a302c777",
-      "basisHash": "dad34e658ebbd224316db8b26d6d136f307a95bc994385cebb08074d889a4940",
+      "basisHash": "c66bc6b1b6d4faf6ed5a3eeddd08af524db19714250e8b32bb2496cef8a5f3a2",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.2354,
-      "recordedAt": "2026-10-25T20:37:44Z",
+      "durationSeconds": 0.1837,
+      "recordedAt": "2026-10-25T21:04:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-9e025b15e1e0.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-eca29e070837.log",
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "final/final-clippy/final": {
       "checkId": "final-clippy",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "531a67fae9bcea4038242b5b35ff1462a955c21158ff9ca84776cc471644789e",
-      "basisHash": "132412578db9ea73758fb2f8c31f3bb98e6657dd4483c30f63b3360d046a4c93",
+      "basisHash": "c6fc2773e586ce9ec8d4afb171936b144b238dd1fa54c343b1369e327bb7c49b",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.2039,
-      "recordedAt": "2026-10-25T20:37:45Z",
+      "durationSeconds": 0.1888,
+      "recordedAt": "2026-10-25T21:04:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d74cb591f07b.log",
-      "logSha256": "f0788aa36d1c86b6ccdfb7f4042a5574102d82061c046422a2d42e008a1e4710"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-13db3c8ee94b.log",
+      "logSha256": "a41051563a4cb5fc1b1bcdd9aa0ba28ca80f7736d629d90cc138218756e8e3a9"
     },
     "final/final-wasm-default/final": {
       "checkId": "final-wasm-default",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "b681bff9c4fb5aaf934ca616a1ec38ab144605c5e54e32b721f0d35090e32a3a",
-      "basisHash": "5bc94c1746afa51821bc290fc5a816064da29fad655dc676d5f848e664d70192",
+      "basisHash": "8932d34ccc67092dda5df7ff50418e0c993c6f2e5e7b231cf6a47d29d6ebc0cf",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 0.0835,
-      "recordedAt": "2026-10-25T20:37:45Z",
+      "durationSeconds": 0.0844,
+      "recordedAt": "2026-10-25T21:04:15Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-155fa806d167.log",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-414335f1a203.log",
       "logSha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
     },
     "final/final-package/final": {
       "checkId": "final-package",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "9234df311b3ef66915f2ac2efdc255ea93eff9f838e4d6e02c9e4e3e2ab0bc58",
-      "basisHash": "5f61b89936b86b9d32f991fc03fcc670e770cfe9de742b1b21d355f043862016",
+      "basisHash": "767809f4b0985799f624a55094f233d410bd7f2a69d8c8bc86966f706a090a1a",
       "status": "passed",
       "exitCode": 0,
       "testCount": 0,
-      "durationSeconds": 4.3677,
-      "recordedAt": "2026-10-25T20:37:49Z",
+      "durationSeconds": 7.8872,
+      "recordedAt": "2026-10-25T21:08:09Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-89cfe5d8e611.log",
-      "logSha256": "24bd953b9e1039f97790b10f6c24f65546321eb5477e27256c5b1f330de72945"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-daa93ea7165f.log",
+      "logSha256": "dd265c17cdf1c1f317a33190177f5fdf56a92816ec62b0e00ac31f62472c3e78"
     },
     "s6-final-repair/check-expr-wasm/final": {
       "checkId": "check-expr-wasm",
@@ -1244,52 +1259,52 @@
       "checkId": "check-expr-stack-top",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "1de40c4d1e525892ab0ac0ca4c1dffa6c9e9550652d953d0dcbfce5da7c2da4b",
-      "basisHash": "373a1021adba4b67e592f724368394d5089e5f8476d5591afbef8c3d418b56eb",
+      "basisHash": "b1a535a01367bfd6a7194805e7d2ad6295f476bd010528501baed55f080aee40",
       "status": "passed",
       "exitCode": 0,
       "testCount": 9,
-      "durationSeconds": 0.1364,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 1.088,
+      "recordedAt": "2026-10-25T21:04:08Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-16d208ac6add.log",
-      "logSha256": "d2c9d9dc43d5813086882ab75dce8cca80f38064906e4920236e68c234c1dbd3",
-      "inputsHash": "21b87b3395ced6e3ab639b48f606c8ee7e436037862c2dcc0a2a28f35f316d3b"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-70aa8fa3b0e9.log",
+      "logSha256": "0ba132c1240cfce5c9688d43faba151df4ba18ca73d7288c9e39cfa4e6cd126b",
+      "inputsHash": "a61f64679fab13cc8f792bbb3a0dd08891e22d9bad945483c7b5e538b6e0a46b"
     },
     "final/check-expr-module-state/final": {
       "checkId": "check-expr-module-state",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "9251be6ef978aa9dd39fb63ca79a93dfaae3cbab3f261c1e59a0a08be7377b98",
-      "basisHash": "0caef8a391399ac09ed2baf0ec9ed3de59d1c7a27e57c30d690c902a9e5ec150",
+      "basisHash": "fdfdda73e4f6210f9942cd309d47b0c30a5482f06197d39ceec1f1f32506cf5c",
       "status": "passed",
       "exitCode": 0,
       "testCount": 11,
-      "durationSeconds": 0.1554,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 1.0905,
+      "recordedAt": "2026-10-25T21:04:09Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-6468f2d7cb2e.log",
-      "logSha256": "64e9faa9590d16253e67ff735b14568ec61361df0c0740f7eb170934497707d3",
-      "inputsHash": "fc567515a18466eeede3fc7e79a26bd1375ba0f5eb39f38396a99fb131f2b7d1"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-dd905541cbd5.log",
+      "logSha256": "c78b35358dca38cdd823f2723a50f632873e04683a51418fcbbce22ffd5b236a",
+      "inputsHash": "ee236492cbb12d390ced42fb936978e236bb5c45987adc64847c99b0ce52ae4c"
     },
     "final/check-expr-diagnostic-names/final": {
       "checkId": "check-expr-diagnostic-names",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "fa350b62c561b805addeb2106b17851e7be4a5ffb1c8b715548f992450a9f25f",
-      "basisHash": "30be6ea28967df3abe4a8c5ab24adee249a84874cd0e3f95c697447acb46b872",
+      "basisHash": "45a5a9e4a02f240fd19d1879315e5e1c8c4515693955531c44c17f89a906a6db",
       "status": "passed",
       "exitCode": 0,
       "testCount": 2,
-      "durationSeconds": 0.1105,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 0.9513,
+      "recordedAt": "2026-10-25T21:04:10Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-e9165111c0e7.log",
-      "logSha256": "b825fb4f6187908f83f966631484bc5316217f2a2595e8831b4d8b12340d4f2a",
-      "inputsHash": "32aa81e6a937126188cd2f808c2019f731d4e1a837b858eeb0863b0fda0e3a8c"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-ed79844e343d.log",
+      "logSha256": "7498145de57e7594a4da6d6927c87a55f8d24089d6ef8c42f12507687dde9f4e",
+      "inputsHash": "54e2d2a5f3d4c2f8d2e63f706e6d5eeb6dd8988636524c02d1357967e7c87568"
     },
     "s7-final-repair-2/check-expr-sandbox/final": {
       "checkId": "check-expr-sandbox",
@@ -1516,69 +1531,69 @@
       "checkId": "check-expr-async-overflow",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "65aad9fdff5f47e491d79a03a1a163952c475fdb043646f266cfcef44a0d97a0",
-      "basisHash": "e5ea3b37c87197f495e5b2d8e2280e49914d90941694957c7af7b7af0901e2f9",
+      "basisHash": "5ba515dc97af9a5cbf86edb6a5ea17958d4af1b84a92a0bea14954a83a844218",
       "status": "passed",
       "exitCode": 0,
       "testCount": 12,
-      "durationSeconds": 0.2822,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 1.2262,
+      "recordedAt": "2026-10-25T21:04:12Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-aeb81416091d.log",
-      "logSha256": "043ef8e6fc095efce99a900f3569d4eab3d65ea4ed9fb90c181bf6c3d48ddd96",
-      "inputsHash": "09f0018b47b91119f087d96c1231135fbc7c7a02da78870485fa8b0782dd7267"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-f2bef975a3a5.log",
+      "logSha256": "d63e268d65b62e5f0f7181757bb20c1f24ba921495f576f73f5b6db758c22cc5",
+      "inputsHash": "66f77e7338785a587a72fb87a47860b3c2e469f17951c42fb1800c8d033e46f8"
     },
     "final/check-expr-shared-compilation/final": {
       "checkId": "check-expr-shared-compilation",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "b563b56e117b927b0463237f7a57129b22d7a9d849a52a0303967743e84a8012",
-      "basisHash": "7b7e4c0eaa0b57203625f37fc562f1bbbc6ae15bf31aee816a737516127e8d52",
+      "basisHash": "e48d04ef27e25739960093b4951dd7f1bd9c304369a759ec03976a7b77d0cec9",
       "status": "passed",
       "exitCode": 0,
       "testCount": 1,
-      "durationSeconds": 0.0988,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 0.9052,
+      "recordedAt": "2026-10-25T21:04:12Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-ba75b5160257.log",
-      "logSha256": "a9e80bc0bb7051fc4431ba5557d6e529340e83ff683cab11f11fd57394243b3a",
-      "inputsHash": "1519cfad3d2f3f5fd268ce7f890a4b3139d6300a9fadda7f40bde5b2bc14b626"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-0e8846b317fd.log",
+      "logSha256": "c6555c4f2647e91794211a581d359f8975c4a45c869853bd873d295b662db94b",
+      "inputsHash": "51dab7a3a86fafc18a746ebc44e2fa675a10787f85f0f4bd78778c3fdb07dcfb"
     },
     "final/check-expr-native-finite/final": {
       "checkId": "check-expr-native-finite",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "35429f782261c1c192e78ce46572150769483e118de709b6312e2e089d9e0032",
-      "basisHash": "36c37726d717545209bbda458928bd4ab7219ecbde1eda7895c071e4570c0bda",
+      "basisHash": "1c09e88c157c24f5abca5e03753bfd32899dca64151e8f9efc33ca4245af73b9",
       "status": "passed",
       "exitCode": 0,
       "testCount": 1,
-      "durationSeconds": 0.1093,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 1.0042,
+      "recordedAt": "2026-10-25T21:04:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-9264a03cc18a.log",
-      "logSha256": "600901121a0c4287566530282ec4ad035e880d7ae6806c6256e4b845f9762c15",
-      "inputsHash": "37b5c08b957d0c180122fcfae6cc1635661b285a7bd399d413e4ade508de08f8"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-1238d191699b.log",
+      "logSha256": "0589216b92fadd43d56bc840e460a7e13baac5abec4bdb7f2f6bf999c332d893",
+      "inputsHash": "8ba250c1758674941e0226b808cc0505b47566eecc1045ccd78acd96dd3b7557"
     },
     "final/check-color-gamut-contrast/final": {
       "checkId": "check-color-gamut-contrast",
       "boundaryId": "final",
       "phase": "final",
-      "batchId": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
+      "batchId": "d8271626456a14c756327ded8380525ff51dc0446e0f0de31e67312a40c0557a",
       "definitionHash": "685c5f716ebe2d7053a2816f1a4c2e95f3c2a7d9eda3bb7cde9587239a157d60",
-      "basisHash": "b73f8a99db349fab6e4d38121b283a85e0e616341c471413399c2ca9c7df0e7a",
+      "basisHash": "f556840bf17f14b9f065232b65236909ae82e33bfc321e9fdafd9fae7b07b6ca",
       "status": "passed",
       "exitCode": 0,
       "testCount": 3,
-      "durationSeconds": 0.0696,
-      "recordedAt": "2026-10-25T20:28:15Z",
+      "durationSeconds": 0.7653,
+      "recordedAt": "2026-10-25T21:04:14Z",
       "messageMarkdown": "Expectation matched",
-      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-85db1d4f03e8.log",
-      "logSha256": "f9d3345165b13b984dd15cc06ef765bdbcdd2f51183935fe29f0cd4e3ee932af",
-      "inputsHash": "9df2bd4ebac4cf4a843e7f7839ead6759d30268927df1c1169acf9b87b851eeb"
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/final-final-d99c3572b5e4.log",
+      "logSha256": "83033114c5666112f1ae396fbce240ba9297e1799ee94947631302f3b4c7f1e8",
+      "inputsHash": "1edbc73631af479cbb335d2e14494ba94012bac755ec76fd40128a7dff9e4029"
     },
     "s8-final-repair-3/check-expr-sandbox/final": {
       "checkId": "check-expr-sandbox",
@@ -1647,6 +1662,57 @@
       "logPath": "artifacts-temp/agentx/dtcg-expressions/s8-final-repair-3-final-765e73af0a34.log",
       "logSha256": "634fe86e061f4dc62069ebc261fcdf9e70807f11e7784c4fe6487666e0948a2d",
       "inputsHash": "96f07c2457e2f1d2caa6a281b3105239c165780a7602d8cb37b9ffb486c75f3a"
+    },
+    "s9-full-platform-coverage/check-expr-sandbox/final": {
+      "checkId": "check-expr-sandbox",
+      "boundaryId": "s9-full-platform-coverage",
+      "phase": "final",
+      "batchId": "7627cbd59854c1810f1ba1efc0c593f6150a63daeb3d2f83b78af0bde1de8677",
+      "definitionHash": "48afed2a90c1654516521627113cbcfb9126c93589ff35ed48ac7cc10d6ed381",
+      "basisHash": "b59014e26092dbff40f4373a91332f2047c047a7b191dedb437f03814d9ed823",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 22,
+      "durationSeconds": 4.8237,
+      "recordedAt": "2026-10-25T21:12:25Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s9-full-platform-coverage-final-9f9e059be89e.log",
+      "logSha256": "4324df86338dc77254521d6db6a761562042a36461e37e48c4003f695aff4fcd",
+      "inputsHash": "903b81db9bb99cc45f61cebe6f38bbd02f830f4cf9f93add810867e121f03f24"
+    },
+    "s9-full-platform-coverage/check-expr-wasm/final": {
+      "checkId": "check-expr-wasm",
+      "boundaryId": "s9-full-platform-coverage",
+      "phase": "final",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "definitionHash": "3d9b595bcc264e6f1c73b44c2933739b9591c2dafa837c3f045befbcf23c5f6e",
+      "basisHash": "753f4e3ae75653769217ff9b9786055009305b8509cece258a81c8d0f6e1e4ca",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 583,
+      "durationSeconds": 256.1739,
+      "recordedAt": "2026-10-25T21:36:02Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s9-full-platform-coverage-final-ed7bca34ad76.log",
+      "logSha256": "f55de9e4ea36f990c96103f3debfb28a73ad89799f0eaec4fec492187e07020d",
+      "inputsHash": "244d3961e906993b8300a070691f9d0d9eca8443f3a258fd3fad1036f5f0991c"
+    },
+    "s9-full-platform-coverage/check-ci-workflow/final": {
+      "checkId": "check-ci-workflow",
+      "boundaryId": "s9-full-platform-coverage",
+      "phase": "final",
+      "batchId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "definitionHash": "ba67d0843ac66e97a6535c91f7701cb2cdd23ac1ccb6988f3f19694c91ebbecf",
+      "basisHash": "ad33ab34f31daca644113e05f6b059e172758a527e507b1264b9028b380f3754",
+      "status": "passed",
+      "exitCode": 0,
+      "testCount": 0,
+      "durationSeconds": 0.0171,
+      "recordedAt": "2026-10-25T21:36:02Z",
+      "messageMarkdown": "Expectation matched",
+      "logPath": "artifacts-temp/agentx/dtcg-expressions/s9-full-platform-coverage-final-46c741293bb0.log",
+      "logSha256": "6188fd2d0152ebf513ec4688e20cece78c748ff0baad6551668405c50fb162b6",
+      "inputsHash": "ff84ee3e0abb7137275b93623c5269d893ccd4a115b50b7892f58eb713355a3d"
     }
   },
   "reviews": {
@@ -3015,621 +3081,123 @@
       "findingIds": [],
       "recordedAt": "2026-10-25T19:51:11Z"
     },
-    "final": {
-      "reviewerId": "reviewer-final-independent-3",
-      "snapshotId": "616bf54a46a4b03abc3c50e6b97113a4b695fe9c946a765916c6926d5df4944e",
+    "s9-full-platform-coverage": {
+      "reviewerId": "reviewer-s9-full-platform-coverage-independent",
+      "snapshotId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
       "criterionIds": [
-        "EXP-1",
-        "EXP-2",
-        "EXP-3",
-        "EVAL-1",
-        "EVAL-2",
-        "EVAL-3",
-        "EVAL-4",
-        "EVAL-6",
-        "SBX-1",
-        "SBX-4",
         "SBX-5",
-        "MOD-1",
-        "MOD-2",
-        "MOD-3",
-        "MOD-4",
-        "MOD-5",
-        "NAT-1",
-        "NAT-2",
-        "NAT-3",
-        "NAT-4",
-        "NAT-5",
-        "PLT-1",
-        "PLT-2",
-        "PLT-4",
-        "PLT-3",
-        "DOC-1"
+        "PLT-5",
+        "PLT-6"
       ],
       "verdict": "passed",
       "anchors": [
         {
           "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expression_extension.rs",
+          "path": ".github/workflows/ci.yml",
           "kind": "source",
           "criterionIds": [
-            "EXP-1",
-            "EXP-2"
+            "PLT-6"
           ],
-          "sha256": "74f638f18f9f2dd5a3002fceb1c0edaa608668f7be735d5ea5f34e3b2449d2aa"
+          "sha256": "6a6144197690a740b018d26dab73bb5a8ccdd4ccf50a76f4127a26fc84f35455"
         },
         {
           "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/options.rs",
+          "path": "crates/dxn_dtcg/tests/support/mod.rs",
           "kind": "source",
           "criterionIds": [
-            "EXP-1"
+            "PLT-5"
           ],
-          "sha256": "43994727f6b19addd71f3c033c30092e6862b1fcbdbcc74bcb7047865868f801"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/format.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EXP-2"
-          ],
-          "sha256": "6e6baab9377e27f213fcb33888a02ccbf3dda1d499b577620300198642326a6d"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/modules.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EXP-3",
-            "MOD-1",
-            "MOD-2",
-            "MOD-3",
-            "MOD-4"
-          ],
-          "sha256": "1dc2d0a9eaa41b0df4ca2939b2e5d353efe471576d2aa1e1669b1c4a2f5be775"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/token_resolution.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-1",
-            "EVAL-2",
-            "EVAL-3"
-          ],
-          "sha256": "91394997d944d32d1b6531ad7f8d065741c2f7ba8da88fa55836266bcaf95589"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/resolver.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-1",
-            "EVAL-6",
-            "MOD-2"
-          ],
-          "sha256": "41e1db8f56f78502c18adcde37754a9a047c7aea0b38845aabb51f6478e0092c"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/runtime.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-6",
-            "MOD-2"
-          ],
-          "sha256": "0eeaa92c162d103aa843ceae376d124af3243fc65dece972e562dec68eaccfa2"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/catalog.rs",
-          "kind": "source",
-          "criterionIds": [
-            "MOD-2"
-          ],
-          "sha256": "a5022dd2d9045faa66a4cebda572e31e007657423c5895dfdd9a4c04eb42047b"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-3",
-            "EVAL-4",
-            "MOD-1",
-            "MOD-3",
-            "MOD-4",
-            "MOD-5",
-            "NAT-3",
-            "SBX-4",
-            "SBX-5"
-          ],
-          "sha256": "c2375b553ea55973622639b1b5e91d8ca80128cca008285d943e92704bc25e7a"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-4",
-            "MOD-3",
-            "SBX-4",
-            "SBX-5"
-          ],
-          "sha256": "c55b0c4d44f4e63f1e51bbc6b5530adbd7ef0aaf1de219030cac17bb26c922eb"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
-          "kind": "source",
-          "criterionIds": [
-            "SBX-1",
-            "SBX-5"
-          ],
-          "sha256": "14005df06d99cd11f8faa232ebf2d25d72c470d1c0e58852c44295aed1e86e62"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/nesting.rs",
-          "kind": "source",
-          "criterionIds": [
-            "SBX-5"
-          ],
-          "sha256": "5e18538f5195003e813bfac5fe28ca14be19be54db35371887e98008a491a303"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/mod.rs",
-          "kind": "source",
-          "criterionIds": [
-            "PLT-2",
-            "SBX-5"
-          ],
-          "sha256": "e0c19c01c46f645add21b79f8c8e4ef4c0c20b7bb4abe6bdb8bb2ba7bad8e40b"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/diagnostics/mod.rs",
-          "kind": "source",
-          "criterionIds": [
-            "EVAL-4"
-          ],
-          "sha256": "4a01da97bb8d71662d46a9e182620e9db99662b6b7f37145f305e5ffb85c44b7"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/builtins.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-1",
-            "NAT-2"
-          ],
-          "sha256": "1a1375a94fdd78121ac3c7206d0b59f7770f861bb0eeded5ac8b557415562261"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/color.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-2"
-          ],
-          "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/values.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-2",
-            "NAT-3"
-          ],
-          "sha256": "4995ec959ce2de3db250859f4c29d8f36423a1a5670632837996839d37c73ebf"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/native.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-3"
-          ],
-          "sha256": "38f39790d18e98beca56c8e1fb5f8c302a71e9b91db4e0e9f7a14b27270ed98f"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg_derive/src/expression_module.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-4"
-          ],
-          "sha256": "850739d3c5801f5fced71985eaa30332c3606a24c411d20dfbf7824905a5930b"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/declarations.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-5"
-          ],
-          "sha256": "7ea8372366766f3c78ab2d2f4a3282b682ee962351365ad1e049aecd3c9b4835"
+          "sha256": "7022c6acd74937f824580801d97cc01d21ba05622e11f1b1a8b8c1df2f06c936"
         },
         {
           "repositoryId": "dtcg",
           "path": "crates/dxn_dtcg/Cargo.toml",
           "kind": "source",
           "criterionIds": [
-            "PLT-1",
-            "PLT-2",
-            "PLT-4"
+            "PLT-5"
           ],
-          "sha256": "383c025b2bb8e8d3957779073013f8acdb1d3718c01cfdf1749ba142c0013a95"
+          "sha256": "1244113317a0d73db8b0840246cdade4dc84369e176f14979ca841bb8d0be05c"
         },
         {
           "repositoryId": "dtcg",
-          "path": "Cargo.toml",
+          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
           "kind": "source",
           "criterionIds": [
-            "PLT-1"
+            "SBX-5"
           ],
-          "sha256": "c212ca39f63d299e7c2be5c6c0e8115f27cf6a24ac188a6bd50d920c5f4bbd05"
+          "sha256": "c2375b553ea55973622639b1b5e91d8ca80128cca008285d943e92704bc25e7a"
         },
         {
           "repositoryId": "dtcg",
-          "path": ".github/workflows/ci.yml",
+          "path": "docs/14-architecture-and-contributing.md",
           "kind": "source",
           "criterionIds": [
-            "PLT-3"
+            "PLT-5",
+            "PLT-6"
           ],
-          "sha256": "d8c6a4ca61cdb96279882556c87bf549d465bd6df2cb9452c9bd62057e76650a"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "docs/15-expressions.md",
-          "kind": "source",
-          "criterionIds": [
-            "DOC-1",
-            "EVAL-6",
-            "SBX-4"
-          ],
-          "sha256": "d2ecb793a0c7d43240422030f92baeeed3f539129d389fb754158fa1a0dc2fc8"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "docs/09-incremental-resolution.md",
-          "kind": "source",
-          "criterionIds": [
-            "DOC-1",
-            "EVAL-6"
-          ],
-          "sha256": "bae0bcc08583542414390d437b51df3ae01d8d6ed2f4b39a916553490317d760"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "website/content/docs/expressions.md",
-          "kind": "source",
-          "criterionIds": [
-            "DOC-1"
-          ],
-          "sha256": "9641dacf351853e30abb2007e99f493f61ea281a3134d35d71893ccec1a8ab58"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_disabled.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EXP-1"
-          ],
-          "sha256": "9169c94fe9ae0ae7a0dd0c319366aead7cc4ec5fc3d8594523bad2255d3d4b74"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_format.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EXP-2"
-          ],
-          "sha256": "75b4ff034e71c3388cfc88ca67193c8347717b0ba3a3f2c5c82751f3d5a0e587"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_document_modules.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EXP-3",
-            "MOD-2"
-          ],
-          "sha256": "8da5db51142ed42e4c446318fa9658640ed6d105c50610fbbc7d67b4374d331b"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_evaluation.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EVAL-1",
-            "EVAL-2",
-            "EVAL-3"
-          ],
-          "sha256": "cf76af7f6cc25e70c23a6332615fdcdbe0068eccfec80776a4b6412a4a2807cb"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_typescript.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EVAL-4"
-          ],
-          "sha256": "5ce0a73372b4d8c0a475c59783ccfbfe5a9be85ceff51698dd13f74e387bf416"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_diagnostic_names.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EVAL-4"
-          ],
-          "sha256": "8be2117e927f11ff65efb1fccaad9a2e54fe8f3c19b7192bac8956ca1997b636"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_apis.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EVAL-6"
-          ],
-          "sha256": "90aa00a61300f48137b3ec4f38e5434e85ca11b2748efd0a28ffbdf5e64d3efe"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_module_state.rs",
-          "kind": "test",
-          "criterionIds": [
-            "EVAL-6",
-            "SBX-4"
-          ],
-          "sha256": "cb0711097637ad2f1b71c94672e2744572f52e2e0dbf6961a456819692759c74"
+          "sha256": "c999aa6ec8bedaca05d99523d1d2f9a2a9cd92cf3f4c51d0e44e3fcd1f7d47fe"
         },
         {
           "repositoryId": "dtcg",
           "path": "crates/dxn_dtcg/tests/expressions_sandbox.rs",
           "kind": "test",
           "criterionIds": [
-            "SBX-1",
-            "SBX-4",
-            "SBX-5"
+            "SBX-5",
+            "PLT-5"
           ],
-          "sha256": "eb00226d333f8a3bc430c6a9830d28d2a3acfb857974e89d7607376b587ad7f1"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_stack_top.rs",
-          "kind": "test",
-          "criterionIds": [
-            "SBX-4",
-            "SBX-5"
-          ],
-          "sha256": "46fb0c55eabdc093da74a4cdf76169d328e17917a4f420335175ca0c035c5fa5"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
-          "kind": "test",
-          "criterionIds": [
-            "MOD-1",
-            "MOD-3",
-            "MOD-4"
-          ],
-          "sha256": "e0584639e562ecbe860ed975a576973dc85757ab2636297f476e01f279a5efe1"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/fixtures/expressions/tinycolor.js",
-          "kind": "test",
-          "criterionIds": [
-            "MOD-4"
-          ],
-          "sha256": "95838070da457477cbc5485f8aefa4d3de27560f7cd6f138323e4c8ade8be94b"
+          "sha256": "8f99fc19d9dee16ed6a8a5183e39be853974378393a5ffc6ba920d825aa543d2"
         },
         {
           "repositoryId": "dtcg",
           "path": "crates/dxn_dtcg/tests/expressions_native.rs",
           "kind": "test",
           "criterionIds": [
-            "MOD-5",
-            "NAT-3"
+            "PLT-5"
           ],
-          "sha256": "66f1e8b857aad83dc4d5aa07feca480d48d30b38e7c61da5efdfeb332856d6c1"
+          "sha256": "4134451ac53cf061752d5090fcadda3e6ea1c4f8ca08899d0cf0590d4513dac8"
         },
         {
           "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/value_serde.rs",
+          "path": "crates/dxn_dtcg/tests/official_test_suite.rs",
           "kind": "test",
           "criterionIds": [
-            "NAT-3"
+            "PLT-5"
           ],
-          "sha256": "9d07d04426ded31d85191c5d5efc92fd755b26e7b9041aed3fc6956d37b72019"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_builtin.rs",
-          "kind": "test",
-          "criterionIds": [
-            "NAT-1"
-          ],
-          "sha256": "f5a29a64125c3c60d6305ecf1116e2a1b38000154c91aee28cb34efd0efeda93"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/color_conversion.rs",
-          "kind": "test",
-          "criterionIds": [
-            "NAT-2"
-          ],
-          "sha256": "473c63bcfec546511a6c5d8b3dd8f5100f3d49d8172d9e462d2fc3819ee2fdb7"
+          "sha256": "1d90f0f5bbdd72310efb75ff34367abfa35ace070595615c7e95aab8572f9643"
         },
         {
           "repositoryId": "dtcg",
           "path": "crates/dxn_dtcg/tests/expressions_color.rs",
           "kind": "test",
           "criterionIds": [
-            "NAT-2"
+            "PLT-5"
           ],
-          "sha256": "0142bfd1aca1f5c1da52c3ede79ed4662b034c0c8886e167fa85e3db3451a6cf"
+          "sha256": "3e094384c8dff530ef8855695bd307c2060aa2449cd0fa750987853c43675ab4"
         },
         {
           "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_native_macro.rs",
+          "path": "crates/dxn_dtcg/tests/expressions_modules.rs",
           "kind": "test",
           "criterionIds": [
-            "NAT-4"
+            "PLT-5"
           ],
-          "sha256": "abc62b546b9fbc5a1b8d4f8876a60ebbe1a6500e79bd8cd2108225a06c1eae04"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_declarations.rs",
-          "kind": "test",
-          "criterionIds": [
-            "NAT-5"
-          ],
-          "sha256": "8579a1f67715282d8817c4ca7b77463a0743cd937287ebc5293a6bf7c41befe6"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_wasm.rs",
-          "kind": "runtime",
-          "criterionIds": [
-            "PLT-2",
-            "PLT-4"
-          ],
-          "sha256": "d58cd318be378185c1afc69474de4b687aed38aabe1bdd714b21f59fd6ec3510"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/Cargo.toml",
-          "kind": "runtime",
-          "criterionIds": [
-            "PLT-1"
-          ],
-          "sha256": "383c025b2bb8e8d3957779073013f8acdb1d3718c01cfdf1749ba142c0013a95"
+          "sha256": "026b353151b8346884c3641c0c846bbd3fddfa25935b939ff3e5e6b28ff4fa44"
         },
         {
           "repositoryId": "dtcg",
           "path": ".github/workflows/ci.yml",
           "kind": "runtime",
           "criterionIds": [
-            "PLT-3"
+            "PLT-6"
           ],
-          "sha256": "d8c6a4ca61cdb96279882556c87bf549d465bd6df2cb9452c9bd62057e76650a"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "docs/15-expressions.md",
-          "kind": "test",
-          "criterionIds": [
-            "DOC-1"
-          ],
-          "sha256": "d2ecb793a0c7d43240422030f92baeeed3f539129d389fb754158fa1a0dc2fc8"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/engine.rs",
-          "kind": "source",
-          "criterionIds": [
-            "SBX-5",
-            "SBX-4",
-            "EVAL-6",
-            "NAT-3"
-          ],
-          "sha256": "c2375b553ea55973622639b1b5e91d8ca80128cca008285d943e92704bc25e7a"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/compile.rs",
-          "kind": "source",
-          "criterionIds": [
-            "SBX-5",
-            "EVAL-4"
-          ],
-          "sha256": "c55b0c4d44f4e63f1e51bbc6b5530adbd7ef0aaf1de219030cac17bb26c922eb"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/expressions/sandbox.rs",
-          "kind": "source",
-          "criterionIds": [
-            "SBX-1",
-            "SBX-5"
-          ],
-          "sha256": "14005df06d99cd11f8faa232ebf2d25d72c470d1c0e58852c44295aed1e86e62"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_async_overflow.rs",
-          "kind": "test",
-          "criterionIds": [
-            "SBX-5"
-          ],
-          "sha256": "3680a5608552254f6345bdd9babef8d6880aa16af72a2b68aa6230cc8182ce43"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_shared_compilation.rs",
-          "kind": "test",
-          "criterionIds": [
-            "SBX-4",
-            "EVAL-6"
-          ],
-          "sha256": "c2cbce54ed599295f81c1297d57f4ccef3507c73416a164136217a6b9f35e272"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/expressions_native_finite.rs",
-          "kind": "test",
-          "criterionIds": [
-            "NAT-1",
-            "NAT-3"
-          ],
-          "sha256": "6dc55d36c59e192796c8ce41dd576cab68c70e508c59ba832dc825535c52c127"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/tests/color_gamut_contrast.rs",
-          "kind": "test",
-          "criterionIds": [
-            "NAT-2"
-          ],
-          "sha256": "1845c0e2c2c97b35cd7e8a37b190b363a426c554ab71b9c6a195ef0411131a3c"
-        },
-        {
-          "repositoryId": "dtcg",
-          "path": "crates/dxn_dtcg/src/color.rs",
-          "kind": "source",
-          "criterionIds": [
-            "NAT-2"
-          ],
-          "sha256": "62141f82cbbe3c63b4aafaf91d5206e01cdf0b753e10d9f8a29be68e7635bf71"
+          "sha256": "6a6144197690a740b018d26dab73bb5a8ccdd4ccf50a76f4127a26fc84f35455"
         }
       ],
-      "deltaSummaryMarkdown": "Inspected `git diff 54aa224..038578b` (commit 038578b, `ci: test on macOS arm64 too`); no source or test changes, and the criteria and dispositions are unchanged.\n\n- **Workflow:** the `rust` matrix is `[ubuntu-latest, windows-latest, macos-latest]`; `macos-latest` is an arm64 runner. Its steps are plain `cargo` invocations without shell- or OS-specific syntax, so they run unchanged on macOS. The Ubuntu-only `wasm-expressions` job (apt-get LLVM, `wasm-bindgen-cli`) is untouched, so PLT-3 still holds. `check-ci-workflow`, run against 038578b, prints `ci workflow ok`: every needle is still present and the workflow still has two jobs.\n- **Docs:** README, docs/01 and website platforms list `macOS arm64` as tested, with the same steps as Linux, and the not-covered rows read 'iOS, Android and other `std` targets' (the website keeps the C-compiler note for `expressions`). docs/14 and website contributing name the three runners and say QuickJS compiles with GCC, MSVC and Apple Clang. All of this matches `ci.yml`. The wording stays consumer-neutral.\n- **Memory and rules:** the validation `state.md` sentence matches the workflow. The commit is a Conventional Commit without `!`, breaking footers or attribution, and no forbidden path was touched. `check --epic` 32/32 on 038578b is reused.",
-      "reattestedFrom": "dca13f9207f88e3bfd532928200c68b52e0164aec9dbf1ab01a9ff244f4994d7",
-      "summaryMarkdown": "Passed. Every active criterion holds against source and tests, and E-F1 to E-F4, E2-F1 to E2-F4 and E3-F1 are resolved. The E3-F1 repair (03fb0ef) replaces the capped unwrapping with one walk in JavaScript (`isOverflow`, each object visited once, data properties only, under the step budget) shared by `check`, the promise rejection tracker and uncaught-error reporting; the f3 probe's 21 cases all fail as stack overflows. The three dispositions match the recorded owner decisions and SBX-5/SBX-4/EVAL-6 carry them exactly. Repository rules hold: no forbidden path touched, Conventional Commits without `!`, breaking footers or attribution, dependencies declared once, `dxn.dtcg.*` ids, consumer-neutral wording. Unproven residual risk: the tracker's check now needs JavaScript stack at the rejection depth (see E3-F1).",
-      "acknowledgedDispositions": [
-        "criterion:EVAL-5",
-        "criterion:SBX-2",
-        "criterion:SBX-3"
-      ],
+      "summaryMarkdown": "Passed (second submission). The delta is plan-only: `check-ci-workflow` (argv and description) in the task records; no repository source, test or workflow change since 8754ae8. I inspected the new check's script and ran it against the current `ci.yml` and against eight mutations. Every PLT-6 step is now asserted per job as a whole line. S9-F1 is resolved and the earlier verification of SBX-5, PLT-5 and PLT-6 still stands.\n\n**No native test was lost.** Native test listings at 038578b vs 8754ae8, each built from sources extracted with `git archive` into separate target dirs (`artifacts-temp/agentx/dtcg-expressions/s9-list-*.txt`), with doctest line numbers ignored:\n- all features: 506 tests before, 507 after; nothing missing, one added (`identifiers_that_are_not_reserved_words_are_export_names`);\n- default features: 342 before and 342 after, identical.\n\n**wasm32 runs the rest.** The latest `check-expr-wasm` log ran 368 (all features) and 215 (default) tests under Node, with no failures. That is exactly the native non-doctest count (372 and 216) minus the native-only tests: `a_panic_leaves_the_runtime_usable`, `export_names_must_be_javascript_identifiers`, `misuse_is_a_compile_error` and the derive `compile_fail` group.\n\n**The exclusions are minimal and justified.**\n- The excluded tests are only the trybuild cases and the tests that catch panics. The panic sub-case of `errors_and_panics_become_catchable_javascript_errors` is skipped on wasm, and `official_test_suite`'s `guarded` cannot catch a panic there; panics abort on wasm32, so a panic fails the run instead.\n- Every other test uses `#[wasm_bindgen_test(unsupported = test)]`.\n- The deleted `expressions_wasm.rs` scenarios (inputs, TypeScript, steps, recursion, host and native modules, colors, caught recursion through aliases, frozen modules) all live in regular groups that now run on wasm.\n- The all-features wasm test binaries import only `__wbindgen_*` placeholders, no `env`, so the clock import is defined inside the crate (`s9-imports.py`).\n\n**`tests/support/mod.rs` is correct.** It uses std natively and Node `fs`/`Date.now()` on wasm. `on_1_mib_stack` keeps the earlier 1 MiB thread natively and uses the wasm main stack on wasm. `trybuild` is native-only and `oxc` is now an all-target dev-dependency.\n\n**E4-F1 is repaired.** The binary search between 40 and 20,000 finds the platform's deepest recursion under the default limit and requires it to overflow at 16 KiB, so the test fails if the configured limit were ignored.\n\n**CI and docs match the criteria.** CI matches PLT-6's text. docs/14, the README and the website `contributing`/`platforms` pages describe the new layout.\n\n**The dispositions are recorded but not attached to this sprint.** PLT-2, PLT-3 and PLT-4 are superseded by PLT-5/PLT-6 in `state.json`, decided by the owner and quoting the request, and their successors cover them. The runtime rejected `acknowledgedDispositions` for this boundary (\"effective dispositions: none\"), so the final review must acknowledge them.",
       "findingIds": [
-        "E-F1",
-        "E-F3",
-        "E-F2",
-        "E-F4",
-        "E2-F1",
-        "E2-F2",
-        "E2-F3",
-        "E2-F4",
-        "E3-F1"
+        "S9-F1"
       ],
-      "recordedAt": "2026-10-25T20:38:23Z"
+      "recordedAt": "2026-10-25T21:36:54Z"
     }
   },
   "checkpoints": {
@@ -3696,6 +3264,14 @@
       },
       "reviewHash": "cca5b1b778294a7409758266b13479ad002e009e181e3e5bcccf666eb436e28f",
       "recordedAt": "2026-10-25T19:51:29Z"
+    },
+    "s9-full-platform-coverage": {
+      "snapshotId": "648e1979b8965af04294a65c23f54e3e0223cf8048a0b06167b917b026582725",
+      "commits": {
+        "dtcg": "8754ae83381b8082d49b31bcf024efddd9b5a016"
+      },
+      "reviewHash": "03cf29d24ff40c184f751870f2849e7fa02fdcfcd65c88a2f4366b1bb0c24eca",
+      "recordedAt": "2026-10-25T21:38:25Z"
     }
   },
   "findings": [
@@ -4803,6 +4379,46 @@
           "symbol": "a_stack_overflow_wrapped_however_deeply_is_still_one"
         }
       ]
+    },
+    {
+      "id": "E4-F1",
+      "boundaryId": "final",
+      "severity": "minor",
+      "status": "open",
+      "criterionIds": [
+        "SBX-5"
+      ],
+      "descriptionMarkdown": "**No test shows any longer that a configured stack limit takes effect.**\n\nExpected (SBX-5: the stack limit has a documented default 'configurable in `ExpressionOptions`'): a test fails if `with_stack_limit` were ignored.\n\nObserved: before 8927847, `expressions_sandbox` (the default-limit recursion test, around line 232) ran the same `f(40)` twice: it succeeded under the default limit and overflowed under `with_stack_limit(16 * 1024)`. Now the 16 KiB case runs `f(10000)`, which overflows under the 256 KiB default too, so the test passes even if the configured limit were never applied. The only other uses, `a_stack_limit_below_the_minimum_counts_as_the_minimum` with `with_stack_limit(0)`, run `1 + 1` and `f(100000)`, which also don't depend on the limit. The reason for the change (40 calls fit in 16 KiB on wasm32) is valid; the lost discrimination is not needed for it.\n\nRepair: make the comparison relative to the running platform. Find the largest depth that succeeds under the default limit, for example by a bounded binary search (frames are uniform, so about 12 evaluations); assert it is at least the documented example depth, and that the same depth fails as a stack overflow under `with_stack_limit(16 * 1024)`. Keep `f(10000)` if wanted. Run `expressions_sandbox` natively and on wasm32.",
+      "regressionRefs": []
+    },
+    {
+      "id": "E4-F2",
+      "boundaryId": "final",
+      "severity": "minor",
+      "status": "open",
+      "criterionIds": [
+        "PLT-2",
+        "PLT-3",
+        "PLT-4"
+      ],
+      "descriptionMarkdown": "**PLT-2, PLT-3 and PLT-4 still describe the deleted single wasm test group and a CI step that is gone, so their checks no longer verify their text.**\n\nExpected: the active criteria describe what the workflow and the checks verify. Revision 17 amended `check-expr-wasm` and `check-ci-workflow`, but not the criteria.\n\nObserved:\n- PLT-2 requires 'a wasm-bindgen test group run under Node'. PLT-4 says 'The same wasm32 test group also resolves...'. PLT-3 requires an Ubuntu job that 'runs `cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown` and the wasm test group'.\n- 8927847 deletes `tests/expressions_wasm.rs`. `ci.yml`'s `wasm32` job no longer runs that `cargo check`, and `check-ci-workflow` dropped its needle.\n- The implementation is a superset: the all-features wasm32 Clippy and `cargo test --workspace --tests --all-features --target wasm32-unknown-unknown` build the feature for wasm32, and the regular groups' scenarios (inputs, TypeScript, step and stack limits, host and native modules, colors) run under Node with the 1 MiB stack. The criteria wording is what is stale.\n\nRepair: amend PLT-2, PLT-3 and PLT-4 (citing the user's request for full coverage on every platform). Describe the whole suite running on wasm32 under Node with and without the feature, the three native runners, and the stated native-only exclusions (trybuild cases and panic-catching tests). Keep the requirements the checks still prove: the in-crate clock import, the default stack, steps, recursion, modules, natives and colors. Alternatively restore the `cargo check` step and its needle; amending the wording is still needed for the deleted group.",
+      "regressionRefs": []
+    },
+    {
+      "id": "S9-F1",
+      "boundaryId": "s9-full-platform-coverage",
+      "severity": "minor",
+      "status": "resolved",
+      "criterionIds": [
+        "PLT-6"
+      ],
+      "descriptionMarkdown": "Resolved. `check-ci-workflow` now splits `ci.yml` into jobs. It asserts every PLT-6 step as a whole stripped line in the right job:\n- `native`: `fail-fast: false`, the three-runner `os:` line, fmt, both Clippy runs, both `cargo test --workspace` runs, the wasm32 check and package;\n- `wasm32`: the CC, AR and runner env, the LLVM install, the wasm-bindgen-cli install, both Clippy runs and both test runs.\nIts description cites PLT-6.\n\nMutation test (`artifacts-temp/agentx/dtcg-expressions/s9-check-ci.py` run on modified copies of `ci.yml`): the original prints `ci workflow ok`. Each of these mutations fails with an `AssertionError` naming the missing line: dropping Windows; `fail-fast: true`; dropping the native default-feature `cargo test --workspace`, the native default-feature Clippy, `cargo fmt --check`, `cargo package --workspace` or the wasm32 default-feature tests; and moving the native test step into the wasm32 job.\n\n---\nOriginal finding:\n\n**`check-ci-workflow`, the only automated evidence for PLT-6, does not check most of what PLT-6 states, and its description still names the superseded PLT-3.**\n\nExpected: an automated criterion's check fails when the behavior it describes is removed. PLT-6 states:\n- the whole suite runs with the feature and without it natively on Ubuntu, Windows and macOS;\n- each platform reports on its own;\n- each runs formatting, Clippy, tests, the default-feature wasm32 check and packaging.\n\nObserved: `.github/workflows/ci.yml` at 8754ae8 does all of this:\n- `native` matrix `[ubuntu-latest, windows-latest, macos-latest]` with `fail-fast: false`;\n- `cargo fmt --check`;\n- Clippy with all and with default features;\n- `cargo test --workspace --all-features` and `cargo test --workspace`;\n- the wasm32 check and `cargo package --workspace`.\n\nThe check's needles cover only `macos-latest`, the all-features Clippy and test lines, the wasm32 check and the wasm32 job. It would still print `ci workflow ok` if any of these were removed: `ubuntu-latest`, `windows-latest`, `fail-fast: false`, the native default-feature `cargo test --workspace` (its text is a prefix of the all-features line, so a needle cannot tell them apart), the native default-feature Clippy, `cargo fmt --check` or `cargo package --workspace`. Its `descriptionMarkdown` begins \"Asserts PLT-3\".\n\nRepair: amend `check-ci-workflow`:\n- assert `ubuntu-latest`, `windows-latest`, `macos-latest` and `fail-fast: false`;\n- assert the native steps as whole lines (e.g. `- run: cargo test --workspace\\n`, `- run: cargo clippy --workspace --all-targets -- -D warnings\\n`, `- run: cargo fmt --check`, `- run: cargo package --workspace`), or parse the YAML jobs and compare their `run` steps;\n- reword the description to PLT-6.\nNo source change is needed.",
+      "regressionRefs": [
+        {
+          "repositoryId": "dtcg",
+          "path": ".github/workflows/ci.yml"
+        }
+      ]
     }
   ],
   "handoffMarkdown": "",
@@ -4846,6 +4462,33 @@
       "decidedBy": "owner",
       "recordedAt": "2026-10-25T19:37:27Z",
       "successorId": "SBX-5"
+    },
+    {
+      "type": "criterion",
+      "id": "PLT-2",
+      "disposition": "superseded",
+      "reasonMarkdown": "User request (2026-10-26): \"Make test full on all platforms on CI. I want all platforms fully covered!\" The whole test suite now runs natively on Ubuntu, Windows and macOS and on wasm32 under Node, each with and without the feature; PLT-5 and PLT-6 describe that and supersede PLT-2, PLT-4 (the dedicated wasm test group is gone) and PLT-3 (the CI layout changed). Final-review findings E4-F1 and E4-F2.",
+      "decidedBy": "owner",
+      "recordedAt": "2026-10-25T21:12:10Z",
+      "successorId": "PLT-5"
+    },
+    {
+      "type": "criterion",
+      "id": "PLT-4",
+      "disposition": "superseded",
+      "reasonMarkdown": "User request (2026-10-26): \"Make test full on all platforms on CI. I want all platforms fully covered!\" The whole test suite now runs natively on Ubuntu, Windows and macOS and on wasm32 under Node, each with and without the feature; PLT-5 and PLT-6 describe that and supersede PLT-2, PLT-4 (the dedicated wasm test group is gone) and PLT-3 (the CI layout changed). Final-review findings E4-F1 and E4-F2.",
+      "decidedBy": "owner",
+      "recordedAt": "2026-10-25T21:12:10Z",
+      "successorId": "PLT-5"
+    },
+    {
+      "type": "criterion",
+      "id": "PLT-3",
+      "disposition": "superseded",
+      "reasonMarkdown": "User request (2026-10-26): \"Make test full on all platforms on CI. I want all platforms fully covered!\" The whole test suite now runs natively on Ubuntu, Windows and macOS and on wasm32 under Node, each with and without the feature; PLT-5 and PLT-6 describe that and supersede PLT-2, PLT-4 (the dedicated wasm test group is gone) and PLT-3 (the CI layout changed). Final-review findings E4-F1 and E4-F2.",
+      "decidedBy": "owner",
+      "recordedAt": "2026-10-25T21:12:10Z",
+      "successorId": "PLT-6"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 7,
   "epicId": "dtcg-expressions",
-  "revision": 16,
+  "revision": 19,
   "title": "JavaScript and TypeScript token expressions with modules and Rust functions",
   "validationMode": "sprint",
   "repositories": [
@@ -193,7 +193,8 @@
       "criterionIds": [
         "SBX-1",
         "SBX-2",
-        "SBX-3"
+        "SBX-3",
+        "SBX-5"
       ],
       "argv": [
         "cargo",
@@ -287,13 +288,14 @@
       "kind": "runtime",
       "criterionIds": [
         "PLT-2",
-        "PLT-4"
+        "PLT-4",
+        "PLT-5"
       ],
-      "descriptionMarkdown": "Runs the wasm32 test group under Node with `wasm-bindgen-test-runner`. Needs an LLVM clang with the WebAssembly target and `llvm-ar` (found through `LLVM_BIN`, Homebrew's `llvm`, or `/usr/lib/llvm-<n>/bin`), Node, and a `wasm-bindgen-test-runner` matching the locked `wasm-bindgen` on PATH. External toolchain, so never reused.",
+      "descriptionMarkdown": "The whole test suite on wasm32-unknown-unknown under Node through wasm-bindgen-test-runner, with all features and with the default ones (an LLVM clang builds QuickJS).",
       "argv": [
         "bash",
         "-c",
-        "set -euo pipefail\npick() {\n  for d in \"${LLVM_BIN:-}\" /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin; do\n    if [ -n \"$d\" ] && [ -x \"$d/clang\" ] && [ -x \"$d/llvm-ar\" ]; then echo \"$d\"; return 0; fi\n  done\n  for v in 21 20 19 18 17; do\n    if [ -x \"/usr/lib/llvm-$v/bin/clang\" ] && [ -x \"/usr/lib/llvm-$v/bin/llvm-ar\" ]; then echo \"/usr/lib/llvm-$v/bin\"; return 0; fi\n  done\n  return 1\n}\nllvm=$(pick) || { echo 'no LLVM clang with llvm-ar found; set LLVM_BIN'; exit 2; }\ncommand -v wasm-bindgen-test-runner >/dev/null || { echo 'wasm-bindgen-test-runner is not on PATH'; exit 2; }\ncommand -v node >/dev/null || { echo 'node is not on PATH'; exit 2; }\nexport CC_wasm32_unknown_unknown=\"$llvm/clang\" AR_wasm32_unknown_unknown=\"$llvm/llvm-ar\" CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner\ncargo test -p dxn_dtcg --features expressions --target wasm32-unknown-unknown --test expressions_wasm\n"
+        "set -euo pipefail\npick() {\n  for d in \"${LLVM_BIN:-}\" /opt/homebrew/opt/llvm/bin /usr/local/opt/llvm/bin; do\n    if [ -n \"$d\" ] && [ -x \"$d/clang\" ] && [ -x \"$d/llvm-ar\" ]; then echo \"$d\"; return 0; fi\n  done\n  for v in 21 20 19 18 17; do\n    if [ -x \"/usr/lib/llvm-$v/bin/clang\" ] && [ -x \"/usr/lib/llvm-$v/bin/llvm-ar\" ]; then echo \"/usr/lib/llvm-$v/bin\"; return 0; fi\n  done\n  return 1\n}\nllvm=$(pick) || { echo 'no LLVM clang with llvm-ar found; set LLVM_BIN'; exit 2; }\ncommand -v wasm-bindgen-test-runner >/dev/null || { echo 'wasm-bindgen-test-runner is not on PATH'; exit 2; }\ncommand -v node >/dev/null || { echo 'node is not on PATH'; exit 2; }\nexport CC_wasm32_unknown_unknown=\"$llvm/clang\" AR_wasm32_unknown_unknown=\"$llvm/llvm-ar\" CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner\ncargo test --workspace --tests --all-features --target wasm32-unknown-unknown\ncargo test --workspace --tests --target wasm32-unknown-unknown\n"
       ],
       "cwd": ".",
       "expected": {
@@ -303,12 +305,15 @@
       "reuse": false,
       "timeoutSeconds": 1800,
       "inputs": [
-        "Cargo.toml",
         "Cargo.lock",
+        "Cargo.toml",
         "crates/dxn_dtcg/Cargo.toml",
         "crates/dxn_dtcg/src/**",
+        "crates/dxn_dtcg/tests/**",
+        "crates/dxn_dtcg/tests/expressions_wasm.rs",
+        "crates/dxn_dtcg_derive/Cargo.toml",
         "crates/dxn_dtcg_derive/src/**",
-        "crates/dxn_dtcg/tests/expressions_wasm.rs"
+        "crates/dxn_dtcg_derive/tests/**"
       ]
     },
     {
@@ -316,13 +321,14 @@
       "repositoryId": "dtcg",
       "kind": "static",
       "criterionIds": [
-        "PLT-3"
+        "PLT-3",
+        "PLT-6"
       ],
-      "descriptionMarkdown": "Asserts PLT-3 from `.github/workflows/ci.yml` as text: the existing `--all-features` clippy and test steps and the default-feature wasm32 check remain, and a separate Ubuntu job installs LLVM (clang and llvm-ar), installs `wasm-bindgen-cli` at the locked `wasm-bindgen` version, sets the `CC_`/`AR_wasm32_unknown_unknown` variables and runs both the feature wasm32 check and the `expressions_wasm` group.",
+      "descriptionMarkdown": "Asserts PLT-6 from `.github/workflows/ci.yml`, step by step: the `native` job runs on Ubuntu, Windows and macOS with `fail-fast: false` and runs `cargo fmt --check`, Clippy and `cargo test --workspace` with all features and with the default ones, the default-feature wasm32 check and `cargo package --workspace`; the `wasm32` job installs LLVM and `wasm-bindgen-cli` at the locked version, sets the `CC_`/`AR_wasm32_unknown_unknown` variables and the runner, and runs Clippy and `cargo test --workspace --tests` for wasm32 with all features and with the default ones.",
       "argv": [
         "python3",
         "-c",
-        "import re\ntext = open('.github/workflows/ci.yml', encoding='utf-8').read()\nfor needle in ['cargo clippy --workspace --all-targets --all-features -- -D warnings', 'cargo test --workspace --all-features', 'cargo check --workspace --target wasm32-unknown-unknown', 'cargo check -p dxn_dtcg --features expressions --target wasm32-unknown-unknown', '--test expressions_wasm', 'wasm-bindgen-cli', 'CC_wasm32_unknown_unknown', 'AR_wasm32_unknown_unknown', 'llvm']:\n    assert needle in text, needle\njobs = re.findall(r'(?m)^  ([A-Za-z0-9_-]+):\\s*$', text)\nassert len(jobs) >= 2, jobs\nprint('ci workflow ok')\n"
+        "import re\ntext = open('.github/workflows/ci.yml', encoding='utf-8').read()\njobs = {}\ncurrent = None\nfor line in text.splitlines():\n    job = re.match(r'^  ([A-Za-z0-9_-]+):\\s*$', line)\n    if job:\n        current = job.group(1)\n        jobs[current] = []\n    elif current is not None:\n        jobs[current].append(line.strip())\nnative = jobs.get('native', [])\nwasm = jobs.get('wasm32', [])\nfor line in [\n    'fail-fast: false',\n    'os: [ubuntu-latest, windows-latest, macos-latest]',\n    '- run: cargo fmt --check',\n    '- run: cargo clippy --workspace --all-targets --all-features -- -D warnings',\n    '- run: cargo clippy --workspace --all-targets -- -D warnings',\n    '- run: cargo test --workspace --all-features',\n    '- run: cargo test --workspace',\n    '- run: cargo check --workspace --target wasm32-unknown-unknown',\n    '- run: cargo package --workspace',\n]:\n    assert line in native, ('native', line)\nfor line in [\n    'CC_wasm32_unknown_unknown: clang',\n    'AR_wasm32_unknown_unknown: llvm-ar',\n    'CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner',\n    'run: sudo apt-get update && sudo apt-get install -y clang llvm',\n    'cargo install wasm-bindgen-cli --version \"$version\" --locked',\n    '- run: cargo clippy --workspace --all-targets --all-features --target wasm32-unknown-unknown -- -D warnings',\n    '- run: cargo clippy --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings',\n    '- run: cargo test --workspace --tests --all-features --target wasm32-unknown-unknown',\n    '- run: cargo test --workspace --tests --target wasm32-unknown-unknown',\n]:\n    assert line in wasm, ('wasm32', line)\nprint('ci workflow ok')\n"
       ],
       "cwd": ".",
       "expected": {
@@ -1966,6 +1972,54 @@
             {
               "repositoryId": "dtcg",
               "path": "crates/dxn_dtcg/src/expressions/engine.rs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s9-full-platform-coverage",
+      "title": "The whole test suite on every platform",
+      "dependsOn": [
+        "s8-final-repair-3"
+      ],
+      "memoryScopes": [
+        "repository/validation"
+      ],
+      "checkIds": [
+        "check-expr-wasm",
+        "check-ci-workflow",
+        "check-expr-sandbox"
+      ],
+      "tasks": [
+        {
+          "id": "t28-full-platform-coverage",
+          "title": "Run the whole suite on every platform in CI",
+          "descriptionMarkdown": "User request (2026-10-26): \"Make test full on all platforms on CI. I want all platforms fully covered!\" Every test runs on wasm32 under Node (`#[wasm_bindgen_test(unsupported = test)]`, a shared `tests/support/mod.rs` for files, stacks and time); only `trybuild` cases and panic-catching tests stay native-only. CI's `native` job (Ubuntu, Windows, macOS, `fail-fast: false`) and `wasm32` job run Clippy and the whole suite with all features and with the default ones; the dedicated `expressions_wasm` group is gone. PLT-5 and PLT-6 supersede PLT-2, PLT-4 and PLT-3. Final-review finding E4-F1: `runaway_recursion_is_a_stack_overflow_uncatchably` finds the deepest recursion that fits the default limit on the running platform and requires it to overflow a 16 KiB limit, so the configured limit is shown to apply everywhere.",
+          "criterionIds": [
+            "PLT-5",
+            "PLT-6"
+          ],
+          "supportingCriterionIds": [
+            "SBX-5"
+          ],
+          "designIds": [
+            "d-wasm"
+          ],
+          "dependsOn": [],
+          "checkIds": [
+            "check-expr-wasm",
+            "check-ci-workflow",
+            "check-expr-sandbox"
+          ],
+          "sourceRefs": [
+            {
+              "repositoryId": "dtcg",
+              "path": ".github/workflows/ci.yml"
+            },
+            {
+              "repositoryId": "dtcg",
+              "path": "crates/dxn_dtcg/tests/support/mod.rs"
             }
           ]
         }
