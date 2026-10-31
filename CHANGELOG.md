@@ -6,6 +6,34 @@ crates share one version and one release tag `vX.Y.Z`. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
 
+## [1.3.0] - 2026-10-31
+
+### Build and CI
+- test on macOS arm64 too
+- run the whole test suite on every platform, wasm32 included
+
+### Documentation
+- *(expressions)* document token expressions in the guide, reference and website
+
+### Features
+- *(expressions)* evaluate JavaScript and TypeScript token expressions
+- *(expressions)* support wasm32-unknown-unknown and test it in CI
+- *(expressions)* import host and document JavaScript and TypeScript modules
+- *(values)* convert and compose colors, serialize every value model
+- *(expressions)* call Rust functions from expressions through native modules
+
+### Fixes
+- *(expressions)* keep stack overflows uncatchable and module values frozen
+- *(values)* clip HSL, HWB and contrast into sRGB and keep near-gray hues
+- *(expressions)* keep stack overflows uncatchable in async code and closing iterators
+- *(expressions)* unwrap wrapped stack overflows however deeply nested
+- *(expressions)* keep the stack margin small and give session setup its own limit
+- *(expressions)* give the engine's overflow check room on large-frame builds
+
+### Tests
+- *(expressions)* cover modules, native calls and colors on wasm32, and the module document limit
+- *(expressions)* show that a configured stack limit applies on every platform
+
 ## [1.2.0] - 2026-10-25
 
 ### Build and CI
