@@ -6,6 +6,11 @@ crates share one version and one release tag `vX.Y.Z`. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
 
+## [1.3.1] - 2026-11-09
+
+### Fixes
+- *(expressions)* pin QuickJS 0.14.2
+
 ## [1.3.0] - 2026-10-31
 
 ### Build and CI
