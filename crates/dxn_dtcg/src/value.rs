@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde_json::{Map, Value};
 
-use crate::ValueExtensions;
+use crate::{TokenType, ValueExtensions};
 
 /// A final DTCG 2025.10 token-value validation failure.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -43,24 +43,25 @@ pub fn validate_value_with(
     value: &Value,
     extensions: &ValueExtensions,
 ) -> Result<(), ValueValidationError> {
-    let valid = match token_type {
-        "color" => color(value),
-        "dimension" => dimension(value),
-        "fontFamily" => font_family(value),
-        "fontWeight" => font_weight(value),
-        "duration" => duration(value),
-        "cubicBezier" => cubic_bezier(value),
-        "number" => value.is_number(),
-        "strokeStyle" => stroke_style(value),
-        "border" => border(value),
-        "transition" => transition(value),
-        "shadow" => shadow(value),
-        "gradient" => gradient(value),
-        "typography" => typography(value, extensions.line_height_dimension),
-        BLUR_TYPE if extensions.blur => blur(value),
-        unsupported => {
-            return Err(ValueValidationError::UnsupportedType(unsupported.into()));
-        }
+    let Some(kind) = TokenType::from_name(token_type).filter(|kind| kind.is_enabled(extensions))
+    else {
+        return Err(ValueValidationError::UnsupportedType(token_type.into()));
+    };
+    let valid = match kind {
+        TokenType::Color => color(value),
+        TokenType::Dimension => dimension(value),
+        TokenType::FontFamily => font_family(value),
+        TokenType::FontWeight => font_weight(value),
+        TokenType::Duration => duration(value),
+        TokenType::CubicBezier => cubic_bezier(value),
+        TokenType::Number => value.is_number(),
+        TokenType::StrokeStyle => stroke_style(value),
+        TokenType::Border => border(value),
+        TokenType::Transition => transition(value),
+        TokenType::Shadow => shadow(value),
+        TokenType::Gradient => gradient(value),
+        TokenType::Typography => typography(value, extensions.line_height_dimension),
+        TokenType::Blur => blur(value),
     };
     valid
         .then_some(())
@@ -304,7 +305,7 @@ fn typography(value: &Value, line_height_dimension: bool) -> bool {
 
 /// Extension type for layer and background blur effects, such as Figma's blur effect
 /// styles, accepted only with [`ValueExtensions::blur`].
-pub const BLUR_TYPE: &str = "dxn.dtcg.blur";
+pub const BLUR_TYPE: &str = TokenType::Blur.name();
 
 /// `{ "kind": "layer" | "background", "radius": <dimension> }`.
 fn blur(value: &Value) -> bool {

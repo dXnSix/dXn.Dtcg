@@ -376,6 +376,40 @@ assert_eq!(
 `ResolvedToken::value` is a `serde_json::Value`. Because every resolved value has already passed
 the checks above, conversion code can rely on its shape.
 
+### The token type: `TokenType`
+
+`ResolvedToken::token_type` holds the effective type as its `$type` spelling.
+`ResolvedToken::dtcg_type()` returns it as a `TokenType`, a `#[non_exhaustive]` enum with one
+variant per type of this chapter: the 13 DTCG types and the `dxn.dtcg.*` extension types.
+`TokenType::name()` gives the `$type` spelling back, `TokenType::from_name` parses one (exactly:
+type names are case-sensitive), `TokenType::ALL` lists them all and `is_extension()` tells the
+extension types apart. `from_name` knows an extension type whether or not the runtime enables it;
+validation decides whether the type is accepted.
+
+```rust
+use dxn_dtcg::{DtcgError, DtcgRuntime, TokenType};
+
+fn main() -> Result<(), DtcgError> {
+    let runtime = DtcgRuntime::from_json(
+        "tokens.json",
+        r#"{ "motion": { "$type": "duration",
+          "fast": { "$value": { "value": 100, "unit": "ms" } },
+          "default": { "$value": "{motion.fast}" } } }"#,
+    )?;
+    let tokens = runtime.resolve(&[])?.ready().unwrap();
+    for token in tokens.iter() {
+        match token.dtcg_type() {
+            Some(TokenType::Duration) => {} // inherited from the group, or taken from the alias target
+            other => panic!("{}: {other:?}", token.path),
+        }
+    }
+    assert_eq!(TokenType::from_name("cubicBezier"), Some(TokenType::CubicBezier));
+    assert_eq!(TokenType::from_name("Color"), None);
+    assert_eq!(TokenType::Blur.name(), "dxn.dtcg.blur");
+    Ok(())
+}
+```
+
 ### Typed values: the `values` module
 
 `dxn_dtcg::values` models every type as plain Rust data, and `ResolvedToken::typed(&extensions)`
@@ -455,6 +489,7 @@ fn main() -> Result<(), DtcgError> {
 ```
 
 `typed` reports a value that does not convert as `DtcgError::Projection` naming the token path.
+`TypedValue::token_type()` returns the `TokenType` a value was converted by.
 Every model also implements `FromDtcgValue`, so it can be a field of a
 [`#[derive(DtcgTokens)]`](08-typed-projection.md) struct, and `TypedValue` itself can be one.
 These implementations check only the value's shape, accepting the extension shapes, because

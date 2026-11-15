@@ -9,6 +9,8 @@
 //! their targets are not position-checked, because their resolved value is
 //! validated by shape as part of the whole value.
 
+use crate::TokenType;
+
 /// The composite structure a value position belongs to.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum Context {
@@ -30,14 +32,14 @@ pub(crate) enum Context {
 
 impl Context {
     pub(crate) fn of_type(token_type: &str) -> Self {
-        match token_type {
-            "border" => Self::Border,
-            "transition" => Self::Transition,
-            "shadow" => Self::Shadow,
-            "gradient" => Self::Gradient,
-            "typography" => Self::Typography,
-            "strokeStyle" => Self::StrokeStyle,
-            crate::BLUR_TYPE => Self::Blur,
+        match TokenType::from_name(token_type) {
+            Some(TokenType::Border) => Self::Border,
+            Some(TokenType::Transition) => Self::Transition,
+            Some(TokenType::Shadow) => Self::Shadow,
+            Some(TokenType::Gradient) => Self::Gradient,
+            Some(TokenType::Typography) => Self::Typography,
+            Some(TokenType::StrokeStyle) => Self::StrokeStyle,
+            Some(TokenType::Blur) => Self::Blur,
             _ => Self::Leaf,
         }
     }

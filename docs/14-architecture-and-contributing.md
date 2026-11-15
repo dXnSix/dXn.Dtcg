@@ -65,8 +65,9 @@ All modules of `dxn_dtcg` are private except `values` and, with its feature, `ex
 | `token_resolution.rs` | Bounded resolution of aliases and JSON Pointers with one hop counter, value-node and value-depth budgets, type determination, value validation; the dependency collector for affected resolution |
 | `reference_positions.rs` | Where a curly-brace alias may appear inside a value, and which type it must target |
 | `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected` |
+| `token_type.rs` | `TokenType`: the single table of `$type` spellings, which extension each extension type needs, `ResolvedToken::dtcg_type` |
 | `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
-| `values.rs` | The public `values` module: typed models, `TypedValue`, `ResolvedToken::typed` and their `FromDtcgValue` implementations, DTCG JSON forms and serde for every model |
+| `values.rs` | The public `values` module: typed models, `TypedValue` (and its `token_type`), `ResolvedToken::typed` and their `FromDtcgValue` implementations, DTCG JSON forms and serde for every model |
 | `color.rs` | The color API on `values::Color`: CSS Color 4 conversions between the 14 spaces, mixing, lightness, hex, contrast, gamut |
 | `expression_extension.rs` | `EXPRESSION_EXTENSION`, present without the feature |
 | `expressions/mod.rs` | Feature `expressions`: `ExpressionOptions`, the public re-exports, and the in-crate QuickJS clock symbol on `wasm32-unknown-unknown` |

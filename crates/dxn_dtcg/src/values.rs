@@ -26,7 +26,7 @@
 use serde_json::{Map, Value};
 
 use crate::{
-    DtcgError, FromDtcgValue, ResolvedToken, ValueExtensions, ValueValidationError,
+    DtcgError, FromDtcgValue, ResolvedToken, TokenType, ValueExtensions, ValueValidationError,
     validate_value_with,
 };
 
@@ -330,23 +330,43 @@ impl TypedValue {
         extensions: &ValueExtensions,
     ) -> Result<Self, ValueValidationError> {
         validate_value_with(token_type, value, extensions)?;
-        Ok(match token_type {
-            "color" => Self::Color(color(value)),
-            "dimension" => Self::Dimension(dimension(value)),
-            "fontFamily" => Self::FontFamily(font_family(value)),
-            "fontWeight" => Self::FontWeight(font_weight(value)),
-            "duration" => Self::Duration(duration(value)),
-            "cubicBezier" => Self::CubicBezier(cubic_bezier(value)),
-            "number" => Self::Number(value.as_f64().expect("validated number")),
-            "strokeStyle" => Self::StrokeStyle(stroke_style(value)),
-            "border" => Self::Border(border(value)),
-            "transition" => Self::Transition(transition(value)),
-            "shadow" => Self::Shadow(shadow(value)),
-            "gradient" => Self::Gradient(gradient(value)),
-            "typography" => Self::Typography(typography(value)),
-            crate::BLUR_TYPE => Self::Blur(blur(value)),
-            other => return Err(ValueValidationError::UnsupportedType(other.into())),
+        let kind = TokenType::from_name(token_type).expect("validated type");
+        Ok(match kind {
+            TokenType::Color => Self::Color(color(value)),
+            TokenType::Dimension => Self::Dimension(dimension(value)),
+            TokenType::FontFamily => Self::FontFamily(font_family(value)),
+            TokenType::FontWeight => Self::FontWeight(font_weight(value)),
+            TokenType::Duration => Self::Duration(duration(value)),
+            TokenType::CubicBezier => Self::CubicBezier(cubic_bezier(value)),
+            TokenType::Number => Self::Number(number(value)),
+            TokenType::StrokeStyle => Self::StrokeStyle(stroke_style(value)),
+            TokenType::Border => Self::Border(border(value)),
+            TokenType::Transition => Self::Transition(transition(value)),
+            TokenType::Shadow => Self::Shadow(shadow(value)),
+            TokenType::Gradient => Self::Gradient(gradient(value)),
+            TokenType::Typography => Self::Typography(typography(value)),
+            TokenType::Blur => Self::Blur(blur(value)),
         })
+    }
+
+    /// The token type this value was converted by.
+    pub fn token_type(&self) -> TokenType {
+        match self {
+            Self::Color(_) => TokenType::Color,
+            Self::Dimension(_) => TokenType::Dimension,
+            Self::FontFamily(_) => TokenType::FontFamily,
+            Self::FontWeight(_) => TokenType::FontWeight,
+            Self::Duration(_) => TokenType::Duration,
+            Self::CubicBezier(_) => TokenType::CubicBezier,
+            Self::Number(_) => TokenType::Number,
+            Self::StrokeStyle(_) => TokenType::StrokeStyle,
+            Self::Border(_) => TokenType::Border,
+            Self::Transition(_) => TokenType::Transition,
+            Self::Shadow(_) => TokenType::Shadow,
+            Self::Gradient(_) => TokenType::Gradient,
+            Self::Typography(_) => TokenType::Typography,
+            Self::Blur(_) => TokenType::Blur,
+        }
     }
 }
 

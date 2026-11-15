@@ -26,6 +26,7 @@ mod source_discovery;
 mod source_occurrence;
 mod source_origin;
 mod token_resolution;
+mod token_type;
 mod type_registry;
 mod value;
 pub mod values;
@@ -49,6 +50,7 @@ pub use resolver::{
 pub use resource::{DocumentReference, ResourceId};
 pub use runtime::DtcgRuntime;
 pub use selection::{ModifierAxis, selection_from_json, selection_refs};
+pub use token_type::TokenType;
 pub use type_registry::TypeRegistry;
 pub use value::{BLUR_TYPE, ValueValidationError, validate_value, validate_value_with};
 

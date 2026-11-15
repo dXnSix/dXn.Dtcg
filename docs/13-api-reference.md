@@ -10,7 +10,7 @@ Signatures are shown in simplified form, without `pub`.
 - [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
 - [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `selection_from_json`, `selection_refs`
 - [Projection](#projection): `DtcgTokens`, `DtcgComponentTokens`, `FromDtcgValue`, `TypeRegistry`, `join_token_path`, derive macros
-- [Values](#values): `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, the `values` module
+- [Values](#values): `TokenType`, `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, the `values` module
 - [Inspection](#inspection): `SourceOccurrence`, `SourceOrigin`, `SourceReference`, `set_sources`, `modifier_contexts`
 - [Errors](#errors): `DtcgError`
 - [Diagnostics](#diagnostics-feature-diagnostics) (feature `diagnostics`): `DtcgDiagnostic`, `DtcgDiagnosticCode`
@@ -205,14 +205,17 @@ struct ResolvedToken {
 }
 
 impl ResolvedToken {
+    fn dtcg_type(&self) -> Option<TokenType>;
     fn typed(&self, extensions: &ValueExtensions) -> Result<TypedValue, DtcgError>;
 }
 ```
 
 All fields are public. A token copied by `$extends` names the document of that `$extends` as its
 `source`. `snapshot` is `None` unless an [expression](15-expressions.md) replaced the value.
-`typed` converts `value` by the effective type into a [`TypedValue`](#typedvalue),
-validating it with `extensions`; a failure is `DtcgError::Projection`.
+`dtcg_type` is `token_type` as a [`TokenType`](#tokentype); it is `None` only for a token without
+a type, which resolution never produces. `typed` converts `value` by the effective type into a
+[`TypedValue`](#typedvalue), validating it with `extensions`; a failure is
+`DtcgError::Projection`.
 
 ### `ResolvedGroup`
 
@@ -544,6 +547,49 @@ the value type of a leaf field without `with`, `DtcgTokens` for a `nested` field
 
 ## Values
 
+### `TokenType`
+
+```rust,ignore
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[non_exhaustive]
+enum TokenType {
+    Color, Dimension, FontFamily, FontWeight, Duration, CubicBezier, Number, StrokeStyle,
+    Border, Transition, Shadow, Gradient, Typography,
+    Blur, // dxn.dtcg.blur
+}
+
+impl TokenType {
+    const ALL: &'static [TokenType];          // the 13 DTCG types in specification order, then the extension types
+    const fn name(self) -> &'static str;      // the `$type` spelling: "color", "cubicBezier", "dxn.dtcg.blur", …
+    fn from_name(name: &str) -> Option<Self>; // exact, case-sensitive
+    const fn is_extension(self) -> bool;      // a `dxn.dtcg.*` type
+}
+impl Display for TokenType // the `$type` spelling
+```
+
+The token types by their `$type` spelling. It is the runtime's single table of type names:
+validation, `TypedValue` and the alias positions dispatch through it. `from_name` knows the
+extension types whatever the runtime's extensions; whether a runtime accepts one is up to its
+[`ValueExtensions`](#valueextensions). `ResolvedToken::dtcg_type` and `TypedValue::token_type`
+return it.
+
+```rust
+use dxn_dtcg::{DtcgRuntime, TokenType, ValueExtensions};
+
+let runtime = DtcgRuntime::from_json(
+    "tokens.json",
+    r#"{ "gap": { "$type": "dimension", "$value": { "value": 4, "unit": "px" } } }"#,
+)
+.unwrap();
+let tokens = runtime.resolve(&[]).unwrap().ready().unwrap();
+let gap = tokens.get("gap").unwrap();
+
+assert_eq!(gap.dtcg_type(), Some(TokenType::Dimension));
+assert_eq!(gap.typed(&ValueExtensions::default()).unwrap().token_type(), TokenType::Dimension);
+assert_eq!(TokenType::from_name("dxn.dtcg.blur"), Some(TokenType::Blur));
+assert!(TokenType::Blur.is_extension());
+```
+
 ### `validate_value` and `validate_value_with`
 
 ```rust,ignore
@@ -588,7 +634,7 @@ impl std::error::Error for ValueValidationError
 ### `BLUR_TYPE`
 
 ```rust,ignore
-const BLUR_TYPE: &str = "dxn.dtcg.blur";
+const BLUR_TYPE: &str = "dxn.dtcg.blur"; // TokenType::Blur.name()
 ```
 
 ### The `values` module
@@ -657,11 +703,12 @@ impl TypedValue {
         value: &serde_json::Value,
         extensions: &ValueExtensions,
     ) -> Result<Self, ValueValidationError>;
+    fn token_type(&self) -> TokenType;
 }
 ```
 
 A resolved value converted by its DTCG type. `from_resolved` validates with `extensions`, then
-converts. `ResolvedToken::typed` is the usual way to get one:
+converts; `token_type` is the type it was converted by. `ResolvedToken::typed` is the usual way to get one:
 
 ```rust
 use dxn_dtcg::{
