@@ -6,6 +6,14 @@ crates share one version and one release tag `vX.Y.Z`. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). It is generated from
 Conventional Commits by release-plz.
 
+## [1.4.0] - 2026-11-15
+
+### Features
+- *(types)* add a public TokenType enum of the token types
+- *(projection)* read tokens by path and list a group's members
+- *(resolver)* enumerate every selection and check the structure across them
+- *(values)* add opt-in dxn.dtcg.string and dxn.dtcg.boolean types
+
 ## [1.3.1] - 2026-11-09
 
 ### Fixes
