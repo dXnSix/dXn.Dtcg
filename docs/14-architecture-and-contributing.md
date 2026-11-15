@@ -64,7 +64,7 @@ All modules of `dxn_dtcg` are private except `values` and, with its feature, `ex
 | `flatten.rs` | Folds all active sources into one merged structure (per-key group properties, recursive `$extensions`, whole-token replacement, token/group collisions), validates token and group structure, expands `$extends`, flattens to dotted paths with inherited type and deprecation, fixes token order |
 | `token_resolution.rs` | Bounded resolution of aliases and JSON Pointers with one hop counter, value-node and value-depth budgets, type determination, value validation; the dependency collector for affected resolution |
 | `reference_positions.rs` | Where a curly-brace alias may appear inside a value, and which type it must target |
-| `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected` |
+| `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `GroupChild`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected`, typed reads by path and group listings |
 | `token_type.rs` | `TokenType`: the single table of `$type` spellings, which extension each extension type needs, `ResolvedToken::dtcg_type` |
 | `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
 | `values.rs` | The public `values` module: typed models, `TypedValue` (and its `token_type`), `ResolvedToken::typed` and their `FromDtcgValue` implementations, DTCG JSON forms and serde for every model |

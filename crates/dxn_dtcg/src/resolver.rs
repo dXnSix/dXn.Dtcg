@@ -7,7 +7,7 @@ use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    AffectedResolution, DtcgError, ResourceId, RuntimeOptions, SourceOccurrence,
+    AffectedResolution, DtcgError, FromDtcgValue, ResourceId, RuntimeOptions, SourceOccurrence,
     catalog::DocumentCatalog,
     flatten::{FlattenedSources, RawGroup, RawToken, flatten_sources},
     source_discovery::{discover, required_root},
@@ -257,6 +257,32 @@ pub struct ResolvedGroup {
     pub extensions: Value,
 }
 
+/// One direct member of a group of a resolution: a token, or a subgroup that
+/// contains at least one resolved token.
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[non_exhaustive]
+pub enum GroupChild<'a> {
+    Token(&'a ResolvedToken),
+    Group(&'a ResolvedGroup),
+}
+
+impl<'a> GroupChild<'a> {
+    /// The dotted path of the token or group.
+    pub fn path(&self) -> &'a str {
+        match self {
+            Self::Token(token) => &token.path,
+            Self::Group(group) => &group.path,
+        }
+    }
+
+    /// The last segment of the path: the member's name in its group
+    /// (`$root` for a group's root token).
+    pub fn name(&self) -> &'a str {
+        let path = self.path();
+        path.rsplit_once('.').map_or(path, |(_, name)| name)
+    }
+}
+
 /// The tokens of one resolution. Equality and the fingerprint ignore the
 /// member order of object values: `serde_json` objects compare as maps, and the
 /// fingerprint hashes them with sorted keys.
@@ -280,6 +306,49 @@ impl ResolvedTokens {
     /// Every group that contains a resolved token, in path order.
     pub fn groups(&self) -> impl Iterator<Item = &ResolvedGroup> {
         self.groups.values()
+    }
+
+    /// Converts the token at `path` into `T` with [`FromDtcgValue`]. A
+    /// missing token fails with [`DtcgError::Projection`] naming `path`, as
+    /// a missing field of a projected struct does; a value of the wrong
+    /// shape fails with the conversion's own `Projection` error.
+    pub fn get_as<T: FromDtcgValue>(&self, path: &str) -> Result<T, DtcgError> {
+        let token = self.get(path).ok_or_else(|| DtcgError::Projection {
+            path: path.into(),
+            message: "required token is missing".into(),
+        })?;
+        T::from_dtcg(token)
+    }
+
+    /// The direct members of the group at `path` (`""` for the merged
+    /// root): its tokens and the subgroups that contain a resolved token, in
+    /// resolution order, a subgroup at the position of its first token.
+    /// `None` when there is no such group, as for [`ResolvedTokens::group`].
+    pub fn children(&self, path: &str) -> Option<Vec<GroupChild<'_>>> {
+        self.groups.get(path)?;
+        let prefix = if path.is_empty() {
+            String::new()
+        } else {
+            format!("{path}.")
+        };
+        let mut children = Vec::new();
+        let mut subgroups = BTreeSet::new();
+        for token in self.iter() {
+            let Some(rest) = token.path.strip_prefix(prefix.as_str()) else {
+                continue;
+            };
+            match rest.split_once('.') {
+                None => children.push(GroupChild::Token(token)),
+                Some((name, _)) if subgroups.insert(name) => {
+                    let group = &token.path[..prefix.len() + name.len()];
+                    if let Some(group) = self.groups.get(group) {
+                        children.push(GroupChild::Group(group));
+                    }
+                }
+                Some(_) => {}
+            }
+        }
+        Some(children)
     }
 
     /// Writes this resolution as a DTCG 2025.10 token document (Resolver §8).

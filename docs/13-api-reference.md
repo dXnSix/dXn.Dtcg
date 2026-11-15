@@ -5,7 +5,7 @@ root, except the typed value models, which live in the public `dxn_dtcg::values`
 Signatures are shown in simplified form, without `pub`.
 
 - [Runtime](#runtime): `DtcgRuntime`
-- [Results](#results): `Resolution`, `DocumentRequest`, `DocumentKind`, `ResolvedTokens`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
+- [Results](#results): `Resolution`, `DocumentRequest`, `DocumentKind`, `ResolvedTokens`, `GroupChild`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
 - [Configuration](#configuration): `RuntimeOptions`, `RuntimeLimits`, `ValueExtensions`
 - [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
 - [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `selection_from_json`, `selection_refs`
@@ -150,6 +150,8 @@ struct ResolvedTokens { /* tokens by path, resolution order, groups, fingerprint
 | Signature | Description |
 |---|---|
 | `fn get(&self, path: &str) -> Option<&ResolvedToken>` | The token at a dotted path |
+| `fn get_as<T: FromDtcgValue>(&self, path: &str) -> Result<T, DtcgError>` | The token at a dotted path converted with `FromDtcgValue`; a missing token is ``Projection { path, message: "required token is missing" }``, a wrong shape the conversion's `Projection` error |
+| `fn children(&self, path: &str) -> Option<Vec<GroupChild<'_>>>` | The direct members of the group at a dotted path (`""` for the merged root): its tokens and the subgroups that contain a resolved token, in resolution order (a subgroup at its first token); `None` when `group(path)` is `None` |
 | `fn iter(&self) -> impl Iterator<Item = &ResolvedToken>` | All tokens in resolution order: authored order across the merged sources, each path at its last definition |
 | `fn len(&self) -> usize` / `fn is_empty(&self) -> bool` | Token count |
 | `fn group(&self, path: &str) -> Option<&ResolvedGroup>` | The group at a dotted path (`""` for the merged root), when it contains at least one resolved token |
@@ -186,6 +188,25 @@ let again = DtcgRuntime::from_json("export.json", document.to_string()).unwrap()
 let exported = again.resolve(&[]).unwrap().ready().unwrap();
 assert_eq!(exported.get("space.md").unwrap().value, tokens.get("space.md").unwrap().value);
 ```
+
+### `GroupChild`
+
+```rust,ignore
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[non_exhaustive]
+enum GroupChild<'a> {
+    Token(&'a ResolvedToken),
+    Group(&'a ResolvedGroup),
+}
+
+impl<'a> GroupChild<'a> {
+    fn path(&self) -> &'a str; // the full dotted path
+    fn name(&self) -> &'a str; // the last segment: the member's name in its group ("$root" for a root token)
+}
+```
+
+One member listed by `ResolvedTokens::children`. See
+[Reading tokens without a struct](08-typed-projection.md#reading-tokens-without-a-struct).
 
 ### `ResolvedToken`
 

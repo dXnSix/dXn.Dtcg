@@ -13,6 +13,7 @@ them.
 - [Custom conversions](#custom-conversions)
 - [Nested structs and shared shapes](#nested-structs-and-shared-shapes)
 - [Component tokens](#component-tokens)
+- [Reading tokens without a struct](#reading-tokens-without-a-struct)
 - [Errors](#errors)
 - [Limitations and manual implementations](#limitations-and-manual-implementations)
 
@@ -476,6 +477,63 @@ let _ = project_any::<Tooltip>;
 Use it when a registry of components needs to tell their token structs apart, for example to
 report which component's tokens failed to project.
 
+## Reading tokens without a struct
+
+When the paths are only known at run time, read tokens from a `ResolvedTokens` directly.
+`ResolvedTokens::get_as::<T>(path)` converts the token at `path` with `T`'s `FromDtcgValue`, as a
+field of a derived struct would be converted: a missing token is
+``projection `<path>`: required token is missing``, and a value of the wrong shape is the
+conversion's own `Projection` error. For an optional read, convert the result of `get`:
+`tokens.get(path).map(T::from_dtcg).transpose()`.
+
+`ResolvedTokens::children(path)` lists the direct members of the group at `path` (`""` for the
+merged root) as `GroupChild::Token(&ResolvedToken)` and `GroupChild::Group(&ResolvedGroup)`
+values, in resolution order, each subgroup at the position of its first token. `name()` is the
+member's name in its group (`$root` for a group's root token) and `path()` its full path. A group
+appears only when it contains a resolved token, as with `ResolvedTokens::group`, and `children`
+returns `None` for a path that is no such group, a token's path included.
+
+```rust
+use dxn_dtcg::{DtcgError, DtcgRuntime, FromDtcgValue, GroupChild, values::Dimension};
+
+fn main() -> Result<(), DtcgError> {
+    let runtime = DtcgRuntime::from_json(
+        "space.json",
+        r#"{ "space": { "$type": "dimension",
+          "sm": { "$value": { "value": 4, "unit": "px" } },
+          "md": { "$value": { "value": 8, "unit": "px" } },
+          "inset": { "card": { "$value": { "value": 12, "unit": "px" } } }
+        } }"#,
+    )?;
+    let tokens = runtime.resolve(&[])?.ready().unwrap();
+
+    let md: Dimension = tokens.get_as("space.md")?;
+    assert_eq!(md.to_px(16.0), 8.0);
+    assert_eq!(
+        tokens.get_as::<Dimension>("space.lg").unwrap_err().to_string(),
+        "projection `space.lg`: required token is missing"
+    );
+    assert!(tokens.get_as::<f64>("space.md").is_err()); // a dimension is not a number
+    let lg = tokens.get("space.lg").map(Dimension::from_dtcg).transpose()?;
+    assert!(lg.is_none());
+
+    // Every scale step directly below `space`, and its subgroups.
+    let mut steps = Vec::new();
+    let mut subgroups = Vec::new();
+    for child in tokens.children("space").unwrap() {
+        match child {
+            GroupChild::Token(token) => steps.push((child.name(), Dimension::from_dtcg(token)?.value)),
+            GroupChild::Group(group) => subgroups.push(group.path.to_string()),
+            _ => {}
+        }
+    }
+    assert_eq!(steps, [("sm", 4.0), ("md", 8.0)]);
+    assert_eq!(subgroups, ["space.inset"]);
+    assert!(tokens.children("space.sm").is_none()); // a token, not a group
+    Ok(())
+}
+```
+
 ## Errors
 
 The first failing field ends the projection:
@@ -509,11 +567,12 @@ The derive covers fixed shapes. It does not support:
 
 - **Collections.** It cannot gather "every token in this group" into a `Vec` or a map. `rest` is a
   placeholder that only calls `Default::default()`; it does not collect anything.
+  `ResolvedTokens::children` lists a group's members for a hand-written implementation.
 - **Name conversion.** Field names are used verbatim; use `rename` for camelCase tokens.
 - **Optional nested structs.** `Option` works for leaf fields only.
 
-For these cases, implement `DtcgTokens` by hand. `ResolvedTokens::get` and `ResolvedTokens::iter`
-give full access to the token set:
+For these cases, implement `DtcgTokens` by hand. `ResolvedTokens::get`, `get_as`, `children` and
+`iter` give full access to the token set:
 
 ```rust
 use std::collections::BTreeMap;
