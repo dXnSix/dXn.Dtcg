@@ -689,28 +689,32 @@ provided yet. `normalize_selection` also returns `Missing` while a nested resolv
 resolver structure is valid. It does **not** resolve or validate token values. Use it to preload
 everything, for example before going offline or bundling assets.
 
-**Resolving every combination** checks the token values too. With a few modifiers, the cartesian
-product of their contexts is small:
+**Resolving every combination** checks the token values too. `selection_space()` lists every
+selection of the root resolver's modifiers as a `SelectionSpace`: each combination of one context
+per modifier, the first modifier varying slowest. It enumerates lazily, so even a large space costs
+nothing until it is iterated; `combinations()` gives its size, or `None` when that overflows a
+`usize`.
+
+**`check_structure(selections)`** resolves each selection and compares the results. Consumers of
+resolver outputs (Resolver §8) usually need every output to share one token structure, so a theme
+switch cannot lose a token or change its type. The `StructureReport` lists:
+
+- `selections`: the selections that resolved, in the given order;
+- `differences`: **every** path that some resolved selection lacks or whose effective type differs
+  between them, in path order, each with its type in every resolved selection (`None` where it is
+  missing), and `missing_in()` and `distinct_types()` to read them;
+- `failures`: every selection that failed to resolve, with its error. Failed selections take no
+  part in the comparison.
+
+`is_consistent()` is true when there is neither a difference nor a failure. A check resolves at
+most `RuntimeLimits::max_selections` selections (default 1,024); more fail with
+`LimitExceeded { kind: "selections" }` before the first is resolved, so a combinatorial space is
+caught early. `check_structure` takes any selections, so a part of the space
+(`space.iter().take(n)`, or a filter) can be checked instead, and it returns `Missing` with every
+document the selections still need.
 
 ```rust
-use dxn_dtcg::{DtcgError, DtcgRuntime, ModifierAxis};
-
-fn all_selections(axes: &[ModifierAxis]) -> Vec<Vec<(&str, &str)>> {
-    let mut selections = vec![Vec::new()];
-    for axis in axes {
-        selections = selections
-            .into_iter()
-            .flat_map(|selection| {
-                axis.contexts.iter().map(move |context| {
-                    let mut next = selection.clone();
-                    next.push((axis.name.as_str(), context.as_str()));
-                    next
-                })
-            })
-            .collect();
-    }
-    selections
-}
+use dxn_dtcg::{DtcgError, DtcgRuntime, TokenType};
 
 fn main() -> Result<(), DtcgError> {
     let runtime = DtcgRuntime::from_json(
@@ -721,9 +725,15 @@ fn main() -> Result<(), DtcgError> {
           "modifiers": {
             "theme": { "default": "light", "contexts": {
               "light": [],
-              "dark": [{ "gap": { "$type": "number", "$value": "{missing}" } }]
+              "dark": [{
+                "gap": { "$type": "dimension", "$value": { "value": 8, "unit": "px" } },
+                "glow": { "$type": "number", "$value": 1 }
+              }]
             } },
-            "density": { "default": "comfortable", "contexts": { "comfortable": [], "compact": [] } }
+            "density": { "default": "comfortable", "contexts": {
+              "comfortable": [],
+              "compact": [{ "gap": { "$type": "number", "$value": "{missing}" } }]
+            } }
           },
           "resolutionOrder": [
             { "$ref": "#/sets/base" }, { "$ref": "#/modifiers/theme" }, { "$ref": "#/modifiers/density" }
@@ -734,27 +744,36 @@ fn main() -> Result<(), DtcgError> {
     // Structure and documents are fine in every context...
     assert!(runtime.validate_complete()?.ready().is_some());
 
-    // ...but the dark context has a dangling alias.
-    let axes = runtime.modifiers()?.ready().unwrap();
-    let failing: Vec<_> = all_selections(&axes)
-        .into_iter()
-        .filter(|selection| runtime.resolve(selection).is_err())
-        .collect();
-    assert_eq!(
-        failing,
-        [
-            vec![("theme", "dark"), ("density", "comfortable")],
-            vec![("theme", "dark"), ("density", "compact")]
-        ]
-    );
+    // ...but the outputs differ.
+    let space = runtime.selection_space()?.ready().unwrap();
+    assert_eq!(space.combinations(), Some(4));
+    let report = runtime.check_structure(&space)?.ready().unwrap();
+    assert!(!report.is_consistent());
+
+    // `compact` has a dangling alias in both themes.
+    let failed: Vec<_> = report.failures.iter().map(|failure| failure.selection.clone()).collect();
+    let pairs = |theme: &str, density: &str| {
+        vec![("theme".to_owned(), theme.to_owned()), ("density".to_owned(), density.to_owned())]
+    };
+    assert_eq!(failed, [pairs("light", "compact"), pairs("dark", "compact")]);
+
+    // The two resolved selections differ in `gap`'s type and in `glow`.
+    assert_eq!(report.selections, [pairs("light", "comfortable"), pairs("dark", "comfortable")]);
+    let paths: Vec<&str> = report.differences.iter().map(|d| d.path.as_str()).collect();
+    assert_eq!(paths, ["gap", "glow"]);
+    assert_eq!(report.differences[0].distinct_types(), [TokenType::Number, TokenType::Dimension]);
+    assert_eq!(report.differences[1].missing_in(), [0]);
     Ok(())
 }
 ```
 
-`modifiers()` lists only the root's axes. For a graph with nested resolvers, add the nested
-resolvers' modifiers to the combinations, or rely on their defaults.
+The space covers the root's modifiers, as `modifiers()` lists them. Nested resolvers' own modifiers
+are not axes: in each selection they follow an input of the same name, such as a shared `theme`,
+or their defaults. To vary them too, pass selections that name them, for example from a
+`SelectionSpace::new` of the root's axes and a nested resolver's (read with `modifiers()` of a
+runtime rooted at it).
 
-In a CI job for a token repository, run this over every combination and fail on any error.
+In a CI job for a token repository, fail on any failure and on any difference.
 
 ## Errors
 

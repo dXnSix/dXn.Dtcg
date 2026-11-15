@@ -113,3 +113,107 @@ pub fn selection_refs(selection: &[(String, String)]) -> Vec<(&str, &str)> {
         .map(|(modifier, context)| (modifier.as_str(), context.as_str()))
         .collect()
 }
+
+/// Every selection of a list of modifier axes: each combination of one
+/// context per axis, enumerated lazily, so a large space costs nothing until
+/// it is iterated. An empty list of axes has one selection, the empty one.
+///
+/// ```
+/// use dxn_dtcg::{DtcgRuntime, SelectionSpace};
+///
+/// let runtime = DtcgRuntime::from_json(
+///     "r.json",
+///     r##"{ "version": "2025.10", "modifiers": {
+///       "theme": { "default": "light", "contexts": { "light": [], "dark": [] } },
+///       "density": { "default": "comfortable", "contexts": { "comfortable": [], "compact": [] } }
+///     }, "resolutionOrder": [{ "$ref": "#/modifiers/theme" }, { "$ref": "#/modifiers/density" }] }"##,
+/// )?;
+/// let space: SelectionSpace = runtime.selection_space()?.ready().unwrap();
+/// assert_eq!(space.combinations(), Some(4));
+/// let first = space.iter().next().unwrap();
+/// assert_eq!(first, [("theme".into(), "light".into()), ("density".into(), "comfortable".into())]);
+/// # Ok::<(), dxn_dtcg::DtcgError>(())
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SelectionSpace {
+    axes: Vec<ModifierAxis>,
+}
+
+impl SelectionSpace {
+    /// The selections of `axes`, in their order.
+    pub fn new(axes: Vec<ModifierAxis>) -> Self {
+        Self { axes }
+    }
+
+    /// The axes, in enumeration order: the first varies slowest.
+    pub fn axes(&self) -> &[ModifierAxis] {
+        &self.axes
+    }
+
+    /// How many selections there are: the product of the axes' context
+    /// counts, or `None` when it does not fit a `usize`.
+    pub fn combinations(&self) -> Option<usize> {
+        self.axes.iter().try_fold(1usize, |product, axis| {
+            product.checked_mul(axis.contexts.len())
+        })
+    }
+
+    /// Every selection, each naming every axis with one of its contexts in
+    /// declared spelling: the first axis varies slowest and contexts follow
+    /// their authored order.
+    pub fn iter(&self) -> Selections<'_> {
+        let empty = self.axes.iter().any(|axis| axis.contexts.is_empty());
+        Selections {
+            axes: &self.axes,
+            next: (!empty).then(|| vec![0; self.axes.len()]),
+        }
+    }
+}
+
+impl<'a> IntoIterator for &'a SelectionSpace {
+    type Item = Vec<(String, String)>;
+    type IntoIter = Selections<'a>;
+
+    fn into_iter(self) -> Selections<'a> {
+        self.iter()
+    }
+}
+
+/// The iterator of [`SelectionSpace::iter`]: owned `(modifier, context)`
+/// pairs, which [`selection_refs`] borrows for the resolving methods.
+#[derive(Clone, Debug)]
+pub struct Selections<'a> {
+    axes: &'a [ModifierAxis],
+    /// The context index of every axis in the next selection; `None` once
+    /// every selection was yielded.
+    next: Option<Vec<usize>>,
+}
+
+impl Iterator for Selections<'_> {
+    type Item = Vec<(String, String)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let indexes = self.next.as_mut()?;
+        let selection = self
+            .axes
+            .iter()
+            .zip(indexes.iter())
+            .map(|(axis, index)| (axis.name.clone(), axis.contexts[*index].clone()))
+            .collect();
+        // Advance like an odometer: the last axis turns fastest.
+        let mut position = indexes.len();
+        loop {
+            if position == 0 {
+                self.next = None;
+                break;
+            }
+            position -= 1;
+            indexes[position] += 1;
+            if indexes[position] < self.axes[position].contexts.len() {
+                break;
+            }
+            indexes[position] = 0;
+        }
+        Some(selection)
+    }
+}

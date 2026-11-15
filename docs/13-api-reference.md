@@ -8,7 +8,7 @@ Signatures are shown in simplified form, without `pub`.
 - [Results](#results): `Resolution`, `DocumentRequest`, `DocumentKind`, `ResolvedTokens`, `GroupChild`, `ResolvedToken`, `ResolvedGroup`, `Deprecation`, `AffectedResolution`
 - [Configuration](#configuration): `RuntimeOptions`, `RuntimeLimits`, `ValueExtensions`
 - [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
-- [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `selection_from_json`, `selection_refs`
+- [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `SelectionSpace`, `Selections`, `StructureReport`, `StructureDifference`, `SelectionFailure`, `selection_from_json`, `selection_refs`
 - [Projection](#projection): `DtcgTokens`, `DtcgComponentTokens`, `FromDtcgValue`, `TypeRegistry`, `join_token_path`, derive macros
 - [Values](#values): `TokenType`, `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, the `values` module
 - [Inspection](#inspection): `SourceOccurrence`, `SourceOrigin`, `SourceReference`, `set_sources`, `modifier_contexts`
@@ -82,6 +82,8 @@ Options are fixed at construction.
 | `fn modifiers(&self) -> Result<Resolution<Vec<ModifierAxis>>, DtcgError>` | The root resolver's modifiers only, in `resolutionOrder` order, then the remaining root modifiers in authored order, with `$ref` step overrides applied. Empty for a token-document root. |
 | `fn normalize_selection(&self, selection: &[(&str, &str)]) -> Result<Resolution<Vec<(String, String)>>, DtcgError>` | Validates a selection exactly as `resolve` does, across every resolver the root graph reaches, and returns the chosen context of every reached modifier in declaration order (root first), with the declared spellings. Equal selections normalize to equal vectors. |
 | `fn validate_complete(&self) -> Result<Resolution<()>, DtcgError>` | Acquires and structurally checks the documents of every context, without resolving values |
+| `fn selection_space(&self) -> Result<Resolution<SelectionSpace>, DtcgError>` | Every selection of the root resolver's modifiers (`modifiers()`), enumerated lazily; one empty selection for a token-document root |
+| `fn check_structure(&self, selections: impl IntoIterator<Item = Vec<(String, String)>>) -> Result<Resolution<StructureReport>, DtcgError>` | Resolves every selection and reports every path missing in some of them or typed differently between them, and every selection that failed; more than `max_selections` selections is `LimitExceeded { kind: "selections" }`. Pass `&space` for every selection of a `SelectionSpace`. |
 | `fn replace_json_and_resolve_affected(&mut self, resource_id: impl AsRef<str>, json: impl Into<Arc<str>>, selection: &[(&str, &str)], changed_paths: &[&str]) -> Result<Resolution<AffectedResolution>, DtcgError>` | Replaces a document and re-resolves only the tokens the edit can change (see [Incremental resolution](09-incremental-resolution.md)). Restores the previous text unless the result is `Ready`. |
 
 #### Inspection
@@ -328,6 +330,7 @@ struct RuntimeLimits {
     max_alias_depth: usize,     // default 64
     max_value_nodes: usize,     // default 4,000,000
     max_tokens: usize,          // default 100,000
+    max_selections: usize,      // default 1,024
 }
 impl Default for RuntimeLimits
 
@@ -337,6 +340,7 @@ impl RuntimeLimits {
     fn with_max_alias_depth(self, limit: usize) -> Self;
     fn with_max_value_nodes(self, limit: usize) -> Self;
     fn with_max_tokens(self, limit: usize) -> Self;
+    fn with_max_selections(self, limit: usize) -> Self;
 }
 ```
 
@@ -443,6 +447,67 @@ struct ModifierAxis {
 
 All fields are public. Returned by `DtcgRuntime::modifiers`, with `$ref` step overrides (such as a
 `default`) applied.
+
+### `SelectionSpace` and `Selections`
+
+```rust,ignore
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SelectionSpace { /* axes */ }
+
+impl SelectionSpace {
+    fn new(axes: Vec<ModifierAxis>) -> Self;
+    fn axes(&self) -> &[ModifierAxis];
+    fn combinations(&self) -> Option<usize>; // the product of the context counts; None when it overflows
+    fn iter(&self) -> Selections<'_>;
+}
+impl<'a> IntoIterator for &'a SelectionSpace // Item = Vec<(String, String)>
+
+#[derive(Clone, Debug)]
+struct Selections<'a> { /* … */ }
+impl Iterator for Selections<'_> { type Item = Vec<(String, String)>; }
+```
+
+Every combination of one context per axis, enumerated lazily: each selection names every axis in
+order with one of its contexts, the first axis varying slowest and contexts in authored order. No
+axes is one empty selection. `DtcgRuntime::selection_space` builds one from the root's modifiers.
+See [Validating every context](06-resolvers-and-modifiers.md#validating-every-context).
+
+### `StructureReport`, `StructureDifference` and `SelectionFailure`
+
+```rust,ignore
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+struct StructureReport {
+    selections: Vec<Vec<(String, String)>>, // the selections that resolved, in the given order
+    differences: Vec<StructureDifference>,  // in path order
+    failures: Vec<SelectionFailure>,        // the selections that failed, in the given order
+}
+impl StructureReport {
+    fn is_consistent(&self) -> bool; // no difference and no failure
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
+struct StructureDifference {
+    path: String,
+    types: Vec<Option<TokenType>>, // by index of `selections`; None where the path is missing
+}
+impl StructureDifference {
+    fn missing_in(&self) -> Vec<usize>;          // indexes of the selections without the path
+    fn distinct_types(&self) -> Vec<TokenType>;  // in order of first appearance
+}
+
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+struct SelectionFailure {
+    selection: Vec<(String, String)>,
+    error: DtcgError,
+}
+```
+
+The result of `DtcgRuntime::check_structure`. A difference is a path that some resolved selection
+lacks, or whose effective type is not the same in all of them; failed selections take no part in
+the comparison. All fields are public.
 
 ### `selection_from_json` and `selection_refs`
 

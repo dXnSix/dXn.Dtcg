@@ -57,7 +57,8 @@ All modules of `dxn_dtcg` are private except `values` and, with its feature, `ex
 | `resource.rs` | `ResourceId` and `DocumentReference`: portable-id rules, normalization and relative resolution |
 | `json_pointer.rs` | The single RFC 6901 parser for resource fragments, value-level and token-level `$ref`s: percent-decoding, `~` unescaping, array indexes |
 | `resolver_definition.rs` | The single owner of resolver structure: allowed members, `resolutionOrder` and context-count rules, the effective definition of every step (with `$ref` overrides), declared modifiers; the public `set_sources` and `modifier_contexts` |
-| `selection.rs` | Resolver inputs: `ModifierAxis` listing, case-insensitive name matching, `selection_from_json`, `selection_refs` |
+| `selection.rs` | Resolver inputs: `ModifierAxis` listing, case-insensitive name matching, `selection_from_json`, `selection_refs`, the lazy `SelectionSpace` enumeration |
+| `structure.rs` | `check_structure`: resolves each selection and compares paths and types across them (`StructureReport`) |
 | `source_discovery.rs` | `Discovery`: expands resolvers into ordered terminal `SourceOccurrence`s, chooses each modifier's context, records which inputs were used, collects missing documents, enforces the document and depth limits, detects resolver cycles |
 | `source_occurrence.rs`, `source_origin.rs` | `SourceOccurrence` (JSON nodes that carry their origin through `child`, `select` and `overlay`) and `SourceOrigin` |
 | `source_reference.rs`, `source_references.rs` | `SourceReference` and the walk over authored reference sites |

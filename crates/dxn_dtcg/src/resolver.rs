@@ -122,6 +122,11 @@ pub struct RuntimeLimits {
     /// that `$extends` copies (default 100,000). Both report
     /// `LimitExceeded { kind: "tokens" }`.
     pub max_tokens: usize,
+    /// Selections one structure check
+    /// ([`DtcgRuntime::check_structure`](crate::DtcgRuntime::check_structure))
+    /// may resolve (default 1,024); more fail with
+    /// `LimitExceeded { kind: "selections" }` before any is resolved.
+    pub max_selections: usize,
 }
 
 impl Default for RuntimeLimits {
@@ -132,6 +137,7 @@ impl Default for RuntimeLimits {
             max_alias_depth: 64,
             max_value_nodes: 4_000_000,
             max_tokens: 100_000,
+            max_selections: 1024,
         }
     }
 }
@@ -164,6 +170,12 @@ impl RuntimeLimits {
     /// Sets [`RuntimeLimits::max_tokens`].
     pub fn with_max_tokens(mut self, limit: usize) -> Self {
         self.max_tokens = limit;
+        self
+    }
+
+    /// Sets [`RuntimeLimits::max_selections`].
+    pub fn with_max_selections(mut self, limit: usize) -> Self {
+        self.max_selections = limit;
         self
     }
 }

@@ -3,10 +3,11 @@ use std::{fmt, sync::Arc};
 use crate::{
     AffectedResolution, DocumentCatalog, DocumentKind, DocumentRequest, DtcgError, DtcgTokens,
     ModifierAxis, Resolution, ResolvedTokens, ResourceId, RuntimeLimits, RuntimeOptions,
-    SourceOccurrence, TypeRegistry,
+    SelectionSpace, SourceOccurrence, StructureReport, TypeRegistry,
     catalog::parse_document,
     resolver, selection,
     source_discovery::{self, required_root},
+    structure,
 };
 
 #[derive(Clone)]
@@ -273,6 +274,32 @@ impl DtcgRuntime {
             }]));
         };
         selection::modifier_axes(root, &parse_document(root, json)?).map(Resolution::Ready)
+    }
+
+    /// Every selection of the root resolver's modifiers: each combination of
+    /// one context per [`ModifierAxis`] of [`DtcgRuntime::modifiers`], in
+    /// that order. A root that is a plain token document has one selection,
+    /// the empty one. Nested resolvers' own modifiers are not axes: in each
+    /// selection they follow an input of the same name or their defaults.
+    pub fn selection_space(&self) -> Result<Resolution<SelectionSpace>, DtcgError> {
+        Ok(self.modifiers()?.map(SelectionSpace::new))
+    }
+
+    /// Resolves every one of `selections` and compares their token
+    /// structures: the result lists every path that some resolved selection
+    /// lacks or whose effective type differs between them, and every
+    /// selection that failed to resolve with its error. Pass the
+    /// [`SelectionSpace`] of [`DtcgRuntime::selection_space`] by reference to
+    /// check every selection of the root resolver.
+    ///
+    /// More than [`RuntimeLimits::max_selections`] selections fail with
+    /// `LimitExceeded { kind: "selections" }` before any is resolved.
+    /// `Missing` lists the documents every selection still needs.
+    pub fn check_structure(
+        &self,
+        selections: impl IntoIterator<Item = Vec<(String, String)>>,
+    ) -> Result<Resolution<StructureReport>, DtcgError> {
+        structure::check(self, selections)
     }
 
     /// Validates a selection exactly as [`DtcgRuntime::resolve`] does, across

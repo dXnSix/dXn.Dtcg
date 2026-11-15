@@ -192,6 +192,7 @@ chainable setters, not with a struct literal.
 | `max_alias_depth` | 64 | `with_max_alias_depth` | Reference hops in one resolution chain, counting curly-brace aliases, pointers to tokens and pointers to other document locations alike. The count does not depend on authored order. Literal values cost nothing, so a limit of 0 still resolves tokens without references. | `"alias depth"` |
 | `max_value_nodes` | 4,000,000 | `with_max_value_nodes` | JSON nodes that references copy into resolved values in one resolution, checked before each copy. This stops pointer fan-out that would build exponentially large values. | `"value nodes"` |
 | `max_tokens` | 100,000 | `with_max_tokens` | Flattened tokens in one resolution, including tokens copied by `$extends`; and, counted separately, the JSON nodes that `$extends` copies | `"tokens"` |
+| `max_selections` | 1,024 | `with_max_selections` | Selections one `check_structure` call resolves, checked before the first is resolved; each selection is a whole resolution with the limits above | `"selections"` |
 
 ### Fixed bounds
 
