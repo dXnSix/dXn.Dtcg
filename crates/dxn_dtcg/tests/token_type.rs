@@ -60,6 +60,8 @@ fn sample(token_type: TokenType) -> Value {
             "letterSpacing": px(0.0), "lineHeight": 1.5
         }),
         TokenType::Blur => json!({"kind": "layer", "radius": px(4.0)}),
+        TokenType::String => json!("Sign in"),
+        TokenType::Boolean => json!(true),
         other => panic!("no sample for {other}"),
     }
 }

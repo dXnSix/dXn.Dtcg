@@ -5,7 +5,8 @@
 //! color `alpha` is `1` (Color §4.1), gradient stop positions are clamped to
 //! `[0, 1]` (Format §9.7), font-weight keywords map to numbers (Format §8.4),
 //! and a single shadow object is one layer whose `inset` defaults to `false`.
-//! [`Blur`] and the dimension form of [`LineHeight`] model the value
+//! [`Blur`], the dimension form of [`LineHeight`], and the
+//! [`TypedValue::String`] and [`TypedValue::Boolean`] variants model the value
 //! extensions enabled by [`ValueExtensions`].
 //!
 //! ```
@@ -320,6 +321,10 @@ pub enum TypedValue {
     Gradient(Gradient),
     Typography(Typography),
     Blur(Blur),
+    /// A `dxn.dtcg.string` value ([`ValueExtensions::string`]).
+    String(String),
+    /// A `dxn.dtcg.boolean` value ([`ValueExtensions::boolean`]).
+    Boolean(bool),
 }
 
 impl TypedValue {
@@ -346,6 +351,8 @@ impl TypedValue {
             TokenType::Gradient => Self::Gradient(gradient(value)),
             TokenType::Typography => Self::Typography(typography(value)),
             TokenType::Blur => Self::Blur(blur(value)),
+            TokenType::String => Self::String(text(value).to_owned()),
+            TokenType::Boolean => Self::Boolean(value.as_bool().expect("validated boolean")),
         })
     }
 
@@ -366,6 +373,8 @@ impl TypedValue {
             Self::Gradient(_) => TokenType::Gradient,
             Self::Typography(_) => TokenType::Typography,
             Self::Blur(_) => TokenType::Blur,
+            Self::String(_) => TokenType::String,
+            Self::Boolean(_) => TokenType::Boolean,
         }
     }
 }

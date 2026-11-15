@@ -56,7 +56,9 @@ pub use selection::{
 pub use structure::{SelectionFailure, StructureDifference, StructureReport};
 pub use token_type::TokenType;
 pub use type_registry::TypeRegistry;
-pub use value::{BLUR_TYPE, ValueValidationError, validate_value, validate_value_with};
+pub use value::{
+    BLUR_TYPE, BOOLEAN_TYPE, STRING_TYPE, ValueValidationError, validate_value, validate_value_with,
+};
 
 pub use resolver_definition::{modifier_contexts, set_sources};
 pub use source_occurrence::SourceOccurrence;

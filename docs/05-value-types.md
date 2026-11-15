@@ -20,6 +20,7 @@ and the exact rules for each one, the opt-in value extensions, and the typed Rus
 - [`gradient`](#gradient)
 - [`typography`](#typography)
 - [`dxn.dtcg.blur` (extension)](#dxndtcgblur-extension)
+- [`dxn.dtcg.string` and `dxn.dtcg.boolean` (extensions)](#dxndtcgstring-and-dxndtcgboolean-extensions)
 - [Strict values and the value extensions](#strict-values-and-the-value-extensions)
 - [Unsupported types](#unsupported-types)
 - [Validating values directly](#validating-values-directly)
@@ -28,7 +29,7 @@ and the exact rules for each one, the opt-in value extensions, and the typed Rus
 
 ## How validation works
 
-- Validation is **strict DTCG 2025.10** by default. The two value extensions are accepted only
+- Validation is **strict DTCG 2025.10** by default. The value extensions are accepted only
   when the runtime is created with them (see
   [Strict values and the value extensions](#strict-values-and-the-value-extensions)).
 - Validation runs on the **resolved** value, after every alias and reference has been substituted.
@@ -61,6 +62,8 @@ and the exact rules for each one, the opt-in value extensions, and the typed Rus
 | `gradient` | a non-empty array of `{ "color": color, "position": number }` |
 | `typography` | `{ "fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight" }` |
 | `dxn.dtcg.blur` | `{ "kind": "layer" \| "background", "radius": dimension }` (value extension, opt-in) |
+| `dxn.dtcg.string` | any JSON string (value extension, opt-in) |
+| `dxn.dtcg.boolean` | `true` or `false` (value extension, opt-in) |
 
 ## `color`
 
@@ -253,20 +256,77 @@ such a value fails validation and such an alias fails with
 A layer or background blur effect, such as a Figma blur effect style. `kind` is `layer` or
 `background`, and `radius` is a dimension; `radius` may alias a `dimension` token. The type name is
 available as the constant `dxn_dtcg::BLUR_TYPE`. The type exists only with the `blur` extension; a
-default runtime reports it as an [unsupported type](#unsupported-types). Other `dxn.dtcg.*` names
-are never recognized.
+default runtime reports it as an [unsupported type](#unsupported-types). The only other
+`dxn.dtcg.*` types are the two below; other names are never recognized.
+
+## `dxn.dtcg.string` and `dxn.dtcg.boolean` (extensions)
+
+```json
+{ "label": { "submit": { "$type": "dxn.dtcg.string", "$value": "Sign in" } },
+  "compact": { "$type": "dxn.dtcg.boolean", "$value": false } }
+```
+
+DTCG 2025.10 has no string or boolean type, but design tools commonly export string and boolean
+variables, such as Figma's `STRING` and `BOOLEAN` variables, as tokens whose values vary by mode
+like any other. `dxn.dtcg.string` accepts any JSON string, the empty string included, and
+`dxn.dtcg.boolean` accepts `true` or `false`; nothing else matches either, so `"true"` is not a
+boolean and `1` is not a string. The names are available as the constants `dxn_dtcg::STRING_TYPE`
+and `dxn_dtcg::BOOLEAN_TYPE`, and each type exists only with its extension, `string` or `boolean`.
+The pre-2025 `string` type stays [unsupported](#unsupported-types) either way.
+
+They follow the alias rules of every other type:
+
+- a `$value` that is exactly `{path}` is an alias, so a string token cannot hold that text
+  literally; `"Hello {name}"` is a plain string;
+- an alias token takes its target's type, and a token with its own `$type` must alias a token of
+  that type (``reference type mismatch: expected dxn.dtcg.boolean, found dxn.dtcg.string``);
+- neither type is a composite, so no alias is allowed inside a value, and a composite member
+  keeps its own type: a typography `fontFamily` cannot alias a `dxn.dtcg.string` token.
+
+`String` and `bool` fields of a [projected struct](08-typed-projection.md#built-in-conversions)
+read them, and `ResolvedToken::typed` converts them to `TypedValue::String` and
+`TypedValue::Boolean`.
+
+```rust
+use dxn_dtcg::{DtcgError, DtcgRuntime, RuntimeOptions, STRING_TYPE, ValueExtensions};
+
+const TOKENS: &str = r#"{
+  "label": { "$type": "dxn.dtcg.string",
+    "submit": { "$value": "Sign in" },
+    "confirm": { "$value": "{label.submit}" } },
+  "compact": { "$type": "dxn.dtcg.boolean", "$value": false }
+}"#;
+
+fn main() -> Result<(), DtcgError> {
+    assert!(DtcgRuntime::from_json("tokens.json", TOKENS)?.resolve(&[]).is_err());
+
+    let extensions = ValueExtensions::default().with_string(true).with_boolean(true);
+    let runtime = DtcgRuntime::from_json_with_options(
+        "tokens.json",
+        TOKENS,
+        RuntimeOptions::default().with_extensions(extensions),
+    )?;
+    let tokens = runtime.resolve(&[])?.ready().unwrap();
+    assert_eq!(tokens.get_as::<String>("label.confirm")?, "Sign in");
+    assert_eq!(tokens.get("label.confirm").unwrap().token_type.as_deref(), Some(STRING_TYPE));
+    assert!(!tokens.get_as::<bool>("compact")?);
+    Ok(())
+}
+```
 
 ## Strict values and the value extensions
 
-A runtime validates strictly unless you pass options. `ValueExtensions` holds the two value
-extensions, both off by default:
+A runtime validates strictly unless you pass options. `ValueExtensions` holds the value
+extensions, all off by default:
 
 | Flag | Setter | Effect |
 |---|---|---|
 | `line_height_dimension` | `with_line_height_dimension(bool)` | Typography `lineHeight` may be a `dimension` or alias a `dimension` token |
 | `blur` | `with_blur(bool)` | The `dxn.dtcg.blur` type is accepted |
+| `string` | `with_string(bool)` | The `dxn.dtcg.string` type is accepted |
+| `boolean` | `with_boolean(bool)` | The `dxn.dtcg.boolean` type is accepted |
 
-`ValueExtensions::all()` turns both on.
+`ValueExtensions::all()` turns every one on.
 Extensions reach a runtime through `RuntimeOptions`, which also carries the
 [limits](11-errors-limits-and-diagnostics.md#runtime-limits):
 
@@ -321,15 +381,16 @@ fn main() -> Result<(), DtcgError> {
 
 Each flag is independent, for example
 `ValueExtensions::default().with_line_height_dimension(true)` accepts dimension line heights but
-not the blur type. Every other rule stays strict with the extensions on.
+not the blur, string or boolean types. Every other rule stays strict with the extensions on.
 
 ## Unsupported types
 
-Every token must end up with one of the 13 DTCG types, or `dxn.dtcg.blur` when the `blur`
-extension is on. Anything else fails, for example:
+Every token must end up with one of the 13 DTCG types, or an extension type whose extension is
+on: `dxn.dtcg.blur`, `dxn.dtcg.string` or `dxn.dtcg.boolean`. Anything else fails, for example:
 
-- the pre-2025 `string` type (use `fontFamily` for font names);
-- `dxn.dtcg.blur` in a runtime without the extension;
+- the pre-2025 `string` type (use `fontFamily` for font names, or `dxn.dtcg.string` with its
+  extension);
+- an extension type such as `dxn.dtcg.blur` in a runtime without its extension;
 - custom reverse-DNS types such as `com.example.elevation`;
 - misspellings such as `colour` or `fontweight` (type names are case-sensitive).
 
@@ -434,6 +495,8 @@ runtime was created with, `runtime.options().extensions`, so the same shapes are
 | `gradient` | `Gradient(Vec<GradientStop>)` | positions clamped to [0, 1] |
 | `typography` | `Typography { font_family, font_size, font_weight, letter_spacing, line_height }` | `LineHeight::Multiplier(f64)`, or `LineHeight::Dimension` with the value extension |
 | `dxn.dtcg.blur` | `Blur { kind, radius }` | `BlurKind::{Layer, Background}`; value extension |
+| `dxn.dtcg.string` | `TypedValue::String(String)` | value extension |
+| `dxn.dtcg.boolean` | `TypedValue::Boolean(bool)` | value extension |
 
 ```rust
 use dxn_dtcg::values::{

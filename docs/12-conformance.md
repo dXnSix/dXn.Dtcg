@@ -104,15 +104,17 @@ Where sources disagree, the runtime follows them in this order:
 ## Strict by default, value extensions on request
 
 With the default `RuntimeOptions`, values are validated strictly against DTCG 2025.10.
-`validate_value` is always strict. Two value shapes beyond the specification are opt-in through
+`validate_value` is always strict. Value shapes beyond the specification are opt-in through
 `ValueExtensions`, which `validate_value_with` and the runtime options accept:
 
 | `ValueExtensions` field | Default | Adds | Details |
 |---|---|---|---|
 | `line_height_dimension` | `false` | Typography `lineHeight` as a `dimension`, or an alias to a `dimension` token, besides the specification's number | [`typography`](05-value-types.md#typography) |
 | `blur` | `false` | The `dxn.dtcg.blur` type: `{ "kind": "layer" \| "background", "radius": dimension }`, whose `radius` may alias a `dimension` token | [Value types](05-value-types.md#dxndtcgblur-extension) |
+| `string` | `false` | The `dxn.dtcg.string` type: any JSON string, for the string variables design tools export | [Value types](05-value-types.md#dxndtcgstring-and-dxndtcgboolean-extensions) |
+| `boolean` | `false` | The `dxn.dtcg.boolean` type: `true` or `false`, for the boolean variables design tools export | [Value types](05-value-types.md#dxndtcgstring-and-dxndtcgboolean-extensions) |
 
-`ValueExtensions::all()` turns both on:
+`ValueExtensions::all()` turns every one on:
 
 ```rust
 use dxn_dtcg::{DtcgRuntime, RuntimeOptions, ValueExtensions};

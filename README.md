@@ -399,9 +399,10 @@ The full technical documentation is in [`docs/`](docs/README.md):
 
 ## Value extensions
 
-Validation is strict DTCG 2025.10 by default. Two value shapes beyond the specification are opt-in:
-the `dxn.dtcg.blur` type for layer and background blur effects, and typography `lineHeight` given as
-a dimension, the form design tools commonly export. A runtime accepts them only when it is created
+Validation is strict DTCG 2025.10 by default. Value shapes beyond the specification are opt-in:
+the `dxn.dtcg.blur` type for layer and background blur effects, typography `lineHeight` given as
+a dimension, the form design tools commonly export, and the `dxn.dtcg.string` and
+`dxn.dtcg.boolean` types for the string and boolean variables design tools export. A runtime accepts them only when it is created
 with them:
 
 ```rust

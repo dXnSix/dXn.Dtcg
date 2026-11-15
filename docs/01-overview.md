@@ -238,7 +238,7 @@ reference-counted.
 ## Opt-in additions
 
 The crate is UI-neutral. A few additions beyond the specification are available on request and
-never affect users who do not ask for them. The two value extensions are **off by default**; a
+never affect users who do not ask for them. The value extensions are **off by default**; a
 runtime accepts them only when created with
 `RuntimeOptions::default().with_extensions(ValueExtensions::all())` or the individual flags
 ([value types](05-value-types.md#strict-values-and-the-value-extensions)):
@@ -247,7 +247,10 @@ runtime accepts them only when created with
   layer and background blur effects such as Figma's blur effect styles
   ([value types](05-value-types.md#dxndtcgblur-extension));
 - typography `lineHeight` given as a `dimension` as well as the standard unitless number, the form
-  design tools commonly export.
+  design tools commonly export;
+- the `dxn.dtcg.string` and `dxn.dtcg.boolean` value types, for the string and boolean variables
+  design tools commonly export
+  ([value types](05-value-types.md#dxndtcgstring-and-dxndtcgboolean-extensions)).
 
 Computed tokens are **off twice**: the `expressions` feature compiles the engine in, and
 `RuntimeOptions::with_expressions` turns evaluation on for one runtime. Without both, a token's

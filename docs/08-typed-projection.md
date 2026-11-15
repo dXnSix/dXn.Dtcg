@@ -128,10 +128,10 @@ projected with `project_at(…, "theme")`, it reads `theme.card.corner.radius`.
 
 | Rust type | Accepts | Typical DTCG types |
 |---|---|---|
-| `String` | a JSON string | `fontFamily` (single family), `fontWeight` keywords, `strokeStyle` keywords |
+| `String` | a JSON string | `fontFamily` (single family), `fontWeight` keywords, `strokeStyle` keywords, `dxn.dtcg.string` |
 | `f64` | a JSON number | `number`, numeric `fontWeight` |
 | `f32` | a JSON number within the finite `f32` range | as `f64` |
-| `bool` | a JSON boolean | none at the top level; useful in custom conversions |
+| `bool` | a JSON boolean | `dxn.dtcg.boolean`; no DTCG type at the top level |
 | `values::Color`, `Dimension`, `Duration`, `FontFamily`, `FontWeight`, `CubicBezier`, `StrokeStyle`, `Border`, `Transition`, `Shadow`, `Gradient`, `Typography`, `LineHeight`, `Blur` | a value of that type's shape | the type of the same name |
 | `values::TypedValue` | any value of a supported type, converted by the token's type | any |
 

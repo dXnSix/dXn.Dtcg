@@ -37,7 +37,8 @@ pub fn validate_value(token_type: &str, value: &Value) -> Result<(), ValueValida
 
 /// Validates a resolved value against one of the 13 types in DTCG 2025.10 and
 /// the value shapes `extensions` enables: a `dimension` typography
-/// `lineHeight`, and the extension type `dxn.dtcg.blur`.
+/// `lineHeight`, and the extension types `dxn.dtcg.blur`, `dxn.dtcg.string`
+/// and `dxn.dtcg.boolean`.
 pub fn validate_value_with(
     token_type: &str,
     value: &Value,
@@ -62,6 +63,8 @@ pub fn validate_value_with(
         TokenType::Gradient => gradient(value),
         TokenType::Typography => typography(value, extensions.line_height_dimension),
         TokenType::Blur => blur(value),
+        TokenType::String => value.is_string(),
+        TokenType::Boolean => value.is_boolean(),
     };
     valid
         .then_some(())
@@ -306,6 +309,15 @@ fn typography(value: &Value, line_height_dimension: bool) -> bool {
 /// Extension type for layer and background blur effects, such as Figma's blur effect
 /// styles, accepted only with [`ValueExtensions::blur`].
 pub const BLUR_TYPE: &str = TokenType::Blur.name();
+
+/// Extension type for string values, such as the string variables design tools export, accepted
+/// only with [`ValueExtensions::string`]. The `$value` is any JSON string; one that is exactly
+/// `{path}` is an alias.
+pub const STRING_TYPE: &str = TokenType::String.name();
+
+/// Extension type for boolean values, such as the boolean variables design tools export,
+/// accepted only with [`ValueExtensions::boolean`]. The `$value` is `true` or `false`.
+pub const BOOLEAN_TYPE: &str = TokenType::Boolean.name();
 
 /// `{ "kind": "layer" | "background", "radius": <dimension> }`.
 fn blur(value: &Value) -> bool {

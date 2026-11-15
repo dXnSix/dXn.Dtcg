@@ -3,6 +3,8 @@ use crate::{DtcgError, ResolvedToken};
 /// Converts one resolved token into a Rust value. A value of the wrong shape
 /// fails with [`DtcgError::Projection`] naming the token path. The typed models
 /// of [`crate::values`] implement it, as do `String`, `f64`, `f32` and `bool`.
+/// `String` reads any string value, such as a `dxn.dtcg.string` token's, and
+/// `bool` any boolean value, such as a `dxn.dtcg.boolean` token's.
 pub trait FromDtcgValue: Sized + 'static {
     fn from_dtcg(token: &ResolvedToken) -> Result<Self, DtcgError>;
 }

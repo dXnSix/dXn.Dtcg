@@ -67,7 +67,7 @@ All modules of `dxn_dtcg` are private except `values` and, with its feature, `ex
 | `reference_positions.rs` | Where a curly-brace alias may appear inside a value, and which type it must target |
 | `resolver.rs` | The result types (`Resolution`, `DocumentRequest`, `ResolvedToken(s)`, `ResolvedGroup`, `GroupChild`, `Deprecation`, `RuntimeLimits`), the `resolve`, `validate_complete` and `resolve_affected` drivers, fingerprints, `to_document`, `apply_affected`, typed reads by path and group listings |
 | `token_type.rs` | `TokenType`: the single table of `$type` spellings, which extension each extension type needs, `ResolvedToken::dtcg_type` |
-| `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE` |
+| `value.rs` | `validate_value`, `validate_value_with`, the per-type rules, `BLUR_TYPE`, `STRING_TYPE`, `BOOLEAN_TYPE` |
 | `values.rs` | The public `values` module: typed models, `TypedValue` (and its `token_type`), `ResolvedToken::typed` and their `FromDtcgValue` implementations, DTCG JSON forms and serde for every model |
 | `color.rs` | The color API on `values::Color`: CSS Color 4 conversions between the 14 spaces, mixing, lightness, hex, contrast, gamut |
 | `expression_extension.rs` | `EXPRESSION_EXTENSION`, present without the feature |
@@ -443,6 +443,6 @@ dependency cycle in a packaged crate, and `dxn_dtcg` excludes
 Consumers depend on a release tag of this repository,
 `dxn_dtcg = { git = "https://github.com/dXnSix/dXn.Dtcg", tag = "vX.Y.Z" }`, and move to a new
 release by changing the tag. A change a consumer needs is released here first. A consumer whose
-documents use dimension line heights or `dxn.dtcg.blur` constructs its runtimes with the matching
+documents use dimension line heights or the `dxn.dtcg.*` extension types constructs its runtimes with the matching
 [value extensions](05-value-types.md#strict-values-and-the-value-extensions), for example
 `RuntimeOptions::default().with_extensions(ValueExtensions::all())`.

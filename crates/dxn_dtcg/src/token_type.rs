@@ -37,6 +37,10 @@ pub enum TokenType {
     Typography,
     /// `dxn.dtcg.blur`, accepted with [`ValueExtensions::blur`].
     Blur,
+    /// `dxn.dtcg.string`, accepted with [`ValueExtensions::string`].
+    String,
+    /// `dxn.dtcg.boolean`, accepted with [`ValueExtensions::boolean`].
+    Boolean,
 }
 
 impl TokenType {
@@ -57,6 +61,8 @@ impl TokenType {
         Self::Gradient,
         Self::Typography,
         Self::Blur,
+        Self::String,
+        Self::Boolean,
     ];
 
     /// The `$type` spelling.
@@ -76,6 +82,8 @@ impl TokenType {
             Self::Gradient => "gradient",
             Self::Typography => "typography",
             Self::Blur => "dxn.dtcg.blur",
+            Self::String => "dxn.dtcg.string",
+            Self::Boolean => "dxn.dtcg.boolean",
         }
     }
 
@@ -93,13 +101,15 @@ impl TokenType {
     /// Whether this is a `dxn.dtcg.*` extension type rather than one of the
     /// 13 DTCG 2025.10 types.
     pub const fn is_extension(self) -> bool {
-        matches!(self, Self::Blur)
+        matches!(self, Self::Blur | Self::String | Self::Boolean)
     }
 
     /// Whether validation with `extensions` accepts this type.
     pub(crate) fn is_enabled(self, extensions: &ValueExtensions) -> bool {
         match self {
             Self::Blur => extensions.blur,
+            Self::String => extensions.string,
+            Self::Boolean => extensions.boolean,
             _ => true,
         }
     }

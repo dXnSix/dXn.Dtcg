@@ -1,6 +1,6 @@
 use crate::RuntimeLimits;
 
-/// Value shapes beyond DTCG 2025.10 that a runtime may accept. Both are off by
+/// Value shapes beyond DTCG 2025.10 that a runtime may accept. All are off by
 /// default, so validation follows the specification strictly.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 #[non_exhaustive]
@@ -13,6 +13,14 @@ pub struct ValueExtensions {
     /// "radius": <dimension> }`) for layer and background blur effects, such
     /// as Figma's blur effect styles.
     pub blur: bool,
+    /// The `dxn.dtcg.string` type, whose `$value` is a JSON string. DTCG
+    /// 2025.10 has no string type, but design tools commonly export string
+    /// variables, such as Figma's `STRING` variables, as tokens.
+    pub string: bool,
+    /// The `dxn.dtcg.boolean` type, whose `$value` is a JSON boolean. DTCG
+    /// 2025.10 has no boolean type, but design tools commonly export boolean
+    /// variables, such as Figma's `BOOLEAN` variables, as tokens.
+    pub boolean: bool,
 }
 
 impl ValueExtensions {
@@ -21,6 +29,8 @@ impl ValueExtensions {
         Self {
             line_height_dimension: true,
             blur: true,
+            string: true,
+            boolean: true,
         }
     }
 
@@ -33,6 +43,18 @@ impl ValueExtensions {
     /// Sets [`ValueExtensions::blur`].
     pub fn with_blur(mut self, enabled: bool) -> Self {
         self.blur = enabled;
+        self
+    }
+
+    /// Sets [`ValueExtensions::string`].
+    pub fn with_string(mut self, enabled: bool) -> Self {
+        self.string = enabled;
+        self
+    }
+
+    /// Sets [`ValueExtensions::boolean`].
+    pub fn with_boolean(mut self, enabled: bool) -> Self {
+        self.boolean = enabled;
         self
     }
 }

@@ -10,7 +10,7 @@ Signatures are shown in simplified form, without `pub`.
 - [Documents and references](#documents-and-references): `ResourceId`, `DocumentReference`, `DocumentCatalog`, `LocalReferencePolicy`
 - [Modifiers and selections](#modifiers-and-selections): `ModifierAxis`, `SelectionSpace`, `Selections`, `StructureReport`, `StructureDifference`, `SelectionFailure`, `selection_from_json`, `selection_refs`
 - [Projection](#projection): `DtcgTokens`, `DtcgComponentTokens`, `FromDtcgValue`, `TypeRegistry`, `join_token_path`, derive macros
-- [Values](#values): `TokenType`, `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, the `values` module
+- [Values](#values): `TokenType`, `validate_value`, `validate_value_with`, `ValueValidationError`, `BLUR_TYPE`, `STRING_TYPE`, `BOOLEAN_TYPE`, the `values` module
 - [Inspection](#inspection): `SourceOccurrence`, `SourceOrigin`, `SourceReference`, `set_sources`, `modifier_contexts`
 - [Errors](#errors): `DtcgError`
 - [Diagnostics](#diagnostics-feature-diagnostics) (feature `diagnostics`): `DtcgDiagnostic`, `DtcgDiagnosticCode`
@@ -356,12 +356,16 @@ limits](11-errors-limits-and-diagnostics.md#runtime-limits).
 struct ValueExtensions {
     line_height_dimension: bool, // typography lineHeight may be (or alias) a dimension
     blur: bool,                  // the dxn.dtcg.blur type
+    string: bool,                // the dxn.dtcg.string type
+    boolean: bool,               // the dxn.dtcg.boolean type
 }
 
 impl ValueExtensions {
     fn all() -> Self; // every value extension on
     fn with_line_height_dimension(self, enabled: bool) -> Self;
     fn with_blur(self, enabled: bool) -> Self;
+    fn with_string(self, enabled: bool) -> Self;
+    fn with_boolean(self, enabled: bool) -> Self;
 }
 ```
 
@@ -641,7 +645,9 @@ the value type of a leaf field without `with`, `DtcgTokens` for a `nested` field
 enum TokenType {
     Color, Dimension, FontFamily, FontWeight, Duration, CubicBezier, Number, StrokeStyle,
     Border, Transition, Shadow, Gradient, Typography,
-    Blur, // dxn.dtcg.blur
+    Blur,    // dxn.dtcg.blur
+    String,  // dxn.dtcg.string
+    Boolean, // dxn.dtcg.boolean
 }
 
 impl TokenType {
@@ -690,7 +696,7 @@ fn validate_value_with(
 
 `validate_value` checks a resolved value against one of the 13 DTCG 2025.10 types, strictly.
 `validate_value_with` also accepts the shapes `extensions` enables: a `dimension` typography
-`lineHeight`, and the `dxn.dtcg.blur` type.
+`lineHeight`, and the `dxn.dtcg.blur`, `dxn.dtcg.string` and `dxn.dtcg.boolean` types.
 
 ```rust
 use dxn_dtcg::{BLUR_TYPE, ValueExtensions, ValueValidationError, validate_value, validate_value_with};
@@ -717,10 +723,12 @@ impl Display for ValueValidationError
 impl std::error::Error for ValueValidationError
 ```
 
-### `BLUR_TYPE`
+### `BLUR_TYPE`, `STRING_TYPE` and `BOOLEAN_TYPE`
 
 ```rust,ignore
-const BLUR_TYPE: &str = "dxn.dtcg.blur"; // TokenType::Blur.name()
+const BLUR_TYPE: &str = "dxn.dtcg.blur";       // TokenType::Blur.name()
+const STRING_TYPE: &str = "dxn.dtcg.string";   // TokenType::String.name()
+const BOOLEAN_TYPE: &str = "dxn.dtcg.boolean"; // TokenType::Boolean.name()
 ```
 
 ### The `values` module
@@ -781,6 +789,8 @@ enum TypedValue {
     Duration(Duration), CubicBezier(CubicBezier), Number(f64), StrokeStyle(StrokeStyle),
     Border(Border), Transition(Transition), Shadow(Shadow), Gradient(Gradient),
     Typography(Typography), Blur(Blur),
+    String(String), // dxn.dtcg.string
+    Boolean(bool),  // dxn.dtcg.boolean
 }
 
 impl TypedValue {

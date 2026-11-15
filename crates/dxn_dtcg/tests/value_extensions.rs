@@ -44,6 +44,8 @@ fn validation_is_strict_by_default() {
         ValueExtensions::all()
             .with_line_height_dimension(false)
             .with_blur(false)
+            .with_string(false)
+            .with_boolean(false)
     );
     validate_value("typography", &typography(json!(1.5))).expect("number line height");
     assert_eq!(
